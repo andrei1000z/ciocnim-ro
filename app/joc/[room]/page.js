@@ -60,7 +60,6 @@ function LogicaJoc({ room }) {
     });
   };
 
-  // Trimitem semnal la server dacă utilizatorul închide site-ul
   useEffect(() => {
     const laIesire = () => {
       navigator.sendBeacon('/api/ciocnire', JSON.stringify({ roomId: room, actiune: 'paraseste' }));
@@ -68,7 +67,7 @@ function LogicaJoc({ room }) {
     window.addEventListener('beforeunload', laIesire);
     return () => {
       window.removeEventListener('beforeunload', laIesire);
-      laIesire(); // Se declanșează și dacă apasă "Înapoi" pe telefon
+      laIesire();
     };
   }, [room]);
 
@@ -107,7 +106,6 @@ function LogicaJoc({ room }) {
       if (data.isHost !== isHost) setAdversarVreaRevansa(true);
     });
 
-    // Ascultăm dacă adversarul a ieșit
     channel.bind("adversar-iesit", () => {
       setAdversarIesit(true);
     });
@@ -122,10 +120,20 @@ function LogicaJoc({ room }) {
     }
   }, [dorintaRevansa, adversarVreaRevansa]);
 
-  const handleAlegeOu = (hexCuloare) => {
+  // ȘMECHERIA PENTRU SENZOR: Cerem permisiunea fix când omul apasă pe ou!
+  const handleAlegeOu = async (hexCuloare) => {
     setOuMeu(hexCuloare);
     ouMeuRef.current = hexCuloare;
     trimiteLaServer('pregatit', { culoare: hexCuloare, isReply: false });
+
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      try {
+        const state = await DeviceMotionEvent.requestPermission();
+        if (state === 'granted') setPermisiuneSenzor(true);
+      } catch (e) { console.error("Senzor respins:", e); }
+    } else {
+      setPermisiuneSenzor(true);
+    }
   };
 
   const handleCereRevansa = () => {
@@ -133,13 +141,25 @@ function LogicaJoc({ room }) {
     trimiteLaServer('revansa');
   };
 
-  const cerePermisiuneMiscare = async () => {
-    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+  // Logica pentru butonul de Share Viral (Insta/WhatsApp)
+  const handleShareViral = async () => {
+    const emoji = rezultat?.amCastigat ? "😎👑" : "😭🍳";
+    const textViral = rezultat?.amCastigat 
+      ? `L-am bătut pe ${numeAdversar} la Ciocnim.ro! ${emoji} Intră și tu și arată-ne ce poți!`
+      : `Mi-am spart oul pe Ciocnim.ro! ${emoji} Cine mă răzbună? Intră și joacă!`;
+
+    if (navigator.share) {
       try {
-        const state = await DeviceMotionEvent.requestPermission();
-        if (state === 'granted') setPermisiuneSenzor(true);
+        await navigator.share({
+          title: 'Ciocnim.ro 🥚',
+          text: textViral,
+          url: window.location.origin, // Dă share la pagina principală
+        });
       } catch (e) {}
-    } else { setPermisiuneSenzor(true); }
+    } else {
+      navigator.clipboard.writeText(`${textViral} -> ${window.location.origin}`);
+      alert("Mesajul a fost copiat! Dă-i Paste pe WhatsApp, Instagram sau Facebook!");
+    }
   };
 
   useEffect(() => {
@@ -197,7 +217,7 @@ function LogicaJoc({ room }) {
           LUPTA! ⚔️
         </div>
       ) : (
-        <div className={`text-4xl font-black px-10 py-6 rounded-[2rem] shadow-2xl border-2 transform transition-all duration-500 scale-110 ${rezultat.amCastigat ? 'bg-green-600/90 border-green-400 text-white' : 'bg-neutral-900/90 border-red-900 text-red-500'}`}>
+        <div className={`text-4xl font-black px-10 py-6 rounded-[2rem] shadow-2xl border-2 transform transition-all duration-500 scale-110 flex flex-col items-center ${rezultat.amCastigat ? 'bg-green-600/90 border-green-400 text-white' : 'bg-neutral-900/90 border-red-900 text-red-500'}`}>
           {rezultat.mesaj}
         </div>
       )}
@@ -223,36 +243,43 @@ function LogicaJoc({ room }) {
       {!rezultat ? (
         <div className="mt-8 w-full px-4">
           {isHost ? (
-            !permisiuneSenzor ? (
-              <button onClick={cerePermisiuneMiscare} className="w-full bg-yellow-400 text-neutral-900 font-black py-5 rounded-2xl text-xl hover:scale-[1.02] transition-transform uppercase">
-                1. Activează Senzorul
-              </button>
-            ) : (
-              <div className="w-full text-2xl font-black animate-pulse bg-red-600 border border-red-400 p-5 rounded-2xl text-center text-white uppercase shadow-[0_0_20px_rgba(220,38,38,0.5)]">
-                2. DĂ CU OUL! 📱💨
+            <div className="w-full text-2xl font-black animate-pulse bg-red-600 border border-red-400 p-6 rounded-2xl text-center text-white uppercase shadow-[0_0_20px_rgba(220,38,38,0.5)] flex flex-col gap-3">
+              <span>DĂ CU OUL! 📱💨</span>
+              <div className="text-sm font-semibold text-yellow-300 normal-case tracking-normal bg-black/20 rounded-xl py-2 px-4 italic">
+                Nu uita să zici: "Hristos a înviat!"
               </div>
-            )
+            </div>
           ) : (
-            <div className="w-full text-lg font-bold bg-neutral-800/80 p-6 rounded-2xl text-center border border-white/10">
-              Ține telefonul strâns! 🥶<br/>
-              <span className="text-red-400 font-black text-xl mt-1 block">{numeAdversar} lovește!</span>
+            <div className="w-full text-lg font-bold bg-neutral-800/80 p-6 rounded-2xl text-center border border-white/10 flex flex-col gap-3">
+              <span>Ține telefonul strâns! 🥶</span>
+              <span className="text-red-400 font-black text-xl block">{numeAdversar} lovește!</span>
+              <div className="text-sm font-semibold text-yellow-300 normal-case tracking-normal bg-white/5 rounded-xl py-2 px-4 mt-2 italic">
+                Răspunde-i: "Adevărat a înviat!"
+              </div>
             </div>
           )}
         </div>
       ) : (
         <div className="flex flex-col gap-3 mt-6 w-full px-4">
-          {/* Aici e logica de deconectare vs revansa */}
+          {/* BUTON NOU DE SHARE VIRAL */}
+          <button 
+            onClick={handleShareViral}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black py-4 rounded-xl text-lg transition-all shadow-lg flex items-center justify-center gap-2 mb-2"
+          >
+            📱 Distribuie Rezultatul!
+          </button>
+
           <button 
             onClick={!adversarIesit ? handleCereRevansa : undefined}
             disabled={dorintaRevansa || adversarIesit}
             className={`w-full font-black py-4 rounded-xl text-lg transition-all border border-transparent ${
               adversarIesit
-                ? "bg-red-950 text-red-400 border-red-900 cursor-not-allowed" // Dacă a ieșit
+                ? "bg-red-950 text-red-400 border-red-900 cursor-not-allowed" 
                 : dorintaRevansa 
-                  ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/50 cursor-not-allowed" // Așteptam
+                  ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/50 cursor-not-allowed" 
                   : adversarVreaRevansa
-                    ? "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400" // El vrea
-                    : "bg-white text-black hover:bg-gray-200" // Stare normală
+                    ? "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400" 
+                    : "bg-white text-black hover:bg-gray-200" 
             }`}
           >
             {adversarIesit 
