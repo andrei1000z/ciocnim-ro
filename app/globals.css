@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   html, body {
@@ -29,22 +27,20 @@
   }
 }
 
-@layer utilities {
-  /* AM ÎNLOCUIT @apply CU CSS PUR CA SĂ NU MAI CRAPE TAILWIND V4 */
-  .glass-panel {
-    background-color: rgba(69, 10, 10, 0.4); /* bg-red-950/40 */
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(239, 68, 68, 0.2); /* border-red-500/20 */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  }
-  
-  .text-shadow-glow {
-    text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.8);
-  }
+/* Stiluri custom care nu depind de versiunea de Tailwind */
+.glass-panel {
+  background-color: rgba(69, 10, 10, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Keyframes pentru magie pură pe ecran */
+.text-shadow-glow {
+  text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Keyframes pentru animații */
 @keyframes float {
   0% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-15px) rotate(2deg); }
