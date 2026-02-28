@@ -1,65 +1,69 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [nume, setNume] = useState("");
+  const router = useRouter();
+
+  const handleInvita = async () => {
+    if (!nume) {
+      alert("Pune-ți o poreclă mai întâi!");
+      return;
+    }
+
+    // 1. Generăm un cod unic pentru camera de joc
+    const roomId = uuidv4();
+    // 2. Creăm link-ul cu tot cu numele celui care invită
+    const linkJoc = `${window.location.origin}/joc/${roomId}?nume=${nume}`;
+
+    // 3. Magia: Deschidem meniul de Share de pe telefon (WhatsApp, Insta, etc.)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Ciocnim un ou?",
+          text: `${nume} te-a provocat la un concurs de ciocnit ouă online! Intră aici să îți alegi oul:`,
+          url: linkJoc,
+        });
+        // După ce a dat share, îl băgăm și pe el în joc
+        router.push(`/joc/${roomId}?nume=${nume}&host=true`);
+      } catch (error) {
+        console.log("Share anulat", error);
+      }
+    } else {
+      // Fallback: Dacă e pe PC și nu are meniu de share, doar copiem linkul
+      navigator.clipboard.writeText(linkJoc);
+      alert("Linkul a fost copiat în clipboard! Trimite-l prietenului tău.");
+      router.push(`/joc/${roomId}?nume=${nume}&host=true`);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-red-600 text-white p-4">
+      <h1 className="text-5xl font-extrabold mb-8 text-center drop-shadow-md">
+        Ciocnim.ro 🥚
+      </h1>
+
+      <div className="bg-white text-black p-8 rounded-3xl shadow-2xl w-full max-w-sm flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <label className="text-xl font-bold text-gray-800">Porecla ta:</label>
+          <input
+            type="text"
+            placeholder="Ex: Gigel Viteazu"
+            value={nume}
+            onChange={(e) => setNume(e.target.value)}
+            className="border-2 border-gray-300 rounded-xl p-4 text-lg focus:outline-none focus:border-red-500 transition-colors bg-gray-50"
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        <button
+          onClick={handleInvita}
+          className="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-4 rounded-xl text-xl transition-all shadow-md transform hover:scale-105"
+        >
+          Invită un prieten 🚀
+        </button>
+      </div>
     </div>
   );
 }
