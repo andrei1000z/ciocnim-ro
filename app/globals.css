@@ -1,18 +1,29 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   1. RESETĂRI ȘI OPTIMIZĂRI PENTRU JOCURI MOBILE
+   ========================================================================== */
 @layer base {
   html, body {
     scroll-behavior: smooth;
+    /* Elimină highlight-ul albastru nativ pe telefoane la click */
     -webkit-tap-highlight-color: transparent; 
-    background-color: #0f0000;
-    color: white;
+    background-color: #0a0000; /* Roșu extrem de închis, dă o notă premium */
+    color: #ffffff;
+    
+    /* Previne zoom-ul accidental care strică experiența de joc */
     touch-action: manipulation;
     overflow-x: hidden; 
+    
+    /* Blochează selectarea textului - face site-ul să pară o aplicație nativă */
     user-select: none; 
     -webkit-user-select: none;
-    font-family: 'Outfit', system-ui, sans-serif;
+    
+    /* Fontul principal importat din layout.js */
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   }
 
+  /* Permitem utilizatorilor să scrie doar în input-uri */
   input {
     user-select: text;
     -webkit-user-select: text;
@@ -20,59 +31,89 @@
     outline: none;
   }
   
+  /* Resetăm butoanele nativ pentru a nu fi suprascrise de iOS/Android Safari */
   button {
     appearance: none;
     outline: none;
     border: none;
+    -webkit-appearance: none;
   }
 }
 
-/* Stiluri custom care nu depind de versiunea de Tailwind */
-.glass-panel {
-  background-color: rgba(69, 10, 10, 0.4);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+/* ==========================================================================
+   2. CLASE UTILITARE CUSTOM (GLASSMORPHISM & GLOW)
+   ========================================================================== */
+@layer utilities {
+  /* Efectul de sticlă roșiatică pentru panourile de joc */
+  .glass-panel {
+    background: linear-gradient(145deg, rgba(69, 10, 10, 0.6) 0%, rgba(20, 0, 0, 0.8) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-top: 2px solid rgba(239, 68, 68, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  
+  /* Efect pentru textul victorios */
+  .text-shadow-glow {
+    text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 0 20px rgba(255, 100, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.9);
+  }
+
+  /* Efect pentru textul roșu (înfrângere) */
+  .text-shadow-red {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(150, 0, 0, 0.9);
+  }
 }
 
-.text-shadow-glow {
-  text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.8);
-}
+/* ==========================================================================
+   3. KEYFRAMES PENTRU ANIMAȚII (BOMBĂ VIZUALĂ)
+   ========================================================================== */
 
-/* Keyframes pentru animații */
+/* Animație de plutire lentă pentru ouăle în așteptare */
 @keyframes float {
   0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(2deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
   100% { transform: translateY(0px) rotate(0deg); }
 }
 
+/* Animație de puls pentru butonul de "LUPTĂ" */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.4); }
-  50% { box-shadow: 0 0 35px rgba(220, 38, 38, 0.9); }
+  0%, 100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.5), inset 0 0 10px rgba(255,255,255,0.2); }
+  50% { box-shadow: 0 0 40px rgba(220, 38, 38, 1), inset 0 0 20px rgba(255,255,255,0.4); }
 }
 
+/* Șocul loviturii - un shake foarte agresiv și realist */
 @keyframes shake-hard {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px) rotate(-5deg); }
-  20%, 40%, 60%, 80% { transform: translateX(10px) rotate(5deg); }
+  0%, 100% { transform: translateX(0) translateY(0) rotate(0); filter: brightness(1); }
+  10%, 50%, 90% { transform: translateX(-15px) translateY(5px) rotate(-8deg); filter: brightness(1.5); }
+  30%, 70% { transform: translateX(15px) translateY(-5px) rotate(8deg); filter: brightness(1.5); }
 }
 
+/* Animație de apariție pentru elementele UI */
 @keyframes pop-in {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+  80% { transform: scale(1.05) translateY(-5px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
+/* Ploaia de confetti pentru câștigător */
 @keyframes fall-down {
-  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1;}
-  100% { transform: translateY(100vh) rotate(360deg); opacity: 0;}
+  0% { transform: translateY(-100vh) rotate(0deg) scale(1); opacity: 1;}
+  80% { opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0;}
 }
 
+/* ==========================================================================
+   4. ATRIBUIREA CLASELOR DE ANIMAȚIE
+   ========================================================================== */
 .animate-float { animation: float 4s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 2s infinite; }
-.animate-shake-hard { animation: shake-hard 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-.animate-pop { animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-.confetti-piece { animation: fall-down 3s linear forwards; }
+.animate-shake-hard { animation: shake-hard 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+.animate-pop { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.confetti-piece { animation: fall-down 3.5s linear forwards; }
 
-::-webkit-scrollbar { width: 0px; background: transparent; }
+/* Ascundem barele de scroll native pentru un design minimalist */
+::-webkit-scrollbar { 
+  width: 0px; 
+  background: transparent; 
+}
