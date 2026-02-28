@@ -6,7 +6,7 @@
   html, body {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent; 
-    background-color: #0f0000; /* Roșu extrem de închis, aproape negru */
+    background-color: #0f0000;
     color: white;
     touch-action: manipulation;
     overflow-x: hidden; 
@@ -15,7 +15,6 @@
     font-family: 'Outfit', system-ui, sans-serif;
   }
 
-  /* FORȚĂM STILIZAREA CA SĂ NU SE MAI STRICE PE NETLIFY */
   input {
     user-select: text;
     -webkit-user-select: text;
@@ -30,16 +29,16 @@
   }
 }
 
-/* Animații Custom Premium pentru Joc */
 @layer utilities {
+  /* AM ÎNLOCUIT @apply CU CSS PUR CA SĂ NU MAI CRAPE TAILWIND V4 */
   .glass-panel {
-    @apply bg-red-950/40 backdrop-blur-xl border border-red-500/20 shadow-2xl;
+    background-color: rgba(69, 10, 10, 0.4); /* bg-red-950/40 */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(239, 68, 68, 0.2); /* border-red-500/20 */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
   
-  .glass-button {
-    @apply bg-gradient-to-br from-red-600 to-red-800 border border-red-400/50 shadow-[0_0_15px_rgba(220,38,38,0.5)];
-  }
-
   .text-shadow-glow {
     text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.8);
   }
