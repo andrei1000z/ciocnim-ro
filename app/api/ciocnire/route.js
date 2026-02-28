@@ -11,18 +11,24 @@ const pusher = new Pusher({
 
 export async function POST(req) {
   const body = await req.json();
-  const { roomId, actiune } = body;
+  const { roomId, actiune, jucator } = body;
 
-  // Dacă cineva dă cu oul, serverul dă cu banul (50/50 șanse) să vedem cine câștigă
   if (actiune === 'lovitura') {
     const castigaCelCareDa = Math.random() < 0.5;
-    await pusher.trigger(`camera-${roomId}`, 'lovitura', {
-      ...body,
-      castigaCelCareDa
-    });
-  } else {
-    // Pentru celelalte acțiuni (alegerea oului, cererea de status), 
-    // serverul doar trimite mesajul mai departe celuilalt telefon
+    await pusher.trigger(`camera-${roomId}`, 'lovitura', { ...body, castigaCelCareDa });
+    
+    // Anunțăm tot site-ul că s-a mai spart un ou!
+    await pusher.trigger('global', 'ou-spart', {});
+  } 
+  else if (actiune === 'paraseste') {
+    // Anunțăm că cineva a fugit din meci
+    await pusher.trigger(`camera-${roomId}`, 'adversar-iesit', {});
+  }
+  else if (actiune === 'cauta-random') {
+    // Trimitem un semnal tuturor celor care apasă "Joacă Aleatoriu"
+    await pusher.trigger('lobby', 'camera-disponibila', { roomId, jucator });
+  } 
+  else {
     await pusher.trigger(`camera-${roomId}`, actiune, body);
   }
 
