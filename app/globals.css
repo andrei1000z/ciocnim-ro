@@ -3,46 +3,81 @@
 @tailwind utilities;
 
 @layer base {
-  html {
+  html, body {
     scroll-behavior: smooth;
-    /* Scoatem highlight-ul albastru enervant de pe Android când apeși pe un buton */
     -webkit-tap-highlight-color: transparent; 
-  }
-  
-  body {
-    /* Setăm culoarea de fundal fixă ca să se îmbine perfect cu restul codului */
-    background-color: #0a0a0a;
+    background-color: #0f0000; /* Roșu extrem de închis, aproape negru */
     color: white;
-
-    /* REGULI PENTRU JOCURI PE MOBIL */
-    /* Previne zoom-ul nedorit pe mobil când apeși repede de 2 ori */
     touch-action: manipulation;
-    
-    /* Previne scroll-ul orizontal dacă o imagine depășește ecranul */
     overflow-x: hidden; 
-    
-    /* Împiedică utilizatorul să selecteze textul din greșeală în timp ce joacă */
     user-select: none; 
     -webkit-user-select: none;
+    font-family: 'Outfit', system-ui, sans-serif;
   }
 
-  /* Permitem selectarea și scrierea de text DOAR în căsuța de nume */
+  /* FORȚĂM STILIZAREA CA SĂ NU SE MAI STRICE PE NETLIFY */
   input {
     user-select: text;
     -webkit-user-select: text;
+    appearance: none;
+    outline: none;
+  }
+  
+  button {
+    appearance: none;
+    outline: none;
+    border: none;
   }
 }
 
-/* Ascundem scrollbar-ul (bara din dreapta) pentru un aspect de aplicație mobilă nativă */
-::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
+/* Animații Custom Premium pentru Joc */
+@layer utilities {
+  .glass-panel {
+    @apply bg-red-950/40 backdrop-blur-xl border border-red-500/20 shadow-2xl;
+  }
+  
+  .glass-button {
+    @apply bg-gradient-to-br from-red-600 to-red-800 border border-red-400/50 shadow-[0_0_15px_rgba(220,38,38,0.5)];
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.8);
+  }
 }
 
-/* Efecte de glow custom (dacă vrem să le refolosim) */
-.glass-panel {
-  background: rgba(26, 26, 26, 0.9);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Keyframes pentru magie pură pe ecran */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
 }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(220, 38, 38, 0.9); }
+}
+
+@keyframes shake-hard {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px) rotate(-5deg); }
+  20%, 40%, 60%, 80% { transform: translateX(10px) rotate(5deg); }
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fall-down {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1;}
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0;}
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s infinite; }
+.animate-shake-hard { animation: shake-hard 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+.animate-pop { animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.confetti-piece { animation: fall-down 3s linear forwards; }
+
+::-webkit-scrollbar { width: 0px; background: transparent; }
