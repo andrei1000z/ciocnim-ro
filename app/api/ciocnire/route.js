@@ -17,15 +17,14 @@ export async function POST(req) {
     const castigaCelCareDa = Math.random() < 0.5;
     await pusher.trigger(`camera-${roomId}`, 'lovitura', { ...body, castigaCelCareDa });
     
-    // Anunțăm tot site-ul că s-a mai spart un ou!
+    // Anunțăm tot site-ul că s-a spart un ou pe bune!
     await pusher.trigger('global', 'ou-spart', {});
   } 
   else if (actiune === 'paraseste') {
-    // Anunțăm că cineva a fugit din meci
     await pusher.trigger(`camera-${roomId}`, 'adversar-iesit', {});
   }
   else if (actiune === 'cauta-random') {
-    // Trimitem un semnal tuturor celor care apasă "Joacă Aleatoriu"
+    // Trimitem semnal pe un canal general de LOBBY
     await pusher.trigger('lobby', 'camera-disponibila', { roomId, jucator });
   } 
   else {
