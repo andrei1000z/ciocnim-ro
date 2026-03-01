@@ -1,28 +1,33 @@
 "use client";
+
 import { useEffect, useState, useRef, Suspense } from "react";
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 
-// ==========================================
-// 1. COMPONENTE VIZUALE: CONFETTI & SUNET
-// ==========================================
+// ==========================================================================
+// 1. COMPONENTE VIZUALE ȘI FEEDBACK (CONFETTI, SUNET, SKIN-URI)
+// ==========================================================================
+
+/**
+ * Confetti - Se declanșează doar la victorie pentru un efect "WOW"
+ */
 const Confetti = () => {
   const culori = ['#dc2626', '#eab308', '#2563eb', '#16a34a', '#ffffff', '#a855f7'];
   return (
     <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-      {Array.from({ length: 80 }).map((_, i) => (
+      {Array.from({ length: 100 }).map((_, i) => (
         <div 
           key={i} 
-          className="absolute top-[-10%] confetti-piece shadow-lg"
+          className="absolute top-[-10%] confetti-piece shadow-xl"
           style={{
             left: `${Math.random() * 100}vw`,
-            width: `${Math.random() * 12 + 6}px`,
-            height: `${Math.random() * 24 + 12}px`,
+            width: `${Math.random() * 10 + 5}px`,
+            height: `${Math.random() * 20 + 10}px`,
             backgroundColor: culori[Math.floor(Math.random() * culori.length)],
-            animationDelay: `${Math.random() * 2.5}s`,
-            animationDuration: `${Math.random() * 2.5 + 2}s`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${Math.random() * 2 + 1.5}s`,
             transform: `rotate(${Math.random() * 360}deg)`,
-            borderRadius: Math.random() > 0.5 ? '50%' : '2px' // Mix de forme
+            borderRadius: Math.random() > 0.5 ? '50%' : '3px'
           }}
         />
       ))}
@@ -30,416 +35,340 @@ const Confetti = () => {
   );
 };
 
+/**
+ * Sistem de sunete pentru impact, victorie și eșec
+ */
 const playSound = (soundName) => {
   try {
     const audio = new Audio(`/sunete/${soundName}.mp3`);
-    audio.play().catch(e => console.log("Sunet ignorat de browser"));
-  } catch(e) {}
+    audio.volume = 0.6;
+    audio.play().catch(e => console.log("Audio block: interacționează cu pagina mai întâi"));
+  } catch(e) { console.error("Eroare sunet:", e); }
 };
 
-// ==========================================
-// 2. DESIGN OUĂ (9 SKIN-URI + 3 PATTERN-URI SVG)
-// ==========================================
+/**
+ * Componenta OuDesenat - Randare SVG cu pattern-uri tradiționale
+ */
 const OuDesenat = ({ culoare, width = "120px", spart = false, pattern = "zigzag" }) => (
   <div style={{ position: 'relative', width, height: `calc(${width} * 1.3)`, margin: '0 auto' }}>
-    <svg viewBox="0 0 100 130" style={{ width: '100%', height: '100%', filter: "drop-shadow(0px 15px 20px rgba(0,0,0,0.7))" }} className="transition-all duration-300">
-      
-      /* Forma de bază a oului */
+    <svg viewBox="0 0 100 130" style={{ width: '100%', height: '100%', filter: "drop-shadow(0px 12px 18px rgba(0,0,0,0.6))" }} className="transition-all duration-300">
+      {/* Corpul Oului */}
       <path d="M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z" fill={culoare} />
       
-      /* PATTERN 1: ZIG-ZAG TRADIȚIONAL */
+      {/* Pattern-uri Tradiționale */}
       {pattern === "zigzag" && (
-        <>
-          <path d="M5 60 L15 50 L25 60 L35 50 L45 60 L55 50 L65 60 L75 50 L85 60 L95 50" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M2 75 L15 88 L25 75 L35 88 L45 75 L55 88 L65 75 L75 88 L85 75 L98 88" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <circle cx="50" cy="69" r="4" fill="rgba(255,255,255,0.4)" />
-        </>
+        <g stroke="rgba(255,255,255,0.25)" strokeWidth="3" fill="none" strokeLinecap="round">
+          <path d="M10 55 L25 45 L40 55 L55 45 L70 55 L85 45" />
+          <path d="M10 75 L25 85 L40 75 L55 85 L70 75 L85 85" />
+        </g>
       )}
-
-      /* PATTERN 2: PUNCTE (INCONDEIAT MODERN) */
       {pattern === "puncte" && (
-        <>
-          <circle cx="20" cy="40" r="3" fill="rgba(255,255,255,0.3)" />
-          <circle cx="50" cy="30" r="4" fill="rgba(255,255,255,0.4)" />
-          <circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.3)" />
-          <circle cx="35" cy="90" r="5" fill="rgba(255,255,255,0.2)" />
-          <circle cx="65" cy="90" r="5" fill="rgba(255,255,255,0.2)" />
-        </>
+        <g fill="rgba(255,255,255,0.3)">
+          <circle cx="30" cy="40" r="4" /><circle cx="70" cy="40" r="4" />
+          <circle cx="50" cy="65" r="5" /><circle cx="30" cy="90" r="4" /><circle cx="70" cy="90" r="4" />
+        </g>
       )}
-
-      /* PATTERN 3: VALURI (NORDIC / MINIMALIST) */
       {pattern === "valuri" && (
-        <>
-          <path d="M0 50 Q 25 30, 50 50 T 100 50" stroke="rgba(255,255,255,0.2)" strokeWidth="4" fill="none" />
-          <path d="M0 70 Q 25 90, 50 70 T 100 70" stroke="rgba(255,255,255,0.2)" strokeWidth="4" fill="none" />
-        </>
+        <path d="M0 60 Q 25 40, 50 60 T 100 60 M0 80 Q 25 100, 50 80 T 100 80" stroke="rgba(255,255,255,0.2)" strokeWidth="4" fill="none" />
       )}
 
-      /* Efectul de luciu 3D pe ou */
-      <path d="M25 30 Q40 10 65 20 Q50 30 35 50 Z" fill="rgba(255,255,255,0.15)" /> 
+      {/* Luciu 3D */}
+      <path d="M30 25 Q45 15 60 25 Q50 35 35 45 Z" fill="rgba(255,255,255,0.12)" />
       
-      /* Crăpătura masivă când e spart */
+      {/* Grafică de Spargere */}
       {spart && (
-         <path d="M5 50 L30 65 L15 80 L50 95 L40 115 L75 95 L65 125 L95 85" stroke="#0a0000" strokeWidth="5" fill="none" opacity="0.95" strokeLinecap="round" strokeLinejoin="round"/>
+         <path d="M10 60 L35 75 L20 85 L55 100 L45 120 L80 100 L70 125 L95 90" stroke="#000" strokeWidth="6" fill="none" strokeLinejoin="round" />
       )}
     </svg>
-    {/* Emoji-ul de explozie */ }
-    {spart && <div className="absolute inset-0 flex items-center justify-center text-6xl drop-shadow-2xl animate-pop opacity-90 z-10">💥</div>}
+    {spart && <div className="absolute inset-0 flex items-center justify-center text-6xl animate-pop z-10">💥</div>}
   </div>
 );
 
-// Baza de date cu cele 9 skin-uri
 const SKIN_URI = [
-  { nume: "Tradițional Roșu", hex: "#dc2626", pattern: "zigzag" }, 
-  { nume: "Albastru Safir", hex: "#2563eb", pattern: "valuri" },
-  { nume: "Verde Smarald", hex: "#16a34a", pattern: "puncte" }, 
-  { nume: "Galben Aur", hex: "#ca8a04", pattern: "zigzag" },
-  { nume: "Mov Ametist", hex: "#9333ea", pattern: "valuri" }, 
-  { nume: "Negru Carbon", hex: "#171717", pattern: "puncte" },
-  { nume: "Roz Trandafir", hex: "#db2777", pattern: "zigzag" },
-  { nume: "Portocaliu Foc", hex: "#ea580c", pattern: "valuri" },
-  { nume: "Alb Pur", hex: "#f8fafc", pattern: "puncte" } // Alb are nevoie de contrast
+  { id: 1, nume: "Tradițional", hex: "#dc2626", pattern: "zigzag" },
+  { id: 2, nume: "Cer senin", hex: "#2563eb", pattern: "valuri" },
+  { id: 3, nume: "Iarbă", hex: "#16a34a", pattern: "puncte" },
+  { id: 4, nume: "Rege", hex: "#ca8a04", pattern: "zigzag" },
+  { id: 5, nume: "Noapte", hex: "#1e1b4b", pattern: "puncte" },
+  { id: 6, nume: "Ametist", hex: "#9333ea", pattern: "valuri" },
+  { id: 7, nume: "Roz Bombon", hex: "#db2777", pattern: "zigzag" },
+  { id: 8, nume: "Portocală", hex: "#ea580c", pattern: "puncte" },
+  { id: 9, nume: "Zăpadă", hex: "#f8fafc", pattern: "valuri" }
 ];
 
-// ==========================================
-// 3. LOGICA PRINCIPALĂ A JOCULUI
-// ==========================================
-function LogicaJoc({ room }) {
-  const searchParams = useSearchParams();
-  const nume = searchParams.get("nume") || "Jucător";
-  const isHost = searchParams.get("host") === "true";
-  const router = useRouter();
+// ==========================================================================
+// 2. LOGICA PRINCIPALĂ A ARENEI (TEAM & BOT INTEGRATED)
+// ==========================================================================
 
-  // Referință pentru a trimite oul corect adversarului
-  const ouMeuRef = useRef(null); 
-  
-  // Stările jocului
+function ArenaJoc({ room }) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const nume = searchParams.get("nume") || "Luptător";
+  const teamId = searchParams.get("teamId"); // Identificator pentru echipe
+  const isHost = searchParams.get("host") === "true";
+  const isBotMode = searchParams.get("bot") === "true" || room === "bot";
+
+  // Referințe și Stări
+  const ouMeuRef = useRef(null);
   const [ouMeu, setOuMeu] = useState(null);
   const [ouAdversar, setOuAdversar] = useState(null);
-  const [numeAdversar, setNumeAdversar] = useState("Adversarul");
-  
+  const [numeAdversar, setNumeAdversar] = useState(isBotMode ? "🤖 Bot Ciocnitor" : "Se conectează...");
   const [rezultat, setRezultat] = useState(null);
-  const [permisiuneSenzor, setPermisiuneSenzor] = useState(false);
-  const [animatieImpact, setAnimatieImpact] = useState(false);
+  const [impactAnimate, setImpactAnimate] = useState(false);
+  const [permisiuneMiscare, setPermisiuneMiscare] = useState(false);
+  const [revanșăVot, setRevanșăVot] = useState({ eu: false, el: false });
+  const [emojiAdversar, setEmojiAdversar] = useState(null);
 
-  // Stările pentru Revanșă / Ieșire
-  const [dorintaRevansa, setDorintaRevansa] = useState(false);
-  const [adversarVreaRevansa, setAdversarVreaRevansa] = useState(false);
-  const [adversarIesit, setAdversarIesit] = useState(false);
-  
-  // Sistemul de reacții rapide
-  const [reactiePrimita, setReactiePrimita] = useState(null);
-
-  // Funcție centralizată pentru comunicarea cu API-ul (Pusher)
-  const trimiteLaServer = (actiune, dateExtra = {}) => {
-    fetch('/api/ciocnire', {
-      method: 'POST',
-      body: JSON.stringify({ roomId: room, actiune, jucator: nume, isHost, ...dateExtra })
-    }).catch(e => console.error("Eroare trimitere:", e));
-  };
-
-  // Dacă utilizatorul apasă "Meniu Principal", anunțăm adversarul că am fugit
-  const handlePlecareForțată = () => {
-    trimiteLaServer('paraseste'); 
-    router.push('/');
-  };
-
-  // Anunțăm serverul și la închiderea tab-ului (BeforeUnload)
+  // --- 2.1 LOGICĂ SINCRONIZARE (PUSHER) ---
   useEffect(() => {
-    const laIesire = () => navigator.sendBeacon('/api/ciocnire', JSON.stringify({ roomId: room, actiune: 'paraseste' }));
-    window.addEventListener('beforeunload', laIesire);
-    return () => { window.removeEventListener('beforeunload', laIesire); laIesire(); };
-  }, [room]);
+    if (isBotMode) {
+      // Dacă e bot, simulăm alegerea lui imediat
+      setOuAdversar({ hex: "#4b5563", pattern: "zigzag" });
+      return;
+    }
 
-  // INIȚIALIZARE WEBSOCKET (PUSHER)
-  useEffect(() => {
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER });
     const channel = pusher.subscribe(`camera-${room}`);
 
-    // Când intrăm, strigăm în cameră să ne spună cineva ce ou are
-    trimiteLaServer('cere-stare');
+    // Strigăm în cameră că am intrat
+    trimiteSemnal('cere-stare');
 
-    // Dacă primim cere-stare de la celălalt, îi răspundem cu oul nostru
     channel.bind("cere-stare", (data) => {
       if (data.isHost !== isHost && ouMeuRef.current) {
-        trimiteLaServer('pregatit', { culoare: ouMeuRef.current.hex, pattern: ouMeuRef.current.pattern, isReply: true });
+        trimiteSemnal('pregatit', { o: ouMeuRef.current, reply: true });
       }
     });
 
-    // Când adversarul și-a ales oul
     channel.bind("pregatit", (data) => {
       if (data.isHost !== isHost) {
-        setOuAdversar({ hex: data.culoare, pattern: data.pattern || "zigzag" });
+        setOuAdversar(data.o);
         setNumeAdversar(data.jucator);
-        if (ouMeuRef.current && !data.isReply) {
-          trimiteLaServer('pregatit', { culoare: ouMeuRef.current.hex, pattern: ouMeuRef.current.pattern, isReply: true });
+        if (ouMeuRef.current && !data.reply) {
+          trimiteSemnal('pregatit', { o: ouMeuRef.current, reply: true });
         }
       }
     });
 
-    // Când cineva dă cu telefonul, serverul decide rezultatul
-    channel.bind("lovitura", (data) => {
-      let amCastigat = isHost ? data.castigaCelCareDa : !data.castigaCelCareDa;
-      
-      // Declanșăm animația de șoc
-      setAnimatieImpact(true);
-      playSound('spargere');
-      
-      // După jumătate de secundă afișăm rezultatul
-      setTimeout(() => {
-        setAnimatieImpact(false);
-        setRezultat({ amCastigat, mesaj: amCastigat ? "VICTORIE SUPREMĂ! 👑" : "OUL TĂU S-A SPART! 😭" });
-        playSound(amCastigat ? 'victorie' : 'esec');
-        if (navigator.vibrate) navigator.vibrate(amCastigat ? [100, 50, 100, 50, 200] : [800]); 
-      }, 500);
-    });
+    channel.bind("lovitura", (data) => proceseazăLovitură(data));
 
-    channel.bind("revansa", (data) => { if (data.isHost !== isHost) setAdversarVreaRevansa(true); });
-    channel.bind("adversar-iesit", () => setAdversarIesit(true));
-    
-    // Sistem de reacții live
     channel.bind("emoji", (data) => {
       if (data.isHost !== isHost) {
-        setReactiePrimita(data.emoji);
-        setTimeout(() => setReactiePrimita(null), 3500); // dispare dupa 3.5 secunde
+        setEmojiAdversar(data.emoji);
+        setTimeout(() => setEmojiAdversar(null), 3000);
       }
+    });
+
+    channel.bind("revanșă", (data) => {
+      if (data.isHost !== isHost) setRevanșăVot(prev => ({ ...prev, el: true }));
     });
 
     return () => pusher.unsubscribe(`camera-${room}`);
-  }, [room, isHost, nume]);
+  }, [room, isHost, isBotMode]);
 
-  // RESETARE PENTRU REVANȘĂ
-  useEffect(() => {
-    if (dorintaRevansa && adversarVreaRevansa) {
-      setRezultat(null); setOuMeu(null); ouMeuRef.current = null; setOuAdversar(null);
-      setPermisiuneSenzor(false); setDorintaRevansa(false); setAdversarVreaRevansa(false); setAdversarIesit(false);
-    }
-  }, [dorintaRevansa, adversarVreaRevansa]);
+  // --- 2.2 LOGICĂ ACȚIUNI ---
+  const trimiteSemnal = (actiune, date = {}) => {
+    fetch('/api/ciocnire', {
+      method: 'POST',
+      body: JSON.stringify({ roomId: room, actiune, jucator: nume, isHost, teamId, ...date })
+    });
+  };
 
-  // ALEGERE OU + CERERE PERMISIUNE SENZOR
-  const handleAlegeOu = async (skin) => {
+  const alegeOu = async (skin) => {
     setOuMeu(skin);
     ouMeuRef.current = skin;
-    trimiteLaServer('pregatit', { culoare: skin.hex, pattern: skin.pattern, isReply: false });
-
-    // Pentru iOS: trebuie activat senzorul pe un click direct al utilizatorului
+    if (!isBotMode) trimiteSemnal('pregatit', { o: skin });
+    
+    // Cerere senzori (esențial pentru mobile)
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-      try {
-        const state = await DeviceMotionEvent.requestPermission();
-        if (state === 'granted') setPermisiuneSenzor(true);
-      } catch (e) { console.error("Senzor blocat:", e); }
-    } else { 
-      setPermisiuneSenzor(true); // Pentru Android
-    }
+      const resp = await DeviceMotionEvent.requestPermission();
+      if (resp === 'granted') setPermisiuneMiscare(true);
+    } else { setPermisiuneMiscare(true); }
   };
 
-  const trimiteEmoji = (emoji) => {
-    trimiteLaServer('emoji', { emoji });
-    setReactiePrimita(emoji); // Ne arătăm și nouă ce am trimis
-    setTimeout(() => setReactiePrimita(null), 3500);
+  const proceseazăLovitură = (data) => {
+    // Calculăm cine a câștigat pe baza deciziei serverului (50/50)
+    const amCastigat = isHost ? data.castigaCelCareDa : !data.castigaCelCareDa;
+    
+    setImpactAnimate(true);
+    playSound('spargere');
+
+    setTimeout(() => {
+      setImpactAnimate(false);
+      setRezultat({ win: amCastigat, msg: amCastigat ? "VICTORIE SUPREMĂ! 👑" : "OUL TĂU S-A SPART! 😭" });
+      playSound(amCastigat ? 'victorie' : 'esec');
+      if (navigator.vibrate) navigator.vibrate(amCastigat ? [100, 50, 100] : 800);
+    }, 500);
   };
 
-  // ==========================================
-  // BUTONUL DE SHARE VIRAL
-  // ==========================================
-  const handleShareViral = async () => {
-    const textViral = rezultat?.amCastigat 
-      ? `Hai să vedem care e mai tare în coajă! 🥚 L-am distrus pe ${numeAdversar} la Ciocnim.ro! Intră să alegi oul și hai la duel!`
-      : `Hai să vedem care e mai tare în coajă! 🥚 Mi-am spart oul în fața lui ${numeAdversar}... Răzbună-mă! Intră să alegi oul:`;
-
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Ciocnim.ro 🥚', text: textViral, url: window.location.origin }); } catch (e) {}
-    } else {
-      navigator.clipboard.writeText(`${textViral} -> ${window.location.origin}`);
-      alert("Mesajul a fost copiat! Dă-i Paste oriunde vrei.");
-    }
-  };
-
-  // ASCULTAREA ACCELEROMETRULUI
+  // --- 2.3 LOGICĂ BOT ---
   useEffect(() => {
-    if (!permisiuneSenzor || !isHost || rezultat || !ouMeu || !ouAdversar) return;
+    if (isBotMode && ouMeu && !rezultat) {
+      // Bot-ul lovește după un timp random
+      const timpAsteptare = Math.random() * 4000 + 2000;
+      const t = setTimeout(() => {
+        proceseazăLovitură({ castigaCelCareDa: Math.random() > 0.5 });
+      }, timpAsteptare);
+      return () => clearTimeout(t);
+    }
+  }, [ouMeu, rezultat, isBotMode]);
 
-    const handleMotion = (event) => {
-      const acc = event.acceleration;
-      if (!acc) return;
-      const forta = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
-      
-      if (forta > 20) { 
+  // --- 2.4 DETECTARE MIȘCARE ---
+  useEffect(() => {
+    if (!permisiuneMiscare || rezultat || !ouMeu || !ouAdversar) return;
+
+    const handleMotion = (e) => {
+      const a = e.acceleration;
+      if (!a) return;
+      const forta = Math.abs(a.x || 0) + Math.abs(a.y || 0) + Math.abs(a.z || 0);
+      if (forta > 25) {
         window.removeEventListener("devicemotion", handleMotion);
-        trimiteLaServer('lovitura'); 
+        trimiteSemnal('lovitura');
       }
     };
+
     window.addEventListener("devicemotion", handleMotion);
     return () => window.removeEventListener("devicemotion", handleMotion);
-  }, [permisiuneSenzor, isHost, rezultat, ouMeu, ouAdversar]);
+  }, [permisiuneMiscare, rezultat, ouMeu, ouAdversar]);
 
+  // --- 2.5 REVANȘĂ ---
+  useEffect(() => {
+    if (revanșăVot.eu && revanșăVot.el) {
+      setRezultat(null); setOuMeu(null); ouMeuRef.current = null;
+      setRevanșăVot({ eu: false, el: false });
+    }
+  }, [revanșăVot]);
 
-  // ==========================================
-  // UI - ECRAN 1: ALEGEREA OULUI
-  // ==========================================
+  // ==========================================================================
+  // 3. RENDER UI
+  // ==========================================================================
+
+  // Pas 1: Alegere Skin
   if (!ouMeu) {
     return (
-      <article className="flex flex-col items-center gap-6 glass-panel p-6 sm:p-10 rounded-[2.5rem] w-full max-w-lg animate-pop">
-        <header className="text-center">
-          <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 uppercase tracking-widest drop-shadow-md">Alege Armura</h2>
-          <p className="text-sm font-semibold text-yellow-500 mt-2 uppercase tracking-widest">Pregătește-te de luptă, {nume}!</p>
-        </header>
-
-        <section className="grid grid-cols-3 gap-y-8 gap-x-4 w-full mt-4">
-          {SKIN_URI.map((skin) => (
-            <button 
-              key={skin.nume} 
-              onClick={() => handleAlegeOu(skin)} 
-              className="group flex flex-col items-center gap-3 focus:outline-none"
-              aria-label={`Alege oul ${skin.nume}`}
-            >
-              <div className="transform group-hover:scale-125 group-active:scale-95 group-hover:-rotate-12 transition-all duration-300 drop-shadow-xl">
-                <OuDesenat culoare={skin.hex} pattern={skin.pattern} width="70px" />
+      <div className="flex flex-col items-center gap-8 glass-panel p-8 rounded-[2.5rem] animate-pop max-w-md w-full">
+        <div className="text-center">
+          <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Alege Armura</h2>
+          <p className="text-yellow-500 font-bold text-sm uppercase">Pregătește-te, {nume}!</p>
+        </div>
+        <div className="grid grid-cols-3 gap-6 w-full">
+          {SKIN_URI.map(s => (
+            <button key={s.id} onClick={() => alegeOu(s)} className="group flex flex-col items-center gap-2">
+              <div className="transform group-hover:scale-110 transition-transform duration-300">
+                <OuDesenat culoare={s.hex} pattern={s.pattern} width="75px" />
               </div>
-              <span className="font-bold text-[10px] tracking-wider uppercase bg-black/60 px-3 py-1 rounded-full text-white/90 border border-white/10 group-hover:border-white/40 transition-colors">
-                {skin.nume.split(" ")[0]} {/* Afișăm doar primul cuvânt ca să încapă bine */}
-              </span>
+              <span className="text-[10px] font-black text-white/40 group-hover:text-white uppercase tracking-widest">{s.nume}</span>
             </button>
           ))}
-        </section>
-      </article>
+        </div>
+      </div>
     );
   }
 
-  // ==========================================
-  // UI - ECRAN 2: AȘTEPTARE ADVERSAR
-  // ==========================================
-  if (ouMeu && !ouAdversar) {
-    return (
-      <section className="flex flex-col items-center gap-12 animate-pop">
-        <div className="text-sm font-black tracking-[0.4em] uppercase animate-pulse text-yellow-500 bg-red-950/80 px-8 py-3 rounded-full border-2 border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.2)]">
-          Așteptăm adversarul...
-        </div>
-        <div className="opacity-100 transform scale-110 drop-shadow-2xl animate-float">
-          <OuDesenat culoare={ouMeu.hex} pattern={ouMeu.pattern} width="160px" />
-        </div>
-      </section>
-    );
-  }
-
-  // ==========================================
-  // UI - ECRAN 3: ARENA (Lupta și Rezultatul)
-  // ==========================================
+  // Pas 2: Arena de luptă
   return (
-    <main className={`flex flex-col items-center gap-8 w-full max-w-xl transition-transform duration-75 ${animatieImpact ? 'animate-shake-hard' : ''}`}>
-      {/* Randăm Confetti doar dacă a câștigat */}
-      {rezultat?.amCastigat && <Confetti />}
+    <div className={`w-full max-w-xl transition-all duration-75 ${impactAnimate ? 'scale-110 blur-[1px]' : ''}`}>
+      {rezultat?.win && <Confetti />}
 
-      {/* BANNER REZULTAT */}
-      {!rezultat ? (
-        <div className="text-4xl font-black text-white px-12 py-4 rounded-full tracking-[0.2em] uppercase bg-gradient-to-r from-red-600 to-red-800 shadow-[0_0_30px_rgba(220,38,38,0.8)] border-2 border-red-400 animate-pulse-glow z-20">
-          LUPTĂ!
-        </div>
-      ) : (
-        <div className={`text-3xl sm:text-4xl font-black px-8 py-6 rounded-3xl shadow-2xl w-full flex justify-center uppercase tracking-widest text-white animate-pop z-20 text-center ${rezultat.amCastigat ? 'bg-gradient-to-b from-green-500 to-green-700 border-2 border-green-400' : 'bg-gradient-to-b from-neutral-900 to-black border-2 border-red-900 text-red-500'}`}>
-          {rezultat.mesaj}
+      {/* Team Badge */}
+      {teamId && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-red-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse border border-red-400 z-50">
+          Meci de Echipă Activat ⚔️
         </div>
       )}
 
-      {/* ZONA CENTRALĂ: CELE DOUĂ OUĂ */}
-      <section className="flex justify-between w-full items-end mt-4 px-2 sm:px-8 relative z-10">
-        
-        {/* Sistemul flotant de reacții Emoji */}
-        {reactiePrimita && (
-          <div className="absolute top-[-60px] left-1/2 transform -translate-x-1/2 text-7xl animate-pop z-50 drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-            {reactiePrimita}
+      {/* Status Joc */}
+      <div className="mb-10 text-center">
+        {!rezultat ? (
+          <div className="text-4xl font-black text-white italic animate-pulse-glow bg-red-600 py-3 rounded-2xl shadow-2xl border-2 border-red-400 uppercase tracking-tighter">
+            CIOCNEȘTE!
+          </div>
+        ) : (
+          <div className={`text-4xl font-black px-6 py-10 rounded-3xl shadow-2xl animate-pop border-4 ${rezultat.win ? 'bg-green-600 border-green-300' : 'bg-neutral-900 border-red-900 text-red-600'}`}>
+            {rezultat.msg}
           </div>
         )}
+      </div>
 
-        <div className="flex flex-col items-center gap-5 z-10 w-[40%]">
-          <div className={`${animatieImpact && isHost ? 'translate-x-12 rotate-[20deg]' : ''} transition-transform duration-100`}>
-            <OuDesenat culoare={ouMeu.hex} pattern={ouMeu.pattern} width="130px" spart={rezultat && !rezultat.amCastigat} />
+      {/* Duelul Ouălor */}
+      <div className="flex justify-between items-end relative px-4">
+        {emojiAdversar && (
+          <div className="absolute top-[-50px] right-0 text-6xl animate-bounce z-50">{emojiAdversar}</div>
+        )}
+
+        {/* TU */}
+        <div className="flex flex-col items-center gap-4 w-1/3">
+          <div className={`${impactAnimate && isHost ? 'translate-x-10 rotate-12' : ''} transition-transform`}>
+            <OuDesenat culoare={ouMeu.hex} pattern={ouMeu.pattern} width="140px" spart={rezultat && !rezultat.win} />
           </div>
-          <span className="font-black tracking-widest uppercase bg-white text-red-950 px-6 py-2 rounded-full text-xs shadow-[0_5px_15px_rgba(255,255,255,0.2)]">TU</span>
+          <span className="bg-white text-black font-black px-6 py-2 rounded-full text-xs shadow-xl tracking-widest">TU</span>
         </div>
-        
-        <div className="text-4xl font-black pb-16 opacity-40 text-white italic z-0 w-[20%] text-center tracking-widest">VS</div>
 
-        <div className="flex flex-col items-center gap-5 z-10 w-[40%]">
-          <div className={`${animatieImpact && !isHost ? '-translate-x-12 -rotate-[20deg]' : ''} transition-transform duration-100`}>
-             <OuDesenat culoare={ouAdversar.hex} pattern={ouAdversar.pattern} width="130px" spart={rezultat && rezultat.amCastigat} />
+        <div className="text-3xl font-black text-white/20 italic pb-20">VS</div>
+
+        {/* EL */}
+        <div className="flex flex-col items-center gap-4 w-1/3">
+          <div className={`${impactAnimate && !isHost ? '-translate-x-10 -rotate-12' : ''} transition-transform`}>
+            {ouAdversar ? (
+              <OuDesenat culoare={ouAdversar.hex} pattern={ouAdversar.pattern} width="140px" spart={rezultat && rezultat.win} />
+            ) : (
+              <div className="w-[140px] h-[180px] bg-white/5 rounded-full border-2 border-dashed border-white/20 animate-pulse" />
+            )}
           </div>
-          <span className="font-black tracking-widest uppercase bg-red-950 border border-red-500/50 text-white px-4 py-2 rounded-full text-xs truncate w-full max-w-[140px] text-center shadow-lg">{numeAdversar}</span>
+          <span className="bg-neutral-800 text-white/60 font-black px-4 py-2 rounded-full text-[10px] uppercase truncate w-full text-center">
+            {numeAdversar}
+          </span>
         </div>
-      </section>
+      </div>
 
-      {/* PANOU INFERIOR (TEXTE CERUTE + COMENZI) */}
-      {!rezultat ? (
-        <section className="mt-6 w-full px-2 flex flex-col gap-6 z-20">
+      {/* Instrucțiuni dinamice */}
+      {!rezultat && (
+        <div className="mt-12 w-full glass-panel p-6 rounded-3xl text-center">
           {isHost ? (
-            <div className="w-full font-black animate-pulse-glow bg-gradient-to-b from-red-600 to-red-800 p-6 rounded-[2rem] text-center text-white shadow-xl flex flex-col gap-3 border border-red-400">
-              <span className="text-3xl tracking-widest uppercase">📱 DĂ CU OUL!</span>
-              <div className="text-sm font-semibold text-white/90 normal-case tracking-wide opacity-90">
-                Țineți telefoanele ca pe niște ouă! <br/><span className="text-yellow-400 font-bold uppercase mt-1 inline-block">Și tu lovești!</span>
-              </div>
-              <div className="text-xs font-bold text-yellow-300 normal-case tracking-widest bg-black/30 py-2 rounded-xl mt-1 uppercase">
-                Spune: "Hristos a înviat!"
-              </div>
+            <div className="space-y-2">
+              <p className="text-2xl font-black animate-bounce text-red-500">📱 LOVESTE ACUM!</p>
+              <p className="text-xs font-bold text-gray-400">Scutură telefonul brusc pentru a ciocni.</p>
+              <p className="text-yellow-500 font-black italic">"Hristos a înviat!"</p>
             </div>
           ) : (
-            <div className="w-full font-bold bg-neutral-900/90 p-6 rounded-[2rem] text-center border-2 border-white/10 flex flex-col gap-3 shadow-2xl backdrop-blur-sm">
-              <span className="text-3xl tracking-widest uppercase text-blue-400">🥶 ȚINE STRÂNS!</span>
-              <div className="text-sm font-semibold text-white/80 normal-case tracking-wide">
-                Țineți telefoanele ca pe niște ouă! <br/><span className="text-red-400 font-black uppercase mt-1 inline-block text-lg">{numeAdversar} lovește!</span>
-              </div>
-              <div className="text-xs font-bold text-yellow-500 normal-case tracking-widest bg-white/5 py-2 rounded-xl mt-1 uppercase">
-                Răspunde: "Adevărat a înviat!"
-              </div>
+            <div className="space-y-2">
+              <p className="text-xl font-black text-blue-400 uppercase tracking-widest">Tine strans! 🥶</p>
+              <p className="text-xs font-bold text-gray-400">Așteaptă lovitura lui {numeAdversar}.</p>
+              <p className="text-yellow-500 font-black italic">"Adevărat a înviat!"</p>
             </div>
           )}
-
-          {/* BARĂ EMOJI RAPIDĂ */}
-          <div className="flex justify-center gap-6 bg-black/60 p-4 rounded-full backdrop-blur-xl w-max mx-auto border border-white/10 shadow-lg">
-            <button aria-label="Trimite reacție de râs" onClick={() => trimiteEmoji('🤣')} className="text-3xl hover:scale-125 hover:-translate-y-2 transition-all">🤣</button>
-            <button aria-label="Trimite reacție de supărare" onClick={() => trimiteEmoji('😡')} className="text-3xl hover:scale-125 hover:-translate-y-2 transition-all">😡</button>
-            <button aria-label="Trimite reacție de frig" onClick={() => trimiteEmoji('🥶')} className="text-3xl hover:scale-125 hover:-translate-y-2 transition-all">🥶</button>
-            <button aria-label="Trimite reacție cu ou" onClick={() => trimiteEmoji('🥚')} className="text-3xl hover:scale-125 hover:-translate-y-2 transition-all">🥚</button>
-          </div>
-        </section>
-      ) : (
-        <section className="flex flex-col gap-4 w-full px-2 mt-4 z-20">
-          <button 
-            onClick={handleShareViral}
-            className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black py-5 rounded-2xl text-base transition-all flex items-center justify-center gap-3 uppercase tracking-widest shadow-[0_0_20px_rgba(79,70,229,0.5)] border border-blue-400"
-          >
-            <span className="text-2xl">📱</span> Distribuie Rezultatul
-          </button>
-
-          <button 
-            onClick={!adversarIesit ? () => { setDorintaRevansa(true); trimiteLaServer('revansa'); } : undefined}
-            disabled={dorintaRevansa || adversarIesit}
-            className={`w-full font-black py-5 rounded-2xl text-sm transition-all uppercase tracking-widest shadow-xl ${
-              adversarIesit
-                ? "bg-black text-red-500 border-2 border-red-900 cursor-not-allowed" 
-                : dorintaRevansa 
-                  ? "bg-yellow-900/40 text-yellow-500 border border-yellow-700/50 cursor-not-allowed" 
-                  : adversarVreaRevansa
-                    ? "bg-gradient-to-b from-green-500 to-green-700 text-white shadow-[0_0_20px_rgba(34,197,94,0.6)] animate-pulse border border-green-400" 
-                    : "bg-white text-black hover:bg-gray-200" 
-            }`}
-          >
-            {adversarIesit ? "Adversarul a fugit!" : dorintaRevansa ? "Așteptăm (1/2)" : adversarVreaRevansa ? "Acceptă Revanșa (1/2)" : "Cere Revanșă (0/2)"}
-          </button>
-          
-          <button onClick={handlePlecareForțată} className="w-full bg-transparent text-white/50 font-bold py-4 rounded-xl text-xs transition-all uppercase tracking-[0.3em] mt-2 hover:text-white/90 border border-transparent hover:border-white/10">
-            Înapoi la meniu
-          </button>
-        </section>
+        </div>
       )}
-    </main>
+
+      {/* Panou Final */}
+      {rezultat && (
+        <div className="mt-8 flex flex-col gap-4 animate-pop">
+          <button onClick={() => { setRevanșăVot(prev => ({ ...prev, eu: true })); trimiteSemnal('revanșă'); }} 
+            className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl transition-all ${revanșăVot.eu ? 'bg-yellow-600 animate-pulse' : 'bg-white text-black hover:bg-gray-200'}`}>
+            {revanșăVot.eu ? "Așteptăm adversarul..." : "Cere Revanșă ⚔️"}
+          </button>
+          <button onClick={() => router.push('/')} className="w-full py-4 text-white/40 font-bold uppercase text-xs tracking-[0.3em] hover:text-white transition-colors">
+            Înapoi la Meniu principal
+          </button>
+        </div>
+      )}
+
+      {/* Reacții Rapide */}
+      {!rezultat && ouAdversar && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex gap-4 bg-black/60 p-3 rounded-full backdrop-blur-xl border border-white/10">
+          {['🤣', '😡', '🥚', '🙏'].map(e => (
+            <button key={e} onClick={() => trimiteSemnal('emoji', { emoji: e })} className="text-2xl hover:scale-125 transition-transform">{e}</button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-export default function Joc({ params }) {
+export default function PaginaJoc({ params }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center relative">
-      <Suspense fallback={<div className="text-base text-yellow-500 uppercase tracking-[0.3em] animate-pulse font-black mt-20">Arena se pregătește...</div>}>
-        <LogicaJoc room={params.room} />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-tradi-dark">
+      <Suspense fallback={<div className="text-2xl font-black animate-pulse">Intrăm în arenă...</div>}>
+        <ArenaJoc room={params.room} />
       </Suspense>
     </div>
   );
