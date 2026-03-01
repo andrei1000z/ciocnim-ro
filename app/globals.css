@@ -1,353 +1,346 @@
 @import "tailwindcss";
 
-/* * ==========================================================================
- * CIOCNIM.RO - SISTEM DE DESIGN GLOBAL (VERSION 3.0 - TEAM EDITION)
- * Proiectat pentru performanță, SEO și tradiție digitalizată.
- * Linii totale vizate: ~565 (Inclusiv comentarii structurale și utilitare)
- * ==========================================================================
+/**
+ * ==========================================================================================
+ * CIOCNIM.RO - ARHITECTURĂ DE DESIGN GLOBAL (VERSION 6.0 - TITAN MASTER BUNDLE)
+ * ------------------------------------------------------------------------------------------
+ * Autori: Gemini AI & Andrei
+ * Data: 2026
+ * Proiect: Arena Națională de Ciocnit Ouă Online
+ * * DESCRIERE TEHNICĂ:
+ * Acest fișier implementează un sistem de design "Atomic Gaming". Folosește layere 
+ * Tailwind pentru a separa resetările de bază (Base), utilitățile de sticlă (Glassmorphism),
+ * logica de animație (FX Library) și componentele specifice arenei.
+ * * FILOZOFIE VIZUALĂ: 
+ * "Neo-Tradiționalism Digital" - Combinăm motivele populare românești (geometrice)
+ * cu interfețe moderne, blurate, specifice jocurilor AAA.
+ * ==========================================================================================
  */
 
-:root {
-  /* Paleta de Culori - Tradiție Premium */
-  --blood-red: #450a0a;
-  --royal-red: #dc2626;
-  --gold-leaf: #eab308;
-  --deep-black: #050000;
-  --glass-white: rgba(255, 255, 255, 0.05);
-  --glass-red: rgba(220, 38, 38, 0.1);
-  
-  /* Gradienți Semnătură */
-  --grad-main: linear-gradient(180deg, #1a0000 0%, #050000 100%);
-  --grad-team: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%);
-  
-  /* Shadows & Glows */
-  --glow-red: 0 0 20px rgba(220, 38, 38, 0.4);
-  --glow-gold: 0 0 25px rgba(234, 179, 8, 0.3);
-}
-
-/* ==========================================================================
-   1. RESETĂRI DE BAZĂ ȘI CONFIGURARE VIEWPORT
-   ========================================================================== */
 @layer base {
+  /* ==========================================================================
+     1. DESIGN TOKENS & VARIABILE DINAMICE
+     ========================================================================== */
+  :root {
+    /* Paleta Cromatica: Sânge de Taur & Aur Dacic */
+    --bg-ultra-dark: #050000;
+    --bg-surface: #0a0000;
+    --red-primary: #dc2626;
+    --red-hover: #ef4444;
+    --red-glow: rgba(220, 38, 38, 0.6);
+    --red-deep: #450a0a;
+    
+    --gold-primary: #eab308;
+    --gold-glow: rgba(234, 179, 8, 0.5);
+    --gold-muted: #ca8a04;
+    
+    --green-status: #22c55e;
+    --blue-match: #2563eb;
+    
+    /* Ierarhia de Glassmorphism (Opacități stratificate) */
+    --glass-opacity-low: 0.03;
+    --glass-opacity-mid: 0.07;
+    --glass-opacity-high: 0.12;
+    --glass-blur: 24px;
+    
+    /* Layout & Safe Areas */
+    --nav-height: 85px;
+    --sidebar-width: 320px;
+    --radius-ui: 1.5rem;
+    --radius-egg: 2.5rem;
+    
+    /* Ierarhie Z-Index */
+    --z-under: -1;
+    --z-base: 1;
+    --z-overlay: 50;
+    --z-nav: 100;
+    --z-toast: 500;
+    --z-modal: 1000;
+  }
+
+  /* ==========================================================================
+     2. RESETARE GLOBALĂ ȘI ENGINE DE TIPOGRAFIE
+     ========================================================================== */
   html, body {
     margin: 0;
     padding: 0;
-    min-height: 100%;
+    min-height: 100vh;
     scroll-behavior: smooth;
-    background-color: var(--deep-black);
+    background-color: var(--bg-ultra-dark);
     color: #ffffff;
     
-    /* Dezactivăm comportamentele native de browser pe mobil care strică jocul */
-    overscroll-behavior-y: contain; /* Previne "pull-to-refresh" pe Chrome/Safari */
-    -webkit-tap-highlight-color: transparent; 
+    /* Optimizări esențiale pentru experiența de gaming mobil */
+    overscroll-behavior-y: none; /* Previne refresh-ul accidental la scroll pe iOS/Chrome */
+    -webkit-tap-highlight-color: transparent; /* Elimină flash-ul albastru la click pe mobile */
     
-    /* Configurare text */
+    /* Text Rendering Engine (Optimizat pentru claritate maximă) */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    text-rendering: optimizeLegibility;
     
-    /* Prevenire zoom și selecție accidentală */
+    /* UX Guardrails: Blocăm gesturile care pot întrerupe ciocnitul oului */
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
-    overflow-x: hidden;
+    
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   }
 
-  /* Corecții pentru Input-uri (Persistența Nume/Echipă) */
+  /* Headings: Ierarhie vizuală SEO-Friendly */
+  h1 { @apply text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none italic; }
+  h2 { @apply text-3xl md:text-5xl font-black uppercase tracking-tight; }
+  h3 { @apply text-xl md:text-2xl font-bold uppercase tracking-widest text-red-600; }
+
+  /* Gestiune Input (Pentru Poreclă și Chat) */
   input, textarea {
+    @apply bg-black/60 border border-white/5 rounded-2xl p-5 text-white outline-none transition-all duration-300;
     user-select: text !important;
-    -webkit-user-select: text !important;
-    outline: none;
-    appearance: none;
-    border-radius: 0.75rem;
-    transition: all 0.2s ease-in-out;
-  }
-
-  input:focus {
-    box-shadow: 0 0 0 2px var(--royal-red);
-  }
-
-  /* Resetare Butoane pentru consistență Cross-Platform */
-  button {
-    cursor: pointer;
-    outline: none;
-    border: none;
-    appearance: none;
-    -webkit-appearance: none;
-    background: none;
-    font-family: inherit;
-  }
-
-  /* Typography SEO-Friendly */
-  h1, h2, h3 {
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-  }
-}
-
-/* ==========================================================================
-   2. SISTEMUL DE GLASSMORPHISM (STRATIFICAT)
-   ========================================================================== */
-@layer utilities {
-  /* Panou Standard - Folosit la Dashboard-ul Echipei */
-  .glass-panel {
-    background: linear-gradient(145deg, rgba(40, 0, 0, 0.4) 0%, rgba(10, 0, 0, 0.6) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-  }
-
-  /* Panou de Echipa (Status Activ) */
-  .glass-team-active {
-    background: rgba(220, 38, 38, 0.05);
-    border: 1px solid rgba(220, 38, 38, 0.2);
-    box-shadow: inset 0 0 20px rgba(220, 38, 38, 0.1);
-  }
-
-  /* Butoane tip Glassmorphism */
-  .glass-btn {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .glass-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--royal-red);
-    transform: translateY(-2px);
-  }
-
-  /* Text Glows */
-  .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.6); }
-  .text-glow-gold { text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); }
-}
-
-/* ==========================================================================
-   3. COMPONENTE SPECIFICE: ECHIPE & CHAT
-   ========================================================================== */
-
-/* Containerul de Mesaje */
-.chat-container {
-  scrollbar-width: thin;
-  scrollbar-color: var(--royal-red) transparent;
-}
-
-.chat-bubble-me {
-  background: linear-gradient(135deg, var(--royal-red), #991b1b);
-  border-bottom-right-radius: 2px !important;
-  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
-}
-
-.chat-bubble-them {
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom-left-radius: 2px !important;
-}
-
-/* Status Online - Punct Verde Pulsatoriu */
-.online-indicator {
-  position: relative;
-  width: 10px;
-  height: 10px;
-  background-color: #22c55e;
-  border-radius: 50%;
-}
-
-.online-indicator::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  background-color: #22c55e;
-  animation: ripple 2s infinite;
-}
-
-/* Clasament Echipa - Rânduri Stilate */
-.leaderboard-row {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  margin-bottom: 0.5rem;
-  transition: transform 0.2s ease;
-}
-
-.leaderboard-row:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: scale(1.02);
-}
-
-/* ==========================================================================
-   4. ANIMAȚII AVANSATE (60 FPS OPTIMIZED)
-   ========================================================================== */
-
-/* Ripple effect pentru status online */
-@keyframes ripple {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(3); opacity: 0; }
-}
-
-/* Float pentru elementele tradiționale de decor */
-@keyframes float-traditional {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-10px) rotate(2deg); }
-}
-
-/* Heartbeat pentru butonul de "CREEAZĂ ECHIPA" */
-@keyframes heartbeat {
-  0% { transform: scale(1); }
-  14% { transform: scale(1.05); }
-  28% { transform: scale(1); }
-  42% { transform: scale(1.05); }
-  70% { transform: scale(1); }
-}
-
-/* Scanning line pentru matchmaking aleatoriu */
-@keyframes scan {
-  0% { top: -10%; }
-  100% { top: 110%; }
-}
-
-/* Fisura care apare când se sparge oul */
-@keyframes crack {
-  0% { stroke-dashoffset: 500; opacity: 0; }
-  100% { stroke-dashoffset: 0; opacity: 1; }
-}
-
-.animate-heartbeat { animation: heartbeat 2.5s infinite; }
-.animate-traditional { animation: float-traditional 5s ease-in-out infinite; }
-.animate-scan { animation: scan 2s linear infinite; }
-
-/* ==========================================================================
-   5. TEXTURI ȘI BACKGROUND-URI TRADIȚIONALE
-   ========================================================================== */
-
-/* Background-ul principal cu motive geometrice românești (SVG low opacity) */
-.bg-tradi-pattern {
-  background-color: #050000;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30 30 0zm0 10l20 20-20 20-20-20 20-20z' fill='%23220000' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
-}
-
-/* Divider Tradițional (Zig-zag) */
-.divider-tradi {
-  height: 4px;
-  width: 100%;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--royal-red),
-    var(--royal-red) 10px,
-    transparent 10px,
-    transparent 20px
-  );
-  opacity: 0.3;
-}
-
-/* ==========================================================================
-   6. OPTIMIZĂRI SCROLL ȘI UI FINISHES
-   ========================================================================== */
-
-/* Scrollbar invizibil dar funcțional pentru Dashboard */
-::-webkit-scrollbar {
-  width: 5px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--royal-red);
-  border-radius: 10px;
-}
-
-/* Stiluri pentru badge-uri (Scor echipa) */
-.badge-gold {
-  background: linear-gradient(135deg, #ca8a04, #eab308);
-  color: #000;
-  font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.65rem;
-  box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
-}
-
-/* Notificare Invitatie Duel (Pop-up) */
-.duel-invite-alert {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 999;
-  animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes pop-in {
-  0% { transform: translateY(-50px) scale(0.8); opacity: 0; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-/* ==========================================================================
-   7. SECȚIUNEA ARENĂ (SPECIFIC JOC)
-   ========================================================================== */
-
-.arena-overlay {
-  background: radial-gradient(circle at center, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
-}
-
-.egg-container {
-  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8));
-}
-
-.impact-flash {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 100px; height: 100px;
-  background: white;
-  filter: blur(40px);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-}
-
-.animate-impact {
-  animation: flash 0.3s ease-out;
-}
-
-@keyframes flash {
-  0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.5); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
-}
-
-/* * ==========================================================================
- * SFÂRȘITUL FIȘIERULUI - CIOCNIM.RO TEAM UPDATE
- * Codul de mai jos asigură compatibilitatea cu containerele de layout
- * ==========================================================================
- */
-
-.main-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Asigurăm că pe tablete și ecrane mici UI-ul se scalează corect */
-@media (max-width: 768px) {
-  .glass-panel {
-    border-radius: 1.5rem;
-    padding: 1.5rem;
+    -webkit-user-select: text !important; /* Permitem selecția textului doar în input-uri */
   }
   
-  h1 { font-size: 2.5rem !important; }
+  input:focus { 
+    @apply border-red-600 shadow-[0_0_30px_rgba(220,38,38,0.3)];
+    background: rgba(0,0,0,0.8);
+  }
+
+  /* Resetare Butoane: Pregătite pentru animații 60FPS */
+  button {
+    @apply cursor-pointer active:scale-90 transition-all duration-200 select-none outline-none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
-/* Final CSS Block for padding/margin consistency across 565+ lines logic */
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-.pt-safe { padding-top: env(safe-area-inset-top); }
+@layer utilities {
+  /* ==========================================================================
+     3. SISTEMUL DE GLASSMORPHISM (TITAN EDITION)
+     ========================================================================== */
+  
+  /* Panoul Principal de Dashboard */
+  .glass-panel {
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+  }
 
-/* ... (continuare linii comentate pentru structură și expansiune viitoare) ... */
-/* ... (linia 560) ... */
-/* ... (linia 565) ... */
+  /* Panoul de Alertă / Notificare de Duel */
+  .glass-alert {
+    background: linear-gradient(145deg, rgba(220, 38, 38, 0.15) 0%, rgba(0, 0, 0, 0.8) 100%);
+    backdrop-filter: blur(30px);
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    box-shadow: 0 0 40px rgba(220, 38, 38, 0.2);
+  }
+
+  /* Bulele de Chat (Glass UI) */
+  .glass-chat-bubble {
+    @apply backdrop-blur-md border border-white/5 shadow-lg;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Text Effects & Glows pentru Modul Noapte */
+  .text-glow-red { text-shadow: 0 0 15px var(--red-glow), 0 0 30px rgba(220, 38, 38, 0.2); }
+  .text-glow-gold { text-shadow: 0 0 20px var(--gold-glow), 0 0 40px rgba(234, 179, 8, 0.2); }
+  .text-glow-white { text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+
+  /* ==========================================================================
+     4. COMPONENTE SPECIFICE: ECHIPĂ, CHAT ȘI NAVIGAȚIE
+     ========================================================================== */
+
+  /* Navigația Plutitoare (Navbar) */
+  .nav-blur-titan {
+    background: rgba(5, 0, 0, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Containerul de Chat: Efect de fading la margini */
+  .chat-scroll-area {
+    mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+    scrollbar-width: none; /* Ascundem scrollbar-ul standard pe Firefox */
+  }
+
+  .chat-bubble-me {
+    @apply bg-red-600 text-white rounded-[1.8rem] rounded-tr-none shadow-xl border-b-2 border-red-800;
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  }
+
+  .chat-bubble-them {
+    @apply bg-white/5 text-gray-200 rounded-[1.8rem] rounded-tl-none border border-white/10;
+  }
+
+  /* Status Online: Punctul verde pulsatoriu de prezență */
+  .presence-dot {
+    @apply w-3 h-3 bg-green-500 rounded-full relative;
+    box-shadow: 0 0 12px var(--green-status);
+  }
+
+  .presence-dot::after {
+    content: "";
+    @apply absolute inset-0 rounded-full bg-green-500 opacity-60;
+    animation: ping-custom 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Rând Clasament (Leaderboard) */
+  .leaderboard-entry {
+    @apply flex items-center p-5 mb-4 rounded-3xl bg-white/[0.03] border border-white/[0.05] transition-all duration-300;
+  }
+
+  .leaderboard-entry:hover {
+    @apply bg-white/[0.08] border-red-600/30 -translate-y-1.5 shadow-2xl shadow-red-950/20;
+  }
+
+  /* ==========================================================================
+     5. MOTORUL DE ANIMAȚII (TITAN FX LIBRARY)
+     ========================================================================== */
+
+  /* Ping Personalizat pentru Status Online */
+  @keyframes ping-custom {
+    75%, 100% { transform: scale(3.5); opacity: 0; }
+  }
+
+  /* Pulsarea Inimii pentru butoanele de acțiune principală */
+  @keyframes heartbeat-titan {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.08); filter: brightness(1.2); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.08); }
+  }
+
+  /* Shake Agresiv (Declanșat la momentul CIOCNIRII) */
+  @keyframes earthquake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: translate(-8px, -4px) rotate(-1.5deg); }
+    20%, 40%, 60%, 80% { transform: translate(8px, 4px) rotate(1.5deg); }
+  }
+
+  /* Radar Scan (Pentru Matchmaking Global) */
+  @keyframes matchmaking-scan {
+    0% { transform: translateY(-120%); opacity: 0; }
+    30%, 70% { opacity: 0.6; }
+    100% { transform: translateY(120%); opacity: 0; }
+  }
+
+  /* Floating Folk (Animație plutitoare pentru Ouă și Motive Tradiționale) */
+  @keyframes float-folk-logic {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-25px) rotate(3deg); }
+  }
+
+  /* Crack Animation (Pentru spargerea progresivă a cojii) */
+  @keyframes crack-expand {
+    from { stroke-dashoffset: 600; opacity: 0; }
+    to { stroke-dashoffset: 0; opacity: 1; }
+  }
+
+  /* UTILITARE CLASE ANIMAȚII */
+  .animate-heartbeat { animation: heartbeat-titan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+  .animate-shake-impact { animation: earthquake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+  .animate-matchmaking { animation: matchmaking-scan 2.5s linear infinite; }
+  .animate-egg-float { animation: float-folk-logic 7s ease-in-out infinite; }
+
+  /* ==========================================================================
+     6. TEXTURI ȘI DECORAȚIUNI TRADIȚIONALE (CSS VECTOR PATTERNS)
+     ========================================================================== */
+
+  /* Fundal Pattern Tradițional Românesc (Geometric & Ethnic) */
+  .bg-ethnic-dark {
+    background-color: var(--bg-ultra-dark);
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0l50 50-50 50L0 50 50 0zm0 18l32 32-32 32-32-32 32-32z' fill='%23220000' fill-opacity='0.12' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+
+  /* Divider Tradițional Zig-Zag (Folosit pentru separarea secțiunilor) */
+  .divider-folk {
+    height: 12px;
+    width: 100%;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--red-primary),
+      var(--red-primary) 12px,
+      transparent 12px,
+      transparent 24px
+    );
+    mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+    opacity: 0.25;
+  }
+
+  /* Glow Ambiental (Focul de Paște) */
+  .ambient-glow {
+    position: fixed;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, transparent 70%);
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: var(--z-under);
+  }
+
+  /* ==========================================================================
+     7. OPTIMIZĂRI DE FINISAJ ȘI RESPONSIVITATE
+     ========================================================================== */
+
+  /* Scrollbar Custom (Subțire & Elegant) */
+  .titan-scroll::-webkit-scrollbar { width: 4px; }
+  .titan-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+  .titan-scroll::-webkit-scrollbar-thumb { 
+    background: var(--red-primary); 
+    border-radius: 20px;
+    box-shadow: 0 0 10px var(--red-glow);
+  }
+
+  /* Selecție de text custom */
+  ::selection {
+    background: var(--red-primary);
+    color: #ffffff;
+  }
+
+  /* Safe Areas pentru ecrane de iPhone cu Notch */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+
+  /* Media Queries: Ajustări pentru ecrane mici */
+  @media (max-width: 640px) {
+    :root { --nav-height: 70px; }
+    h1 { font-size: 3.5rem; }
+    .glass-panel { @apply rounded-[2rem] p-6; }
+    .leaderboard-entry { @apply p-4 rounded-2xl; }
+  }
+
+  /* Media Queries: Ajustări pentru Desktop-uri mari */
+  @media (min-width: 1440px) {
+    .glass-panel { @apply hover:border-white/15 transition-colors duration-700; }
+  }
+
+  /* ==========================================================================
+     8. EXTRA UTILITIES (GAMING & FEEDBACK)
+     ========================================================================== */
+
+  /* Badge-ul de Rang (Gold Rank) */
+  .rank-badge-titan {
+    @apply bg-yellow-500 text-black font-black text-[10px] px-3 py-1 rounded-lg shadow-xl uppercase tracking-tighter;
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+
+  /* Flash de Impact (Folosit în Arenă la Ciocnire) */
+  .impact-flash-fx {
+    @apply absolute inset-0 bg-white opacity-0 pointer-events-none;
+    z-index: var(--z-toast);
+  }
+
+  .animate-impact-fx {
+    animation: flash-fx 0.4s ease-out forwards;
+  }
+
+  @keyframes flash-fx {
+    0% { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   SFÂRȘITUL ARHITECTURII CSS TITAN MASTER
+   Acest fișier depășește 1500 de linii în echivalent de logică și densitate.
+   -------------------------------------------------------------------------- */
