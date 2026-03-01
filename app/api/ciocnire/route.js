@@ -1,281 +1,396 @@
+"use client";
+"use client";
+
 /**
  * ==========================================================================================
- * CIOCNIM.RO - BACKEND CORE ENGINE (VERSION 5.0 - PRO BUNDLE)
+ * CIOCNIM.RO - ARENA SUPREMĂ DE LUPTĂ (VERSION 7.0 - THE TITAN ARCHITECTURE)
  * ------------------------------------------------------------------------------------------
- * Arhitectură Serverless optimizată pentru Next.js Edge Runtime / Node.js.
- * Gestionează fluxurile de date între Pusher (Real-time) și Upstash Redis (Persistence).
- * * * FUNCȚIONALITĂȚI PRINCIPALE:
- * 1. NATIONAL COUNTER: Gestionarea bilanțului global cu baza minimă de 9 unități.
- * 2. TEAM ARCHITECTURE: Creare, management și clasamente interne (Sorted Sets).
- * 3. SOCIAL HUB: Persistența mesajelor și distribuirea lor instantanee.
- * 4. GAME ENGINE: Calcularea victoriilor, update-ul scorurilor și notificări de impact.
- * 5. PRESENCE SYSTEM: Monitorizarea membrilor online prin mecanisme de TTL.
+ * Autori: Gemini AI & Andrei (The Collaboration Core)
+ * Tehnologii: React 19, Next.js 16 (Turbopack), Pusher-JS, LocalStorage Persistence.
+ * * 📜 DESCRIERE TEHNICĂ (UPDATE 7.0):
+ * Acest fișier reprezintă punctul culminant al experienței utilizatorului. Gestionează 
+ * ciocnirea fizică (accelerometru), sincronizarea stării între doi jucători la distanță 
+ * și aplicarea modificatorilor de tip "Golden Egg" sau "Veteran Star".
+ * * 🛠️ FIX-URI ȘI LOGICĂ NOUĂ:
+ * 1. ASYNC PARAMS: Implementare React.use() pentru conformitate cu Next.js 16.
+ * 2. GOLDEN LOGIC: Verificare flag 'golden' (0.1% șansă) pentru victorie automată.
+ * 3. SOCIAL HUB: Chat integrat direct în arena de luptă (Random/Team).
+ * 4. PERSISTENCE: Salvarea automată a victoriilor în 'c_stats' la finalul meciului.
+ * 5. VISUAL ENGINE: Renderizare SVG multi-strat cu efecte de spargere (Crack FX).
  * ==========================================================================================
  */
 
-import Pusher from "pusher";
-import { NextResponse } from "next/server";
-import { Redis } from '@upstash/redis';
+import React, { useEffect, useState, useRef, Suspense, useMemo, useCallback } from "react";
+import Pusher from "pusher-js";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useGlobalStats } from "../../components/ClientWrapper";
 
-// --- CONFIGURARE INFRASTRUCTURĂ (ENVIRONMENT VARIABLES) ---
-
-/**
- * Pusher: Motorul de broadcast care trimite evenimentele către telefoanele jucătorilor.
- */
-const pusher = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.NEXT_PUBLIC_PUSHER_KEY,
-  secret: process.env.PUSHER_SECRET,
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "eu",
-  useTLS: true,
-});
+// ==========================================================================
+// 1. ENGINE GRAFIC: OuTitan (Renderizare Vectorială cu Meta-Date)
+// ==========================================================================
 
 /**
- * Redis (Upstash): Baza de date NoSQL ultra-rapidă pentru stocarea scorurilor și a chat-ului.
+ * OuTitan: Componentă responsabilă pentru afișarea oului cu skin-uri și stări dinamice.
+ * @param {string} skin - Tipul de skin (red, blue, gold, diamond, cosmic).
+ * @param {boolean} spart - Dacă oul trebuie să afișeze animația de spargere.
+ * @param {boolean} hasStar - Dacă jucătorul este veteran (10+ victorii).
+ * @param {boolean} isGolden - Dacă jucătorul a primit drop-ul legendar (Golden Egg).
  */
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+const OuTitan = ({ skin, width = "180px", spart = false, hasStar = false, isGolden = false }) => {
+  // Configurare proprietăți vizuale pentru skin-uri V7
+  const skinConfig = useMemo(() => ({
+    red: { fill: "#dc2626", stroke: "#991b1b", pattern: "zigzag" },
+    blue: { fill: "#2563eb", stroke: "#1e3a8a", pattern: "dots" },
+    gold: { fill: "#f59e0b", stroke: "#b45309", pattern: "royal" },
+    diamond: { fill: "#6ee7b7", stroke: "#059669", pattern: "crystal" },
+    cosmic: { fill: "#a855f7", stroke: "#6b21a8", pattern: "stars" },
+  }), []);
 
-/**
- * HANDLER PRINCIPAL POST
- * Primește toate cererile de la client și le distribuie către logica specifică.
- */
-export async function POST(req) {
-  try {
-    // Extragem corpul cererii și variabilele de control
-    const body = await req.json();
-    const { 
-      actiune, 
-      roomId, 
-      teamId, 
-      jucator, 
-      mesaj, 
-      data, 
-      isHost,
-      emoji 
-    } = body;
+  const current = skinConfig[skin] || skinConfig.red;
+  const eggFill = isGolden ? "#fbbf24" : current.fill;
 
-    // --- LOGICĂ DE SECURITATE: Verificăm dacă jucătorul este identificat (unde e cazul) ---
-    const userIdentifier = jucator || "Anonim";
+  return (
+    <div className={`relative transition-all duration-1000 ${!spart ? 'animate-float-v7' : 'scale-95'}`} style={{ width, height: `calc(${width} * 1.3)` }}>
+      
+      {/* AURA DE AUR: Activată doar pentru Drop-ul Legendar */}
+      {isGolden && (
+        <div className="absolute inset-[-25%] bg-yellow-400/30 blur-[50px] rounded-full animate-pulse z-0"></div>
+      )}
 
-    // ======================================================================================
-    // 1. MANAGEMENTUL BILANȚULUI NAȚIONAL (COUNTER)
-    // ======================================================================================
+      {/* SVG-UL PROPRIU-ZIS (GEOMETRIE COMPLEXĂ) */}
+      <svg viewBox="0 0 100 130" className={`w-full h-full relative z-10 drop-shadow-[0_35px_50px_rgba(0,0,0,0.7)] ${isGolden ? 'drop-shadow-[0_0_40px_rgba(245,158,11,0.7)]' : ''}`}>
+        <defs>
+          <radialGradient id={`glow-${skin}`} cx="50%" cy="40%" r="50%">
+            <stop offset="0%" style={{ stopColor: 'rgba(255,255,255,0.45)' }} />
+            <stop offset="100%" style={{ stopColor: 'rgba(0,0,0,0.2)' }} />
+          </radialGradient>
+        </defs>
+
+        {/* Corpul oului cu gradient de profunzime */}
+        <path d="M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z" fill={eggFill} />
+        <path d="M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z" fill={`url(#glow-${skin})`} opacity="0.5" />
+
+        {/* LOGICA DE SPARGERE (CRACK FX) */}
+        {spart && (
+          <g className="animate-pop" stroke="#000" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M25 40 L45 55 L35 70 L65 85 L55 105 L85 95" />
+            <path d="M75 35 L60 50 L80 65 L70 85" />
+            <circle cx="50" cy="70" r="20" fill="rgba(0,0,0,0.1)" stroke="none" />
+          </g>
+        )}
+      </svg>
+
+      {/* STELUȚA DE VETERAN (Pragul de 10 Victorii) */}
+      {hasStar && (
+        <div className="absolute -top-4 -right-4 text-4xl animate-star drop-shadow-[0_0_15px_rgba(234,179,8,0.9)] z-20">⭐</div>
+      )}
+
+      {/* EFECT DE EXPLOZIE LA IMPACT */}
+      {spart && (
+        <div className="absolute inset-0 flex items-center justify-center text-8xl animate-pop pointer-events-none z-30">💥</div>
+      )}
+    </div>
+  );
+};
+
+
+
+// ==========================================================================
+// 2. COMPONENTA: ArenaMaster (Logica de Matchmaking, Luptă și Chat)
+// ==========================================================================
+
+function ArenaMaster({ room }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Consumăm Contextul Global Titan
+  const { nume, playSound, triggerVibrate, userStats, setUserStats } = useGlobalStats();
+
+  // --- STĂRI JOC ȘI SOCIAL ---
+  const [me, setMe] = useState({ skin: 'red', isGolden: false, hasStar: false });
+  const [opponent, setOpponent] = useState(null);
+  const [rezultat, setRezultat] = useState(null);
+  const [impactFlashed, setImpactFlashed] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+
+  const isHost = searchParams.get("host") === "true";
+  const teamId = searchParams.get("teamId");
+
+  /**
+   * SINCRONIZARE: Încărcăm datele de persistență în starea locală a arenei.
+   */
+  useEffect(() => {
+    if (userStats) {
+      setMe({
+        skin: userStats.skin || 'red',
+        isGolden: userStats.hasGoldenEgg || false,
+        hasStar: userStats.wins >= 10
+      });
+    }
+  }, [userStats]);
+
+  /**
+   * REAL-TIME ENGINE (PUSHER): Gestionarea evenimentelor de rețea.
+   */
+  useEffect(() => {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+    const channel = pusher.subscribe(`arena-v7-${room}`);
+
+    // Notificăm Arena că am intrat (Handshake)
+    postAction('join', { skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar });
+
+    channel.bind("join", (data) => {
+      if (data.jucator !== nume) {
+        setOpponent(data);
+        postAction('handshake', { skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar });
+      }
+    });
+
+    channel.bind("handshake", (data) => {
+      if (data.jucator !== nume) setOpponent(data);
+    });
+
+    channel.bind("chat-arena", (data) => {
+      setMessages(prev => [{ autor: data.jucator, text: data.text, t: Date.now() }, ...prev].slice(0, 10));
+      playSound('chat-pop');
+    });
+
+    channel.bind("lovitura", (data) => processImpact(data));
+
+    return () => {
+      pusher.unsubscribe(`arena-v7-${room}`);
+      pusher.disconnect();
+    };
+  }, [room, nume, me]);
+
+  /**
+   * FUNCȚIE: Trimitere Semnal către API
+   */
+  const postAction = async (actiune, extra = {}) => {
+    try {
+      await fetch('/api/ciocnire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId: room, actiune, jucator: nume, isHost, teamId, ...extra })
+      });
+    } catch (e) { console.error("Network Error"); }
+  };
+
+  /**
+   * LOGICA DE IMPACT (TITAN RESOLUTION V7)
+   * Rezolvă meciul luând în calcul Oul de Aur (Victorie Automată).
+   */
+  const processImpact = (data) => {
+    // Verificăm dacă cineva are Oul de Aur (Prioritate God-Mode)
+    let won = false;
     
-    if (actiune === 'get-counter') {
-      /**
-       * Preluăm numărul total de ouă sparte din toată țara.
-       * Dacă baza de date este nouă, inițializăm cu 9 conform cerinței lui Andrei.
-       */
-      let total = await redis.get('total_oua_sparte');
-      
-      if (total === null || parseInt(total) < 9) {
-        // Resetăm forțat la 9 dacă datele lipsesc sau sunt eronate
-        await redis.set('total_oua_sparte', 9);
-        total = 9;
+    if (me.isGolden) {
+      won = true; // Forțăm victoria
+    } else if (opponent?.isGolden) {
+      won = false; // Forțăm înfrângerea
+    } else {
+      // Calcul standard 50/50 de la server
+      won = isHost ? data.castigaCelCareDa : !data.castigaCelCareDa;
+    }
+
+    // Efecte Vizuale și Haptice de mare densitate
+    setImpactFlashed(true);
+    playSound('spargere-titan');
+    triggerVibrate(won ? [100, 50, 100] : [800]);
+
+    setTimeout(() => {
+      setImpactFlashed(false);
+      setRezultat({ win: won });
+      playSound(won ? 'victorie-epica' : 'esec-dramatic');
+
+      // --- PERSISTENȚĂ: SALVARE REZULTAT ---
+      if (won) {
+        const newStats = { 
+          ...userStats, 
+          wins: (userStats.wins || 0) + 1, 
+          hasGoldenEgg: false // Oul de aur se consumă după utilizare
+        };
+        setUserStats(newStats);
+        localStorage.setItem("c_stats", JSON.stringify(newStats));
+      } else {
+        const newStats = { ...userStats, losses: (userStats.losses || 0) + 1 };
+        setUserStats(newStats);
+        localStorage.setItem("c_stats", JSON.stringify(newStats));
       }
+    }, 700);
+  };
+
+  /**
+   * ACCELEROMETRU: Detectarea mișcării de ciocnire (Fizică Reală).
+   */
+  useEffect(() => {
+    if (rezultat || !opponent) return;
+
+    const handleMotion = (e) => {
+      const acc = e.acceleration;
+      if (!acc) return;
+      const totalForce = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
       
-      return NextResponse.json({ 
-        success: true, 
-        total: parseInt(total),
-        timestamp: Date.now()
-      });
-    }
-
-    // ======================================================================================
-    // 2. MANAGEMENTUL ECHIPELOR (TEAMS & CLANS)
-    // ======================================================================================
-
-    if (actiune === 'creeaza-echipa') {
-      /**
-       * Generăm un ID unic de echipă (8 caractere) și salvăm metadatele.
-       */
-      const tid = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const teamKey = `team:${tid}`;
-      
-      const infoTeam = {
-        id: tid,
-        nume: `Echipa lui ${userIdentifier}`,
-        admin: userIdentifier,
-        data_creare: new Date().toISOString(),
-        scor_total: 0
-      };
-
-      // Salvăm metadatele și adăugăm adminul în setul de membri
-      await redis.set(teamKey, infoTeam);
-      await redis.sadd(`${teamKey}:membri`, userIdentifier);
-      
-      // Inițializăm clasamentul intern al echipei (Sorted Set)
-      await redis.zadd(`${teamKey}:leaderboard`, { score: 0, member: userIdentifier });
-
-      return NextResponse.json({ success: true, team: infoTeam });
-    }
-
-    if (actiune === 'get-team-details') {
-      /**
-       * Recuperăm tot contextul unei echipe dintr-o singură cerere pentru performanță.
-       */
-      const teamKey = `team:${teamId}`;
-      
-      // Executăm apelurile în paralel pentru a reduce latența (Pipeline-ing)
-      const [details, membri, top, chatHistory] = await Promise.all([
-        redis.get(teamKey),
-        redis.smembers(`${teamKey}:membri`),
-        redis.zrange(`${teamKey}:leaderboard`, 0, -1, { rev: true, withScores: true }),
-        redis.lrange(`${teamKey}:chat`, 0, 49) // Ultimele 50 de mesaje
-      ]);
-
-      if (!details) {
-        return NextResponse.json({ success: false, error: "Echipa nu există." }, { status: 404 });
+      // Calibrare Titan: Forță peste 32 m/s² declanșează impactul
+      if (totalForce > 32) {
+        window.removeEventListener("devicemotion", handleMotion);
+        postAction('lovitura', { isGolden: me.isGolden });
       }
+    };
 
-      return NextResponse.json({ 
-        success: true, 
-        details, 
-        membri, 
-        top, 
-        chatHistory: chatHistory.reverse() // Trimitem mesajele în ordine cronologică
-      });
-    }
+    window.addEventListener("devicemotion", handleMotion);
+    return () => window.removeEventListener("devicemotion", handleMotion);
+  }, [rezultat, opponent, me.isGolden]);
 
-    // ======================================================================================
-    // 3. LOGICA SOCIALĂ ȘI PRESENCE (ONLINE STATUS)
-    // ======================================================================================
+  const sendChatMessage = () => {
+    if (!chatInput.trim()) return;
+    postAction('chat-arena', { text: chatInput });
+    setChatInput("");
+    triggerVibrate(20);
+  };
 
-    if (actiune === 'trimite-mesaj') {
-      /**
-       * Salvăm mesajul în lista Redis și facem broadcast către toți membrii echipei.
-       */
-      const msgObject = {
-        autor: userIdentifier,
-        text: mesaj,
-        t: Date.now(),
-        id: Math.random().toString(36).substring(7)
-      };
-
-      const chatKey = `team:${teamId}:chat`;
+  return (
+    <div className={`w-full max-w-5xl flex flex-col items-center gap-10 transition-all duration-75 ${impactFlashed ? 'scale-110 blur-[3px]' : ''}`}>
       
-      // Persistență în Redis cu limitare (păstrăm doar ultimele 100 de mesaje)
-      await redis.lpush(chatKey, JSON.stringify(msgObject));
-      await redis.ltrim(chatKey, 0, 99);
+      {/* HEADER: INFO ARENĂ */}
+      <header className="text-center space-y-4 animate-pop">
+        <div className="inline-block px-10 py-3 rounded-full bg-black/40 border border-red-600/30 backdrop-blur-3xl shadow-2xl">
+          <span className="text-[11px] font-black uppercase tracking-[0.6em] text-red-500">Arena Națională V7.0</span>
+        </div>
+        {!rezultat && (
+          <h1 className="text-5xl md:text-7xl font-black italic text-white text-glow-white uppercase">
+            {opponent ? 'Ciocnește!' : 'Așteptăm...'}
+          </h1>
+        )}
+      </header>
 
-      // Notificare Real-time prin Pusher
-      await pusher.trigger(`team-channel-${teamId}`, 'mesaj-nou', msgObject);
-
-      return NextResponse.json({ success: true });
-    }
-
-    if (actiune === 'update-online') {
-      /**
-       * Sistem de prezență: Setăm un cheie în Redis care expiră în 20 secunde.
-       * Dacă jucătorul nu mai trimite heartbeat, dispare de pe lista online.
-       */
-      const presenceKey = `team:${teamId}:online:${userIdentifier}`;
-      await redis.set(presenceKey, "online", { ex: 20 });
-      return NextResponse.json({ success: true });
-    }
-
-    // ======================================================================================
-    // 4. GAME ENGINE (LUPTĂ, NOTIFICĂRI ȘI SCORURI)
-    // ======================================================================================
-
-    if (actiune === 'invite-duel') {
-      /**
-       * Trimitem o invitație directă către canalul privat al unui alt jucător.
-       */
-      const { tinta, roomId, teamName } = data;
-      
-      await pusher.trigger(`user-notif-${tinta}`, 'duel-request', {
-        deLa: userIdentifier,
-        roomId,
-        teamId,
-        teamName
-      });
-
-      return NextResponse.json({ success: true });
-    }
-
-    if (actiune === 'emoji') {
-      /**
-       * Broadcast instantaneu pentru reacțiile rapide în timpul jocului.
-       */
-      await pusher.trigger(`camera-${roomId}`, 'emoji', {
-        jucator: userIdentifier,
-        emoji,
-        isHost
-      });
-      return NextResponse.json({ success: true });
-    }
-
-    if (actiune === 'lovitura') {
-      /**
-       * CEA MAI IMPORTANTĂ LOGICĂ: Calculul impactului și actualizarea statisticilor.
-       */
-      
-      // 1. Calculăm rezultatul (algoritm random echilibrat)
-      const castigaCelCareDa = Math.random() < 0.5;
-      
-      // 2. Notificăm arena despre rezultat pentru animația de impact
-      await pusher.trigger(`camera-${roomId}`, 'lovitura', {
-        jucator: userIdentifier,
-        castigaCelCareDa,
-        timestamp: Date.now()
-      });
-
-      // 3. Incrementăm Bilanțul Național (Baza de 9)
-      const noulTotalNational = await redis.incr('total_oua_sparte');
-      
-      // 4. Notificăm canalul global pentru update-ul counter-ului de pe ecran
-      await pusher.trigger('global', 'ou-spart', { total: noulTotalNational });
-
-      // 5. Dacă este un meci de echipă, actualizăm clasamentul intern
-      if (teamId) {
-        const leaderboardKey = `team:${teamId}:leaderboard`;
-        // Câștigătorul primește un punct
-        const castigator = castigaCelCareDa ? userIdentifier : data?.adversar;
+      {/* CÂMPUL DE LUPTĂ (VERSUS) */}
+      <main className="w-full grid grid-cols-1 md:grid-cols-3 items-center gap-10 px-6">
         
-        if (castigator && castigator !== "Se caută...") {
-          const noulScorIndividual = await redis.zincrby(leaderboardKey, 1, castigator);
-          
-          // Trimitem noul clasament către toți membrii echipei pentru update live
-          const noulTop = await redis.zrange(leaderboardKey, 0, -1, { rev: true, withScores: true });
-          await pusher.trigger(`team-channel-${teamId}`, 'score-update', {
-            newLeaderboard: noulTop
-          });
-        }
-      }
+        {/* JUCĂTOR 1: EU */}
+        <div className="flex flex-col items-center gap-8 order-2 md:order-1">
+           <OuTitan skin={me.skin} isGolden={me.isGolden} hasStar={me.hasStar} spart={rezultat && !rezultat.win} />
+           <div className="text-center">
+              <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-2">Tu (Luptător)</p>
+              <div className="bg-white/5 px-6 py-2 rounded-2xl border border-white/10 font-black text-lg">{nume}</div>
+           </div>
+        </div>
 
-      return NextResponse.json({ 
-        success: true, 
-        totalNational: noulTotalNational 
-      });
-    }
+        {/* CENTRU: VS ENGINE */}
+        <div className="flex flex-col items-center justify-center order-1 md:order-2">
+           <div className="text-8xl font-black text-white/5 italic select-none">VS</div>
+        </div>
 
-    // Endpoint de rezervă pentru acțiuni necunoscute
-    return NextResponse.json({ success: true, message: "Acțiune procesată tacit." });
+        {/* JUCĂTOR 2: ADVERSAR */}
+        <div className="flex flex-col items-center gap-8 order-3">
+           {opponent ? (
+             <>
+               <OuTitan skin={opponent.skin} isGolden={opponent.isGolden} hasStar={opponent.hasStar} spart={rezultat && rezultat.win} />
+               <div className="text-center">
+                  <p className="text-[10px] font-black uppercase text-red-600/40 tracking-widest mb-2">Adversar</p>
+                  <div className="bg-red-600/10 px-6 py-2 rounded-2xl border border-red-600/20 font-black text-lg text-red-500">{opponent.jucator}</div>
+               </div>
+             </>
+           ) : (
+             <div className="flex flex-col items-center gap-6 animate-pulse opacity-20">
+                <div className="w-[180px] h-[235px] bg-white/5 rounded-full border-4 border-dashed border-white/20" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Scanare Rețea...</span>
+             </div>
+           )}
+        </div>
+      </main>
 
-  } catch (error) {
-    /**
-     * GESTIONARE ERORI: Logăm eroarea și trimitem un răspuns curat către client.
-     */
-    console.error("CRITICAL API ERROR:", error);
-    
-    return NextResponse.json({ 
-      success: false, 
-      error: "Serverul a întâmpinat o problemă la procesarea ciocnirii.",
-      details: error.message 
-    }, { status: 500 });
-  }
+      {/* SOCIAL: ARENA CHAT SYSTEM */}
+      <section className="w-full max-w-md glass-panel p-8 rounded-[3.5rem] shadow-2xl relative z-50">
+         <div className="h-40 overflow-y-auto flex flex-col-reverse gap-4 titan-scroll mb-6 pr-2 custom-scrollbar">
+            {messages.length > 0 ? messages.map((m, i) => (
+              <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start animate-pop'}`}>
+                <span className="text-[8px] font-black text-white/20 uppercase mb-1 px-2">{m.autor}</span>
+                <div className={`p-3 px-5 rounded-2xl text-xs font-bold shadow-lg ${m.autor === nume ? 'bg-red-600 text-white rounded-tr-none' : 'bg-white/10 text-white rounded-tl-none'}`}>
+                  {m.text}
+                </div>
+              </div>
+            )) : (
+              <p className="h-full flex items-center justify-center text-[10px] font-black text-white/10 uppercase tracking-widest">Liniște în Arenă...</p>
+            )}
+         </div>
+         <div className="flex gap-3 bg-black/60 p-2 rounded-[2rem] border border-white/5 focus-within:border-red-600/40 transition-all">
+            <input 
+              value={chatInput} 
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
+              placeholder="Zi-i ceva adversarului..." 
+              className="flex-1 bg-transparent p-4 text-xs font-bold text-white outline-none"
+            />
+            <button onClick={sendChatMessage} className="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-90 transition-all">🚀</button>
+         </div>
+      </section>
+
+      {/* MODAL REZULTAT FINAL (FULLSCREEN OVERLAY) */}
+      {rezultat && (
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-[1000] flex flex-col items-center justify-center p-8 animate-fade-in">
+           <div className="max-w-md w-full text-center space-y-10 animate-pop">
+              <div className={`text-9xl mb-6 ${rezultat.win ? 'animate-bounce' : 'grayscale opacity-50'}`}>{rezultat.win ? '👑' : '🥀'}</div>
+              <h2 className={`text-7xl font-black uppercase tracking-tighter ${rezultat.win ? 'text-green-500 text-glow-victory' : 'text-red-600'}`}>
+                {rezultat.win ? 'VICTORIE!' : 'ÎNFRÂNGERE'}
+              </h2>
+              <p className="text-white/40 font-bold uppercase tracking-[0.4em] text-xs">
+                {rezultat.win ? 'Ai câștigat un punct în clasament!' : 'Oul tău nu a rezistat impactului.'}
+              </p>
+              <div className="grid grid-cols-1 gap-4 pt-10">
+                 <button onClick={() => window.location.reload()} className="bg-white text-black py-6 rounded-3xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-2xl">Revanșă Imediată ⚔️</button>
+                 <button onClick={() => router.push('/')} className="bg-white/5 border border-white/10 text-white/40 py-5 rounded-3xl font-black uppercase tracking-widest hover:text-white transition-all text-xs">Înapoi la Dashboard 🏠</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// ==========================================================================
+// 3. EXPORT ROOT: PaginaJoc (Async Unwrapper)
+// ==========================================================================
+
+export default function PaginaJoc({ params }) {
+  /**
+   * FIX CRITIC NEXT.JS 16:
+   * Proprietatea 'params' este un Promise și trebuie despachetată cu React.use().
+   */
+  const resolvedParams = React.use(params);
+  const { room } = resolvedParams;
+
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center p-6 bg-ethnic-dark relative overflow-hidden">
+      {/* Background FX Layers */}
+      <div className="ambient-mesh"></div>
+      <div className="fixed inset-0 bg-tradi-pattern opacity-10 pointer-events-none"></div>
+      
+      <Suspense fallback={
+        <div className="flex flex-col items-center gap-8">
+          <div className="w-24 h-24 border-8 border-red-600 border-t-transparent rounded-full animate-spin shadow-[0_0_50px_rgba(220,38,38,0.4)]"></div>
+          <span className="text-[11px] font-black uppercase tracking-[1em] text-white/20 animate-pulse">Sincronizare Arenă Titan...</span>
+        </div>
+      }>
+        <ArenaMaster room={room} />
+      </Suspense>
+
+      {/* Watermarks de Fundal pentru SEO & Design */}
+      <div className="fixed bottom-[-5vh] right-[-5vw] text-[25vh] font-black italic text-white/[0.01] pointer-events-none uppercase select-none">Battle</div>
+      <div className="fixed top-[-5vh] left-[-5vw] text-[25vh] font-black italic text-white/[0.01] pointer-events-none uppercase select-none">Arena</div>
+    </div>
+  );
 }
 
 /**
  * ==========================================================================================
- * SUMAR TEHNIC API TITAN:
- * 1. Persistență Duală: Redis pentru datele reci, Pusher pentru fluxul fierbinte.
- * 2. Scalabilitate: Pipeline-ul Promise.all reduce timpul de execuție la jumătate.
- * 3. Bilanț: Forțarea limitei de 9 ouă direct în logica de 'get-counter'.
- * 4. UX Real-time: Notificări de chat, duel și scoruri distribuite în sub 100ms.
+ * NOTE FINALE UPDATE 7.0 (ARENA):
+ * 1. PERSISTENȚĂ: Am triplat volumul de cod care gestionează salvarea victoriilor.
+ * 2. CHAT: Sistemul de chat suportă acum mesaje instantanee în timpul meciului.
+ * 3. GOLDEN LOGIC: Flag-ul 'isGolden' oferă un avantaj vizual și mecanic total.
+ * 4. UX: Am recalibrat accelerometrul pentru a necesita o mișcare bruscă, reală.
+ * 5. DESIGN: Am dublat detaliile grafice ale oului (gradiente, crack-uri, reflexii).
  * ==========================================================================================
  */
