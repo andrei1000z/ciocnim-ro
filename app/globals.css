@@ -72,6 +72,7 @@
     cursor: pointer;
     outline: none;
     border: none;
+    appearance: none;
     -webkit-appearance: none;
     background: none;
     font-family: inherit;
