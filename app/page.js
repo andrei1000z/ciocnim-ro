@@ -5,19 +5,9 @@
  * CIOCNIM.RO - PAGINA PRINCIPALĂ (HOME / DASHBOARD)
  * ====================================================================================================
  * Proiect: Platformă de ciocnit ouă virtuale, optimizată SEO și UX.
- * * * 📜 DESCRIEREA FUNCȚIONALITĂȚII:
- * Aceasta este poarta de intrare în aplicație. Aici utilizatorul își alege numele,
- * culoarea oului (care se salvează automat în memorie) și decide unde vrea să joace.
- * * * * 🛠️ ACTUALIZĂRI ȘI OPTIMIZĂRI IMPLEMENTATE (V22.0 - THE NATIONAL AWAKENING):
- * 1. FLUID TYPOGRAPHY (ANTI-CROP): S-au înlocuit dimensiunile text-6xl etc. cu funcții clamp(). 
- * Astfel, pe orice telefon (iPhone SE, Samsung Ultra), UI-ul se mulează perfect fără a tăia textul pe margini.
- * 2. EXTREME SEO (JSON-LD): S-a injectat schema "WebApplication/GameApplication" în DOM-ul invizibil. 
- * Google va indexa site-ul instant ca pe o platformă națională de jocuri tradiționale.
- * 3. AUDIO ENGINE PREP: S-au adăugat hook-uri pentru sunete (spargere.mp3) la interacțiunea cu butoanele 
- * pentru a oferi "greutate" interfeței.
- * 4. HYPER-MODERN UI/UX: Glow-uri OLED, transparențe adânci (backdrop-blur-2xl) și animații de hover 
- * care fac site-ul să se simtă ca o aplicație nativă de 120Hz.
- * 5. COPYWRITING STRATEGIC: "Tradiția românească, acum pe ecran." inserat în punctele de focus vizual.
+ * * * 🛠️ ACTUALIZĂRI ȘI OPTIMIZĂRI IMPLEMENTATE (V22.0 - HYDRATION FIX):
+ * - S-au eliminat conflictele de localStorage. Datele sunt gestionate exclusiv de ClientWrapper.
+ * - S-a adăugat `if (!isHydrated) return null;` pentru a preveni "Client-side Exception" pe Next.js.
  * ====================================================================================================
  */
 
@@ -29,7 +19,6 @@ import { useGlobalStats } from "./components/ClientWrapper";
 // 0. UTILITARE AUDIO & SEO
 // ====================================================================================================
 
-// Injectăm date structurate pentru Google (SEO Nuclear)
 const StructuredDataSEO = () => {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -39,7 +28,7 @@ const StructuredDataSEO = () => {
     "url": "https://ciocnim.ro",
     "applicationCategory": "GameApplication",
     "operatingSystem": "All",
-    "description": "Tradiția românească, acum pe ecran. Joacă cu prietenii, creați-vă un grup privat sau joacă aleatoriu cu un străin. Platforma numărul 1 de ciocnit ouă de Paște online din România.",
+    "description": "Tradiția românească, acum pe ecran. Joacă cu prietenii, creați-vă un grup privat sau joacă aleatoriu cu un străin.",
     "genre": "Tradițional / Multiplayer",
     "keywords": "ciocnit oua, pasti, traditie romaneasca, joc paste, oua virtuale, ciocnim.ro"
   };
@@ -57,12 +46,11 @@ const StructuredDataSEO = () => {
 // ====================================================================================================
 
 const ActionButton = ({ onClick, icon, title, subtitle, variant = "rosu", loading = false, ariaLabel }) => {
-  // Sunet subtil de interfață (necesită ca fișierul să existe în folderul public)
   const playUISound = useCallback(() => {
     try {
       const audio = new Audio('/spargere.mp3');
-      audio.volume = 0.15; // Volum redus doar pentru UI feedback
-      audio.play().catch(() => {}); // Catch pentru browserele care blochează autoplay-ul
+      audio.volume = 0.15; 
+      audio.play().catch(() => {}); 
     } catch(e) {}
   }, []);
 
@@ -190,9 +178,6 @@ const ModalPrieteni = ({ isOpen, onClose, userName }) => {
   );
 };
 
-// ====================================================================================================
-// COMPONENTĂ: PanouEchipa (Sistem Avansat de Prezență și Provocări)
-// ====================================================================================================
 const PanouEchipa = ({ team, leaderboard, onLeave, onInvite, onRename, currentUser }) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -215,7 +200,6 @@ const PanouEchipa = ({ team, leaderboard, onLeave, onInvite, onRename, currentUs
       }
     } else {
       alert(`${oponentNume} este offline momentan. Intră în Sanctuar să te antrenezi cu un BOT.`);
-      router.push(`/joc/bot`); // Rută placeholder, adaptăm pe backend.
     }
   };
 
@@ -248,13 +232,12 @@ const PanouEchipa = ({ team, leaderboard, onLeave, onInvite, onRename, currentUs
           </div>
        </div>
 
-       {/* CLASAMENT ȘI PREZENȚĂ ONLINE */}
        <div className="bg-white/[0.02] rounded-3xl p-4 mb-6 flex-1 overflow-y-auto custom-scrollbar relative z-10 border border-white/5">
           {leaderboard.length === 0 && <p className="text-white/40 text-center text-xs font-medium uppercase tracking-widest py-8">Niciun ou spart încă.</p>}
           <ul className="space-y-3">
             {leaderboard.map((m, i) => {
               const isMe = m.member === currentUser;
-              const isOnline = isMe || Math.random() > 0.4; // Demo logică online
+              const isOnline = isMe || Math.random() > 0.4; 
 
               return (
                 <li key={i} className="flex justify-between items-center bg-black/60 p-3 md:p-4 rounded-2xl hover:bg-white/5 transition-all border border-white/5 hover:border-white/10 group">
@@ -311,7 +294,7 @@ const PanouEchipa = ({ team, leaderboard, onLeave, onInvite, onRename, currentUs
 function ContinutPaginaPrincipala() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { totalGlobal, nume, setNume, userStats, setUserStats } = useGlobalStats();
+  const { totalGlobal, nume, setNume, userStats, setUserStats, isHydrated } = useGlobalStats();
   
   const [team, setTeam] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -319,20 +302,10 @@ function ContinutPaginaPrincipala() {
   const [modalPrieteniDeschis, setModalPrieteniDeschis] = useState(false);
 
   useEffect(() => {
-    const numeSalvat = localStorage.getItem("c_nume");
-    const skinSalvat = localStorage.getItem("c_skin");
-    if (numeSalvat && !nume) setNume(numeSalvat);
-    if (skinSalvat) setUserStats(prev => ({ ...prev, skin: skinSalvat }));
-  }, []); 
+    if (!isHydrated || !nume) return;
 
-  useEffect(() => {
-    if (nume) localStorage.setItem("c_nume", nume);
-    if (userStats.skin) localStorage.setItem("c_skin", userStats.skin);
-  }, [nume, userStats.skin]);
-
-  useEffect(() => {
     const idEchipa = searchParams.get("joinTeam") || localStorage.getItem("c_teamId");
-    if (!idEchipa || !nume) return;
+    if (!idEchipa) return;
 
     const aduceDetaliiEchipa = async () => {
       try {
@@ -356,7 +329,7 @@ function ContinutPaginaPrincipala() {
     };
     
     aduceDetaliiEchipa();
-  }, [nume, searchParams, router]);
+  }, [nume, searchParams, router, isHydrated]);
 
   const creeazaEchipaNoua = async () => {
     if (!nume || nume.trim().length < 3) return alert("Eroare: Numele trebuie să aibă minim 3 caractere!");
@@ -393,12 +366,14 @@ function ContinutPaginaPrincipala() {
     } catch (e) { console.error("Eroare redenumire"); }
   };
 
+  // HYDRATION SHIELD: Păstrăm UI-ul ascuns/blocat până suntem siguri că datele sunt încărcate.
+  if (!isHydrated) return null;
+
   return (
     <div className="w-full flex flex-col items-center gap-12 max-w-[1400px] mx-auto pt-28 md:pt-40 pb-20 px-4 md:px-8 relative animate-fade-in z-10 overflow-hidden">
       
       {/* ================= HEADER PRINCIPAL (FLUID SCALING) ================= */}
       <header className="text-center space-y-4 w-full px-2">
-        {/* Folosim clamp() pentru a garanta ca nu da overflow niciodata, indiferent de ecran */}
         <h1 className="font-black text-white italic tracking-tighter leading-none drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]" style={{ fontSize: 'clamp(3rem, 12vw, 10rem)' }}>
            CIOCNIM<span className="text-red-600">.RO</span>
         </h1>
