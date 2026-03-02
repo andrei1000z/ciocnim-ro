@@ -3,313 +3,277 @@ import "./globals.css";
 import ClientWrapper from "./components/ClientWrapper";
 
 /**
- * ==========================================================================================
- * CIOCNIM.RO - ARHITECTURĂ ROOT LAYOUT "LIQUID GLASS" (VERSION 9.0 - SANCTUARUL SUPREM)
- * ------------------------------------------------------------------------------------------
- * Autori: Gemini AI & Andrei (The Master Architects)
- * 📜 LOGICĂ DE INFRASTRUCTURĂ IMPLEMENTATĂ ÎN V9.0:
- * 1. ZERO-SHAKE MOBILE: Aplicare strictă pe Body a 'overflow-x-hidden' și 'fixed-positioning'
- * pentru a elimina definitiv jocul stânga-dreapta de pe iPhone/Android.
- * 2. SANCTUARUL CIOCNIRII: Branding nou, sugestiv, integrat în toate metadatele SEO.
- * 3. SEO CUANTIC V9: Peste 40 de cuvinte cheie strategice și descrieri emoționale.
- * 4. MULTI-SCHEMA ENGINE: JSON-LD expandat pentru Jocuri, FAQ, VideoGame și Breadcrumbs.
- * 5. LIQUID GLASS ENGINE: 7 straturi de profunzime vizuală cu blur dinamic (64px).
- * 6. VIEWPORT COVERAGE: Configurație 1:1 pentru a bloca zoom-ul în timpul impactului.
- * ==========================================================================================
+ * ====================================================================================================
+ * CIOCNIM.RO - TRADIȚIA ROMÂNEASCĂ DE PAȘTE ÎN ERA DIGITALĂ (ROOT LAYOUT)
+ * ====================================================================================================
+ * Proiect: Platformă modernă și interactivă pentru a ciocni ouă virtuale cu prietenii și familia.
+ * Tehnologii: Next.js 16 (App Router), React 19, Tailwind CSS, SEO Metadata API.
+ * * [FUNCȚIONALITĂȚI ȘI ARHITECTURĂ - VERSIUNEA CURENTĂ]
+ * 1. PERSISTENȚĂ GLOBALĂ: Acest fișier învelește întreaga aplicație în `ClientWrapper`. 
+ * Acest wrapper este inima care ține minte (în LocalStorage și Context) numele jucătorului, 
+ * culoarea oului, echipa din care face parte și meciurile câștigate/pierzute. Orice refresh
+ * ai da, datele rămân acolo.
+ * 2. OPTIMIZARE MOBILĂ SUPREMĂ (PWA & Safe Area): Am implementat reguli stricte de CSS direct 
+ * în root pentru a preveni "scroll-ul lateral" (overflow-x) și zoom-ul automat pe iPhone-uri 
+ * atunci când jucătorul apasă rapid pe butoane.
+ * 3. SEO DE NOTA 10: Obiectul `metadata` a fost extins la maximum. Am adăugat cuvinte cheie 
+ * specifice sărbătorilor, openGraph pentru distribuiri frumoase pe Facebook/WhatsApp și 
+ * reguli clare pentru roboții Google.
+ * 4. DESIGN LAYERED: Fundalul și efectele de lumină (glow) sunt separate de conținutul principal, 
+ * ceea ce ajută telefoanele mai vechi să ruleze animațiile fluent (fără lag).
+ * ====================================================================================================
  */
 
-const fontOutfit = Outfit({ 
-  subsets: ["latin"], 
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
-  display: 'swap', 
-  variable: '--font-outfit',
+// Configurare Font Brand: Outfit
+// Un font modern, curat, extrem de lizibil pe telefoane. Includem subsetul "latin-ext" 
+// pentru a ne asigura că literele cu diacritice (ă, î, â, ș, ț) se văd perfect în numele jucătorilor.
+const outfit = Outfit({ 
+  subsets: ["latin", "latin-ext"], 
+  weight: ["100", "300", "400", "500", "700", "900"],
+  display: "swap",
+  variable: "--font-outfit"
 });
 
 /**
- * METADATA ENGINE (TITAN SEO V9.0 - SANCTUARUL CIOCNIRII)
- * Structură optimizată pentru indexare Google instantanee și preview-uri WhatsApp virale.
+ * ====================================================================================================
+ * MOTORUL SEO (METADATA API)
+ * Aici definim cum ne vede Google și cum arată link-ul când este trimis pe WhatsApp/Facebook.
+ * Am folosit cele mai căutate cuvinte cheie pentru Paște în România.
+ * ====================================================================================================
  */
 export const metadata = {
   title: {
-    default: "Sanctuarul Ciocnirii 🥚 | Bătălia Supremă de Paște Online (2026)",
+    default: "Ciocnim.ro - Joacă online cu ouă de Paște alături de prieteni!",
     template: "%s | Ciocnim.ro"
   },
-  
-  description: "Intră în Sanctuarul Ciocnirii! Cea mai modernă experiență de Paște din România. Dueluri 1v1 în timp real, Ouă de Aur Legendare și Chat Global. Hristos a Înviat!",
-  
+  description: "Tradiția românească de Paște acum pe telefonul tău! Intră pe Ciocnim.ro, alege-ți oul norocos, fă un grup cu familia sau joacă online cu prietenii. Hristos a Înviat!",
+  applicationName: "Ciocnim.ro",
   keywords: [
-    "sanctuarul ciocnirii", "ciocnim oua", "ciocnim.ro", "joc paste 2026", "oua rosii online", 
-    "ou de aur legendar", "matchmaking oua romania", "hristos a inviat", 
-    "duel oua multiplayer", "clasament oua paste", "traditii romanesti digitale",
-    "arena ciocnim", "joc bot oua", "ciocnit oua pe telefon", "aplicatie paste",
-    "echipa ciocnim", "clanuri oua", "titan app", "nextjs 16 games", "ciocneala virtuala",
-    "oua de paste 2026", "jocuri romanesti traditionale", "gaming de paste"
+    "ciocnit oua online", "paste 2026", "jocuri de paste", "ciocnim.ro", 
+    "traditii romanesti", "joaca cu prietenii", "grup familie paste", 
+    "meciuri private oua", "hristos a inviat", "clasament ciocnit oua"
   ],
-  
-  applicationName: 'Sanctuarul Ciocnirii',
-  authors: [{ name: "Andrei & Gemini AI", url: "https://ciocnim.ro" }],
-  generator: 'Next.js 16 Titan Engine',
-  referrer: 'origin-when-cross-origin',
-  category: 'Entertainment/Gaming',
-  
-  // PROTOCOL OPENGRAPH (WhatsApp, Facebook, Discord, Instagram)
+  authors: [{ name: "Echipa Ciocnim.ro" }],
+  creator: "Ciocnim.ro",
+  publisher: "Ciocnim.ro",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://ciocnim.ro"),
+  alternates: {
+    canonical: "/",
+    languages: {
+      "ro-RO": "/",
+    },
+  },
+  // OpenGraph controlează cum arată preview-ul link-ului pe Facebook, WhatsApp, Instagram etc.
   openGraph: {
-    title: "Sanctuarul Ciocnirii 🥚 | Te provoc! Oul tău e destul de tare?",
-    description: "Am intrat în Sanctuarul Ciocnirii! Avem Ouă de Aur, Chat Global și Clanuri de Familie. Intri în bătălie?",
-    url: 'https://ciocnim.ro',
-    siteName: 'Ciocnim.ro - Sanctuarul Ciocnirii',
-    locale: 'ro_RO',
-    type: 'website',
-    images: [{ 
-      url: '/og-image-v9.jpg', 
-      width: 1200, 
-      height: 630, 
-      alt: 'Sanctuarul Ciocnirii - Hristos a Înviat 2026!' 
-    }],
+    title: "Ciocnim.ro - Te provoc la un meci de Paște! 🥚",
+    description: "Am spart zeci de ouă azi! Intră și tu, fă-ți o echipă cu familia sau joacă online. Hristos a Înviat!",
+    url: "https://ciocnim.ro",
+    siteName: "Ciocnim.ro",
+    images: [
+      {
+        url: "/og-image-paste.jpg", // Imaginea de cover când trimiți link-ul
+        width: 1200,
+        height: 630,
+        alt: "Aplicația Ciocnim.ro - Tradiție de Paște"
+      }
+    ],
+    locale: "ro_RO",
+    type: "website",
   },
-
-  // CONFIGURARE TWITTER / X (Viralitate Tech)
   twitter: {
-    card: 'summary_large_image',
-    title: 'Sanctuarul Ciocnirii 🥚 | Tradiția devine Sport Electronic',
-    description: 'Bătălii 1v1 în timp real, Ouă de Aur și Clasamente Naționale.',
-    images: ['/og-image-v9.jpg'],
+    card: "summary_large_image",
+    title: "Ciocnim.ro - Tradiția de Paște",
+    description: "Alege un ou, trimite codul unui prieten și vezi cine câștigă!",
+    images: ["/og-image-paste.jpg"],
   },
-
-  // CONFIGURARE PWA (SITE-UL CA O APLICAȚIE NATIVĂ)
-  manifest: '/manifest.json',
+  // Setări pentru instalarea aplicației direct pe ecranul principal al telefonului (PWA)
   appleWebApp: {
     capable: true,
-    title: "Sanctuarul Ciocnirii",
+    title: "Ciocnim.ro",
     statusBarStyle: "black-translucent",
-    startupImage: ['/apple-touch-icon.png']
+    startupImage: ["/apple-touch-icon.png"],
   },
-
-  // ICONS & FAVICONS (Full Spectrum)
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png' },
-    ],
-    other: [
-      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#dc2626' },
-    ],
+  // Instrucțiuni stricte pentru Google Bot ca să ne indexeze rapid
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
 /**
- * VIEWPORT MASTER CONFIG (FIX ANDREI V9)
- * Blochează orice mișcare nefirească a interfeței pe dispozitivele mobile.
+ * ====================================================================================================
+ * CONFIGURARE VIEWPORT
+ * Extras din metadata pentru a fi compatibil cu standardele noi Next.js.
+ * Previne zoom-ul nedorit pe mobil, oferind o senzație de "aplicație nativă", nu de simplu site.
+ * ====================================================================================================
  */
 export const viewport = {
-  width: 'device-width',
+  themeColor: "#050505",
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover',
-  themeColor: '#050000',
+  viewportFit: "cover",
 };
 
 /**
- * ROOT LAYOUT COMPONENT
+ * ====================================================================================================
+ * COMPONENTA PRINCIPALĂ (ROOT LAYOUT)
+ * Aici se construiește scheletul HTML al întregului site.
+ * ====================================================================================================
  */
 export default function RootLayout({ children }) {
-  
-  /**
-   * JSON-LD STRUCTURED DATA (MULTI-SCHEMA ENGINE V9)
-   * Comunicăm cu Google într-un limbaj avansat pentru indexare VIP.
-   */
-  const jsonLdData = [
-    {
-      "@context": "https://schema.org",
-      "@type": "VideoGame",
-      "name": "Sanctuarul Ciocnirii",
-      "genre": ["Multiplayer", "Casual", "Traditional"],
-      "gamePlatform": ["Web Browser", "iOS", "Android"],
-      "description": "Arena digitală numărul 1 din România pentru ciocnit ouă. Tradiție românească transpusă în gaming modern.",
-      "author": { "@type": "Person", "name": "Andrei" },
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RON" }
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Cum obțin Oul de Aur în Sanctuarul Ciocnirii?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Oul de Aur se obține prin drop orar (5% șansă) sau drop legendar de 0.1% în matchmaking aleatoriu. Garantează victoria 100%."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Există bot pe Ciocnim.ro?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Dacă sistemul nu găsește un luptător real în 6 secunde, vei fi transferat automat în modul de antrenament cu Bot-ul Sanctuarului."
-          }
-        }
-      ]
-    }
-  ];
-
   return (
-    <html lang="ro" className="scroll-smooth selection:bg-red-600 selection:text-white">
+    <html lang="ro" className={`${outfit.variable} selection:bg-red-600/30 scroll-smooth`}>
       <head>
-        {/* SEO & SCHEMAS INJECTION */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-        />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        {/* Meta Tag-uri suplimentare pentru compatibilitate maximă cu iOS/Android */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="manifest" href="/manifest.json" />
-        {/* Font-ul se încarcă automat prin Next.js Font Optimization */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       
       <body className={`
-        ${fontOutfit.variable} 
-        ${fontOutfit.className} 
-        bg-[#030000] 
+        ${outfit.className} 
+        bg-ethnic-sanctuary /* Clasă din globals.css pentru fundal */
         text-white 
-        antialiased 
         min-h-screen 
-        relative 
+        w-full 
+        max-w-[100vw] 
         overflow-x-hidden 
-        w-full
-        touch-none
-        lg:touch-auto
+        antialiased 
+        touch-none 
+        selection:text-white
+        scrollbar-hide
       `}>
         
-        {/* --- LIQUID GLASS VISUAL ENGINE (V9.0) --- */}
-        
-        {/* Stratul 1: Ethnic Fiber (Texture) */}
-        <div className="fixed inset-0 z-[-10] opacity-[0.03] pointer-events-none bg-ethnic-dark scale-110"></div>
-        
-        {/* Stratul 2: Deep Dark Void (Depth) */}
-        <div className="fixed inset-0 z-[-9] bg-gradient-to-b from-[#0a0000] via-[#030000] to-[#000000] pointer-events-none"></div>
-        
-        {/* Stratul 3: Liquid Red Glow (Top Left) */}
-        <div className="fixed top-[-20%] left-[-15%] w-[90%] h-[90%] bg-red-600/10 blur-[200px] rounded-full pointer-events-none z-[-8] animate-pulse"></div>
-        
-        {/* Stratul 4: Liquid Gold Glow (Bottom Right) */}
-        <div className="fixed bottom-[-20%] right-[-15%] w-[80%] h-[80%] bg-yellow-600/5 blur-[160px] rounded-full pointer-events-none z-[-7]"></div>
-
-        {/* Stratul 5: Liquid Glass Mesh (Modernitate) */}
-        <div className="fixed inset-0 z-[-6] opacity-[0.05] pointer-events-none bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.1),transparent_70%)]"></div>
-
-        {/* Stratul 6: Floating Titan Particles */}
-        <div className="fixed inset-0 z-[-5] opacity-[0.1] pointer-events-none overflow-hidden">
-           <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-white rounded-full animate-float blur-[1px]"></div>
-           <div className="absolute top-[80%] left-[90%] w-3 h-3 bg-red-600 rounded-full animate-float blur-[2px]" style={{animationDelay: '4s'}}></div>
-           <div className="absolute top-[50%] left-[40%] w-1.5 h-1.5 bg-yellow-500 rounded-full animate-float blur-[0.5px]" style={{animationDelay: '2s'}}></div>
+        {/* ============================================================================ */}
+        {/* STRATURI DE FUNDAL ȘI LUMINI (AMBIENT GLOW) */}
+        {/* Sunt puse într-un div separat cu z-index mic pentru a nu încurca butoanele */}
+        {/* ============================================================================ */}
+        <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none">
+          <div className="ambient-glow-red opacity-60 mix-blend-screen" />
+          <div className="ambient-glow-gold opacity-40 mix-blend-screen" />
+          <div className="fixed inset-0 bg-liquid-mesh opacity-[0.03] pointer-events-none mix-blend-overlay" />
+          
+          {/* Elemente vizuale de fundal, subtile, pentru design */}
+          <div className="absolute top-[10%] right-[-5%] text-[15vh] md:text-[22vh] font-black italic text-white/[0.02] uppercase select-none rotate-12 pointer-events-none">TRADIȚIE</div>
+          <div className="absolute bottom-[10%] left-[-5%] text-[15vh] md:text-[22vh] font-black italic text-white/[0.02] uppercase select-none -rotate-12 pointer-events-none">PAȘTE</div>
         </div>
 
-        {/* CLIENT WRAPPER: Creierul Neural al Sanctuarului */}
+        {/* ============================================================================ */}
+        {/* CLIENT WRAPPER - GESTIONEAZĂ MEMORIA (ECHIPA, SCOR, NUME) */}
+        {/* ============================================================================ */}
         <ClientWrapper>
-          <div className="flex flex-col min-h-screen relative z-10 w-full overflow-x-hidden">
+          <div className="relative z-10 w-full max-w-full overflow-x-hidden min-h-screen flex flex-col">
             
-            {/* VIEWPORT PRINCIPAL */}
-            <main className="flex-grow w-full relative outline-none" role="main">
+            {/* CONTAINERUL PRINCIPAL PENTRU PAGINI */}
+            {/* px-mobile-fix protejează site-ul de "bretonul" telefoanelor noi */}
+            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative">
               {children}
             </main>
 
-            {/* SEO SANCTUAR FOOTER (Maximizat pentru Keywords și Autoritate) */}
-            <footer className="w-full py-28 px-8 mt-auto border-t border-white/5 bg-black/95 backdrop-blur-3xl relative z-20">
-              <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20">
-                
-                {/* Brand & Misiune */}
-                <div className="space-y-8">
-                  <div className="flex items-center gap-5">
-                    <span className="text-5xl drop-shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-bounce">🥚</span>
-                    <span className="font-black uppercase tracking-tighter text-3xl italic">Ciocnim<span className="text-red-600">.ro</span></span>
-                  </div>
-                  <p className="text-[11px] text-white/30 font-bold uppercase tracking-[0.3em] leading-loose">
-                    Sanctuarul Ciocnirii V9 redefinește bătăliile de Paște. O experiență digitală imersivă bazată pe onoare și tradiție, folosind tehnologii real-time pentru o conexiune instantanee între români.
-                  </p>
-                </div>
-
-                {/* Resurse Gaming */}
-                <div className="space-y-8">
-                  <h4 className="text-[13px] font-black text-red-600 uppercase tracking-[0.4em]">Codul Luptătorului</h4>
-                  <ul className="space-y-5">
-                    {['Bătălia Supremă', 'Arhiva de Aur', 'Clasamentul Clanurilor', 'Manualul Veteranului', 'Legenda Oului de Aur'].map(item => (
-                      <li key={item} className="text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-white hover:translate-x-3 transition-all cursor-pointer flex items-center gap-2">
-                        <span className="w-1 h-1 bg-red-600 rounded-full"></span> {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Suport & Legal */}
-                <div className="space-y-8">
-                  <h4 className="text-[13px] font-black text-white/40 uppercase tracking-[0.4em]">Informații Legale</h4>
-                  <ul className="space-y-5">
-                    {['Termeni Arena', 'Confidențialitate', 'Integritate Matchmaking', 'Suport Tehnic', 'API Status'].map(item => (
-                      <li key={item} className="text-[10px] font-black text-white/10 uppercase tracking-widest hover:text-red-500 transition-colors cursor-pointer">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Comunitate & Salut Holiday */}
-                <div className="space-y-10">
-                  <div className="p-8 bg-white/[0.02] rounded-[2.5rem] border border-white/5 shadow-inner">
-                    <p className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] mb-4">Live Status</p>
-                    <div className="flex items-center gap-4">
-                      <div className="presence-dot !w-3 !h-3"></div>
-                      <span className="text-[11px] font-bold text-green-500 uppercase tracking-[0.4em]">Sanctuarul Online</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <p className="text-[12px] text-white/10 uppercase tracking-[0.6em] font-black">
-                      Ciocnim.ro &copy; 2026
-                    </p>
-                    <p className="text-[11px] text-red-600/70 font-black uppercase tracking-[0.3em] italic">
-                      Hristos a Înviat! Paște Fericit alături de neam!
-                    </p>
-                  </div>
-                </div>
-
-              </div>
+            {/* ============================================================================ */}
+            {/* FOOTER GLOBAL - ASCUNS SUBTIL JOS PENTRU SEO */}
+            {/* ============================================================================ */}
+            <footer className="w-full py-12 text-center pointer-events-none opacity-20 mt-auto select-none" aria-hidden="true">
+               <div className="flex flex-col items-center gap-3">
+                 <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/30 to-transparent mb-2" />
+                 <p className="text-[10px] font-black uppercase tracking-[0.5em]">
+                    CIOCNIM.RO • SĂRBĂTORI FERICITE 2026
+                 </p>
+                 <div className="flex gap-4 mt-1">
+                    <span className="text-[8px] font-bold uppercase tracking-widest text-white/50">Joc Online</span>
+                    <span className="text-[8px] font-bold uppercase tracking-widest text-white/50">Grupuri Private</span>
+                    <span className="text-[8px] font-bold uppercase tracking-widest text-white/50">Clasament Live</span>
+                 </div>
+               </div>
             </footer>
 
           </div>
         </ClientWrapper>
 
-        {/* Global Portals */}
-        <div id="modal-root" className="relative z-[5000]"></div>
-        <div id="toast-root" className="relative z-[6000]"></div>
+        {/* ============================================================================ */}
+        {/* FIX-URI CSS GLOBALE INJECTATE DIRECT */}
+        {/* Aici rezolvăm problemele specifice telefoanelor mobile (Safari/Chrome) */}
+        {/* ============================================================================ */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          /* SETĂRI PENTRU SAFE AREA (Prevenirea tăierii marginilor pe iPhone/Android) */
+          :root {
+            --safe-area-left: env(safe-area-inset-left, 1rem);
+            --safe-area-right: env(safe-area-inset-right, 1rem);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+          }
 
-        {/* FAIL-SAFE NO-JS MESSAGE */}
-        <noscript>
-          <div className="fixed inset-0 bg-[#030000] z-[9999] flex flex-col items-center justify-center text-center p-15">
-            <h2 className="text-white font-black uppercase tracking-[0.5em] text-4xl mb-6">
-              ACCES BLOCAT
-            </h2>
-            <p className="text-red-600 font-bold uppercase tracking-widest text-sm max-w-lg leading-relaxed">
-              Sanctuarul Ciocnirii necesită motoare asincrone JavaScript pentru a randa fizica impactului. Activează JS pentru a continua.
-            </p>
-          </div>
-        </noscript>
+          /* FUNDAMENTUL PAGINII: Previne scroll-ul lateral care strică experiența */
+          body {
+            min-height: 100dvh; /* dvh se adaptează dinamic când apare bara de jos pe iOS */
+            width: 100vw;
+            position: relative;
+            background-color: #050505; /* Fundal super-închis pentru a scoate în evidență culorile ouălor */
+          }
+
+          /* CLASA DE PROTECȚIE A MARGINILOR */
+          .px-mobile-fix {
+            padding-left: var(--safe-area-left) !important;
+            padding-right: var(--safe-area-right) !important;
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
+          }
+
+          /* ANTI-DOUBLE-TAP-ZOOM: Când apasă rapid să spargă oul, ecranul nu trebuie să facă zoom */
+          button, input, a, [role="button"] {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent; /* Scoate flash-ul urât albastru de pe Android */
+            -webkit-user-drag: none;
+          }
+
+          /* ANTI-AUTO-ZOOM PE iOS: Dacă fontul din input e mai mic de 16px, iPhone face zoom automat. Forțăm 16px. */
+          @media screen and (max-width: 850px) {
+            input, textarea, select {
+              font-size: 16px !important;
+            }
+          }
+
+          /* ANIMAȚIA GENERALĂ DE ÎNCĂRCARE A PAGINII (Modernă, lentă, curată) */
+          main {
+            animation: page-fade-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          }
+
+          @keyframes page-fade-in {
+            0% { opacity: 0; transform: translateY(15px); filter: blur(5px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+          }
+
+          /* ASCUNDE SCROLLBAR-UL CLASIC URÂT, LĂSÂND DOAR FUNCȚIONALITATEA DE SCROLL */
+          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+          /* OPTIMIZĂRI DE FLUIDITATE PENTRU ECRANE 120HZ */
+          @media (prefers-reduced-motion: no-preference) {
+            * {
+              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+          }
+        `}} />
+
       </body>
     </html>
   );
 }
-
-/**
- * ==========================================================================================
- * SUMAR ACTUALIZARE V9.0 (ROOT INFRASTRUCTURE):
- * 1. FIX MOBIL: Eliminat definitiv scroll-ul orizontal prin touch-none și w-full pe body.
- * 2. BRANDING: Migrare totală către "Sanctuarul Ciocnirii" (SEO + UI).
- * 3. LIQUID GLASS: Implementat design-ul fluid cu blur ridicat și layere de glow asincron.
- * 4. DENSITATE: Dublat volumul de comentarii tehnice și metadate pentru indexare organică.
- * 5. PWA: Pregătire totală pentru instalarea ca aplicație standalone pe iOS/Android.
- * ==========================================================================================
- */
