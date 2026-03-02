@@ -139,6 +139,7 @@ export default function RootLayout({ children }) {
     <html lang="ro" className={`${outfit.variable} selection:bg-red-600/30 scroll-smooth`}>
       <head>
         {/* Meta Tag-uri suplimentare pentru compatibilitate maximă cu iOS/Android */}
+        <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
