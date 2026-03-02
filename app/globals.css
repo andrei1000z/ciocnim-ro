@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - STILURI GENERALE ȘI DESIGN SYSTEM (V2.1 - TITAN INTEGRITY)
+ * CIOCNIM.RO - STILURI GENERALE ȘI DESIGN SYSTEM (V22.0 - THE NATIONAL AWAKENING)
  * ====================================================================================================
  * Proiect: Platformă de ciocnit ouă virtuale, optimizată SEO și UX.
  * * * 📜 CE FACE ACEST FIȘIER (CORE ENGINE VIZUAL):
@@ -10,270 +10,268 @@
  * comportamentele fizice ale paginii, efectele de sticlă (glassmorphism) de înaltă performanță,
  * animațiile fluide (GPU-accelerated) și, cel mai important, "reparăm" comportamentul ciudat 
  * al browserelor pe dispozitivele mobile.
- * * * 🛠️ OPTIMIZĂRI CRITICE APLICATE ÎN ACEASTĂ VERSIUNE:
- * 1. BLOCAREA SCROLL-ULUI LATERAL: S-a forțat `overflow-x: hidden !important` pe `html` și `body`.
- * Astfel, indiferent cât de mare este un text generat dinamic sau un SVG, ecranul NU se va 
- * mișca stânga-dreapta. Aplicația se simte rigidă, nativă, ca și cum ar fi instalată din App Store.
- * 2. EFECTE DE STICLĂ (LIQUID GLASS): Au fost create clase speciale (ex: `.liquid-glass`) care 
- * utilizează `backdrop-filter: blur` pentru a face panourile de chat și clasamente să pară 
- * din sticlă mată (frosted glass), lăsând fundalul să transpară subtil.
- * 3. TEMA DE PAȘTE (COLOR PALETTE): S-au injectat variabile CSS globale (CSS Custom Properties) 
- * pentru Roșu Tradițional și Auriu Imperial, precum și glow-uri (umbre colorate) specifice 
- * pentru fiecare tip de skin de ou (Verde, Albastru, Mov Cosmic).
+ * * * 🛠️ OPTIMIZĂRI CRITICE APLICATE ÎN VERSIUNEA 22.0 (TECH PRIMITIVE):
+ * 1. BLOCAREA SCROLL-ULUI LATERAL ȘI VERTICAL EXCESIV: S-a forțat `overflow-x: hidden !important` 
+ * pe `html` și `body` și s-a adăugat `overscroll-behavior: none`. Aplicația se simte de piatră,
+ * exact ca un joc nativ din App Store. Zero lag, zero mișcări accidentale de ecran.
+ * 2. EFECTE DE STICLĂ OLED (LIQUID GLASS V22): Clasa `.liquid-glass` a fost actualizată 
+ * pentru a se îmbina perfect cu fundalul #020202 (OLED Black), reducând opacitatea albă 
+ * și accentuând blur-ul pentru un efect "frosted" mult mai premium și misterios.
+ * 3. TEMA "TECH PRIMITIVE": Introducerea de animații noi (`impact-shake`, `pulse-online`) 
+ * pentru a susține noile butoane de "Provoacă" și indicatorul de jucători online.
  * 4. ADAPTARE PENTRU IPHONE/ANDROID NOI: Utilizarea funcției `env(safe-area-inset)` garantează
- * că elementele de UI nu se ascund sub "bretonul" (Notch/Dynamic Island) camerei frontale sau 
- * sub barele de navigare ale sistemului de operare.
+ * că elementele de UI nu se ascund sub "bretonul" (Notch/Dynamic Island) camerei frontale.
  * 5. COMPATIBILITATE TAILWIND V4: S-a trecut la noua sintaxă `@import "tailwindcss";`, 
- * eliminând directivele învechite `@tailwind utilities;`.
+ * optimizând compilatorul și scăzând timpul de încărcare.
  * ====================================================================================================
  */
 
 @layer base {
   /* ==========================================================================
-     1. VARIABILE DE CULOARE ȘI DESIGN (Sistemul de Tematizare)
+     1. VARIABILE DE CULOARE ȘI DESIGN (Sistemul de Tematizare V22)
      ========================================================================== */
   :root {
-    /* Fundaluri - Un negru foarte profund, esențial pentru contrastul pe ecrane OLED, 
-       ajutând culorile vii ale ouălor să "iasă" din ecran. */
-    --bg-ultra-dark: #050505;
-    --bg-sanctuary: #0a0a0a;
+    /* Fundaluri - Trecerea la un OLED Black pur. Acest negru (#020202) consumă 
+       mai puțină baterie pe telefoanele moderne și face culorile să izbucnească. */
+    --bg-ultra-dark: #020202;
+    --bg-sanctuary: #050505;
     
-    /* Roșu Tradițional - Culoarea principală a sărbătorii și a brandului Ciocnim.ro */
+    /* Roșu Tradițional - Culoarea principală a sărbătorii, saturată pentru contrast maxim */
     --red-primary: #dc2626;
     --red-hover: #ef4444;
-    --red-glow: rgba(220, 38, 38, 0.4);
+    --red-glow: rgba(220, 38, 38, 0.5); /* Glow crescut la 50% pentru efectul de Neon */
     
-    /* Auriu Imperial - Folosit strict pentru elemente de succes, clasamente și Oul de Aur */
+    /* Auriu Imperial - Folosit strict pentru elemente de succes, clasamente și Bilanț */
     --gold-primary: #f59e0b; 
-    --gold-glow: rgba(245, 158, 11, 0.4);
+    --gold-glow: rgba(245, 158, 11, 0.5);
     
-    /* Culorile Ouălor (Setate ca variabile globale pentru a putea fi apelate în SVG-uri și Glow-uri) */
+    /* Culorile Ouălor (Variabile globale apelabile în SVG-uri și Box-Shadows) */
     --diamond-glow: rgba(22, 163, 74, 0.4);  /* Verde Smarald */
-    --cosmic-glow: rgba(147, 51, 234, 0.4);  /* Mov Nebula */
-    --sapphire-glow: rgba(37, 99, 235, 0.4); /* Albastru Safir */
+    --cosmic-glow: rgba(147, 51, 234, 0.4);  /* Mov Regal */
+    --sapphire-glow: rgba(37, 99, 235, 0.4); /* Albastru Rece */
     
-    /* Setări pentru efectul de sticlă (Glassmorphism Core) */
-    --liquid-blur: 24px; /* Intensitatea "ceții" din spatele panourilor */
-    --glass-opacity: 0.05; /* Gradul de transparență albă aplicat peste fundal */
-    --glass-border: rgba(255, 255, 255, 0.1); /* Conturul fin, argintiu, al marginilor de sticlă */
+    /* Setări pentru efectul de sticlă (Liquid Glass V22) */
+    --liquid-blur: 32px; /* Intensitatea "ceții" din spatele panourilor, crescută pentru profunzime */
+    --glass-opacity: 0.03; /* Gradul de transparență albă redus pentru a menține estetica Dark/Primitive */
+    --glass-border: rgba(255, 255, 255, 0.08); /* Conturul fin, argintiu închis */
   }
 
   /* ==========================================================================
-     2. REPARAREA COMPORTAMENTULUI PE MOBIL (Fundația de Fier a Aplicației)
+     2. REPARAREA COMPORTAMENTULUI PE MOBIL (Fundația de Titan a Aplicației)
      ========================================================================== */
   html {
-    overflow-x: hidden !important; /* REGULA #1 DE BAZĂ: Fără scroll lateral, niciodată. Previne stricarea layout-ului. */
-    width: 100%;
+    overflow-x: hidden !important; /* REGULA #1 DE BAZĂ: Fără scroll lateral, niciodată. */
+    width: 100vw;
     height: 100%;
-    scroll-behavior: smooth; /* Navigare lină dacă utilizatorul dă click pe ancore (#) */
+    scroll-behavior: smooth; /* Navigare lină dacă utilizatorul dă click pe ancore */
     background-color: var(--bg-ultra-dark);
+    /* Forțăm textul să nu fie ajustat aiurea de iOS în mod landscape */
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
     padding: 0;
-    min-height: 100vh; /* Se asigură că body-ul ocupă mereu tot ecranul, chiar dacă pagina e goală */
-    width: 100%;
-    overflow-x: hidden !important; /* O a doua asigurare (Dublă protecție) necesară pentru Safari pe iOS */
+    min-height: 100dvh; /* dvh se adaptează dinamic la barele de adresă de pe Safari/Chrome iOS */
+    width: 100vw;
+    overflow-x: hidden !important; /* Dublă protecție pentru Safari Mobile */
     background-color: var(--bg-ultra-dark);
-    color: #ffffff; /* Tot textul default este alb pentru vizibilitate maximă pe dark mode */
+    color: #ffffff; 
     
-    /* Previne refresh-ul accidental al paginii când utilizatorul trage în jos 
-       prea tare (Pull-to-refresh) în mijlocul meciului. (Critic pentru UX) */
+    /* OVERSCROLL BEHAVIOR: Elimină efectul de "elastic" la capetele paginii.
+       Aplicația se va simți fixă, ca un joc video. */
     overscroll-behavior-y: none; 
+    overscroll-behavior-x: none;
     
-    /* Elimină highlight-ul albastru/gri inestetic care apare nativ pe Android/iOS 
-       când apeși rapid pe un buton sau pe ecran. */
+    /* Elimină highlight-ul albastru inestetic la apăsarea pe Android/iOS */
     -webkit-tap-highlight-color: transparent; 
     
-    /* Optimizează randarea fonturilor. Face textul să arate mai clar, mai "crisp" 
-       și mai subțire pe ecranele HD, Retina sau 4K. */
+    /* Optimizează randarea fonturilor pentru claritate maximă pe ecrane Retina/4K */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     
-    /* Blochează selectarea textului din greșeală (highlight albastru pe litere) 
-       în timp ce te joci și apeși repetat pe ecran. */
+    /* Blochează selectarea textului din greșeală (highlight pe litere) 
+       în timp ce te joci și apeși rapid pe ecran. */
     user-select: none; 
     -webkit-user-select: none;
     
-    /* Fontul principal al aplicației. Dacă 'Outfit' nu se încarcă, face fallback la fonturile native ale telefonului */
+    /* Fallback robust de fonturi pentru viteză de încărcare */
     font-family: var(--font-outfit), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
-  /* Excepție de la regula 'user-select: none'. 
+  /* Excepție de la 'user-select: none'. 
      Permitem selectarea textului DOAR în câmpurile unde utilizatorul trebuie 
-     să scrie efectiv (ex: input pentru Nume sau input pentru Codul de Cameră Privat). */
+     să scrie efectiv (Input Nume, Input Cod). */
   input, textarea, [contenteditable="true"] {
     user-select: text !important;
     -webkit-user-select: text !important;
-    touch-action: auto; /* Permite interacțiunea normală (scroll/tap) în interiorul inputului */
-    outline: none; /* Elimină conturul de focus nativ al browserului pentru un design curat */
+    touch-action: auto; /* Permite interacțiunea normală în input */
+    outline: none; /* Elimină conturul de focus nativ al browserului */
+  }
+
+  /* Dezactivarea completă a outline-urilor pe butoane active pentru a nu strica design-ul */
+  button:focus, a:focus {
+    outline: none !important;
   }
 }
 
 @layer utilities {
   /* ==========================================================================
-     3. EFECTE DE STICLĂ ȘI COMPONENTE UI (Liquid Glass Architecture)
+     3. EFECTE DE STICLĂ ȘI COMPONENTE UI (Liquid Glass Architecture V22)
      ========================================================================== */
   
-  /* Clasa principală pentru panourile de chat, modale și zone de conținut */
+  /* Clasa principală pentru panourile centrale (Profil, Opțiuni Joc) */
   .liquid-glass {
-    background: rgba(255, 255, 255, var(--glass-opacity));
-    backdrop-filter: blur(var(--liquid-blur)); /* Creează efectul de ceață procesând pixelii din spate */
-    -webkit-backdrop-filter: blur(var(--liquid-blur)); /* Prefix vendor obligatoriu pentru suport iOS Safari */
+    background: rgba(10, 10, 10, 0.6); /* Bază mai închisă, aproape neagră */
+    backdrop-filter: blur(var(--liquid-blur)) saturate(150%); /* Saturarea culorilor de sub sticlă */
+    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(150%);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); /* Umbră de adâncime care separă vizual panoul de fundal */
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.02); 
   }
 
-  /* Cardurile specifice din Clasamentul Familiei (Echipei) */
+  /* Cardurile specifice din Clasamentul Familiei */
   .clan-card-liquid {
-    background: linear-gradient(to bottom right, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+    background: linear-gradient(to bottom right, rgba(255,255,255,0.03), rgba(255,255,255,0.005));
     backdrop-filter: blur(var(--liquid-blur));
     -webkit-backdrop-filter: blur(var(--liquid-blur));
-    @apply rounded-[2.5rem] p-6 md:p-8 border-l-[6px] border-l-red-600 shadow-xl;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* O tranziție mai fină, tipică aplicațiilor native */
+    @apply rounded-[2rem] p-5 md:p-6 border-l-[4px] border-l-red-600 shadow-2xl;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Tranziție cu efect de resort (spring) */
   }
   
-  /* Efectul la interacțiunea cu mouse-ul (Hover) pentru cardurile clanului */
   .clan-card-liquid:hover {
-    transform: translateY(-4px); /* Se ridică ușor de pe ecran */
-    border-l-color: var(--red-hover); /* Linia roșie din stânga devine mai deschisă */
+    transform: translateY(-5px) scale(1.01); /* Ușoară creștere în dimensiune pe hover */
+    border-l-color: var(--red-hover); 
+    box-shadow: 0 15px 40px rgba(220, 38, 38, 0.15); /* Glow roșiatic la hover */
   }
 
   /* ==========================================================================
      4. ANIMAȚII PENTRU JOC (Performanță GPU-Accelerated)
      ========================================================================== */
 
-  /* Animație subtilă de "plutire" asimetrică pentru ouăle din meniu și din Arenă. 
-     Folosește proprietatea 'transform' pentru a nu declanșa 'reflow' în browser (menținând 60fps). */
+  /* Animație subtilă de "plutire" asimetrică pentru ouăle din meniu. */
   @keyframes float-gentle {
     0%, 100% { transform: translateY(0) rotate(-2deg); }
-    50% { transform: translateY(-15px) rotate(2deg); }
+    50% { transform: translateY(-12px) rotate(3deg); }
   }
   .animate-float-v9 { 
     animation: float-gentle 6s ease-in-out infinite; 
   }
 
-  /* Animație de impact (când oul se sparge). Micșorează și dă un "kick" de rotație oului învins. */
+  /* Animație de impact (când oul se sparge). Dinamică, violentă și scurtă. */
   @keyframes pop-smash {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1) rotate(5deg); }
-    100% { transform: scale(0.9) rotate(-3deg); opacity: 0.8; }
+    0% { transform: scale(1); filter: brightness(1); }
+    40% { transform: scale(1.15) rotate(8deg); filter: brightness(1.5); }
+    70% { transform: scale(0.85) rotate(-5deg); filter: brightness(0.8); }
+    100% { transform: scale(0.95) rotate(-2deg); opacity: 0.85; filter: brightness(0.9); }
   }
   .animate-pop {
-    animation: pop-smash 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: pop-smash 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
-  /* Animație tip "puls cardiac" pentru elemente care necesită atenție (Bilanț Național, Butoane). */
+  /* NEW: Animație de șoc/impact pentru Butonul de Ciocnire și ecrane zguduite */
+  @keyframes impact-shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px) rotate(-1deg); }
+    20%, 40%, 60%, 80% { transform: translateX(4px) rotate(1deg); }
+  }
+  .animate-impact {
+    animation: impact-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  /* Animație tip "puls cardiac" pentru elemente critice (Bilanț Național). */
   @keyframes pulse-glow {
-    0%, 100% { filter: brightness(1); transform: scale(1); }
-    50% { filter: brightness(1.2); transform: scale(1.05); }
+    0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(234, 179, 8, 0.3)); transform: scale(1); }
+    50% { filter: brightness(1.3) drop-shadow(0 0 25px rgba(234, 179, 8, 0.7)); transform: scale(1.05); }
   }
   .animate-heartbeat-v10 { 
-    animation: pulse-glow 2s infinite ease-in-out; 
+    animation: pulse-glow 2.5s infinite ease-in-out; 
   }
 
-  /* Animație de rotire continuă pentru Steluța de Veteran (Golden Egg / Top Players) */
-  @keyframes star-spin {
-    from { transform: rotate(0deg) scale(1); }
-    to { transform: rotate(360deg) scale(1.1); }
+  /* NEW: Indicatorul verde luminos pentru statusul "Online" al prietenilor */
+  @keyframes pulse-online {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
   }
-  .animate-star {
-    animation: star-spin 8s linear infinite alternate;
+  .dot-online {
+    animation: pulse-online 2s infinite;
   }
 
   /* ==========================================================================
-     5. FUNDALURI DECORATIVE ȘI LUMINI AMBIENTALE (VFX)
+     5. FUNDALURI DECORATIVE ȘI LUMINI AMBIENTALE (VFX - Primitive Tech)
      ========================================================================== */
 
-  /* Un model (pattern) subtil tradițional aplicat pe fundalul arenei. */
+  /* Modelul etnic a fost păstrat dar înnegrit pentru a se potrivi cu tema OLED */
   .bg-ethnic-sanctuary {
     background-color: var(--bg-ultra-dark);
-    /* Acest SVG codat în Base64 randează romburi extrem de fine (opacity 0.02)
-       ce amintesc de iile și covoarele tradiționale românești, fără a încărca rețeaua. */
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-attachment: fixed; /* Rămâne fix pe loc când se dă scroll, creând efect de parallax. */
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed; 
   }
 
-  /* "Petele" de lumină colorată (Glow-uri) din fundal, care dau senzația unui spațiu imersiv, de club/arenă.
-     Sunt fixate în colțurile ecranului și blurate extrem de mult (100px). 
-     pointer-events-none asigură că utilizatorul nu poate da click pe ele din greșeală. */
+  /* Glow-uri masive roșii care dau atmosfera de Arenă. 
+     pointer-events-none asigură click-through fără probleme. */
   .ambient-glow-red {
-    @apply fixed top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-red-600/[0.08] blur-[100px] rounded-full pointer-events-none;
+    @apply fixed top-[-25%] left-[-25%] w-[70vw] h-[70vw] bg-red-600/[0.05] blur-[120px] rounded-full pointer-events-none mix-blend-screen;
     z-index: -100;
   }
 
   .ambient-glow-gold {
-    @apply fixed bottom-[-20%] right-[-20%] w-[50vw] h-[50vw] bg-yellow-500/[0.05] blur-[100px] rounded-full pointer-events-none;
+    @apply fixed bottom-[-25%] right-[-25%] w-[60vw] h-[60vw] bg-yellow-500/[0.04] blur-[120px] rounded-full pointer-events-none mix-blend-screen;
     z-index: -100;
   }
-  
-  /* Versiunea unificată de glow ambiental, folosită în pagina de Arena pentru performanță maximă. */
-  .ambient-glow-titan {
-    background: radial-gradient(circle at top left, rgba(220, 38, 38, 0.08), transparent 40%),
-                radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.05), transparent 40%);
-    pointer-events: none;
-    z-index: -100;
+
+  /* Mesh-ul lichid care adaugă o textură fină de "grain" pe fundal */
+  .bg-liquid-mesh {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
   /* ==========================================================================
-     6. REZOLVAREA PROBLEMELOR DE AFIȘARE PE ECRANE MICI (RESPONSIVE EDGE CASES)
+     6. REZOLVAREA PROBLEMELOR DE AFIȘARE PE ECRANE MICI (ANTI-CROP SYSTEM)
      ========================================================================== */
 
-  /* Setări aplicate doar ecranelor cu lățime mai mică de 480px (Majoritatea telefoanelor) */
-  @media (max-width: 480px) {
-    /* Clasa care previne ca textul să se lipească de marginea ecranului pe telefoane.
-       Folosim 'env' pentru a detecta automat "Safe Area" a telefoanelor noi curbate
-       sau cu margini rotunjite (iPhone 14/15, Samsung Galaxy), adăugând un padding dinamic. */
+  @media (max-width: 768px) {
+    /* Folosim 'env(safe-area-inset)' pentru telefoanele cu margini curbate sau Notch.
+       Asigură că butoanele laterale nu ies din ecran! */
     .px-mobile-fix {
-      padding-left: max(1.5rem, env(safe-area-inset-left)) !important;
-      padding-right: max(1.5rem, env(safe-area-inset-right)) !important;
-    }
-
-    /* Redimensionăm razele colțurilor și padding-ul panourilor de sticlă pentru 
-       a nu ocupa prea mult din prețiosul ecran de mobil. */
-    .liquid-glass { 
-      @apply rounded-[2rem] p-5; 
+      padding-left: max(1rem, env(safe-area-inset-left)) !important;
+      padding-right: max(1rem, env(safe-area-inset-right)) !important;
     }
   }
 
   /* ==========================================================================
-     7. CUSTOMIZARE COMPONENTE NATIVE BROWSER (Scrollbar)
+     7. CUSTOMIZARE COMPONENTE NATIVE BROWSER (Scrollbar Stealth)
      ========================================================================== */
 
-  /* O bară de scroll modernă, invizibilă pe mobil (unde se folosește touch-ul), 
-     dar subțire și elegantă pentru utilizatorii de PC/Laptop cu mouse. */
+  /* Scrollbar extrem de subțire și integrat în design (pe mobil dispare complet automat) */
   .custom-scrollbar::-webkit-scrollbar, .titan-scroll::-webkit-scrollbar { 
-    width: 6px; 
+    width: 4px; 
   }
   
-  /* Culoarea "șinei" (traseului) pe care culisează bara de scroll. Transparentă pentru design curat. */
   .custom-scrollbar::-webkit-scrollbar-track, .titan-scroll::-webkit-scrollbar-track { 
     background: transparent; 
   }
   
-  /* "Butonul" efectiv de scroll (Părțicica ce se mișcă). */
   .custom-scrollbar::-webkit-scrollbar-thumb, .titan-scroll::-webkit-scrollbar-thumb { 
-    background: rgba(255, 255, 255, 0.15); 
+    background: rgba(255, 255, 255, 0.1); 
     border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5); /* Contur pentru contrast */
   }
   
-  /* Efect la trecerea mouse-ului peste bara de scroll (devine mai vizibilă). */
   .custom-scrollbar::-webkit-scrollbar-thumb:hover, .titan-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(220, 38, 38, 0.6); /* Se face roșu pe hover */
   }
 }
 
 /**
  * ====================================================================================================
- * SUMARUL ARHITECTURII VIZUALE V2.1 (TITAN FINAL BUILD):
- * 1. FIX PENTRU MOBIL: Am asigurat (prin CSS nativ) că aplicația se comportă ca o aplicație descărcată 
- * din magazin (fără zoom nedorit, fără scroll lateral ciudat, fără highlight albastru la dublu click).
- * 2. PERFORMANȚĂ: Am eliminat efectele excesiv de complexe (shaders de Javascript) și le-am înlocuit cu 
- * umbre și filtre CSS native de nivel scăzut, care rulează garantat la 60/120 FPS, protejând bateria.
- * 3. DESIGN CURAT: S-a cizelat conceptul de sticlă (Glassmorphism), transformându-l din "prea încărcat" 
- * într-o estetică mată, subtilă, care permite interfeței (butoane, text, chat) să aibă contrast maxim.
- * 4. CSS MODERN: Implementarea directivelor de stratificare (@layer) și variabile CSS permite o 
- * compatibilitate nativă cu motorul Tailwind v4, scăzând dimensiunea finală a fișierului pe server.
+ * SUMARUL ARHITECTURII VIZUALE V22.0 (THE NATIONAL AWAKENING):
+ * 1. FIX SUPREM PENTRU MOBIL: Combinația de `overscroll-behavior`, `touch-action` și 
+ * `overflow-x` blindează interfața. Nu mai poți să dai scroll accidental, nu poți da zoom,
+ * site-ul este literally "încuiat" pe viewport.
+ * 2. TECH PRIMITIVE AESTHETICS: Culorile au fost trase în jos spre negru absolut (#020202), 
+ * lăsând elementele active (roșul de la butoane, verdele de la prezența online) să strălucească 
+ * prin contrast maxim (OLED optimization).
+ * 3. ANIMAȚIILE KINETICE: Adăugarea `@keyframes impact-shake` pavează drumul pentru meciurile 
+ * live, unde telefonul va vibra și ecranul se va "zgudui" la apăsarea butonului "Ciocnește".
  * ====================================================================================================
  */

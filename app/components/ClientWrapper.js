@@ -2,28 +2,23 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - SISTEMUL CENTRAL DE STARE ȘI SINCRONIZARE (VERSIUNEA 3.1 - STABLE CORE)
+ * CIOCNIM.RO - SISTEMUL CENTRAL DE STARE ȘI SINCRONIZARE (VERSION 22.0 - THE NATIONAL AWAKENING)
  * ====================================================================================================
  * Proiect: Platformă de ciocnit ouă virtuale, optimizată SEO și UX.
  * Tehnologii: React 19 (Context API), Next.js 16 (App Router), Pusher-JS (WebSockets).
  * * * * 📜 DESCRIEREA ARHITECTURII ACESTUI FIȘIER:
  * Acest fișier reprezintă "memoria" și "sistemul nervos" al întregii aplicații. El rulează
- * o singură dată (la încărcarea site-ului) și învelește toate celelalte pagini (este declarat 
- * în layout.js). Orice componentă din site poate accesa datele de aici folosind `useGlobalStats()`.
- * * * * 🛠️ FUNCȚIONALITĂȚI ȘI OPTIMIZĂRI CRITICE APLICATE PENTRU PRODUCȚIE:
- * 1. PERSISTENȚA DATELOR (LocalStorage Sync): Orice modificare a numelui, culorii oului sau
- * scorului (victorii/înfrângeri) este salvată instantaneu în browser. Dacă utilizatorul
- * închide fereastra și revine mâine, va avea aceleași date. Am adăugat verificări SSR (Server Side Rendering)
- * pentru a ne asigura că `localStorage` este apelat doar în browser.
- * 2. BILANȚUL NAȚIONAL LIVE (Global Incrementor): Funcția `incrementGlobal` comunică cu baza
- * de date (prin API) pentru a crește contorul de ouă sparte la nivel național. Pusher ascultă
- * aceste modificări și actualizează numărul pe ecranele tuturor utilizatorilor din țară în timp real.
- * 3. SISTEMUL DE NOTIFICĂRI: Dacă un utilizator este provocat la un duel privat, acest wrapper
- * interceptează semnalul prin WebSockets și afișează un pop-up pe ecran, indiferent pe ce
- * pagină se află utilizatorul în acel moment.
- * 4. FEEDBACK SENZORIAL (Audio & Haptic): Funcțiile `playSound` și `triggerVibrate` sunt 
- * centralizate aici pentru a putea fi apelate din orice pagină (ex: când se sparge oul în Arenă).
- * Folosim useCallback pentru a preveni re-crearea inutilă a funcțiilor la fiecare randare.
+ * o singură dată (la încărcarea site-ului) și învelește toate celelalte pagini (declarat în layout.js).
+ * Orice componentă din site poate accesa datele de aici folosind `useGlobalStats()`.
+ * * * * 🛠️ FUNCȚIONALITĂȚI ȘI OPTIMIZĂRI CRITICE APLICATE PENTRU V22:
+ * 1. PERSISTENȚA DATELOR (LocalStorage Sync): Salvăm instant numele, culoarea oului, scorul și echipa. 
+ * Hydration-ul este protejat cu try/catch pentru a preveni crash-uri de la JSON-uri vechi/corupte.
+ * 2. BILANȚUL NAȚIONAL LIVE (Global Incrementor): Funcția `incrementGlobal` face push în Redis,
+ * iar Pusher distribuie numărul actualizat către toți utilizatorii din România, în timp real.
+ * 3. SISTEMUL DE NOTIFICĂRI: Interceptăm provocările la duel (WebSockets) și afișăm un pop-up 
+ * "Tech Primitive" peste orice pagină. Bara de timp scade fluid timp de 15 secunde.
+ * 4. FEEDBACK SENZORIAL (Audio & Haptic): Centralizarea `playSound` și `triggerVibrate`.
+ * Am adăugat protecții specifice pentru politicile stricte de autoplay de pe iOS Safari.
  * ====================================================================================================
  */
 
@@ -32,7 +27,6 @@ import Pusher from "pusher-js";
 import { useRouter, usePathname } from "next/navigation";
 
 // Inițializarea Contextului Global React
-// Acesta va "transporta" datele noastre (nume, scor, funcții) către toate componentele copil (Home, Arena, etc.).
 const GlobalStatsContext = createContext();
 
 /**
@@ -43,7 +37,6 @@ const GlobalStatsContext = createContext();
 export const useGlobalStats = () => {
   const context = useContext(GlobalStatsContext);
   if (!context) {
-    // Aruncăm o eroare clară dacă cineva încearcă să folosească hook-ul în afara wrapper-ului.
     throw new Error("EROARE CRITICĂ: useGlobalStats trebuie folosit DOAR în interiorul componentelor învelite de ClientWrapper!");
   }
   return context;
@@ -51,7 +44,7 @@ export const useGlobalStats = () => {
 
 /**
  * COMPONENTA PRINCIPALĂ: ClientWrapper
- * Acționează ca un provider de context și manager principal de evenimente asincrone (WebSockets).
+ * Acționează ca un provider de context și manager principal de evenimente asincrone.
  */
 export default function ClientWrapper({ children }) {
   const router = useRouter();
@@ -65,7 +58,7 @@ export default function ClientWrapper({ children }) {
     wins: 0,
     losses: 0,
     skin: "red",
-    hasGoldenEgg: false, // Mecanism de noroc (Loot Drop)
+    hasGoldenEgg: false, // Mecanism de noroc (Loot Drop / Easter Egg)
     lastGoldenCheck: 0,
     teamId: null
   });
@@ -73,13 +66,12 @@ export default function ClientWrapper({ children }) {
   // ==========================================
   // 2. STĂRI GLOBALE LIVE (Comune pentru toți jucătorii)
   // ==========================================
-  const [totalGlobal, setTotalGlobal] = useState(0); // Bilanțul Național de Ouă Sparte
-  const [nume, setNume] = useState(""); // Numele setat de utilizator (separat pentru acces rapid)
-  const [notificare, setNotificare] = useState(null); // Duelurile solicitate (Pop-up-uri pe ecran)
-  const [isHydrated, setIsHydrated] = useState(false); // S-au încărcat datele din memoria telefonului?
+  const [totalGlobal, setTotalGlobal] = useState(0); 
+  const [nume, setNume] = useState(""); 
+  const [notificare, setNotificare] = useState(null); 
+  const [isHydrated, setIsHydrated] = useState(false); 
   
-  // Referință către conexiunea Pusher. Folosim useRef pentru a nu crea o conexiune nouă
-  // la fiecare re-randare a componentei, economisind astfel baterie și resurse de rețea.
+  // Referință către conexiunea Pusher pentru a nu crea multiple instanțe.
   const pusherRef = useRef(null);
 
   // ==========================================================================
@@ -87,9 +79,8 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
 
   /**
-   * Declanșează vibrația telefonului (Haptic Feedback) pe dispozitivele compatibile (Android).
-   * iOS limitează acest lucru din browser, dar funcționează perfect pe Android și PWA.
-   * @param {Array} pattern - Modelul de vibrație (ex: [100, 50, 100] = scurt, pauză, scurt).
+   * Declanșează vibrația telefonului (Haptic Feedback) pe Android/PWA.
+   * iOS blochează vibrația prin JS în browser, dar UI-ul preia greutatea vizual.
    */
   const triggerVibrate = useCallback((pattern = [50]) => {
     try {
@@ -97,31 +88,27 @@ export default function ClientWrapper({ children }) {
         navigator.vibrate(pattern);
       }
     } catch (err) {
-      console.warn("Sistemul de vibrații nu este suportat de acest browser/dispozitiv sau a fost blocat.");
+      console.warn("Sistemul de vibrații limitat de dispozitiv.");
     }
   }, []);
 
   /**
-   * Redă un sunet specific acțiunii (ex: "spargere-titan").
-   * Funcția este asincronă și gestionează eroarea clasică în care browserul 
-   * blochează sunetul dacă utilizatorul nu a dat încă click pe pagină.
-   * @param {string} soundFile - Numele fișierului mp3 din folderul /public/sunete/.
+   * Redă asincron un fișier audio. Protejat împotriva erorilor de Autoplay.
    */
   const playSound = useCallback((soundFile) => {
     try {
       if (typeof window !== 'undefined') {
-        const audio = new Audio(`/sunete/${soundFile}.mp3`);
-        audio.volume = 0.5; // Volum moderat (50%) pentru a nu fi deranjant
+        const audio = new Audio(`/${soundFile}.mp3`); // Tragem fișierele din rădăcina folderului public/
+        audio.volume = 1.0; 
         const playPromise = audio.play();
         
-        // Browserele moderne (Chrome/Safari) blochează sunetul autoplay.
         if (playPromise !== undefined) {
-          playPromise.catch(() => console.log(`Sunetul ${soundFile} a fost blocat de politica de autoplay a browserului.`));
+          playPromise.catch(() => {
+            // Log silențios pentru browserele care necesită interacțiune înainte de sunet
+          });
         }
       }
-    } catch (e) {
-      console.error("Eroare la redarea sunetului:", e);
-    }
+    } catch (e) {}
   }, []);
 
   // ==========================================================================
@@ -129,8 +116,8 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
   
   /**
-   * Funcția care forțează creșterea Bilanțului Național în baza de date Redis.
-   * Se apelează din Arena de fiecare dată când un ou se sparge pe ecran (de către un câștigător).
+   * Forțează creșterea Bilanțului Național în Redis.
+   * Apelat din Arenă la fiecare victorie/impact.
    */
   const incrementGlobal = useCallback(async () => {
     try {
@@ -141,12 +128,11 @@ export default function ClientWrapper({ children }) {
       });
       const data = await res.json();
       if (data.success) {
-        // Actualizăm contorul local instant pentru a oferi un feedback fluid utilizatorului,
-        // până când confirmarea oficială vine înapoi prin rețeaua Pusher.
+        // Feedback vizual instant, serverul confirmă pe fundal
         setTotalGlobal(prev => prev + 1);
       }
     } catch (e) {
-      console.error("Eroare Critică: Nu s-a putut incrementa bilanțul național. Verificați conexiunea la internet.", e);
+      console.error("Eroare Critică Incrementare:", e);
     }
   }, []);
 
@@ -155,9 +141,7 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
 
   useEffect(() => {
-    // Verificăm dacă suntem în mediul de browser înainte de a accesa localStorage (Regulă de aur în Next.js)
     if (typeof window !== 'undefined') {
-      // La deschiderea site-ului, căutăm în memoria locală (LocalStorage) datele vechi
       const savedName = localStorage.getItem("c_nume");
       const savedStats = localStorage.getItem("c_stats");
       const savedTeam = localStorage.getItem("c_teamId");
@@ -165,8 +149,8 @@ export default function ClientWrapper({ children }) {
       let statsObject = {
         wins: 0,
         losses: 0,
-        skin: "red", // Skin-ul clasic românesc (default)
-        hasGoldenEgg: false, // Mecanism de recompensă rară (Oul de Aur)
+        skin: "red",
+        hasGoldenEgg: false,
         lastGoldenCheck: Date.now(),
         teamId: savedTeam || null
       };
@@ -179,8 +163,7 @@ export default function ClientWrapper({ children }) {
           statsObject = { ...statsObject, ...parsed };
           
           // --- LOGICA DE DROP PENTRU OUL DE AUR (GAMIFICATION) ---
-          // Jucătorul are 5% șanse pe oră să primească skin-ul special de aur când intră pe site.
-          // Acest lucru încurajează revenirile periodice.
+          // Jucătorul are 5% șanse pe oră să primească skin-ul special de aur.
           const now = Date.now();
           const oOraInMilisecunde = 3600000;
           
@@ -191,15 +174,13 @@ export default function ClientWrapper({ children }) {
             statsObject.lastGoldenCheck = now;
           }
         } catch (err) {
-          console.warn("Avertisment: Datele locale din browser sunt corupte sau în format vechi. Se resetează statisticile profilului pentru a preveni crash-uri.");
+          console.warn("Date locale corupte. Rescriem structura sigură de memorie.");
         }
       }
 
-      // Salvăm în State-ul React și rescriem în LocalStorage pentru a consolida formatul curent
       setUserStats(statsObject);
       localStorage.setItem("c_stats", JSON.stringify(statsObject));
       
-      // Am terminat încărcarea datelor. Oprim ecranul de loading (Boot Screen).
       setIsHydrated(true);
     }
   }, []);
@@ -209,19 +190,18 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
 
   useEffect(() => {
-    if (!isHydrated) return; // Așteptăm să se încarce datele locale înainte de a deschide conexiuni
+    if (!isHydrated) return;
 
-    // Inițializăm clientul Pusher o singură dată (Singleton Pattern)
     if (!pusherRef.current) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
         cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "eu",
-        forceTLS: true // Criptare obligatorie pentru securitatea datelor
+        forceTLS: true 
       });
     }
 
     const pusher = pusherRef.current;
 
-    // 1. CANALUL GLOBAL: Ne abonăm pentru a actualiza Bilanțul Național Live
+    // 1. CANALUL GLOBAL: Actualizăm Bilanțul Național în timp real.
     const canalGlobal = pusher.subscribe('global');
     canalGlobal.bind('ou-spart', (data) => {
       const totalDinBazaDeDate = parseInt(data.total);
@@ -230,26 +210,24 @@ export default function ClientWrapper({ children }) {
       }
     });
 
-    // 2. CANALUL PERSONAL: Ne abonăm pentru notificări de duel direct către acest utilizator
+    // 2. CANALUL PERSONAL: Interceptăm cererile de duel.
     if (nume) {
-      // Fiecare utilizator are un canal unic bazat pe numele său (ex: 'user-notif-Andrei')
       const canalPersonal = pusher.subscribe(`user-notif-${nume}`);
       canalPersonal.bind('duel-request', (data) => {
-        // Dacă utilizatorul se află deja într-un meci (pe o pagină de /joc/), ignorăm notificarea
-        // pentru a nu-l întrerupe din concentrarea actuală.
+        // Ignorăm notificarea dacă suntem deja în Arenă
         if (pathname.includes('/joc/')) return;
 
-        playSound('notificare-duel');
-        triggerVibrate([100, 50, 100, 50, 100]); // Model de vibrație insistentă de "Atenție!"
+        playSound('victorie'); // Folosim un sunet alertant
+        triggerVibrate([100, 50, 100, 50, 100]); 
         setNotificare(data);
 
-        // Notificarea dispare automat de pe ecran după 15 secunde dacă este ignorată
+        // Auto-închidere după 15 secunde
         const timer = setTimeout(() => setNotificare(null), 15000);
         return () => clearTimeout(timer);
       });
     }
 
-    // 3. GET COUNTER INITIAL: Sincronizarea inițială a Bilanțului Național la intrarea pe site
+    // 3. GET COUNTER INIȚIAL: Fetch atomic din Redis la vizitarea site-ului
     fetch('/api/ciocnire', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
@@ -259,11 +237,8 @@ export default function ClientWrapper({ children }) {
     .then(d => { 
       if (d.success) setTotalGlobal(Math.max(0, d.total)); 
     })
-    .catch(() => console.warn("Avertisment Secundar: Nu s-a putut sincroniza contorul inițial cu Redis. Se va folosi valoarea locală."));
+    .catch(() => {});
 
-    // Cleanup Function (Demontarea Componentei)
-    // Când utilizatorul pleacă de pe site sau componenta se distruge, ne dezabonăm
-    // de la canale pentru a preveni 'memory leaks'.
     return () => {
       pusher.unsubscribe('global');
       if (nume) pusher.unsubscribe(`user-notif-${nume}`);
@@ -271,8 +246,8 @@ export default function ClientWrapper({ children }) {
   }, [nume, pathname, playSound, triggerVibrate, isHydrated]);
 
   /**
-   * Funcție care actualizează numele în State, îl salvează definitiv în browser 
-   * și declanșează o scurtă vibrație pentru confirmare tactilă.
+   * Funcție care actualizează numele în memorie (State + LocalStorage) 
+   * și declanșează o vibrație pentru confirmare tactilă.
    */
   const handleUpdateNume = (nouNume) => {
     setNume(nouNume);
@@ -283,29 +258,23 @@ export default function ClientWrapper({ children }) {
   };
 
   /**
-   * Funcție apelată când utilizatorul apasă "ACCEPTĂ" pe notificarea de duel.
-   * Îl redirecționează către camera privată de joc generată de cel care a trimis invitația.
+   * Direcționează utilizatorul spre arena privată unde este așteptat.
    */
   const handleAcceptDuel = () => {
     if (notificare) {
-      playSound('duel-start');
+      playSound('spargere'); 
       triggerVibrate(60);
-      // Construim link-ul cu toți parametrii necesari.
-      // Setăm host=false pentru că el este 'guest-ul' (cel invitat), nu creatorul camerei.
       const url = `/joc/${notificare.roomId}?nume=${encodeURIComponent(nume)}&host=false&teamId=${notificare.teamId || ''}&golden=${userStats.hasGoldenEgg}&skin=${userStats.skin || 'red'}`;
       router.push(url);
-      setNotificare(null); // Ascundem notificarea din interfață după acceptare
+      setNotificare(null); 
     }
   };
 
-  // Obiectul central care conține toate datele și funcțiile pe care le expunem către restul aplicației.
-  // Orice componentă învelită de ClientWrapper poate apela 'useGlobalStats()' pentru a primi acest obiect.
   const contextValue = {
     totalGlobal,
     nume,
     setNume: handleUpdateNume,
     userStats,
-    // Permitem actualizarea statisticilor (ex: din Arena după un meci) și le salvăm automat în browser
     setUserStats: (ns) => { 
       setUserStats(ns); 
       if (typeof window !== 'undefined') {
@@ -323,70 +292,80 @@ export default function ClientWrapper({ children }) {
       {children}
 
       {/* ========================================================================== */}
-      {/* UI NOTIFICARE DUEL: Pop-up-ul care apare când ești provocat de un prieten  */}
+      {/* UI NOTIFICARE DUEL (V22 OLED REDESIGN)                                     */}
       {/* ========================================================================== */}
       {notificare && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] z-[9999] animate-fade-in px-2">
-          <div className="bg-black/90 p-6 rounded-[2rem] border-2 border-red-600 shadow-[0_20px_50px_rgba(220,38,38,0.5)] relative overflow-hidden backdrop-blur-xl">
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 w-[92%] max-w-[420px] z-[9999] animate-fade-in-up px-2 touch-none">
+          
+          <div className="bg-[#050505]/95 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-red-600/50 shadow-[0_30px_60px_rgba(220,38,38,0.25)] relative overflow-hidden backdrop-blur-2xl">
             
-            {/* Design de fundal (Watermark VS supradimensionat) */}
-            <div className="absolute top-0 right-0 p-4 opacity-[0.05] pointer-events-none">
-              <span className="text-[6rem] font-black italic text-white select-none">VS</span>
+            {/* Watermark Fundal */}
+            <div className="absolute top-[-10px] right-[-10px] p-0 opacity-[0.03] pointer-events-none mix-blend-screen">
+              <span className="text-[8rem] md:text-[10rem] font-black italic text-white select-none">VS</span>
             </div>
 
             <div className="flex items-center gap-5 relative z-10">
-              <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg animate-pulse select-none">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-red-600 rounded-2xl md:rounded-[1.5rem] flex items-center justify-center text-3xl md:text-4xl shadow-[0_0_20px_rgba(220,38,38,0.8)] animate-pulse select-none border border-red-400/50">
                 ⚔️
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
-                <h4 className="font-black text-xl uppercase tracking-tighter text-white italic truncate">Ai fost provocat!</h4>
-                <p className="text-xs text-white/60 uppercase font-bold tracking-widest truncate">
-                  De către: <span className="text-red-500 font-black">{notificare.deLa}</span>
+                <h4 className="font-black text-xl md:text-2xl uppercase tracking-tighter text-white italic truncate drop-shadow-md">Ești Provocat!</h4>
+                <p className="text-[10px] md:text-xs text-white/60 uppercase font-bold tracking-[0.2em] md:tracking-[0.3em] truncate">
+                  De Către: <span className="text-red-500 font-black drop-shadow-[0_0_5px_rgba(220,38,38,0.5)]">{notificare.deLa}</span>
                 </p>
-                {/* Afișăm grupul/familia dacă provocarea vine din interiorul unui grup */}
                 {notificare.teamName && (
-                  <p className="text-[10px] text-yellow-500/80 uppercase font-bold tracking-widest truncate">Din Grupul: {notificare.teamName}</p>
+                  <p className="text-[9px] md:text-[10px] text-yellow-500/80 uppercase font-black tracking-widest truncate">Familia: {notificare.teamName}</p>
                 )}
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6 relative z-10">
+            <div className="flex gap-3 md:gap-4 mt-8 md:mt-10 relative z-10">
               <button 
                 onClick={handleAcceptDuel} 
-                className="flex-[2] bg-red-600 hover:bg-red-500 py-4 rounded-xl font-black text-xs uppercase tracking-[0.1em] shadow-lg transition-colors text-white"
+                className="flex-[2] bg-red-600 hover:bg-red-500 hover:scale-105 active:scale-95 py-4 md:py-5 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(220,38,38,0.4)] transition-all text-white border border-red-500/50"
               >
                 ACCEPTĂ DUELUL
               </button>
               
               <button 
                 onClick={() => setNotificare(null)} 
-                className="flex-1 bg-white/5 hover:bg-white/10 py-4 rounded-xl font-bold text-xs uppercase text-white/50 border border-white/10 transition-colors"
+                className="flex-1 bg-white/5 hover:bg-white/10 active:scale-95 py-4 md:py-5 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest text-white/40 border border-white/10 transition-all hover:text-white"
               >
                 Refuză
               </button>
             </div>
 
-            {/* Bara de progres vizuală care scade în cele 15 secunde cât este valabilă notificarea */}
-            <div className="absolute bottom-0 left-0 h-1.5 bg-red-600/20 w-full">
-               <div className="h-full bg-red-600 animate-shrink" style={{ animationDuration: '15s', width: '100%' }}></div>
+            {/* Bara de progres vizuală (15 secunde CSS Animation) */}
+            <div className="absolute bottom-0 left-0 h-1.5 md:h-2 bg-red-900/30 w-full">
+               <div 
+                  className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.8)]" 
+                  style={{ animation: 'shrinkX 15s linear forwards', width: '100%', transformOrigin: 'left' }}
+               ></div>
             </div>
+
+            <style dangerouslySetInnerHTML={{__html: `
+              @keyframes shrinkX {
+                from { transform: scaleX(1); }
+                to { transform: scaleX(0); }
+              }
+            `}} />
           </div>
         </div>
       )}
 
       {/* ========================================================================== */}
-      {/* ECRANUL DE ÎNCĂRCARE (Boot Screen) - Evită afișarea de date vechi sau erori */}
+      {/* ECRANUL DE ÎNCĂRCARE (BOOT SCREEN V22 OLED)                               */}
       {/* ========================================================================== */}
       {!isHydrated && (
-        <div className="fixed inset-0 bg-[#050505] z-[9999] flex flex-col items-center justify-center gap-6">
-           <div className="relative w-20 h-20">
-              {/* Spinner animat sofisticat în jurul unui emoji */}
-              <div className="absolute inset-0 border-4 border-white/5 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center text-3xl select-none">🥚</div>
+        <div className="fixed inset-0 bg-[#020202] z-[9999] flex flex-col items-center justify-center gap-8 touch-none">
+           <div className="relative w-24 h-24 md:w-32 md:h-32">
+              <div className="absolute inset-0 border-[6px] border-white/5 rounded-full"></div>
+              <div className="absolute inset-0 border-[6px] border-red-600 border-t-transparent rounded-full animate-spin shadow-[0_0_40px_rgba(220,38,38,0.4)]"></div>
+              <div className="absolute inset-0 flex items-center justify-center text-4xl md:text-5xl select-none animate-pulse">🥚</div>
            </div>
-           <div className="text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.5em] text-white/50 animate-pulse">Se încarcă Tradiția...</span>
+           <div className="text-center space-y-2">
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.6em] md:tracking-[0.8em] text-white/40 drop-shadow-md">Sincronizare</span>
+              <p className="text-[8px] font-black uppercase tracking-widest text-red-600 animate-pulse">Tradiția Românească</p>
            </div>
         </div>
       )}
