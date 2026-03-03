@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * ====================================================================================================
+ * CIOCNIM.RO - PAGINA DE TRADIȚII ȘI SEO (V23.2 - LORE & IMMERSION)
+ * ====================================================================================================
+ */
+
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -12,17 +18,21 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
   <motion.article 
     initial="hidden"
     whileInView="visible"
-    viewport={{ once: true, margin: "-100px" }}
+    viewport={{ once: true, margin: "-50px" }}
     variants={{
       hidden: { opacity: 0, y: 50 },
       visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay, ease: "easeOut" } }
     }}
-    className="bg-white/5 p-8 md:p-12 rounded-[2.5rem] border border-white/10 backdrop-blur-md shadow-2xl relative overflow-hidden group"
+    className="bg-white/5 p-8 md:p-12 rounded-[2.5rem] border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden group hover:border-red-500/30 transition-colors duration-500"
   >
+    {/* Highlight subtil pe hover */}
+    <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    
     <div className="flex items-center gap-4 mb-6 relative z-10">
-      <span className="text-4xl md:text-5xl drop-shadow-md">{icon}</span>
+      <span className="text-4xl md:text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:scale-110 transition-transform duration-500">{icon}</span>
       <h2 className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-white">{title}</h2>
     </div>
+    
     <div className="space-y-4 text-[13px] md:text-[15px] font-bold text-white/70 leading-relaxed relative z-10">
       {children}
     </div>
@@ -31,26 +41,30 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
 
 export default function TraditiiPage() {
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#050505] text-white">
+    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30">
       
+      {/* OLED GLOWS (Luate direct din globals.css pentru unificare) */}
+      <div className="ambient-glow-red"></div>
+      <div className="ambient-glow-gold"></div>
+
       {/* HEADER SIMPLU PENTRU NAVIGARE */}
-      <div className="w-full flex justify-between items-center p-6 absolute top-0 left-0 z-50">
+      <div className="w-full flex justify-between items-center p-6 md:p-8 absolute top-0 left-0 z-50">
          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl group-hover:scale-110 transition-transform">🥚</span>
-            <span className="font-bold text-lg tracking-tight">Ciocnim<span className="text-red-500">.ro</span></span>
+            <span className="text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">🥚</span>
+            <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
          </Link>
-         <Link href="/" className="px-5 py-2 bg-white/10 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/20 transition-all">
-            Înapoi
+         <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
+            Înapoi în Arenă
          </Link>
       </div>
 
-      <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12">
+      <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12 relative z-10">
         
         <motion.header initial="hidden" animate="visible" variants={fadeUpVariant} className="text-center space-y-6">
-          <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none">
-            TRADIȚIA <br className="md:hidden" /><span className="text-red-600">CIOCNITULUI</span>
+          <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none drop-shadow-lg">
+            TRADIȚIA <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">CIOCNITULUI</span>
           </h1>
-          <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-widest leading-relaxed">
+          <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
             Află regulile jocului de Paște care a unit generații.
           </p>
         </motion.header>
@@ -58,29 +72,44 @@ export default function TraditiiPage() {
         <section className="flex flex-col gap-8 w-full mt-6">
           <ArticleSection title="De ce ciocnim ouă?" icon="🩸" delay={0.1}>
             <p>
-              Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong>"Hristos a Înviat!"</strong>.
+              Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong className="text-white">"Hristos a Înviat!"</strong>.
             </p>
             <p>
-              Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt. Astăzi, acest joc a devenit un prilej de bucurie în familie.
+              Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt. Astăzi, acest joc a devenit un prilej de bucurie și reunire a familiei.
             </p>
           </ArticleSection>
 
           <ArticleSection title="Regulile Nescrise" icon="📜" delay={0.2}>
-            <p>Dacă te-ai întrebat vreodată cum se ciocnesc ouăle corect, există un protocol simplu:</p>
-            <ul className="list-disc pl-6 space-y-2 mt-2">
-              <li><strong>Cap la Cap:</strong> Regula primei zile de Paște (duminică).</li>
-              <li><strong>Cap la Dos:</strong> Permis începând cu a doua zi (luni).</li>
-              <li><strong>Dos la Dos:</strong> Rezervat pentru a treia zi.</li>
+            <p>Dacă te-ai întrebat vreodată cum se ciocnesc ouăle corect, există un protocol simplu păstrat din tată-n fiu:</p>
+            <ul className="list-disc pl-6 space-y-3 mt-4">
+              <li><strong className="text-white uppercase tracking-wider text-xs">Cap la Cap:</strong> Regula primei zile de Paște (Duminică).</li>
+              <li><strong className="text-white uppercase tracking-wider text-xs">Cap la Dos:</strong> Permis abia începând cu a doua zi (Luni).</li>
+              <li><strong className="text-white uppercase tracking-wider text-xs">Dos la Dos:</strong> Rezervat strict pentru a treia zi de sărbătoare.</li>
             </ul>
-            <p className="mt-4">
-               Cel care lovește primul rostește "Hristos a Înviat!", iar cel care ține oul răspunde cu "Adevărat a Înviat!".
-            </p>
+            <div className="mt-6 p-4 bg-red-600/10 border border-red-500/20 rounded-2xl shadow-inner">
+               <p className="text-red-400 font-black italic text-center text-sm md:text-base">
+                 Cel care lovește zice "Hristos a Înviat!", iar celălalt răspunde "Adevărat a Înviat!"
+               </p>
+            </div>
+          </ArticleSection>
+
+          {/* SECȚIUNE NOUĂ PENTRU RETENȚIE ȘI SEO */}
+          <ArticleSection title="Superstiții Românești" icon="✨" delay={0.3}>
+            <p>Jocul nu este doar o competiție, ci și un mod de a atrage norocul în Noul An agricol:</p>
+            <ul className="list-disc pl-6 space-y-3 mt-4">
+              <li>Cine are oul cel mai tare și iese învingător din toate duelurile, va fi sănătos și puternic tot restul anului.</li>
+              <li>Dacă găsești la masă un ou cu două gălbenușuri, vei avea parte de noroc dublu (și poate o nuntă în familie).</li>
+              <li>Cojile ouălor sparte și sfințite nu se aruncă la gunoi! Tradiția cere să le îngropi în pământul grădinii pentru a proteja recolta de rele.</li>
+            </ul>
           </ArticleSection>
         </section>
 
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-8">
-          <Link href="/" className="bg-red-600 px-8 py-4 rounded-full font-black uppercase tracking-widest text-white hover:scale-105 transition-all shadow-[0_10px_30px_rgba(220,38,38,0.3)]">
-            Joacă Acum
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
+          <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden">
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+            <span className="relative z-10 flex items-center gap-3 drop-shadow-md">
+              JOACĂ ACUM ⚔️
+            </span>
           </Link>
         </motion.div>
 
