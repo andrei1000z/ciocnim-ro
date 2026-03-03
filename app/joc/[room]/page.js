@@ -2,7 +2,7 @@
 
 /**
  * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.5 - TEAM SCORE FIX)
+ * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.8 - HOST ROLES & TEAM SYNC)
  * ========================================================================================================================
  */
 
@@ -83,7 +83,8 @@ function ArenaMaster({ room }) {
 
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
-  const teamIdPreluat = searchParams.get("teamId"); // NOU: Luăm teamId-ul din link!
+  const teamIdPreluat = searchParams.get("teamId"); 
+  const isHost = searchParams.get("host") === "true"; // NOU: Folosim host pentru roles!
 
   const canStrike = !rezultat && opponent && atacantName === nume;
 
@@ -91,22 +92,14 @@ function ArenaMaster({ room }) {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
   };
 
-  const determineRoles = useCallback((myName, opName, seed) => {
-      const sorted = [myName, opName].sort();
-      if (seed > 0.5) return sorted[0];
-      return sorted[1];
-  }, []);
-
-  const [localSeed, setLocalSeed] = useState(Math.random());
-
   const broadcastJoin = useCallback(() => {
     if (!nume) return;
     fetch('/api/ciocnire', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar, seed: localSeed })
+      body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar, isHost: isHost })
     });
-  }, [room, nume, me, localSeed]);
+  }, [room, nume, me, isHost]);
 
   // LOGICĂ BOT
   useEffect(() => {
@@ -139,7 +132,7 @@ function ArenaMaster({ room }) {
       }
   }, [isBotMatch, atacantName, rezultat, incrementGlobal]);
 
-  // PUSHER SYNC CU HANDSHAKE REPARAT
+  // PUSHER SYNC CU HANDSHAKE REPARAT (FĂRĂ RANDOM SEED)
   useEffect(() => {
     if (isBotMatch) return;
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
@@ -152,8 +145,15 @@ function ArenaMaster({ room }) {
     arenaChannel.bind("join", (data) => {
       if (data.jucator !== nume) { 
         setOpponent(data); 
-        const atacantCalculat = determineRoles(nume, data.jucator, data.seed || localSeed);
-        setAtacantName(atacantCalculat);
+        
+        // NOU: Cel care e setat ca Host în link va lovi mereu primul în prima rundă!
+        if (isHost && data.isHost) {
+           // Dacă amândoi sunt host (bug link), rezolvăm alfabetic
+           setAtacantName([nume, data.jucator].sort()[0]);
+        } else {
+           setAtacantName(isHost ? nume : data.jucator);
+        }
+
         broadcastJoin(); 
       }
     });
@@ -165,7 +165,7 @@ function ArenaMaster({ room }) {
     arenaChannel.bind("lovitura", (data) => executeBattle(data));
 
     return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
-  }, [room, nume, isBotMatch, broadcastJoin, determineRoles, localSeed]);
+  }, [room, nume, isBotMatch, broadcastJoin, isHost]);
 
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isBotMatch) {
@@ -228,8 +228,8 @@ function ArenaMaster({ room }) {
           roomId: room, 
           actiune: 'lovitura', 
           jucator: nume, 
-          regiune: userStats.regiune, // Trimitem regiunea ca să urce în clasament!
-          teamId: teamIdPreluat, // NOU: Trimitem teamId-ul ca să îți urce punctul în grup!
+          regiune: userStats.regiune, 
+          teamId: teamIdPreluat, 
           castigaCelCareDa: castigaCelCareDaRandom,
           atacant: nume, 
           esteCastigator: castigaCelCareDaRandom
@@ -266,7 +266,8 @@ function ArenaMaster({ room }) {
     if (isBotMatch) window.location.reload();
     else { 
       setRezultat(null); 
-      setLocalSeed(Math.random());
+      // La revanșă facem swap la atacant
+      setAtacantName(prev => prev === nume ? opponent.jucator : nume);
       triggerVibrate(); 
       broadcastJoin(); 
     }

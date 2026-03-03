@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.7 - CLEAN RENAME & STATS FIX)
+ * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.8 - CLEAN RENAME & STATS FIX)
  * ====================================================================================================
  */
 
@@ -367,18 +367,17 @@ function HomeContent() {
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [isPlayModalOpen, setIsPlayModalOpen] = useState(false);
   
-  // Control pentru Pop-up-ul de interceptare a invitațiilor
   const [showJoinModal, setShowJoinModal] = useState(false);
 
-  // Stare locală pentru input-ul de nume (PREVINE FANTOMELE)
+  // Stare locală MEREU curată. Nu o mai forțăm să asculte de 'nume' după montare.
   const [localNume, setLocalNume] = useState("");
 
-  // NOU: Sincronizare simplă o singură dată la montare sau când 'nume' e adus din context prima oară
+  // O singură populare inițială.
   useEffect(() => {
       if (nume && localNume === "") {
           setLocalNume(nume);
       }
-  }, [nume, localNume]);
+  }, [nume]);
 
   const getStoredTeamIds = () => {
       const stored = localStorage.getItem("c_teamIds");
@@ -409,7 +408,6 @@ function HomeContent() {
       return newIds;
   };
 
-  // Verificare specială DOAR pentru utilizatorii care n-au nume și intră din link
   useEffect(() => {
     const paramId = searchParams.get("joinTeam");
     if (isHydrated && paramId && (!nume || nume.length < 3)) {
@@ -417,21 +415,18 @@ function HomeContent() {
     }
   }, [isHydrated, searchParams, nume]);
 
-  // Handler-ul pentru când userul dă submit din noul Pop-Up
   const handleModalJoin = (alesNume) => {
     setNume(alesNume);
     setShowJoinModal(false);
   };
 
-  // Funcția sigură pentru salvarea numelui (șterge fantomele prin API)
   const handleSaveNume = async () => {
       const finalName = localNume.trim().toUpperCase();
       if (finalName.length < 3) return alert("Băi, pune un nume de minim 3 litere!");
-      if (finalName === nume) return;
+      if (finalName === (nume || "").trim().toUpperCase()) return;
 
       triggerVibrate();
       
-      // Dacă aveai deja nume și ești în grupuri, spunem API-ului să facă switch ca să eviți fantomele
       if (nume && loadedTeams.length > 0) {
           try {
               await fetch('/api/ciocnire', {
@@ -439,7 +434,7 @@ function HomeContent() {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                       actiune: 'schimba-porecla',
-                      oldName: nume,
+                      oldName: nume.trim().toUpperCase(),
                       newName: finalName,
                       teamIds: loadedTeams.map(t => t.details.id)
                   })
@@ -515,8 +510,8 @@ function HomeContent() {
         addStoredTeamId(data.teamId);
         
         const newTeamData = { 
-            details: { id: data.teamId, nume: `GRUPUL LUI ${nume.toUpperCase()}` }, 
-            top: [{ member: nume, score: 0 }] 
+            details: { id: data.teamId, nume: `GRUPUL LUI ${nume.toUpperCase().trim()}` }, 
+            top: [{ member: nume.toUpperCase().trim(), score: 0 }] 
         };
         
         setLoadedTeams(prev => [...prev, newTeamData]);
@@ -532,7 +527,7 @@ function HomeContent() {
     
     setLoadedTeams(prev => prev.map(t => {
         if (t.details.id === teamId) {
-            return { ...t, details: { ...t.details, nume: nouNume.toUpperCase() } };
+            return { ...t, details: { ...t.details, nume: nouNume.toUpperCase().trim() } };
         }
         return t;
     }));
@@ -568,13 +563,11 @@ function HomeContent() {
       })
     });
 
-    // Păstrăm &teamId în link ca să știe Arena unde să pună punctul!
     router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true&teamId=${teamId}`);
   };
 
   if (!isHydrated) return null;
 
-  // NOU: Logica clară pentru când să afișăm butonul "Salvează"
   const isNameChanged = localNume.trim().toUpperCase() !== (nume || "").trim().toUpperCase();
 
   return (

@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.4 - BULLETPROOF REGION & SYNC)
+ * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.8 - SYNC MASTER)
  * ====================================================================================================
  */
 
@@ -20,7 +20,6 @@ export default function ClientWrapper({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   
-  // Setăm o regiune default pentru a evita null-urile în clasament!
   const [userStats, setUserStats] = useState(DEFAULT_STATS);
   const [totalGlobal, setTotalGlobal] = useState(0);
   const [topRegiuni, setTopRegiuni] = useState([]);
@@ -38,12 +37,9 @@ export default function ClientWrapper({ children }) {
     try { const audio = new Audio(`/${soundFile}.mp3`); audio.volume = 0.4; audio.play().catch(() => {}); } catch (e) {}
   }, []);
 
-  // Funcție sigură pentru actualizarea și salvarea statisticilor
   const updateUserStats = useCallback((newStats) => {
     setUserStats(prevStats => {
-      // Dacă primim o funcție (cum facem în arenă), o executăm cu prevStats
       const updated = typeof newStats === 'function' ? newStats(prevStats) : newStats;
-      // Salvăm instant în localStorage pentru a preveni pierderea la refresh
       localStorage.setItem("c_stats", JSON.stringify(updated));
       return updated;
     });
@@ -56,7 +52,6 @@ export default function ClientWrapper({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             actiune: 'increment-global', 
-            // Trimitem regiunea DOAR dacă am câștigat duelul și o curățăm de spații
             regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null 
         })
       });
@@ -77,11 +72,9 @@ export default function ClientWrapper({ children }) {
     if (savedStats) {
       try { 
         const parsed = JSON.parse(savedStats);
-        // MERGE DE SIGURANȚĂ: Ne asigurăm că dacă îi lipsea vreo proprietate veche (ex: regiune), o primește acum
         const safeStats = { ...DEFAULT_STATS, ...parsed };
         setUserStats(safeStats); 
         
-        // Auto-heal: Ne asigurăm că dacă există un nume salvat, el este și în userStats
         if (savedName && safeStats.nume !== savedName) {
             const healedStats = { ...safeStats, nume: savedName };
             setUserStats(healedStats);
@@ -89,7 +82,6 @@ export default function ClientWrapper({ children }) {
         }
       } catch (e) {}
     } else if (savedName) {
-        // Dacă are nume dar nu are statistici (intră prima oară pe link și a pus numele în modal)
         setUserStats(prev => ({ ...prev, nume: savedName }));
     }
     
@@ -122,7 +114,7 @@ export default function ClientWrapper({ children }) {
     if (!isHydrated || !nume || nume.length < 3) return;
     if (!pusherRef.current) return;
 
-    const channelName = `user-notif-${nume}`;
+    const channelName = `user-notif-${nume.trim().toUpperCase()}`;
     const userChannel = pusherRef.current.subscribe(channelName);
     
     userChannel.bind('duel-request', (data) => {
@@ -140,8 +132,12 @@ export default function ClientWrapper({ children }) {
         const cleanName = val.toUpperCase().trim(); 
         setNume(cleanName); 
         localStorage.setItem("c_nume", cleanName); 
-        // Sincronizăm instant și userStats pentru a nu avea latență când intră în grup!
-        updateUserStats(prev => ({ ...prev, nume: cleanName }));
+        
+        setUserStats(prev => {
+           const nextStats = { ...prev, nume: cleanName };
+           localStorage.setItem("c_stats", JSON.stringify(nextStats));
+           return nextStats;
+        });
     },
     userStats, 
     setUserStats: updateUserStats,
@@ -158,7 +154,7 @@ export default function ClientWrapper({ children }) {
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500 animate-pulse bg-red-500/10 px-4 py-1.5 rounded-full inline-block">Provocare Nouă!</span>
               <p className="font-black text-xl md:text-2xl text-white italic drop-shadow-md">⚔️ {notificare.deLa} te-a provocat!</p>
               <div className="flex gap-3 pt-3">
-                <button className="flex-1 bg-red-600 p-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_10px_20px_rgba(220,38,38,0.3)] active:scale-95 text-white" onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}`); }}>ACCEPTĂ</button>
+                <button className="flex-1 bg-red-600 p-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_10px_20px_rgba(220,38,38,0.3)] active:scale-95 text-white" onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}&teamId=${notificare.teamId || ''}`); }}>ACCEPTĂ</button>
                 <button className="flex-1 bg-white/5 p-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white/50 border border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95" onClick={() => setNotificare(null)}>REFUZĂ</button>
               </div>
             </div>

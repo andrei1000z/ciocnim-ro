@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V25.7 - STRICT TRIM & SCORE FIX)
+ * CIOCNIM.RO - API ENDPOINT (V25.8 - STRICT TRIM & SCORE FIX)
  * ====================================================================================================
  */
 
@@ -62,7 +62,7 @@ export async function POST(request) {
 
       case 'join': {
         await pusher.trigger(`arena-v22-${roomId}`, 'join', { 
-          jucator: jucator.trim(), skin, isGolden, hasStar, t: Date.now(), seed: body.seed 
+          jucator: jucator.trim().toUpperCase(), skin, isGolden, hasStar, t: Date.now(), seed: body.seed 
         });
         return NextResponse.json({ success: true });
       }
@@ -70,29 +70,23 @@ export async function POST(request) {
       case 'lovitura': {
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
         
-        // 1. INCREMENTARE AUTOMATĂ A BILANȚULUI TOTAL
         const noulTotal = await redis.incr('global_ciocniri_total');
         
-        // 2. INCREMENTARE PUNCTE (Regiune & Grup)
         if (esteCastigator) {
-          // Punct pentru regiune
           if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
             await redis.zincrby('leaderboard_regiuni', 1, regiune.trim());
           }
-          // Punct în clasamentul intern al grupului!
-          if (teamId) {
+          if (teamId && teamId !== "null" && teamId !== "") {
             await redis.zincrby(`team:${teamId}:membri`, 1, jucator.trim().toUpperCase());
           }
         }
         
         const topActualizat = await getClasamentRegiuni();
 
-        // 3. Notificăm arena curentă
         await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', { 
-          jucator: jucator.trim(), castigaCelCareDa, atacant: atacant.trim(), t: Date.now() 
+          jucator: jucator.trim().toUpperCase(), castigaCelCareDa, atacant: atacant.trim().toUpperCase(), t: Date.now() 
         });
 
-        // 4. Notificăm TOATĂ platforma
         await pusher.trigger('global', 'update-complet', { 
           total: noulTotal, 
           topRegiuni: topActualizat 
@@ -104,7 +98,7 @@ export async function POST(request) {
       case 'arena-chat': {
         if (!text || text.trim() === "") return NextResponse.json({ success: false });
         await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', { 
-          jucator: jucator.trim(), text: text.trim(), t: Date.now() 
+          jucator: jucator.trim().toUpperCase(), text: text.trim(), t: Date.now() 
         });
         return NextResponse.json({ success: true });
       }
@@ -113,8 +107,8 @@ export async function POST(request) {
         if (!oponentNume || !jucator || !roomId) {
           return NextResponse.json({ success: false, error: "Date incomplete" });
         }
-        await pusher.trigger(`user-notif-${oponentNume.trim()}`, 'duel-request', {
-          deLa: jucator.trim(), roomId: roomId, teamId: teamId || null, t: Date.now()
+        await pusher.trigger(`user-notif-${oponentNume.trim().toUpperCase()}`, 'duel-request', {
+          deLa: jucator.trim().toUpperCase(), roomId: roomId, teamId: teamId || null, t: Date.now()
         });
         return NextResponse.json({ success: true });
       }
@@ -125,14 +119,11 @@ export async function POST(request) {
           const newClean = newName.trim().toUpperCase();
 
           for (const tid of teamIds) {
-            // Luăm scorul (victoriile) pe care îl avea numele vechi
             const scorVechi = await redis.zscore(`team:${tid}:membri`, oldClean);
             
             if (scorVechi !== null) {
               const pipeline = redis.pipeline();
-              // Ștergem fantoma
               pipeline.zrem(`team:${tid}:membri`, oldClean);
-              // Băgăm numele nou cu scorul intact
               pipeline.zadd(`team:${tid}:membri`, scorVechi, newClean);
               await pipeline.exec();
             }
@@ -149,7 +140,6 @@ export async function POST(request) {
         
         const teamStats = await redis.hgetall(`team:${teamId}:stats`);
         
-        // Dacă un jucător nou a intrat pe link, îl adăugăm cu 0 puncte
         if (jucator && jucator.trim().length >= 3) {
           const cleanPlayer = jucator.trim().toUpperCase();
           const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
