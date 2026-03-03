@@ -1,352 +1,82 @@
 @import "tailwindcss";
 
-/**
- * ========================================================================================================================
- * CIOCNIM.RO - SANCTUARY NEURAL FRAMEWORK (VERSION 10.0 - THE LIQUID GLASS SUPREMACY)
- * ------------------------------------------------------------------------------------------------------------------------
- * Autori: Gemini AI & Andrei (The Master Architects of the Digital Easter 2026)
- * Tehnologii: Tailwind CSS V4, PostCSS Engine, OLED Depth Mapping, Haptic Visualizer.
- * * 📜 FILOZOFIA DE DESIGN "LIQUID GLASS 10.0":
- * Acest document reprezintă coloana vertebrală vizuală și logică a ecosistemului Ciocnim.ro.
- * Trecem de la un design static la o arhitectură bazată pe "profunzime OLED" și "refracție dinamică".
- * Fiecare utilitate este calibrată pentru a minimiza latența vizuală și pentru a maximiza imersiunea.
- * * 🛠️ INFRASTRUCTURĂ ȘI OPTIMIZĂRI CRITICE:
- * 1. ABSOLUTE VIEWPORT STABILITY (THE TANK LOCK): Implementare multinivel pentru 'overflow-x: hidden' 
- * și 'touch-action: pan-y'. Garantează că site-ul se comportă ca o aplicație nativă, eliminând 
- * orice mișcare parazită laterală în timpul ciocnirii.
- * 2. CHROMATIC ABERRATION SIMULATION: Utilizarea de umbre stratificate și gradiente cu saturare de 160% 
- * pentru a simula modul în care lumina trece prin sticlă curbată și ouă de Paște de lux.
- * 3. HAPTIC VISUAL ENGINE: Clase de animație GPU-accelerated (transform-3d) care oferă feedback 
- * vizual instantaneu la atingere, compensând lipsa de feedback tactil pe anumite browsere.
- * 4. SEO NEURAL GROUNDING: Peste 3000 de caractere de documentație tehnică incluse în cod pentru 
- * indexarea semantică de către motoarele de căutare de ultimă generație (AI Crawlers).
- * 5. SAFE AREA ADAPTIVITY: Suport complet pentru env(safe-area-inset) pe dispozitivele cu 
- * Dynamic Island, Notch sau margini curbate (iPhone 17/18 & Android Ultra).
- * 6. BILANȚ NAȚIONAL GLOW: Clase specifice pentru randearea contorului global cu efect de neon pulsatoriu.
- * ========================================================================================================================
- */
+/* ==========================================================================
+   CIOCNIM.RO - STILURI GLOBALE (MINIMAL & RAPID)
+   ========================================================================== */
 
 @layer base {
-  /* ==========================================================================
-     1. DESIGN TOKENS "TITAN LIQUID" (V10 CORE VARIABLES)
-     ========================================================================== */
-  :root {
-    /* --- Culori de Fundal (OLED Infinite Black & Deep Sanctuary) --- */
-    --bg-ultra-dark: #010000; /* Contrast pur de 1.000.000:1 pentru ecrane Super Retina */
-    --bg-sanctuary: #040000;
-    --bg-surface: rgba(8, 0, 0, 0.98);
-    
-    /* --- Ierarhia Roșie (Ruby Impact & Crimson Sanctuary) --- */
-    --red-primary: #dc2626;
-    --red-hover: #ef4444;
-    --red-glow: rgba(220, 38, 38, 0.8);
-    --red-deep: #410808;
-    --red-liquid: rgba(220, 38, 38, 0.18);
-    
-    /* --- Ierarhia Aurie (Imperial Gold & Legendary Drop) --- */
-    --gold-primary: #f59e0b; 
-    --gold-legendary: #fbbf24;
-    --gold-glow: rgba(245, 158, 11, 0.7);
-    --gold-liquid: rgba(245, 158, 11, 0.12);
-    
-    /* --- Skin Engine Shaders (Refractive Emerald, Cosmic Nebula, Deep Sapphire) --- */
-    --diamond-primary: #10b981;
-    --diamond-glow: rgba(16, 185, 129, 0.6);
-    --cosmic-primary: #8b5cf6;
-    --cosmic-glow: rgba(139, 92, 246, 0.6);
-    --sapphire-primary: #2563eb;
-    --sapphire-glow: rgba(37, 99, 235, 0.6);
-    
-    /* --- Parametrii de Refracție Liquid Glass 10.0 --- */
-    --liquid-blur: 80px; /* Blur masiv pentru profunzime de câmp */
-    --liquid-blur-sm: 16px;
-    --glass-opacity: 0.09;
-    --glass-border: rgba(255, 255, 255, 0.14);
-    --glass-saturation: 180%; /* Saturare extremă pentru un aspect "vibrant" */
-    
-    /* --- Geometrie și Layout (Anti-Shake Precision) --- */
-    --nav-height: 90px;
-    --radius-sanctuary: 3rem;
-    --radius-button: 1.5rem;
-    --radius-bubble: 2.2rem;
-    
-    /* --- Z-Index Strategic Buffer --- */
-    --z-under: -100;
-    --z-back: -50;
-    --z-base: 10;
-    --z-nav: 1000;
-    --z-overlay: 3000;
-    --z-modal: 7000;
-    --z-god: 9999;
-  }
-
-  /* ==========================================================================
-     2. RESETARE APP-NATIVE ȘI STABILIZARE VERTICALĂ (THE TANK LOCK)
-     ========================================================================== */
-  html {
-    overflow-x: hidden !important; /* Blocare forțată pe axa X pentru a opri balansul lateral */
+  html, body {
+    @apply bg-[#050505] text-white;
     width: 100%;
-    height: 100%;
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-    background-color: var(--bg-ultra-dark);
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
     min-height: 100vh;
-    width: 100%;
-    overflow-x: hidden !important; /* Dublă barieră de securitate pentru stabilitate pe mobil */
-    background-color: var(--bg-ultra-dark);
-    color: #ffffff;
     
-    /* --- Experiență de Aplicație Nativă (Overscroll Prevention) --- */
-    overscroll-behavior-y: none; /* Previne efectul de "pull-to-refresh" pe iOS/Android */
-    touch-action: pan-y; /* Permite doar scroll vertical, interzice orice gest de swype lateral */
-    -webkit-tap-highlight-color: transparent; /* Elimină flash-ul gri la atingere pe iPhone */
+    /* Previne mișcarea laterală a site-ului pe mobil */
+    overflow-x: hidden !important; 
     
-    /* --- Motor de Randare Fonturi (Titan Smooth) --- */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    /* Oprește efectul de pull-to-refresh pe telefoane (să nu dea refresh din greșeală când dau cu oul) */
+    overscroll-behavior-y: none; 
     
-    /* --- Blocare Selecție (Simțire de Joc Premium) --- */
+    /* Scoate flash-ul gri când apeși pe un buton pe iOS */
+    -webkit-tap-highlight-color: transparent; 
+    
+    /* Previne selectarea textului din greșeală, dă senzația de aplicație nativă */
     user-select: none; 
     -webkit-user-select: none;
-    
-    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
-  /* Restaurare selecție text DOAR pentru zonele de comunicare */
-  input, textarea, [contenteditable="true"], .selectable-text {
+  /* Permite selectarea textului DOAR în inputuri (ex: la chat sau la nume) */
+  input, textarea {
     user-select: text !important;
     -webkit-user-select: text !important;
-    touch-action: auto;
-    @apply outline-none;
-  }
-
-  /* Ierarhia Tipografică a Sanctuarului (Optimizată SEO) */
-  h1 { @apply text-7xl md:text-9xl font-black uppercase tracking-tighter leading-[0.75] italic; }
-  h2 { @apply text-5xl md:text-6xl font-black uppercase tracking-tight italic; }
-  h3 { @apply text-2xl font-black uppercase tracking-[0.5em] text-red-600; }
-  p { @apply leading-relaxed text-white/50 font-medium; }
-
-  /* Buttons & Semantic Interaction Framework */
-  button {
-    @apply cursor-pointer active:scale-90 transition-all duration-300 outline-none select-none;
-    -webkit-appearance: none;
-    appearance: none;
   }
 }
 
 @layer utilities {
   /* ==========================================================================
-     3. SISTEMUL DE GLASSMORPHISM "LIQUID REFRACTION" V10
+     EFECTE AMBIENTALE ȘI FUNDALURI
      ========================================================================== */
   
-  /* Panoul Liquid Glass Principal: Blur masiv + Saturare mare */
-  .liquid-glass {
-    background: rgba(255, 255, 255, var(--glass-opacity));
-    backdrop-filter: blur(var(--liquid-blur)) saturate(var(--glass-saturation));
-    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--glass-saturation));
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.95);
+  .ambient-glow-titan {
+    background: radial-gradient(circle at 50% 50%, rgba(220, 38, 38, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
   }
 
-  /* Card-ul pentru Echipă/Clan: Optimizat pentru scannability pe lățime */
-  .clan-card-liquid {
-    background: linear-gradient(165deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 100%);
-    backdrop-filter: blur(var(--liquid-blur)) saturate(var(--glass-saturation));
-    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--glass-saturation));
-    @apply rounded-[3.5rem] p-8 md:p-12 border-l-[10px] border-l-red-600 shadow-2xl;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    max-width: 100%; /* Fix Andrei: Nu permite cardului să iasă din ecran */
-  }
-  .clan-card-liquid:hover {
-    transform: translateY(-8px) scale(1.01);
-    border-l-color: var(--red-hover);
-  }
-
-  /* ==========================================================================
-     4. IERARHIA BUTOANELOR TITAN (LOGICA CROMATICĂ ANDREI)
-     ========================================================================== */
-  
-  /* Butonul "TITAN RED": Acțiune Supremă (Invită, Acceptă, Creează) */
-  .btn-titan-red {
-    background: var(--red-primary);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 25px 70px rgba(220, 38, 38, 0.5);
-    @apply text-white font-black uppercase tracking-[0.3em] hover:bg-red-500 
-           hover:scale-[1.05] active:scale-90 transition-all duration-500 text-[11px] py-6 px-10 rounded-3xl;
-    text-shadow: 0 3px 15px rgba(0,0,0,0.4);
-  }
-
-  /* Butonul "TITAN GLASS": Matchmaking și Navigare (Duel Aleatoriu) */
-  .btn-titan-glass {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid var(--glass-border);
-    backdrop-filter: blur(25px) saturate(130%);
-    @apply text-white/80 font-black uppercase tracking-[0.25em] hover:bg-white/10 
-           hover:text-white active:scale-95 transition-all duration-500 text-[10px] py-6 px-10 rounded-3xl;
-  }
-
-  /* Indicatorul "BILANȚ NAȚIONAL": Efect de Neon Pulsatoriu */
-  .bilant-glow {
-    @apply font-black italic tracking-tighter text-white;
-    text-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(220,38,38,0.3);
-    animation: bilant-pulse 3s infinite ease-in-out;
-  }
-
-  /* ==========================================================================
-     5. SKIN ENGINE V10 (SHADER SIMULATION)
-     ========================================================================== */
-  
-  /* Cosmic Skin: Nebuloasă animată cu refracție stelară */
-  .skin-cosmic-animate {
-    background: linear-gradient(135deg, #8b5cf6 0%, #4c1d95 100%);
-    box-shadow: 0 0 60px var(--cosmic-glow);
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-  }
-  .skin-cosmic-animate::before {
-    content: ""; @apply absolute inset-0 opacity-50;
-    background-image: radial-gradient(circle at 50% 50%, white 2px, transparent 2px);
+  /* Grid-ul subtil de pe fundalul arenei */
+  .bg-liquid-mesh {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 30px 30px;
-    animation: cosmic-star-pulse 4s infinite alternate ease-in-out;
-  }
-
-  /* Diamond Skin: Emerald Reflect cu strălucire prismatică */
-  .skin-diamond-reflect {
-    background: linear-gradient(135deg, #10b981 0%, #064e3b 100%);
-    box-shadow: 0 0 60px var(--diamond-glow);
-    position: relative;
-    overflow: hidden;
-  }
-  .skin-diamond-reflect::after {
-    content: ""; @apply absolute inset-0 opacity-60;
-    background: linear-gradient(60deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%);
-    background-size: 350% 350%;
-    animation: diamond-shimmer 4.5s infinite linear;
   }
 
   /* ==========================================================================
-     6. MECANICA "LOVIT VS ȚINUT" (INSTRUCTION BANNERS)
+     SCROLLBAR PERSONALIZAT (Pentru secțiunea de Chat)
      ========================================================================== */
   
-  .instruction-banner {
-    @apply fixed top-1/4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-[2000] p-6 text-center 
-           rounded-3xl border-2 border-red-600/50 backdrop-blur-3xl shadow-2xl;
-    background: rgba(220, 38, 38, 0.15);
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(220, 38, 38, 0.5); /* Se face roșu la hover */
   }
 
   /* ==========================================================================
-     7. MOTORUL DE ANIMAȚII GPU V10 (120Hz OPTIMIZED)
+     ANIMAȚII SPECIFICE
      ========================================================================== */
-
-  @keyframes bilant-pulse {
-    0%, 100% { filter: brightness(1); transform: scale(1); }
-    50% { filter: brightness(1.3); transform: scale(1.02); }
+  
+  /* Animația steluței pentru jucătorii cu peste 10 victorii */
+  .animate-star {
+    animation: star-pulse 2s infinite alternate ease-in-out;
   }
 
-  @keyframes cosmic-star-pulse {
-    0% { transform: scale(1) rotate(0deg); opacity: 0.3; }
-    100% { transform: scale(1.25) rotate(10deg); opacity: 0.7; }
-  }
-
-  @keyframes diamond-shimmer {
-    0% { background-position: -250% -250%; }
-    100% { background-position: 250% 250%; }
-  }
-
-  @keyframes float-majestic {
-    0%, 100% { transform: translateY(0) rotate(-1.5deg) scale(1); }
-    50% { transform: translateY(-35px) rotate(1.5deg) scale(1.02); }
-  }
-
-  @keyframes titan-heartbeat {
-    0%, 100% { box-shadow: 0 0 20px var(--red-glow); }
-    50% { box-shadow: 0 0 50px var(--red-hover); }
-  }
-
-  .animate-float-v9 { animation: float-majestic 8s ease-in-out infinite; }
-  .animate-heartbeat-v10 { animation: titan-heartbeat 2s infinite ease-in-out; }
-
-  /* ==========================================================================
-     8. BACKGROUND DEPTH & ETHNIC SANCTUARY PATTERNS
-     ========================================================================== */
-
-  .bg-ethnic-sanctuary {
-    background-color: var(--bg-ultra-dark);
-    background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 0l60 60-60 60L0 60 60 0zm0 18l42 42-42 42-42-42 42-42z' fill='%23330000' fill-opacity='0.06'/%3E%3C/svg%3E");
-    background-attachment: fixed;
-  }
-
-  /* Ambient Glow Layers (OLED Optimization) */
-  .ambient-glow-red {
-    @apply fixed top-[-15%] left-[-10%] w-[80vw] h-[80vw] bg-red-600/[0.06] blur-[180px] rounded-full pointer-events-none;
-    z-index: var(--z-under);
-    animation: ambient-pulse 12s infinite alternate ease-in-out;
-  }
-
-  .ambient-glow-gold {
-    @apply fixed bottom-[-15%] right-[-10%] w-[70vw] h-[70vw] bg-yellow-600/[0.04] blur-[160px] rounded-full pointer-events-none;
-    z-index: var(--z-under);
-  }
-
-  @keyframes ambient-pulse {
-    0% { opacity: 0.3; transform: scale(1); }
-    100% { opacity: 0.7; transform: scale(1.1); }
-  }
-
-  /* ==========================================================================
-     9. RESPONSIVITATE EXTREMĂ ȘI FIX-URI LĂȚIME (NO TEXT-CUT)
-     ========================================================================== */
-
-  @media (max-width: 480px) {
-    :root {
-      --liquid-blur: 32px;
-      --radius-sanctuary: 2rem;
-    }
-    
-    /* Fix Andrei: Ne asigurăm că textul nu este tăiat de laterala telefonului */
-    .px-mobile-fix {
-      padding-left: 1.5rem !important;
-      padding-right: 1.5rem !important;
-    }
-
-    h1 { font-size: 3.5rem; letter-spacing: -0.06em; line-height: 0.85; }
-    h2 { font-size: 2.5rem; }
-    
-    .liquid-glass { @apply rounded-[2.5rem] p-6; }
-    
-    /* Suport pentru Safe Areas pe iPhone-uri moderne */
-    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
-    .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
-  }
-
-  /* Titan Scrollbar (Ultra-Subtilă pentru experiență imersivă) */
-  .titan-scroll::-webkit-scrollbar { width: 4px; }
-  .titan-scroll::-webkit-scrollbar-track { background: transparent; }
-  .titan-scroll::-webkit-scrollbar-thumb { 
-    background: rgba(255, 255, 255, 0.1); 
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-  }
-  .titan-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+  @keyframes star-pulse {
+    0% { transform: scale(1) rotate(-5deg); filter: brightness(1); }
+    100% { transform: scale(1.2) rotate(15deg); filter: brightness(1.3); }
   }
 }
-
-/**
- * ========================================================================================================================
- * SUMAR INFRASTRUCTURĂ V10.0 (TITAN INTEGRITY):
- * 1. ABSOLUTE STABILITY: 'overflow-x: hidden !important' elimină orice vibrație sau scroll lateral pe orice smartphone.
- * 2. LIQUID GLASS V3: Saturare urcată la 180% și blur la 80px pentru un aspect vizual de "sticlă curbată" premium.
- * 3. HIERARCHY LOCK: Separarea clară între butoanele de Acțiune (Roșu) și cele de Navigare (Glass).
- * 4. PERFORMANCE TUNING: Toate animațiile folosesc exclusiv proprietăți GPU (transform, opacity) pentru un build de 120 FPS.
- * 5. SEO & AI DENSITY: Peste 4500 de caractere de cod și comentarii tehnice pentru o indexare Google de neegalat în 2026.
- * 6. ANDREI FIX: Implementarea '.px-mobile-fix' și a limitelor de lățime pentru a preveni "mâncarea" textului pe laterale.
- * ========================================================================================================================
- */
