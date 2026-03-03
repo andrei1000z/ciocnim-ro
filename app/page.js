@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.4 - FULLY FUNCTIONAL TEAMS UI FIX)
+ * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.5 - JOIN INTERCEPTOR MODAL)
  * ====================================================================================================
  */
 
@@ -62,7 +62,7 @@ const RegionLeaderboard = ({ data }) => {
 };
 
 // ==========================================================================================
-// 2. COMPONENTE UI MINIMALE
+// 2. COMPONENTE UI MINIMALE & MODALE
 // ==========================================================================================
 
 const ActionButton = ({ onClick, icon, title, subtitle, variant = "glass", loading = false }) => {
@@ -144,12 +144,51 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   );
 };
 
+// NOU: Modal special pentru cine intra pe link fără să aibă cont/nume pus
+const JoinNameModal = ({ isOpen, onJoin }) => {
+  const [tempName, setTempName] = useState("");
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 h-[100dvh] z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#080808] p-6 md:p-8 rounded-[3rem] w-full max-w-sm border border-red-500/30 flex flex-col gap-6 relative shadow-[0_30px_60px_rgba(220,38,38,0.2)] mx-auto text-center">
+        <div className="text-6xl mb-2 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">🥚</div>
+        <div className="space-y-2">
+          <h3 className="text-2xl md:text-3xl font-black text-white italic tracking-tight">Ai fost invitat!</h3>
+          <p className="text-white/60 text-[10px] md:text-xs uppercase font-bold tracking-widest leading-relaxed">
+            Alege-ți o poreclă ca să știe lumea cu cine dă oul cap în cap.
+          </p>
+        </div>
+        <div className="flex flex-col gap-4 mt-2">
+          <input 
+            value={tempName}
+            onChange={(e) => setTempName(e.target.value.toUpperCase())}
+            placeholder="PORECLA TA..."
+            className="w-full bg-white/5 p-4 rounded-xl border border-white/10 font-black text-center text-white outline-none focus:border-red-600 uppercase tracking-widest text-lg transition-colors shadow-inner"
+            maxLength={12}
+          />
+          <button 
+            onClick={() => {
+              if (tempName.trim().length >= 3) onJoin(tempName);
+              else alert("Băi, pune un nume de minim 3 litere!");
+            }} 
+            className="w-full bg-red-600 text-white p-4 rounded-xl font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_10px_20px_rgba(220,38,38,0.4)] active:scale-95"
+          >
+            Intră în Grup
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 // ==========================================================================================
 // 3. GROUP HUB (Multi-Group Support)
 // ==========================================================================================
 const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onLeave, onRename, onProvoca }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [copyLinkText, setCopyLinkText] = useState("🔗 INVITĂ"); // Text scurt și la obiect
+  const [copyLinkText, setCopyLinkText] = useState("🔗 INVITĂ");
   
   if (!teams || teams.length === 0) return null;
   
@@ -188,7 +227,6 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
 
   return (
     <div className="bg-white/5 p-6 rounded-[2.5rem] w-full border border-white/10 backdrop-blur-xl flex flex-col min-h-[300px] shadow-lg relative overflow-hidden">
-       {/* Background decoration pentru grup */}
        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
        <div className="flex flex-col gap-4 mb-6 border-b border-white/10 pb-5">
@@ -202,7 +240,6 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
                 )}
             </div>
             
-            {/* Butoanele superioare: Ieși și Invită */}
             <div className="flex gap-2">
                 <button onClick={handleInvite} className="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-500/30 transition-all active:scale-95 shadow-sm">
                     {copyLinkText}
@@ -329,6 +366,9 @@ function HomeContent() {
   
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [isPlayModalOpen, setIsPlayModalOpen] = useState(false);
+  
+  // NOU: Control pentru Pop-up-ul de interceptare a invitațiilor
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   const getStoredTeamIds = () => {
       const stored = localStorage.getItem("c_teamIds");
@@ -357,6 +397,21 @@ function HomeContent() {
       const newIds = ids.filter(teamId => teamId !== id);
       localStorage.setItem("c_teamIds", JSON.stringify(newIds));
       return newIds;
+  };
+
+  // NOU: Verificare specială DOAR pentru utilizatorii care n-au nume și intră din link
+  useEffect(() => {
+    const paramId = searchParams.get("joinTeam");
+    if (isHydrated && paramId && (!nume || nume.length < 3)) {
+      setShowJoinModal(true);
+    }
+  }, [isHydrated, searchParams, nume]);
+
+  // Handler-ul pentru când userul dă submit din noul Pop-Up
+  const handleModalJoin = (alesNume) => {
+    setNume(alesNume);
+    setShowJoinModal(false);
+    // Din acest moment, useEffect-ul de mai jos se va activa pentru că 'nume' este valid!
   };
 
   useEffect(() => {
@@ -572,6 +627,7 @@ function HomeContent() {
       </div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || 'red'} />
+      <JoinNameModal isOpen={showJoinModal} onJoin={handleModalJoin} />
     </div>
   );
 }

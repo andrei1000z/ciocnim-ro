@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.2 - BULLETPROOF STATS SYNC)
+ * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.3 - FULL NAME/STATS SYNC)
  * ====================================================================================================
  */
 
@@ -36,7 +36,7 @@ export default function ClientWrapper({ children }) {
     try { const audio = new Audio(`/${soundFile}.mp3`); audio.volume = 0.4; audio.play().catch(() => {}); } catch (e) {}
   }, []);
 
-  // NOU: Funcție sigură pentru actualizarea și salvarea statisticilor
+  // Funcție sigură pentru actualizarea și salvarea statisticilor
   const updateUserStats = useCallback((newStats) => {
     setUserStats(prevStats => {
       // Dacă primim o funcție (cum facem în arenă), o executăm cu prevStats
@@ -71,9 +71,23 @@ export default function ClientWrapper({ children }) {
     const savedStats = localStorage.getItem("c_stats");
     
     if (savedName) setNume(savedName);
+    
     if (savedStats) {
-      try { setUserStats(JSON.parse(savedStats)); } catch (e) {}
+      try { 
+        const parsed = JSON.parse(savedStats);
+        setUserStats(parsed); 
+        // Auto-heal: Ne asigurăm că dacă există un nume salvat, el este și în userStats
+        if (savedName && parsed.nume !== savedName) {
+            const healedStats = { ...parsed, nume: savedName };
+            setUserStats(healedStats);
+            localStorage.setItem("c_stats", JSON.stringify(healedStats));
+        }
+      } catch (e) {}
+    } else if (savedName) {
+        // Dacă are nume dar nu are statistici (intră prima oară pe link și a pus numele în modal)
+        setUserStats(prev => ({ ...prev, nume: savedName }));
     }
+    
     setIsHydrated(true);
 
     const getInitialData = async () => {
@@ -117,9 +131,15 @@ export default function ClientWrapper({ children }) {
 
   const contextValue = {
     totalGlobal, topRegiuni, nume, 
-    setNume: (val) => { const cleanName = val.toUpperCase().trim(); setNume(cleanName); localStorage.setItem("c_nume", cleanName); },
+    setNume: (val) => { 
+        const cleanName = val.toUpperCase().trim(); 
+        setNume(cleanName); 
+        localStorage.setItem("c_nume", cleanName); 
+        // NOU: Sincronizăm instant și userStats pentru a nu avea latență când intră în grup!
+        updateUserStats(prev => ({ ...prev, nume: cleanName }));
+    },
     userStats, 
-    setUserStats: updateUserStats, // Acum folosim funcția sigură
+    setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated
   };
 
