@@ -125,8 +125,8 @@ export default function RootLayout({ children }) {
                     CIOCNIM.RO • SĂRBĂTORI FERICITE 2026
                  </p>
                  <div className="flex gap-4 md:gap-6 mt-1">
-                    <span className="text-[7px] font-bold uppercase tracking-widest text-white/50">Neural Sync V23</span>
-                    <span className="text-[7px] font-bold uppercase tracking-widest text-white/50">Titan Infrastructure</span>
+                    <span className="text-[7px] font-bold uppercase tracking-widest text-white/50"></span>
+                    <span className="text-[7px] font-bold uppercase tracking-widest text-white/50"></span>
                  </div>
                </div>
             </footer>
