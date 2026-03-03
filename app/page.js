@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - PAGINA PRINCIPALĂ (V23.2 - MULTI-GROUP HUB)
+ * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.4 - FULLY FUNCTIONAL TEAMS UI FIX)
  * ====================================================================================================
  */
 
@@ -88,6 +88,16 @@ const ActionButton = ({ onClick, icon, title, subtitle, variant = "glass", loadi
 
 const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   const [roomCode, setRoomCode] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const createRoom = () => {
@@ -106,10 +116,10 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#080808] p-8 rounded-[3rem] w-full max-w-sm border border-white/10 flex flex-col gap-6 relative shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
-        <button onClick={onClose} className="absolute top-6 right-6 text-white/40 hover:text-white text-xl">✕</button>
-        <h3 className="text-3xl font-black text-white text-center italic">Meci Privat</h3>
+    <div className="fixed inset-0 h-[100dvh] z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#080808] p-6 md:p-8 rounded-[3rem] w-full max-w-sm border border-white/10 flex flex-col gap-6 relative shadow-[0_30px_60px_rgba(0,0,0,0.8)] mx-auto">
+        <button onClick={onClose} className="absolute top-6 right-6 text-white/40 hover:text-white text-xl z-10">✕</button>
+        <h3 className="text-2xl md:text-3xl font-black text-white text-center italic mt-2">Meci Privat</h3>
         <div className="flex flex-col gap-4">
           <button onClick={createRoom} className="w-full bg-red-600 text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_10px_20px_rgba(220,38,38,0.4)]">
             Creează Cameră
@@ -118,15 +128,15 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             <div className="h-px bg-white/10 w-full"></div>
             <span className="absolute left-1/2 -translate-x-1/2 bg-[#080808] px-4 text-[10px] font-black text-white/30">SAU</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full">
             <input 
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase().trim())}
               placeholder="COD CAMERĂ"
-              className="flex-1 bg-white/5 p-4 rounded-xl border border-white/10 font-black text-center text-white outline-none focus:border-red-600 uppercase tracking-widest"
+              className="flex-1 min-w-0 bg-white/5 p-4 rounded-xl border border-white/10 font-black text-center text-white outline-none focus:border-red-600 uppercase tracking-widest text-sm md:text-base"
               maxLength={6}
             />
-            <button onClick={joinRoom} className="bg-white/10 px-6 rounded-xl font-black text-white hover:bg-white/20 transition-all border border-white/10">INTRĂ</button>
+            <button onClick={joinRoom} className="shrink-0 bg-white/10 px-4 md:px-6 rounded-xl font-black text-white hover:bg-white/20 transition-all border border-white/10 text-sm md:text-base">INTRĂ</button>
           </div>
         </div>
       </motion.div>
@@ -139,13 +149,13 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
 // ==========================================================================================
 const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onLeave, onRename, onProvoca }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [copyLinkText, setCopyLinkText] = useState("🔗 INVITĂ"); // Text scurt și la obiect
   
   if (!teams || teams.length === 0) return null;
   
   const currentTeam = teams[activeTeamIndex];
   const [newName, setNewName] = useState(currentTeam.details.nume);
 
-  // Sincronizare nume input cand schimbam grupul activ
   useEffect(() => {
     setNewName(currentTeam.details.nume);
     setIsEditing(false);
@@ -156,18 +166,33 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
     setIsEditing(false);
   };
 
-  const nextTeam = () => {
-    setActiveTeamIndex((prev) => (prev + 1) % teams.length);
-  };
+  const nextTeam = () => setActiveTeamIndex((prev) => (prev + 1) % teams.length);
+  const prevTeam = () => setActiveTeamIndex((prev) => (prev - 1 + teams.length) % teams.length);
 
-  const prevTeam = () => {
-    setActiveTeamIndex((prev) => (prev - 1 + teams.length) % teams.length);
+  const handleInvite = async () => {
+      const inviteUrl = `${window.location.origin}/?joinTeam=${currentTeam.details.id}`;
+      if (navigator.share) {
+          try {
+              await navigator.share({
+                  title: 'Hai în grupul meu pe Ciocnim.ro!',
+                  text: `Te provoc la o luptă în ${currentTeam.details.nume}. Intră aici:`,
+                  url: inviteUrl,
+              });
+          } catch (err) { console.log('Share error:', err); }
+      } else {
+          navigator.clipboard.writeText(inviteUrl);
+          setCopyLinkText("✅ COPIAT");
+          setTimeout(() => setCopyLinkText("🔗 INVITĂ"), 2000);
+      }
   };
 
   return (
-    <div className="bg-white/5 p-6 rounded-[2.5rem] w-full border border-white/10 backdrop-blur-xl flex flex-col min-h-[300px]">
-       <div className="flex justify-between items-start mb-6 border-b border-white/10 pb-5">
-          <div className="flex flex-col gap-1 w-full pr-4">
+    <div className="bg-white/5 p-6 rounded-[2.5rem] w-full border border-white/10 backdrop-blur-xl flex flex-col min-h-[300px] shadow-lg relative overflow-hidden">
+       {/* Background decoration pentru grup */}
+       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+       <div className="flex flex-col gap-4 mb-6 border-b border-white/10 pb-5">
+          <div className="flex justify-between items-start w-full">
             <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em]">Grupul Tău</span>
                 {teams.length > 1 && (
@@ -177,56 +202,76 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
                 )}
             </div>
             
+            {/* Butoanele superioare: Ieși și Invită */}
+            <div className="flex gap-2">
+                <button onClick={handleInvite} className="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-500/30 transition-all active:scale-95 shadow-sm">
+                    {copyLinkText}
+                </button>
+                <button onClick={() => onLeave(currentTeam.details.id)} className="bg-white/5 text-white/40 px-3 py-1.5 rounded-lg hover:bg-red-600 hover:text-white transition-all text-[10px] font-black uppercase border border-white/10 active:scale-95">
+                    Ieși
+                </button>
+            </div>
+          </div>
+          
+          <div className="w-full">
             {isEditing ? (
-              <div className="flex gap-2 mt-1">
+              <div className="flex gap-2 mt-1 w-full">
                 <input 
                   value={newName} 
                   onChange={e => setNewName(e.target.value)}
                   className="bg-black/50 text-white font-black text-xl w-full p-2 rounded-lg border border-red-500 outline-none uppercase"
                 />
-                <button onClick={handleSave} className="bg-red-600 px-3 rounded-lg font-bold text-xs">OK</button>
+                <button onClick={handleSave} className="bg-red-600 px-4 rounded-lg font-bold text-xs uppercase tracking-widest active:scale-95">OK</button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <h4 className="text-xl md:text-2xl font-black uppercase text-white truncate">{currentTeam.details.nume}</h4>
-                <button onClick={() => setIsEditing(true)} className="text-white/30 hover:text-white transition-all text-sm">✏️</button>
+              <div className="flex items-center gap-3 w-full group/title cursor-pointer" onClick={() => setIsEditing(true)}>
+                <h4 className="text-xl md:text-2xl font-black uppercase text-white truncate drop-shadow-md">{currentTeam.details.nume}</h4>
+                <span className="text-white/20 group-hover/title:text-white/60 transition-colors text-sm">✏️</span>
               </div>
             )}
           </div>
-          <button onClick={() => onLeave(currentTeam.details.id)} className="p-3 bg-white/5 text-white/40 rounded-xl hover:bg-red-600 hover:text-white transition-all text-[10px] font-black uppercase border border-white/10">Ieși</button>
        </div>
 
        {teams.length > 1 && (
-           <div className="flex justify-between items-center mb-4 px-2">
-               <button onClick={prevTeam} className="text-white/40 hover:text-white p-2">◀</button>
+           <div className="flex justify-between items-center mb-4 px-2 bg-black/20 rounded-full py-1">
+               <button onClick={prevTeam} className="text-white/40 hover:text-white p-2 w-10 h-8 flex justify-center items-center rounded-full hover:bg-white/10">◀</button>
                <span className="text-[10px] uppercase font-bold text-white/40 tracking-widest">Alege Grupul</span>
-               <button onClick={nextTeam} className="text-white/40 hover:text-white p-2">▶</button>
+               <button onClick={nextTeam} className="text-white/40 hover:text-white p-2 w-10 h-8 flex justify-center items-center rounded-full hover:bg-white/10">▶</button>
            </div>
        )}
 
        <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar pr-1 max-h-[250px]">
           {currentTeam.top.map((m, i) => (
-            <div key={i} className="bg-black/40 p-3 md:p-4 rounded-2xl flex justify-between items-center border border-white/5 group">
-               <div className="flex items-center gap-3 overflow-hidden">
-                  <span className={`text-xs font-black ${i === 0 ? 'text-yellow-500' : 'text-white/20'}`}>#{i+1}</span>
-                  <span className="text-sm font-bold text-white truncate max-w-[100px] md:max-w-[150px]">{m.member}</span>
+            <div key={i} className="bg-black/40 p-3 md:p-4 rounded-2xl flex justify-between items-center border border-white/5 hover:border-white/10 transition-colors group">
+               <div className="flex items-center gap-3 overflow-hidden flex-1">
+                  <span className={`text-xs font-black ${i === 0 ? 'text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]' : 'text-white/20'}`}>#{i+1}</span>
+                  <span className={`text-sm font-bold truncate ${m.member === numePreluat ? 'text-white italic' : 'text-white/80'}`}>{m.member}</span>
                </div>
                
-               <div className="flex items-center gap-3">
-                  <span className="text-sm font-black text-green-500">{m.score} xp</span>
+               <div className="flex items-center gap-3 pl-2">
+                  <span className="text-sm font-black text-green-500 drop-shadow-sm">{m.score} xp</span>
                   
                   {m.member !== numePreluat && (
                     <button 
                       onClick={() => onProvoca(m.member, currentTeam.details.id)}
-                      className="opacity-100 md:opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+                      className="bg-red-600 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-500 hover:scale-105 active:scale-95 shadow-[0_5px_15px_rgba(220,38,38,0.4)] flex items-center gap-1"
                     >
-                      Provoacă
+                      <span>⚔️</span> <span className="hidden sm:inline">Provoacă</span>
                     </button>
                   )}
                </div>
             </div>
           ))}
-          {currentTeam.top.length === 0 && <p className="text-center text-white/20 text-xs py-10 uppercase font-black">Adaugă prieteni.</p>}
+          
+          {currentTeam.top.length <= 1 && (
+            <div className="text-center py-8 flex flex-col items-center gap-3 opacity-60">
+                <span className="text-4xl">👻</span>
+                <p className="text-xs text-white uppercase font-black tracking-widest">E cam liniște aici...</p>
+                <button onClick={handleInvite} className="mt-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors">
+                    Adu prieteni în grup
+                </button>
+            </div>
+          )}
        </div>
     </div>
   );
@@ -279,14 +324,12 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const { totalGlobal, topRegiuni, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate } = useGlobalStats();
   
-  // În loc de un singur `team` / `leaderboard`, stocăm un array cu toate detaliile echipelor
   const [loadedTeams, setLoadedTeams] = useState([]); 
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
   
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [isPlayModalOpen, setIsPlayModalOpen] = useState(false);
 
-  // Funcție helper pentru a citi array-ul de ID-uri din localStorage
   const getStoredTeamIds = () => {
       const stored = localStorage.getItem("c_teamIds");
       if (stored) {
@@ -299,7 +342,6 @@ function HomeContent() {
       return [];
   };
 
-  // Funcție helper pentru a adăuga un ID în localStorage
   const addStoredTeamId = (id) => {
       const ids = getStoredTeamIds();
       if (!ids.includes(id)) {
@@ -310,7 +352,6 @@ function HomeContent() {
       return ids;
   };
 
-  // Funcție helper pentru a sterge un ID
   const removeStoredTeamId = (id) => {
       const ids = getStoredTeamIds();
       const newIds = ids.filter(teamId => teamId !== id);
@@ -318,7 +359,6 @@ function HomeContent() {
       return newIds;
   };
 
-  // Încărcare Grupuri (Toate ID-urile salvate + cel din URL)
   useEffect(() => {
     if (!isHydrated) return;
     if (!nume || nume.length < 3) {
@@ -330,9 +370,9 @@ function HomeContent() {
       let idsToFetch = getStoredTeamIds();
       const paramId = searchParams.get("joinTeam");
       
-      // Dacă am venit cu link de invite, îl adăugăm în lista temporară pentru a-l descărca
       if (paramId && !idsToFetch.includes(paramId)) {
           idsToFetch.push(paramId);
+          addStoredTeamId(paramId); 
       }
 
       if (idsToFetch.length === 0) {
@@ -343,7 +383,6 @@ function HomeContent() {
       const results = [];
       const validIds = [];
 
-      // Descărcăm datele pentru fiecare echipă. (Se poate optimiza cu un API bulk mai târziu)
       for (const tid of idsToFetch) {
           try {
               const res = await fetch('/api/ciocnire', {
@@ -361,7 +400,6 @@ function HomeContent() {
           }
       }
       
-      // Actualizăm localStorage doar cu grupurile care mai există pe server
       localStorage.setItem("c_teamIds", JSON.stringify(validIds));
       setLoadedTeams(results);
       
@@ -371,7 +409,6 @@ function HomeContent() {
     fetchAllTeams();
   }, [nume, searchParams, router, isHydrated]);
 
-  // Creare Grup
   const handleCreateTeam = async () => {
     if (!nume || nume.trim().length < 3) return alert("Scrie-ți porecla mai întâi!");
     setLoadingTeam(true);
@@ -392,18 +429,16 @@ function HomeContent() {
         };
         
         setLoadedTeams(prev => [...prev, newTeamData]);
-        setActiveTeamIndex(loadedTeams.length); // Treci direct la noul grup creat
+        setActiveTeamIndex(loadedTeams.length);
       }
     } catch (e) { alert("Eroare la crearea grupului."); } 
     finally { setLoadingTeam(false); }
   };
 
-  // Redenumire Grup (actualizeaza array-ul)
   const handleRenameTeam = async (teamId, nouNume) => {
     if (nouNume.length < 3) return alert("Nume prea scurt.");
     triggerVibrate();
     
-    // Update UI instant
     setLoadedTeams(prev => prev.map(t => {
         if (t.details.id === teamId) {
             return { ...t, details: { ...t.details, nume: nouNume.toUpperCase() } };
@@ -418,16 +453,14 @@ function HomeContent() {
     });
   };
 
-  // Părăsire Grup
   const handleLeaveTeam = (teamId) => {
       if(confirm("Ești sigur că vrei să părăsești acest grup?")) { 
           removeStoredTeamId(teamId);
           setLoadedTeams(prev => prev.filter(t => t.details.id !== teamId));
-          setActiveTeamIndex(0); // Reseteaza indexul
+          setActiveTeamIndex(0);
       }
   };
 
-  // Provocare la Duel din Grup
   const handleProvocare = async (oponent, teamId) => {
     triggerVibrate([50, 50, 50]);
     const roomCode = `privat-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
@@ -522,7 +555,6 @@ function HomeContent() {
           <div className="space-y-4">
              <ActionButton variant="red" icon="⚔️" title="Meci cu un Prieten" subtitle="Creează o cameră privată cu cod secret" onClick={() => { if (nume.length < 3) return alert("Nume prea scurt!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
              
-             {/* Acum oricine poate crea grupuri adiționale oricând */}
              <ActionButton variant="glass" icon="🏰" title={loadedTeams.length > 0 ? "Alt Grup" : "Creează Grup"} subtitle={loadedTeams.length > 0 ? "Adaugă un grup nou" : "Clasament privat pentru familia ta"} onClick={handleCreateTeam} loading={loadingTeam} />
              
              <ActionButton variant="glass" icon="🌍" title="Arena Globală" subtitle="Joacă aleatoriu cu cineva din țară" onClick={() => { if (nume.length < 3) return alert("Nume prea scurt!"); triggerVibrate(); router.push(`/joc/global-arena?skin=${userStats.skin || 'red'}`); }} />
@@ -535,7 +567,7 @@ function HomeContent() {
       {/* BUTON TRADIȚII SEO MUTAT JOS */}
       <div className="w-full flex justify-center mt-6">
         <Link href="/traditii" className="bg-white/5 border border-white/10 px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 shadow-lg">
-           📖 Află Regulile și Tradițiile
+            📖 Află Regulile și Tradițiile
         </Link>
       </div>
 

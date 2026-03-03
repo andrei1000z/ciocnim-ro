@@ -2,11 +2,11 @@
 
 /**
  * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 24.2 - HANDSHAKE SYNC FIX)
+ * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.0 - DYNAMIC COMBAT ROLES)
  * ========================================================================================================================
  */
 
-import React, { useEffect, useState, Suspense, useMemo, useCallback } from "react";
+import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
@@ -74,38 +74,70 @@ function ArenaMaster({ room }) {
   const [rezultat, setRezultat] = useState(null);
   const [impactFlash, setImpactFlash] = useState(false);
   const [isBotMatch, setIsBotMatch] = useState(false);
-  const [isHost] = useState(searchParams.get("host") === "true");
+  
+  // NOU: Am scos 'isHost' din logica de luptă, acum totul e bazat pe un seed comun
+  const [atacantName, setAtacantName] = useState(null); 
   
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
 
   const isPrivate = room.includes("privat-");
-  const canStrike = !rezultat && opponent && (!isPrivate || !isHost);
+
+  // NOU: Calculăm cine e atacant pe baza "zarului" (Dacă eu sunt setat ca atacant, pot lovi)
+  const canStrike = !rezultat && opponent && atacantName === nume;
 
   const playArenaSound = (name) => {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
   };
 
-  // FUNCȚIE DE SEMNALIZARE (Handshake)
+  // NOU: Algoritm deterministic de stabilire a atacantului bazat pe nume
+  // Sortăm numele alfabetic. Dacă un numar random dat de cel care intra e > 0.5, primul loveste. Altfel al doilea.
+  // Folosim `randomSeed` trimis în broadcastJoin ca sa fim de acord amandoi
+  const determineRoles = useCallback((myName, opName, seed) => {
+      const sorted = [myName, opName].sort();
+      if (seed > 0.5) return sorted[0];
+      return sorted[1];
+  }, []);
+
+  const [localSeed, setLocalSeed] = useState(Math.random());
+
   const broadcastJoin = useCallback(() => {
     if (!nume) return;
     fetch('/api/ciocnire', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar })
+      body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar, seed: localSeed })
     });
-  }, [room, nume, me]);
+  }, [room, nume, me, localSeed]);
 
   // LOGICĂ BOT
   useEffect(() => {
     if (opponent || rezultat || isBotMatch || isPrivate) return;
     const botTimeout = setTimeout(() => {
       setIsBotMatch(true);
-      setOpponent({ jucator: "🤖 BOT RANDOM", skin: 'gold', isGolden: false, hasStar: true });
+      const botName = "🤖 BOT RANDOM";
+      setOpponent({ jucator: botName, skin: 'gold', isGolden: false, hasStar: true });
+      
+      // Decidem random dacă botul dă sau eu
+      const botLoveseste = Math.random() > 0.5;
+      setAtacantName(botLoveseste ? botName : nume);
+
     }, 5000);
     return () => clearTimeout(botTimeout);
-  }, [opponent, rezultat, isBotMatch, isPrivate]);
+  }, [opponent, rezultat, isBotMatch, isPrivate, nume]);
+
+  // Dacă botul e atacantul, dă el după 1-3 secunde
+  useEffect(() => {
+      if (isBotMatch && atacantName === "🤖 BOT RANDOM" && !rezultat) {
+          const timeout = setTimeout(() => {
+              // Botul atacă. Eu primesc lovitura.
+              executeBattle({ castigaCelCareDa: Math.random() < 0.5, atacant: "🤖 BOT RANDOM" });
+              incrementGlobal(); 
+          }, 1000 + Math.random() * 2000);
+          return () => clearTimeout(timeout);
+      }
+  }, [isBotMatch, atacantName, rezultat, incrementGlobal]);
 
   // PUSHER SYNC CU HANDSHAKE REPARAT
   useEffect(() => {
@@ -113,7 +145,6 @@ function ArenaMaster({ room }) {
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
-    // FIX: Trimitem JOIN când subscripția e gata
     arenaChannel.bind("pusher:subscription_succeeded", () => {
       broadcastJoin();
     });
@@ -121,7 +152,12 @@ function ArenaMaster({ room }) {
     arenaChannel.bind("join", (data) => {
       if (data.jucator !== nume) { 
         setOpponent(data); 
-        // FIX: Răspundem cu propriile date ca să ne vadă și el instantaneu
+        
+        // Când primim join-ul, stabilim rolurile pe baza seed-ului (ori al nostru, ori al lui, nu contează atâta timp cât e fix pe cameră)
+        // Ambele tabere vor rula funcția asta și vor ajunge la același atacant.
+        const atacantCalculat = determineRoles(nume, data.jucator, data.seed || localSeed);
+        setAtacantName(atacantCalculat);
+
         broadcastJoin(); 
       }
     });
@@ -133,9 +169,8 @@ function ArenaMaster({ room }) {
     arenaChannel.bind("lovitura", (data) => executeBattle(data));
 
     return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
-  }, [room, nume, isBotMatch, broadcastJoin]);
+  }, [room, nume, isBotMatch, broadcastJoin, determineRoles, localSeed]);
 
-  // RE-BROADCAST (Pentru siguranță în meciuri private)
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isBotMatch) {
       const retry = setTimeout(broadcastJoin, 3000);
@@ -147,9 +182,20 @@ function ArenaMaster({ room }) {
     if (rezultat) return;
     let amCastigat = false;
     
+    // Stabilim cine a dat lovitura ca să știm cum interpretăm boolean-ul "castigaCelCareDa"
+    const celCareALovit = data.atacant || (atacantName === nume ? nume : opponent?.jucator);
+
     if (me.isGolden) amCastigat = true;
     else if (opponent?.isGolden) amCastigat = false;
-    else amCastigat = isHost ? !data.castigaCelCareDa : data.castigaCelCareDa;
+    else {
+        if (celCareALovit === nume) {
+            // Eu am dat
+            amCastigat = data.castigaCelCareDa;
+        } else {
+            // El a dat
+            amCastigat = !data.castigaCelCareDa;
+        }
+    }
 
     setImpactFlash(true);
     playArenaSound('spargere');
@@ -161,20 +207,27 @@ function ArenaMaster({ room }) {
       playArenaSound(amCastigat ? 'victorie' : 'esec');
       if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
       
-      setUserStats(prev => ({ 
-        ...prev, 
-        wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
-        losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
-      }));
+      setUserStats(prev => {
+        const noiStatistici = { 
+          ...prev, 
+          wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
+          losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
+        };
+        // NOU: Forțăm salvarea în localStorage direct aici pentru a nu se pierde nimic la refresh!
+        localStorage.setItem("c_stats", JSON.stringify(noiStatistici));
+        return noiStatistici;
+      });
     }, 400);
   };
 
   const handleStrike = () => {
     if (!canStrike) return;
     
+    const castigaCelCareDaRandom = Math.random() < 0.5;
+
     if (isBotMatch) {
-      executeBattle({ castigaCelCareDa: Math.random() < 0.5 });
-      incrementGlobal();
+      executeBattle({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
+      incrementGlobal(castigaCelCareDaRandom); // Trimitem boolean-ul la bot match
     } else {
       fetch('/api/ciocnire', {
         method: 'POST',
@@ -184,7 +237,9 @@ function ArenaMaster({ room }) {
           actiune: 'lovitura', 
           jucator: nume, 
           regiune: userStats.regiune, 
-          castigaCelCareDa: Math.random() < 0.5 
+          castigaCelCareDa: castigaCelCareDaRandom,
+          atacant: nume, 
+          esteCastigator: castigaCelCareDaRandom // Trimitem explicit daca eu castig, pentru a puncta regiunea
         })
       });
     }
@@ -214,8 +269,10 @@ function ArenaMaster({ room }) {
     if (isBotMatch) window.location.reload();
     else { 
       setRezultat(null); 
+      // Resetăm rolurile generând un nou seed, ca la runda a doua să poată lovi celălalt
+      setLocalSeed(Math.random());
       triggerVibrate(); 
-      broadcastJoin(); // Re-anunțăm prezența pentru revanșă
+      broadcastJoin(); 
     }
   };
 
@@ -241,7 +298,8 @@ function ArenaMaster({ room }) {
       <div className="flex justify-between items-center w-full px-4 md:px-20">
         <div className="flex flex-col items-center gap-6 flex-1">
           <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
-          <div className="liquid-glass p-3 px-6 rounded-2xl text-center border-l-2 border-l-green-500">
+          <div className="liquid-glass p-3 px-6 rounded-2xl text-center border-l-2 border-l-green-500 relative">
+            {atacantName === nume && !rezultat && opponent && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg border border-red-400">ATACĂ</span>}
             <span className="text-[10px] font-black uppercase tracking-widest text-white/30 block">Tu</span>
             <span className="text-lg font-black text-white italic">{nume}</span>
           </div>
@@ -251,7 +309,8 @@ function ArenaMaster({ room }) {
           {opponent ? (
             <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
               <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
-              <div className="bg-red-900/20 p-3 px-6 rounded-2xl border border-red-500/20 border-r-2 border-r-red-500 backdrop-blur-md">
+              <div className="bg-red-900/20 p-3 px-6 rounded-2xl border border-red-500/20 border-r-2 border-r-red-500 backdrop-blur-md relative">
+                {atacantName === opponent.jucator && !rezultat && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg border border-red-400">ATACĂ</span>}
                 <span className="text-[10px] font-black uppercase tracking-widest text-red-500/50 block">Rival</span>
                 <span className="text-lg font-black text-white italic">{opponent.jucator}</span>
               </div>

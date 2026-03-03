@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * ====================================================================================================
+ * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.2 - BULLETPROOF STATS SYNC)
+ * ====================================================================================================
+ */
+
 import { useEffect, useState, createContext, useContext, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useRouter, usePathname } from "next/navigation";
@@ -30,12 +36,27 @@ export default function ClientWrapper({ children }) {
     try { const audio = new Audio(`/${soundFile}.mp3`); audio.volume = 0.4; audio.play().catch(() => {}); } catch (e) {}
   }, []);
 
-  const incrementGlobal = useCallback(async () => {
+  // NOU: Funcție sigură pentru actualizarea și salvarea statisticilor
+  const updateUserStats = useCallback((newStats) => {
+    setUserStats(prevStats => {
+      // Dacă primim o funcție (cum facem în arenă), o executăm cu prevStats
+      const updated = typeof newStats === 'function' ? newStats(prevStats) : newStats;
+      // Salvăm instant în localStorage pentru a preveni pierderea la refresh
+      localStorage.setItem("c_stats", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const incrementGlobal = useCallback(async (amCastigat = false) => {
     try {
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actiune: 'increment-global', regiune: userStats.regiune })
+        body: JSON.stringify({ 
+            actiune: 'increment-global', 
+            // Trimitem regiunea DOAR dacă am câștigat duelul (cu botul)
+            regiune: amCastigat ? userStats.regiune : null 
+        })
       });
       const data = await res.json();
       if (data.success) {
@@ -98,7 +119,7 @@ export default function ClientWrapper({ children }) {
     totalGlobal, topRegiuni, nume, 
     setNume: (val) => { const cleanName = val.toUpperCase().trim(); setNume(cleanName); localStorage.setItem("c_nume", cleanName); },
     userStats, 
-    setUserStats: (val) => { setUserStats(val); localStorage.setItem("c_stats", JSON.stringify(val)); },
+    setUserStats: updateUserStats, // Acum folosim funcția sigură
     playSound, triggerVibrate, incrementGlobal, isHydrated
   };
 
