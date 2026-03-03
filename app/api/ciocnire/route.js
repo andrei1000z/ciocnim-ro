@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V25.5 - GROUP SCORE TRACKING)
+ * CIOCNIM.RO - API ENDPOINT (V25.6 - GHOST KILLER & REGION FIX)
  * ====================================================================================================
  */
 
@@ -39,7 +39,7 @@ export async function POST(request) {
     const { 
       actiune, roomId, jucator, skin, isGolden, hasStar, 
       teamId, regiune, creator, text, newName, oponentNume,
-      atacant, esteCastigator 
+      atacant, esteCastigator, oldName, teamIds // <-- NOU pentru uciderea fantomelor
     } = body;
 
     switch (actiune) {
@@ -52,8 +52,9 @@ export async function POST(request) {
 
       case 'increment-global': {
         const noulTotal = await redis.incr('global_ciocniri_total');
+        // AM ADAUGAT .trim() CA SA EVITAM "Muntenia " SA SE DUBLAZE FATA DE "Muntenia"
         if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-          await redis.zincrby('leaderboard_regiuni', 1, regiune);
+          await redis.zincrby('leaderboard_regiuni', 1, regiune.trim());
         }
         const topActualizat = await getClasamentRegiuni();
         await pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat });
@@ -77,11 +78,11 @@ export async function POST(request) {
         if (esteCastigator) {
           // Punct pentru regiune
           if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-            await redis.zincrby('leaderboard_regiuni', 1, regiune);
+            await redis.zincrby('leaderboard_regiuni', 1, regiune.trim());
           }
-          // NOU: Punct în clasamentul intern al grupului!
+          // Punct în clasamentul intern al grupului!
           if (teamId) {
-            await redis.zincrby(`team:${teamId}:membri`, 1, jucator);
+            await redis.zincrby(`team:${teamId}:membri`, 1, jucator.trim());
           }
         }
         
@@ -119,6 +120,27 @@ export async function POST(request) {
         return NextResponse.json({ success: true });
       }
 
+      // NOU: Acțiunea care omoară fantomele (mută scorul de pe numele vechi pe cel nou)
+      case 'schimba-porecla': {
+        if (oldName && newName && teamIds && Array.isArray(teamIds)) {
+          for (const tid of teamIds) {
+            // Luăm scorul (victoriile) pe care îl avea numele vechi
+            const scorVechi = await redis.zscore(`team:${tid}:membri`, oldName);
+            
+            if (scorVechi !== null) {
+              const pipeline = redis.pipeline();
+              // Ștergem fantoma (numele vechi)
+              pipeline.zrem(`team:${tid}:membri`, oldName);
+              // Băgăm numele nou cu scorul intact
+              pipeline.zadd(`team:${tid}:membri`, scorVechi, newName);
+              await pipeline.exec();
+            }
+          }
+          return NextResponse.json({ success: true });
+        }
+        return NextResponse.json({ success: false });
+      }
+
       case 'get-team-details': {
         if (!teamId) return NextResponse.json({ success: false, error: "Lipsește ID" });
         const teamName = await redis.get(`team:${teamId}:nume`);
@@ -127,9 +149,9 @@ export async function POST(request) {
         const teamStats = await redis.hgetall(`team:${teamId}:stats`);
         
         // Dacă un jucător nou a intrat pe link, îl adăugăm cu 0 puncte
-        if (jucator && jucator.length >= 3) {
-          const exists = await redis.zscore(`team:${teamId}:membri`, jucator);
-          if (exists === null) await redis.zadd(`team:${teamId}:membri`, 0, jucator);
+        if (jucator && jucator.trim().length >= 3) {
+          const exists = await redis.zscore(`team:${teamId}:membri`, jucator.trim());
+          if (exists === null) await redis.zadd(`team:${teamId}:membri`, 0, jucator.trim());
         }
         
         const membriRaw = await redis.zrevrange(`team:${teamId}:membri`, 0, 14, 'WITHSCORES');
@@ -149,7 +171,7 @@ export async function POST(request) {
         const pipeline = redis.pipeline();
         pipeline.set(`team:${newId}:nume`, finalTeamName);
         pipeline.hset(`team:${newId}:stats`, { creator: creator, victorii: 0, creat_la: Date.now() });
-        pipeline.zadd(`team:${newId}:membri`, 0, creator); // Îl băgăm pe creator direct cu 0 puncte
+        pipeline.zadd(`team:${newId}:membri`, 0, creator.trim()); // Îl băgăm pe creator direct cu 0 puncte
         await pipeline.exec();
         
         return NextResponse.json({ success: true, teamId: newId });

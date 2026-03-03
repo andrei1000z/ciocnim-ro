@@ -2,7 +2,7 @@
 
 /**
  * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.0 - DYNAMIC COMBAT ROLES)
+ * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.4 - PROVOCARE BOT & CHAT FIX)
  * ========================================================================================================================
  */
 
@@ -75,7 +75,6 @@ function ArenaMaster({ room }) {
   const [impactFlash, setImpactFlash] = useState(false);
   const [isBotMatch, setIsBotMatch] = useState(false);
   
-  // NOU: Am scos 'isHost' din logica de luptă, acum totul e bazat pe un seed comun
   const [atacantName, setAtacantName] = useState(null); 
   
   const [messages, setMessages] = useState([]);
@@ -83,17 +82,15 @@ function ArenaMaster({ room }) {
   const [copied, setCopied] = useState(false);
 
   const isPrivate = room.includes("privat-");
+  // NOU: Detectăm dacă e o provocare de grup pentru a declanșa bot-ul la timp
+  const isProvocare = searchParams.get("provocare") === "true";
 
-  // NOU: Calculăm cine e atacant pe baza "zarului" (Dacă eu sunt setat ca atacant, pot lovi)
   const canStrike = !rezultat && opponent && atacantName === nume;
 
   const playArenaSound = (name) => {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
   };
 
-  // NOU: Algoritm deterministic de stabilire a atacantului bazat pe nume
-  // Sortăm numele alfabetic. Dacă un numar random dat de cel care intra e > 0.5, primul loveste. Altfel al doilea.
-  // Folosim `randomSeed` trimis în broadcastJoin ca sa fim de acord amandoi
   const determineRoles = useCallback((myName, opName, seed) => {
       const sorted = [myName, opName].sort();
       if (seed > 0.5) return sorted[0];
@@ -111,27 +108,33 @@ function ArenaMaster({ room }) {
     });
   }, [room, nume, me, localSeed]);
 
-  // LOGICĂ BOT
+  // LOGICĂ BOT ACTUALIZATĂ (7s provocare, 5s global, 0 privat clasic)
   useEffect(() => {
-    if (opponent || rezultat || isBotMatch || isPrivate) return;
+    if (opponent || rezultat || isBotMatch) return;
+    
+    // Dacă e cameră privată clasică (cu cod, fără provocare), NU băgăm bot
+    if (isPrivate && !isProvocare) return;
+
+    // 7 secunde pentru provocare grup, 5 secunde pentru global arena
+    const waitTime = isProvocare ? 7000 : 5000;
+
     const botTimeout = setTimeout(() => {
       setIsBotMatch(true);
       const botName = "🤖 BOT RANDOM";
       setOpponent({ jucator: botName, skin: 'gold', isGolden: false, hasStar: true });
       
-      // Decidem random dacă botul dă sau eu
       const botLoveseste = Math.random() > 0.5;
       setAtacantName(botLoveseste ? botName : nume);
 
-    }, 5000);
+    }, waitTime);
+
     return () => clearTimeout(botTimeout);
-  }, [opponent, rezultat, isBotMatch, isPrivate, nume]);
+  }, [opponent, rezultat, isBotMatch, isPrivate, isProvocare, nume]);
 
   // Dacă botul e atacantul, dă el după 1-3 secunde
   useEffect(() => {
       if (isBotMatch && atacantName === "🤖 BOT RANDOM" && !rezultat) {
           const timeout = setTimeout(() => {
-              // Botul atacă. Eu primesc lovitura.
               executeBattle({ castigaCelCareDa: Math.random() < 0.5, atacant: "🤖 BOT RANDOM" });
               incrementGlobal(); 
           }, 1000 + Math.random() * 2000);
@@ -152,18 +155,14 @@ function ArenaMaster({ room }) {
     arenaChannel.bind("join", (data) => {
       if (data.jucator !== nume) { 
         setOpponent(data); 
-        
-        // Când primim join-ul, stabilim rolurile pe baza seed-ului (ori al nostru, ori al lui, nu contează atâta timp cât e fix pe cameră)
-        // Ambele tabere vor rula funcția asta și vor ajunge la același atacant.
         const atacantCalculat = determineRoles(nume, data.jucator, data.seed || localSeed);
         setAtacantName(atacantCalculat);
-
         broadcastJoin(); 
       }
     });
 
     arenaChannel.bind("arena-chat", (data) => {
-      setMessages(prev => [{ autor: data.jucator, text: data.text }, ...prev].slice(0, 10));
+      setMessages(prev => [{ autor: data.jucator, text: data.text }, ...prev].slice(0, 20));
     });
 
     arenaChannel.bind("lovitura", (data) => executeBattle(data));
@@ -182,17 +181,14 @@ function ArenaMaster({ room }) {
     if (rezultat) return;
     let amCastigat = false;
     
-    // Stabilim cine a dat lovitura ca să știm cum interpretăm boolean-ul "castigaCelCareDa"
     const celCareALovit = data.atacant || (atacantName === nume ? nume : opponent?.jucator);
 
     if (me.isGolden) amCastigat = true;
     else if (opponent?.isGolden) amCastigat = false;
     else {
         if (celCareALovit === nume) {
-            // Eu am dat
             amCastigat = data.castigaCelCareDa;
         } else {
-            // El a dat
             amCastigat = !data.castigaCelCareDa;
         }
     }
@@ -213,7 +209,6 @@ function ArenaMaster({ room }) {
           wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
           losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
         };
-        // NOU: Forțăm salvarea în localStorage direct aici pentru a nu se pierde nimic la refresh!
         localStorage.setItem("c_stats", JSON.stringify(noiStatistici));
         return noiStatistici;
       });
@@ -227,7 +222,7 @@ function ArenaMaster({ room }) {
 
     if (isBotMatch) {
       executeBattle({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
-      incrementGlobal(castigaCelCareDaRandom); // Trimitem boolean-ul la bot match
+      incrementGlobal(castigaCelCareDaRandom); 
     } else {
       fetch('/api/ciocnire', {
         method: 'POST',
@@ -239,7 +234,7 @@ function ArenaMaster({ room }) {
           regiune: userStats.regiune, 
           castigaCelCareDa: castigaCelCareDaRandom,
           atacant: nume, 
-          esteCastigator: castigaCelCareDaRandom // Trimitem explicit daca eu castig, pentru a puncta regiunea
+          esteCastigator: castigaCelCareDaRandom
         })
       });
     }
@@ -261,7 +256,11 @@ function ArenaMaster({ room }) {
 
   const handleChat = () => {
     if (!chatInput.trim()) return;
-    fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: chatInput }) });
+    fetch('/api/ciocnire', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: chatInput }) 
+    });
     setChatInput("");
   };
 
@@ -269,7 +268,6 @@ function ArenaMaster({ room }) {
     if (isBotMatch) window.location.reload();
     else { 
       setRezultat(null); 
-      // Resetăm rolurile generând un nou seed, ca la runda a doua să poată lovi celălalt
       setLocalSeed(Math.random());
       triggerVibrate(); 
       broadcastJoin(); 
@@ -284,7 +282,8 @@ function ArenaMaster({ room }) {
 
   return (
     <div className={`w-full max-w-4xl flex flex-col items-center gap-8 pt-12 ${impactFlash ? 'animate-impact scale-105 blur-[2px]' : ''}`}>
-      {isPrivate && (
+      {/* NOU: Ascundem codul de cameră dacă e provocare de grup */}
+      {isPrivate && !isProvocare && (
         <button onClick={copyRoomCode} className="group relative bg-black/50 backdrop-blur-xl px-8 py-4 rounded-full border border-white/10 mb-4 shadow-2xl hover:bg-white/5 transition-all active:scale-95">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 group-hover:text-white/80 transition-colors">Cod Cameră: </span>

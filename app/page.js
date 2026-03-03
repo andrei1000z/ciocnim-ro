@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.5 - JOIN INTERCEPTOR MODAL)
+ * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.6 - ANTI-GHOST & STATS FIX)
  * ====================================================================================================
  */
 
@@ -144,7 +144,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   );
 };
 
-// NOU: Modal special pentru cine intra pe link fără să aibă cont/nume pus
+// Modal special pentru cine intra pe link fără să aibă cont/nume pus
 const JoinNameModal = ({ isOpen, onJoin }) => {
   const [tempName, setTempName] = useState("");
 
@@ -286,7 +286,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
                </div>
                
                <div className="flex items-center gap-3 pl-2">
-                  <span className="text-sm font-black text-green-500 drop-shadow-sm">{m.score} xp</span>
+                  <span className="text-sm font-black text-green-500 drop-shadow-sm">{m.score} victorii</span>
                   
                   {m.member !== numePreluat && (
                     <button 
@@ -367,8 +367,16 @@ function HomeContent() {
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [isPlayModalOpen, setIsPlayModalOpen] = useState(false);
   
-  // NOU: Control pentru Pop-up-ul de interceptare a invitațiilor
+  // Control pentru Pop-up-ul de interceptare a invitațiilor
   const [showJoinModal, setShowJoinModal] = useState(false);
+
+  // Stare locală pentru input-ul de nume (PREVINE FANTOMELE)
+  const [localNume, setLocalNume] = useState("");
+
+  // Sincronizare inițială pentru input-ul de nume
+  useEffect(() => {
+      if (nume && !localNume) setLocalNume(nume);
+  }, [nume, localNume]);
 
   const getStoredTeamIds = () => {
       const stored = localStorage.getItem("c_teamIds");
@@ -399,7 +407,7 @@ function HomeContent() {
       return newIds;
   };
 
-  // NOU: Verificare specială DOAR pentru utilizatorii care n-au nume și intră din link
+  // Verificare specială DOAR pentru utilizatorii care n-au nume și intră din link
   useEffect(() => {
     const paramId = searchParams.get("joinTeam");
     if (isHydrated && paramId && (!nume || nume.length < 3)) {
@@ -411,7 +419,33 @@ function HomeContent() {
   const handleModalJoin = (alesNume) => {
     setNume(alesNume);
     setShowJoinModal(false);
-    // Din acest moment, useEffect-ul de mai jos se va activa pentru că 'nume' este valid!
+  };
+
+  // Funcția sigură pentru salvarea numelui (șterge fantomele prin API)
+  const handleSaveNume = async () => {
+      const finalName = localNume.trim().toUpperCase();
+      if (finalName.length < 3) return alert("Băi, pune un nume de minim 3 litere!");
+      if (finalName === nume) return;
+
+      triggerVibrate();
+      
+      // Dacă aveai deja nume și ești în grupuri, spunem API-ului să facă switch ca să eviți fantomele
+      if (nume && loadedTeams.length > 0) {
+          try {
+              await fetch('/api/ciocnire', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      actiune: 'schimba-porecla',
+                      oldName: nume,
+                      newName: finalName,
+                      teamIds: loadedTeams.map(t => t.details.id)
+                  })
+              });
+          } catch(e) {}
+      }
+
+      setNume(finalName);
   };
 
   useEffect(() => {
@@ -532,7 +566,8 @@ function HomeContent() {
       })
     });
 
-    router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}`);
+    // Am adăugat &provocare=true în link ca Arena să știe să aștepte 7s în caz de AFK
+    router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true`);
   };
 
   if (!isHydrated) return null;
@@ -570,12 +605,19 @@ function HomeContent() {
         <div className="bg-white/5 p-6 md:p-8 rounded-[3rem] flex flex-col gap-4 border border-white/5 backdrop-blur-2xl shadow-xl">
           <div className="flex flex-col gap-2 w-full">
             <label className="text-[10px] font-black uppercase text-red-600 tracking-widest pl-2">Alegeți Numele</label>
-            <input 
-              value={nume} 
-              onChange={e => setNume(e.target.value.toUpperCase())}
-              placeholder="PORECLA..."
-              className="w-full bg-black/50 p-5 rounded-2xl text-xl font-black focus:border-red-600 border-2 border-transparent outline-none text-white text-center transition-all shadow-inner"
-            />
+            <div className="flex gap-2 w-full mt-1">
+              <input 
+                value={localNume} 
+                onChange={e => setLocalNume(e.target.value.toUpperCase())}
+                placeholder="PORECLA..."
+                className="w-full bg-black/50 p-4 rounded-2xl text-xl font-black focus:border-red-600 border-2 border-transparent outline-none text-white text-center transition-all shadow-inner"
+              />
+              {localNume !== nume && localNume.length >= 3 && (
+                <button onClick={handleSaveNume} className="bg-red-600 px-6 rounded-2xl font-black uppercase tracking-widest text-white shadow-[0_10px_20px_rgba(220,38,38,0.4)] active:scale-95 transition-all">
+                  SALVEAZĂ
+                </button>
+              )}
+            </div>
           </div>
           
           <RegionSelector selectedRegion={userStats.regiune} onSelectRegion={(reg) => setUserStats({...userStats, regiune: reg})} />

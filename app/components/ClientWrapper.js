@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.3 - FULL NAME/STATS SYNC)
+ * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.4 - BULLETPROOF REGION & SYNC)
  * ====================================================================================================
  */
 
@@ -14,12 +14,14 @@ import { motion, AnimatePresence } from "framer-motion";
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
+const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", teamId: null, regiune: "Muntenia" };
+
 export default function ClientWrapper({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   
   // Setăm o regiune default pentru a evita null-urile în clasament!
-  const [userStats, setUserStats] = useState({ nume: "", wins: 0, losses: 0, skin: "red", teamId: null, regiune: "Muntenia" });
+  const [userStats, setUserStats] = useState(DEFAULT_STATS);
   const [totalGlobal, setTotalGlobal] = useState(0);
   const [topRegiuni, setTopRegiuni] = useState([]);
   const [nume, setNume] = useState("");
@@ -54,8 +56,8 @@ export default function ClientWrapper({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             actiune: 'increment-global', 
-            // Trimitem regiunea DOAR dacă am câștigat duelul (cu botul)
-            regiune: amCastigat ? userStats.regiune : null 
+            // Trimitem regiunea DOAR dacă am câștigat duelul și o curățăm de spații
+            regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null 
         })
       });
       const data = await res.json();
@@ -75,10 +77,13 @@ export default function ClientWrapper({ children }) {
     if (savedStats) {
       try { 
         const parsed = JSON.parse(savedStats);
-        setUserStats(parsed); 
+        // MERGE DE SIGURANȚĂ: Ne asigurăm că dacă îi lipsea vreo proprietate veche (ex: regiune), o primește acum
+        const safeStats = { ...DEFAULT_STATS, ...parsed };
+        setUserStats(safeStats); 
+        
         // Auto-heal: Ne asigurăm că dacă există un nume salvat, el este și în userStats
-        if (savedName && parsed.nume !== savedName) {
-            const healedStats = { ...parsed, nume: savedName };
+        if (savedName && safeStats.nume !== savedName) {
+            const healedStats = { ...safeStats, nume: savedName };
             setUserStats(healedStats);
             localStorage.setItem("c_stats", JSON.stringify(healedStats));
         }
@@ -135,7 +140,7 @@ export default function ClientWrapper({ children }) {
         const cleanName = val.toUpperCase().trim(); 
         setNume(cleanName); 
         localStorage.setItem("c_nume", cleanName); 
-        // NOU: Sincronizăm instant și userStats pentru a nu avea latență când intră în grup!
+        // Sincronizăm instant și userStats pentru a nu avea latență când intră în grup!
         updateUserStats(prev => ({ ...prev, nume: cleanName }));
     },
     userStats, 
