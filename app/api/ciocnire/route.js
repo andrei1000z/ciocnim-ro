@@ -59,13 +59,13 @@ export async function POST(request) {
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat });
       }
 
-      case 'join': {
-        if (!roomId || !jucator) return NextResponse.json({ success: false, error: "Date incomplete" });
-        await pusher.trigger(`arena-v22-${roomId}`, 'join', { 
-          jucator, skin, isGolden, hasStar, t: Date.now() 
-        });
-        return NextResponse.json({ success: true });
-      }
+case 'join': {
+  // Trimitem datele către Pusher instantaneu
+  await pusher.trigger(`arena-v22-${roomId}`, 'join', { 
+    jucator, skin, isGolden, hasStar, t: Date.now() 
+  });
+  return NextResponse.json({ success: true });
+}
 
       case 'lovitura': {
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;

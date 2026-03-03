@@ -1,11 +1,21 @@
 "use client";
 
-import React, { useEffect, useState, Suspense, useMemo } from "react";
+/**
+ * ========================================================================================================================
+ * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 24.2 - HANDSHAKE SYNC FIX)
+ * ========================================================================================================================
+ */
+
+import React, { useEffect, useState, Suspense, useMemo, useCallback } from "react";
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+
+// ==========================================================================================
+// 1. ENGINE GRAFIC: OuTitan (Renderizare Liquid Glass)
+// ==========================================================================================
 
 const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => {
   const skins = useMemo(() => ({
@@ -50,6 +60,10 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
   );
 };
 
+// ==========================================================================================
+// 2. ARENA MASTER: Logica de Luptă
+// ==========================================================================================
+
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -73,6 +87,17 @@ function ArenaMaster({ room }) {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
   };
 
+  // FUNCȚIE DE SEMNALIZARE (Handshake)
+  const broadcastJoin = useCallback(() => {
+    if (!nume) return;
+    fetch('/api/ciocnire', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar })
+    });
+  }, [room, nume, me]);
+
+  // LOGICĂ BOT
   useEffect(() => {
     if (opponent || rezultat || isBotMatch || isPrivate) return;
     const botTimeout = setTimeout(() => {
@@ -82,31 +107,41 @@ function ArenaMaster({ room }) {
     return () => clearTimeout(botTimeout);
   }, [opponent, rezultat, isBotMatch, isPrivate]);
 
+  // PUSHER SYNC CU HANDSHAKE REPARAT
   useEffect(() => {
     if (isBotMatch) return;
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
-    const broadcastJoin = () => {
-      fetch('/api/ciocnire', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar })
-      });
-    };
-
-    broadcastJoin();
+    // FIX: Trimitem JOIN când subscripția e gata
+    arenaChannel.bind("pusher:subscription_succeeded", () => {
+      broadcastJoin();
+    });
 
     arenaChannel.bind("join", (data) => {
-      if (data.jucator !== nume) { setOpponent(data); broadcastJoin(); }
+      if (data.jucator !== nume) { 
+        setOpponent(data); 
+        // FIX: Răspundem cu propriile date ca să ne vadă și el instantaneu
+        broadcastJoin(); 
+      }
     });
+
     arenaChannel.bind("arena-chat", (data) => {
       setMessages(prev => [{ autor: data.jucator, text: data.text }, ...prev].slice(0, 10));
     });
+
     arenaChannel.bind("lovitura", (data) => executeBattle(data));
 
     return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
-  }, [room, nume, isBotMatch, me]);
+  }, [room, nume, isBotMatch, broadcastJoin]);
+
+  // RE-BROADCAST (Pentru siguranță în meciuri private)
+  useEffect(() => {
+    if (isPrivate && !opponent && !rezultat && !isBotMatch) {
+      const retry = setTimeout(broadcastJoin, 3000);
+      return () => clearTimeout(retry);
+    }
+  }, [opponent, isPrivate, broadcastJoin, rezultat, isBotMatch]);
 
   const executeBattle = async (data) => {
     if (rezultat) return;
@@ -120,14 +155,17 @@ function ArenaMaster({ room }) {
     playArenaSound('spargere');
     triggerVibrate(amCastigat ? [100, 50, 100] : [800]);
 
-    // Eliminat fetch-ul manual de incrementare. Serverul o face acum automat la evenimentul 'lovitura'.
-
     setTimeout(() => {
       setImpactFlash(false);
       setRezultat({ win: amCastigat });
       playArenaSound(amCastigat ? 'victorie' : 'esec');
       if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-      setUserStats({ ...userStats, wins: amCastigat ? (userStats.wins || 0) + 1 : (userStats.wins || 0), losses: !amCastigat ? (userStats.losses || 0) + 1 : (userStats.losses || 0) });
+      
+      setUserStats(prev => ({ 
+        ...prev, 
+        wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
+        losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
+      }));
     }, 400);
   };
 
@@ -136,9 +174,8 @@ function ArenaMaster({ room }) {
     
     if (isBotMatch) {
       executeBattle({ castigaCelCareDa: Math.random() < 0.5 });
-      incrementGlobal(); // Dacă jucăm cu botul, incrementăm manual din client
+      incrementGlobal();
     } else {
-      // Trimitem cererea serverului împreună cu REGIUNEA pentru a incrementa totalul național
       fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -146,7 +183,7 @@ function ArenaMaster({ room }) {
           roomId: room, 
           actiune: 'lovitura', 
           jucator: nume, 
-          regiune: userStats.regiune, // EXTREM DE IMPORTANT PENTRU CLASAMENT
+          regiune: userStats.regiune, 
           castigaCelCareDa: Math.random() < 0.5 
         })
       });
@@ -175,7 +212,11 @@ function ArenaMaster({ room }) {
 
   const handleRematch = () => {
     if (isBotMatch) window.location.reload();
-    else { setRezultat(null); triggerVibrate(); }
+    else { 
+      setRezultat(null); 
+      triggerVibrate(); 
+      broadcastJoin(); // Re-anunțăm prezența pentru revanșă
+    }
   };
 
   const copyRoomCode = () => {
@@ -208,13 +249,13 @@ function ArenaMaster({ room }) {
         <div className="text-4xl font-black text-white/5 italic">VS</div>
         <div className="flex flex-col items-center gap-6 flex-1 text-center">
           {opponent ? (
-            <>
+            <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
               <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
               <div className="bg-red-900/20 p-3 px-6 rounded-2xl border border-red-500/20 border-r-2 border-r-red-500 backdrop-blur-md">
                 <span className="text-[10px] font-black uppercase tracking-widest text-red-500/50 block">Rival</span>
                 <span className="text-lg font-black text-white italic">{opponent.jucator}</span>
               </div>
-            </>
+            </motion.div>
           ) : (
             <div className="w-[120px] h-[160px] bg-white/5 rounded-[3rem] border-2 border-dashed border-white/10 animate-pulse flex items-center justify-center text-[10px] font-bold text-white/20 text-center px-4">
               AȘTEPTĂM ADVERSAR...
@@ -256,7 +297,7 @@ function ArenaMaster({ room }) {
               </h2>
               <div className="flex flex-col gap-4 mt-8">
                 <button onClick={handleRematch} className="bg-white/10 hover:bg-white/20 py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all active:scale-95 border border-white/5">Revanșă ⚔️</button>
-                <button onClick={() => router.push('/')} className="bg-red-600 py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-[0_15px_30px_rgba(220,38,38,0.4)] hover:bg-red-500 transition-all active:scale-95">Înapoi în Sanctuar</button>
+                <button onClick={() => router.push('/')} className="bg-red-600 py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-[0_15px_30px_rgba(220,38,38,0.4)] hover:bg-red-500 transition-all active:scale-95">Înapoi</button>
               </div>
             </motion.div>
           </motion.div>

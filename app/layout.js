@@ -23,11 +23,16 @@ export const metadata = {
     default: "Ciocnim.ro - Ciocnește ouă online de Paște 2026",
     template: "%s | Ciocnim.ro"
   },
-  description: "Cea mai avansată platformă de ciocnit ouă online din România. Intră în Sanctuar, alege-ți oul norocos, formează un clan cu familia și domină clasamentul național. Hristos a Înviat!",
+  description: "Ciocnește ouă online cu prietenii de Paște 2026. Pune-ți un nume, alege-ti regiunea și culoarea oului. Joacă cu un prieten, cu un străin sau creează un grup cu familia sau cu prietenii. Fiecare ou spart se adaugă la bilanțul național și fiecare victorie îți duce regiunea mai sus în clasamentul regiunilor. Hristos a Înviat!",
   applicationName: "Ciocnim.ro",
   keywords: [
     "ciocnit oua online", "paste 2026", "jocuri de paste", "ciocnim.ro", "sanctuarul ciocnirii",
-    "traditii romanesti digitalizate", "oul de aur", "arena nationala ciocnim", "hristos a inviat"
+    "traditii romanesti digitalizate", "oul de aur", "arena nationala ciocnim", "hristos a inviat",
+    "ciocnit oua", "ciocnit online", "paste 2026", "ciocnit oua paste", "ciocnim.ro", "ciocnim online",
+    "ciocnim oua", "ciocnim paste", "ciocnim 2026", "ciocnim.ro joc", "ciocnim.ro arena", "ciocnim.ro traditii",
+    "ciocnim.ro ciocnit oua", "ciocnim.ro paste", "ciocnim.ro 2026", "ciocnim.ro joc online",
+    "ciocnim.ro arena online", "ciocnim.ro traditii romanesti", "ciocnim.ro oul de aur",
+    "ciocnim.ro clasament", "ciocnim.ro clanuri", "ciocnim.ro hristos a inviat"
   ],
   authors: [{ name: "Andrei" }, { name: "Echipa Ciocnim.ro" }],
   creator: "The Master Architects",
