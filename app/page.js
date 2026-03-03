@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.6 - ANTI-GHOST & STATS FIX)
+ * CIOCNIM.RO - PAGINA PRINCIPALĂ (V25.7 - CLEAN RENAME & STATS FIX)
  * ====================================================================================================
  */
 
@@ -373,9 +373,11 @@ function HomeContent() {
   // Stare locală pentru input-ul de nume (PREVINE FANTOMELE)
   const [localNume, setLocalNume] = useState("");
 
-  // Sincronizare inițială pentru input-ul de nume
+  // NOU: Sincronizare simplă o singură dată la montare sau când 'nume' e adus din context prima oară
   useEffect(() => {
-      if (nume && !localNume) setLocalNume(nume);
+      if (nume && localNume === "") {
+          setLocalNume(nume);
+      }
   }, [nume, localNume]);
 
   const getStoredTeamIds = () => {
@@ -566,11 +568,14 @@ function HomeContent() {
       })
     });
 
-    // Am adăugat &provocare=true în link ca Arena să știe să aștepte 7s în caz de AFK
-    router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true`);
+    // Păstrăm &teamId în link ca să știe Arena unde să pună punctul!
+    router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true&teamId=${teamId}`);
   };
 
   if (!isHydrated) return null;
+
+  // NOU: Logica clară pentru când să afișăm butonul "Salvează"
+  const isNameChanged = localNume.trim().toUpperCase() !== (nume || "").trim().toUpperCase();
 
   return (
     <div className="w-full flex flex-col items-center gap-6 max-w-4xl mx-auto pt-24 pb-12 px-5 z-10 relative">
@@ -608,11 +613,11 @@ function HomeContent() {
             <div className="flex gap-2 w-full mt-1">
               <input 
                 value={localNume} 
-                onChange={e => setLocalNume(e.target.value.toUpperCase())}
+                onChange={e => setLocalNume(e.target.value)}
                 placeholder="PORECLA..."
-                className="w-full bg-black/50 p-4 rounded-2xl text-xl font-black focus:border-red-600 border-2 border-transparent outline-none text-white text-center transition-all shadow-inner"
+                className="w-full bg-black/50 p-4 rounded-2xl text-xl font-black focus:border-red-600 border-2 border-transparent outline-none text-white text-center transition-all shadow-inner uppercase"
               />
-              {localNume !== nume && localNume.length >= 3 && (
+              {isNameChanged && localNume.trim().length >= 3 && (
                 <button onClick={handleSaveNume} className="bg-red-600 px-6 rounded-2xl font-black uppercase tracking-widest text-white shadow-[0_10px_20px_rgba(220,38,38,0.4)] active:scale-95 transition-all">
                   SALVEAZĂ
                 </button>

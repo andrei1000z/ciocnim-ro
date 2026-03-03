@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V25.6 - GHOST KILLER & REGION FIX)
+ * CIOCNIM.RO - API ENDPOINT (V25.7 - STRICT TRIM & SCORE FIX)
  * ====================================================================================================
  */
 
@@ -39,7 +39,7 @@ export async function POST(request) {
     const { 
       actiune, roomId, jucator, skin, isGolden, hasStar, 
       teamId, regiune, creator, text, newName, oponentNume,
-      atacant, esteCastigator, oldName, teamIds // <-- NOU pentru uciderea fantomelor
+      atacant, esteCastigator, oldName, teamIds 
     } = body;
 
     switch (actiune) {
@@ -52,7 +52,6 @@ export async function POST(request) {
 
       case 'increment-global': {
         const noulTotal = await redis.incr('global_ciocniri_total');
-        // AM ADAUGAT .trim() CA SA EVITAM "Muntenia " SA SE DUBLAZE FATA DE "Muntenia"
         if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
           await redis.zincrby('leaderboard_regiuni', 1, regiune.trim());
         }
@@ -63,7 +62,7 @@ export async function POST(request) {
 
       case 'join': {
         await pusher.trigger(`arena-v22-${roomId}`, 'join', { 
-          jucator, skin, isGolden, hasStar, t: Date.now(), seed: body.seed 
+          jucator: jucator.trim(), skin, isGolden, hasStar, t: Date.now(), seed: body.seed 
         });
         return NextResponse.json({ success: true });
       }
@@ -82,7 +81,7 @@ export async function POST(request) {
           }
           // Punct în clasamentul intern al grupului!
           if (teamId) {
-            await redis.zincrby(`team:${teamId}:membri`, 1, jucator.trim());
+            await redis.zincrby(`team:${teamId}:membri`, 1, jucator.trim().toUpperCase());
           }
         }
         
@@ -90,7 +89,7 @@ export async function POST(request) {
 
         // 3. Notificăm arena curentă
         await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', { 
-          jucator, castigaCelCareDa, atacant: atacant, t: Date.now() 
+          jucator: jucator.trim(), castigaCelCareDa, atacant: atacant.trim(), t: Date.now() 
         });
 
         // 4. Notificăm TOATĂ platforma
@@ -105,7 +104,7 @@ export async function POST(request) {
       case 'arena-chat': {
         if (!text || text.trim() === "") return NextResponse.json({ success: false });
         await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', { 
-          jucator, text: text.trim(), t: Date.now() 
+          jucator: jucator.trim(), text: text.trim(), t: Date.now() 
         });
         return NextResponse.json({ success: true });
       }
@@ -114,25 +113,27 @@ export async function POST(request) {
         if (!oponentNume || !jucator || !roomId) {
           return NextResponse.json({ success: false, error: "Date incomplete" });
         }
-        await pusher.trigger(`user-notif-${oponentNume}`, 'duel-request', {
-          deLa: jucator, roomId: roomId, teamId: teamId || null, t: Date.now()
+        await pusher.trigger(`user-notif-${oponentNume.trim()}`, 'duel-request', {
+          deLa: jucator.trim(), roomId: roomId, teamId: teamId || null, t: Date.now()
         });
         return NextResponse.json({ success: true });
       }
 
-      // NOU: Acțiunea care omoară fantomele (mută scorul de pe numele vechi pe cel nou)
       case 'schimba-porecla': {
         if (oldName && newName && teamIds && Array.isArray(teamIds)) {
+          const oldClean = oldName.trim().toUpperCase();
+          const newClean = newName.trim().toUpperCase();
+
           for (const tid of teamIds) {
             // Luăm scorul (victoriile) pe care îl avea numele vechi
-            const scorVechi = await redis.zscore(`team:${tid}:membri`, oldName);
+            const scorVechi = await redis.zscore(`team:${tid}:membri`, oldClean);
             
             if (scorVechi !== null) {
               const pipeline = redis.pipeline();
-              // Ștergem fantoma (numele vechi)
-              pipeline.zrem(`team:${tid}:membri`, oldName);
+              // Ștergem fantoma
+              pipeline.zrem(`team:${tid}:membri`, oldClean);
               // Băgăm numele nou cu scorul intact
-              pipeline.zadd(`team:${tid}:membri`, scorVechi, newName);
+              pipeline.zadd(`team:${tid}:membri`, scorVechi, newClean);
               await pipeline.exec();
             }
           }
@@ -150,8 +151,9 @@ export async function POST(request) {
         
         // Dacă un jucător nou a intrat pe link, îl adăugăm cu 0 puncte
         if (jucator && jucator.trim().length >= 3) {
-          const exists = await redis.zscore(`team:${teamId}:membri`, jucator.trim());
-          if (exists === null) await redis.zadd(`team:${teamId}:membri`, 0, jucator.trim());
+          const cleanPlayer = jucator.trim().toUpperCase();
+          const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
+          if (exists === null) await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
         }
         
         const membriRaw = await redis.zrevrange(`team:${teamId}:membri`, 0, 14, 'WITHSCORES');
@@ -166,12 +168,13 @@ export async function POST(request) {
       case 'creeaza-echipa': {
         if (!creator || creator.trim().length < 3) return NextResponse.json({ success: false });
         const newId = `grup_${Math.random().toString(36).substring(2, 9)}`;
-        const finalTeamName = `GRUPUL LUI ${creator.toUpperCase().trim()}`;
+        const cleanCreator = creator.trim().toUpperCase();
+        const finalTeamName = `GRUPUL LUI ${cleanCreator}`;
         
         const pipeline = redis.pipeline();
         pipeline.set(`team:${newId}:nume`, finalTeamName);
-        pipeline.hset(`team:${newId}:stats`, { creator: creator, victorii: 0, creat_la: Date.now() });
-        pipeline.zadd(`team:${newId}:membri`, 0, creator.trim()); // Îl băgăm pe creator direct cu 0 puncte
+        pipeline.hset(`team:${newId}:stats`, { creator: cleanCreator, victorii: 0, creat_la: Date.now() });
+        pipeline.zadd(`team:${newId}:membri`, 0, cleanCreator); 
         await pipeline.exec();
         
         return NextResponse.json({ success: true, teamId: newId });

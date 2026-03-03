@@ -2,7 +2,7 @@
 
 /**
  * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.4 - PROVOCARE BOT & CHAT FIX)
+ * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.5 - TEAM SCORE FIX)
  * ========================================================================================================================
  */
 
@@ -82,8 +82,8 @@ function ArenaMaster({ room }) {
   const [copied, setCopied] = useState(false);
 
   const isPrivate = room.includes("privat-");
-  // NOU: Detectăm dacă e o provocare de grup pentru a declanșa bot-ul la timp
   const isProvocare = searchParams.get("provocare") === "true";
+  const teamIdPreluat = searchParams.get("teamId"); // NOU: Luăm teamId-ul din link!
 
   const canStrike = !rezultat && opponent && atacantName === nume;
 
@@ -108,14 +108,11 @@ function ArenaMaster({ room }) {
     });
   }, [room, nume, me, localSeed]);
 
-  // LOGICĂ BOT ACTUALIZATĂ (7s provocare, 5s global, 0 privat clasic)
+  // LOGICĂ BOT
   useEffect(() => {
     if (opponent || rezultat || isBotMatch) return;
-    
-    // Dacă e cameră privată clasică (cu cod, fără provocare), NU băgăm bot
     if (isPrivate && !isProvocare) return;
 
-    // 7 secunde pentru provocare grup, 5 secunde pentru global arena
     const waitTime = isProvocare ? 7000 : 5000;
 
     const botTimeout = setTimeout(() => {
@@ -131,7 +128,7 @@ function ArenaMaster({ room }) {
     return () => clearTimeout(botTimeout);
   }, [opponent, rezultat, isBotMatch, isPrivate, isProvocare, nume]);
 
-  // Dacă botul e atacantul, dă el după 1-3 secunde
+  // Dacă botul e atacantul, dă el
   useEffect(() => {
       if (isBotMatch && atacantName === "🤖 BOT RANDOM" && !rezultat) {
           const timeout = setTimeout(() => {
@@ -231,7 +228,8 @@ function ArenaMaster({ room }) {
           roomId: room, 
           actiune: 'lovitura', 
           jucator: nume, 
-          regiune: userStats.regiune, 
+          regiune: userStats.regiune, // Trimitem regiunea ca să urce în clasament!
+          teamId: teamIdPreluat, // NOU: Trimitem teamId-ul ca să îți urce punctul în grup!
           castigaCelCareDa: castigaCelCareDaRandom,
           atacant: nume, 
           esteCastigator: castigaCelCareDaRandom
@@ -282,7 +280,6 @@ function ArenaMaster({ room }) {
 
   return (
     <div className={`w-full max-w-4xl flex flex-col items-center gap-8 pt-12 ${impactFlash ? 'animate-impact scale-105 blur-[2px]' : ''}`}>
-      {/* NOU: Ascundem codul de cameră dacă e provocare de grup */}
       {isPrivate && !isProvocare && (
         <button onClick={copyRoomCode} className="group relative bg-black/50 backdrop-blur-xl px-8 py-4 rounded-full border border-white/10 mb-4 shadow-2xl hover:bg-white/5 transition-all active:scale-95">
           <div className="flex items-center gap-3">
