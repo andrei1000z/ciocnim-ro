@@ -2,16 +2,31 @@
 
 /**
  * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 25.8 - HOST ROLES & TEAM SYNC)
+ * CIOCNIM.RO - ARENA DE LUPTĂ (VERSION 29.0 - TRUE TRADITION & BULLETPROOF IMPACT)
  * ========================================================================================================================
  */
 
-import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
+import React, { useEffect, useState, Suspense, useMemo, useCallback } from "react";
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+
+// --- BAZA DE DATE CITATE ---
+const CITATE_IERTARE = [
+  "Iartă, și vei fi iertat. Oul tău s-a jertfit pentru bucuria aproapelui.",
+  "Iertarea este podul către liniștea sufletului.",
+  "Fii bun, căci toți cei pe care îi întâlnești duc o luptă grea.",
+  "Că de veţi ierta oamenilor greşealele lor, ierta-va şi vouă Tatăl vostru cel Ceresc."
+];
+
+const CITATE_SMERENIE = [
+  "Dumnezeu celor mândri le stă împotrivă, iar celor smeriți le dă har.",
+  "Cine se va smeri pe sine, va fi înălțat.",
+  "Cel mai mare dintre voi să fie slujitorul tuturor.",
+  "Biruința e trecătoare, tradiția și omenia sunt veșnice."
+];
 
 // ==========================================================================================
 // 1. ENGINE GRAFIC: OuTitan (Renderizare Liquid Glass)
@@ -71,7 +86,13 @@ function ArenaMaster({ room }) {
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
-  const [rezultat, setRezultat] = useState(null);
+  
+  // Stări pentru rezultate și animații
+  const [isStriking, setIsStriking] = useState(false); 
+  const [rezultatAmanat, setRezultatAmanat] = useState(null); 
+  const [rezultat, setRezultat] = useState(null); 
+
+  const [citatFinal, setCitatFinal] = useState("");
   const [impactFlash, setImpactFlash] = useState(false);
   const [isBotMatch, setIsBotMatch] = useState(false);
   
@@ -84,9 +105,9 @@ function ArenaMaster({ room }) {
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
   const teamIdPreluat = searchParams.get("teamId"); 
-  const isHost = searchParams.get("host") === "true"; // NOU: Folosim host pentru roles!
+  const isHost = searchParams.get("host") === "true"; 
 
-  const canStrike = !rezultat && opponent && atacantName === nume;
+  const canStrike = !rezultat && !isStriking && opponent && atacantName === nume;
 
   const playArenaSound = (name) => {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
@@ -97,21 +118,30 @@ function ArenaMaster({ room }) {
     fetch('/api/ciocnire', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomId: room, actiune: 'join', jucator: nume, skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar, isHost: isHost })
+      body: JSON.stringify({ 
+        roomId: room, 
+        actiune: 'join', 
+        jucator: nume, 
+        skin: me.skin, 
+        isGolden: me.isGolden, 
+        hasStar: me.hasStar, 
+        isHost: isHost,
+        regiune: userStats.regiune
+      })
     });
-  }, [room, nume, me, isHost]);
+  }, [room, nume, me, isHost, userStats.regiune]);
 
-  // LOGICĂ BOT
+  // LOGICĂ BOT (7 secunde pentru provocări, 5 pentru global)
   useEffect(() => {
-    if (opponent || rezultat || isBotMatch) return;
+    if (opponent || rezultat || isStriking || isBotMatch) return;
     if (isPrivate && !isProvocare) return;
 
     const waitTime = isProvocare ? 7000 : 5000;
 
     const botTimeout = setTimeout(() => {
       setIsBotMatch(true);
-      const botName = "🤖 BOT RANDOM";
-      setOpponent({ jucator: botName, skin: 'gold', isGolden: false, hasStar: true });
+      const botName = "🤖 BOT TRADIȚIONAL";
+      setOpponent({ jucator: botName, skin: 'gold', isGolden: false, hasStar: true, regiune: "Muntele Athos" });
       
       const botLoveseste = Math.random() > 0.5;
       setAtacantName(botLoveseste ? botName : nume);
@@ -119,20 +149,20 @@ function ArenaMaster({ room }) {
     }, waitTime);
 
     return () => clearTimeout(botTimeout);
-  }, [opponent, rezultat, isBotMatch, isPrivate, isProvocare, nume]);
+  }, [opponent, rezultat, isStriking, isBotMatch, isPrivate, isProvocare, nume]);
 
   // Dacă botul e atacantul, dă el
   useEffect(() => {
-      if (isBotMatch && atacantName === "🤖 BOT RANDOM" && !rezultat) {
+      if (isBotMatch && atacantName === "🤖 BOT TRADIȚIONAL" && !rezultat && !isStriking) {
           const timeout = setTimeout(() => {
-              executeBattle({ castigaCelCareDa: Math.random() < 0.5, atacant: "🤖 BOT RANDOM" });
+              executeBattle({ castigaCelCareDa: Math.random() < 0.5, atacant: "🤖 BOT TRADIȚIONAL" });
               incrementGlobal(); 
-          }, 1000 + Math.random() * 2000);
+          }, 1500 + Math.random() * 1500);
           return () => clearTimeout(timeout);
       }
-  }, [isBotMatch, atacantName, rezultat, incrementGlobal]);
+  }, [isBotMatch, atacantName, rezultat, isStriking, incrementGlobal]);
 
-  // PUSHER SYNC CU HANDSHAKE REPARAT (FĂRĂ RANDOM SEED)
+  // PUSHER SYNC 
   useEffect(() => {
     if (isBotMatch) return;
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
@@ -146,9 +176,7 @@ function ArenaMaster({ room }) {
       if (data.jucator !== nume) { 
         setOpponent(data); 
         
-        // NOU: Cel care e setat ca Host în link va lovi mereu primul în prima rundă!
         if (isHost && data.isHost) {
-           // Dacă amândoi sunt host (bug link), rezolvăm alfabetic
            setAtacantName([nume, data.jucator].sort()[0]);
         } else {
            setAtacantName(isHost ? nume : data.jucator);
@@ -168,16 +196,18 @@ function ArenaMaster({ room }) {
   }, [room, nume, isBotMatch, broadcastJoin, isHost]);
 
   useEffect(() => {
-    if (isPrivate && !opponent && !rezultat && !isBotMatch) {
+    if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
       const retry = setTimeout(broadcastJoin, 3000);
       return () => clearTimeout(retry);
     }
-  }, [opponent, isPrivate, broadcastJoin, rezultat, isBotMatch]);
+  }, [opponent, isPrivate, broadcastJoin, rezultat, isStriking, isBotMatch]);
 
   const executeBattle = async (data) => {
-    if (rezultat) return;
-    let amCastigat = false;
+    if (rezultat || isStriking) return;
     
+    setIsStriking(true);
+
+    let amCastigat = false;
     const celCareALovit = data.atacant || (atacantName === nume ? nume : opponent?.jucator);
 
     if (me.isGolden) amCastigat = true;
@@ -190,26 +220,38 @@ function ArenaMaster({ room }) {
         }
     }
 
-    setImpactFlash(true);
-    playArenaSound('spargere');
-    triggerVibrate(amCastigat ? [100, 50, 100] : [800]);
+    setRezultatAmanat({ win: amCastigat });
+
+    const citatAles = amCastigat 
+      ? CITATE_SMERENIE[Math.floor(Math.random() * CITATE_SMERENIE.length)]
+      : CITATE_IERTARE[Math.floor(Math.random() * CITATE_IERTARE.length)];
+    
+    setCitatFinal(citatAles);
 
     setTimeout(() => {
-      setImpactFlash(false);
-      setRezultat({ win: amCastigat });
-      playArenaSound(amCastigat ? 'victorie' : 'esec');
-      if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      setImpactFlash(true);
+      playArenaSound('spargere');
+      triggerVibrate(amCastigat ? [100, 50, 100] : [800]);
       
-      setUserStats(prev => {
-        const noiStatistici = { 
-          ...prev, 
-          wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
-          losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
-        };
-        localStorage.setItem("c_stats", JSON.stringify(noiStatistici));
-        return noiStatistici;
-      });
-    }, 400);
+      setRezultat({ win: amCastigat });
+
+      setTimeout(() => {
+        setImpactFlash(false);
+        playArenaSound(amCastigat ? 'victorie' : 'esec');
+        if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        
+        // AICI STĂ MAGICUL PENTRU REZOLVAREA BUCĂLII DE VICTORII:
+        setUserStats(prev => {
+          const noiStatistici = { 
+            ...prev, 
+            wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
+            losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
+          };
+          localStorage.setItem("c_stats", JSON.stringify(noiStatistici));
+          return noiStatistici;
+        });
+      }, 400);
+    }, 500);
   };
 
   const handleStrike = () => {
@@ -263,10 +305,16 @@ function ArenaMaster({ room }) {
   };
 
   const handleRematch = () => {
-    if (isBotMatch) window.location.reload();
-    else { 
+    if (isBotMatch) {
+      // Dacă a fost cu botul, dăm reload curat
+      window.location.reload();
+    } else { 
+      // Resetăm tot complet pentru un om real ca să nu se încalece
       setRezultat(null); 
-      // La revanșă facem swap la atacant
+      setRezultatAmanat(null);
+      setIsStriking(false);
+      
+      // Schimbăm cine dă
       setAtacantName(prev => prev === nume ? opponent.jucator : nume);
       triggerVibrate(); 
       broadcastJoin(); 
@@ -280,96 +328,172 @@ function ArenaMaster({ room }) {
   };
 
   return (
-    <div className={`w-full max-w-4xl flex flex-col items-center gap-8 pt-12 ${impactFlash ? 'animate-impact scale-105 blur-[2px]' : ''}`}>
-      {isPrivate && !isProvocare && (
-        <button onClick={copyRoomCode} className="group relative bg-black/50 backdrop-blur-xl px-8 py-4 rounded-full border border-white/10 mb-4 shadow-2xl hover:bg-white/5 transition-all active:scale-95">
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 group-hover:text-white/80 transition-colors">Cod Cameră: </span>
-            <span className="text-yellow-500 font-black text-2xl tracking-widest drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]">{room.replace('privat-', '')}</span>
-            <span className="bg-white/10 p-2 rounded-xl text-xs ml-2 group-hover:bg-white/20 transition-all">{copied ? '✅' : '📋'}</span>
-          </div>
-          {copied && <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-green-500 tracking-widest">COPIAT!</span>}
-        </button>
-      )}
-
-      <div className="flex justify-between items-center w-full px-4 md:px-20">
-        <div className="flex flex-col items-center gap-6 flex-1">
-          <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
-          <div className="liquid-glass p-3 px-6 rounded-2xl text-center border-l-2 border-l-green-500 relative">
-            {atacantName === nume && !rezultat && opponent && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg border border-red-400">ATACĂ</span>}
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/30 block">Tu</span>
-            <span className="text-lg font-black text-white italic">{nume}</span>
-          </div>
-        </div>
-        <div className="text-4xl font-black text-white/5 italic">VS</div>
-        <div className="flex flex-col items-center gap-6 flex-1 text-center">
-          {opponent ? (
-            <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
-              <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
-              <div className="bg-red-900/20 p-3 px-6 rounded-2xl border border-red-500/20 border-r-2 border-r-red-500 backdrop-blur-md relative">
-                {atacantName === opponent.jucator && !rezultat && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg border border-red-400">ATACĂ</span>}
-                <span className="text-[10px] font-black uppercase tracking-widest text-red-500/50 block">Rival</span>
-                <span className="text-lg font-black text-white italic">{opponent.jucator}</span>
-              </div>
-            </motion.div>
-          ) : (
-            <div className="w-[120px] h-[160px] bg-white/5 rounded-[3rem] border-2 border-dashed border-white/10 animate-pulse flex items-center justify-center text-[10px] font-bold text-white/20 text-center px-4">
-              AȘTEPTĂM ADVERSAR...
+    <>
+      <div className={`w-full max-w-4xl flex flex-col items-center gap-8 pt-12 ${impactFlash ? 'animate-impact scale-105 blur-[2px]' : ''}`}>
+        
+        {isPrivate && !isProvocare && (
+          <button onClick={copyRoomCode} className="group relative bg-[#080808]/80 backdrop-blur-xl px-8 py-4 rounded-full border border-red-500/20 mb-4 shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-[#111] hover:border-red-500/50 transition-all active:scale-95 z-10">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 group-hover:text-white/80 transition-colors">Cod Cameră: </span>
+              <span className="text-yellow-500 font-black text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]">{room.replace('privat-', '')}</span>
+              <span className="bg-white/5 p-2 rounded-xl text-xs ml-2 group-hover:bg-white/10 transition-all border border-white/5">{copied ? '✅' : '📋'}</span>
             </div>
-          )}
-        </div>
-      </div>
-
-      <div className="w-full max-w-sm px-4 mt-6">
-        {opponent && !rezultat && (
-          <button onClick={handleStrike} disabled={!canStrike} className={`w-full py-6 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all shadow-lg ${canStrike ? 'bg-red-600 text-white shadow-[0_15px_40px_rgba(220,38,38,0.5)] border-2 border-red-400/30 hover:scale-105 active:scale-95 animate-pulse' : 'bg-white/5 text-white/30 cursor-not-allowed border-2 border-white/5'}`}>
-            {canStrike ? "💥 CIOCNEȘTE ACUM!" : "🛡️ APĂRĂ OUL!"}
+            {copied && <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-green-500 tracking-widest">COPIAT!</span>}
           </button>
         )}
-      </div>
 
-      <div className="w-full max-w-md liquid-glass p-4 rounded-[2rem] mt-4">
-        <div className="h-32 overflow-y-auto flex flex-col-reverse gap-2 mb-4 custom-scrollbar pr-2">
-          {messages.map((m, i) => (
-            <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start'}`}>
-              <span className="text-[8px] font-black uppercase text-white/30 px-2 mb-1">{m.autor}</span>
-              <div className={`px-4 py-2 rounded-2xl text-xs font-bold ${m.autor === nume ? 'bg-red-600' : 'bg-white/10'}`}>{m.text}</div>
+        <div className="flex justify-between items-center w-full px-4 md:px-20 mt-4">
+          <div className="flex flex-col items-center gap-6 flex-1">
+            <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
+            <div className="bg-[#080808]/90 backdrop-blur-md p-4 px-6 rounded-2xl text-center border border-white/5 border-l-4 border-l-green-500 relative min-w-[140px] shadow-lg">
+              {atacantName === nume && !rezultat && opponent && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.5)] border border-red-400/50">ATACĂ</span>}
+              <span className="text-[9px] font-black uppercase tracking-widest text-white/40 block mb-1 truncate">{userStats.regiune || "Muntenia"}</span>
+              <span className="text-xl font-black text-white italic drop-shadow-sm">{nume}</span>
             </div>
-          ))}
+          </div>
+
+          <div className="text-5xl font-black text-white/10 italic drop-shadow-sm px-4">VS</div>
+          
+          <div className="flex flex-col items-center gap-6 flex-1 text-center">
+            {opponent ? (
+              <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
+                <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
+                <div className="bg-[#080808]/90 p-4 px-6 rounded-2xl border border-white/5 border-r-4 border-r-red-600 backdrop-blur-md relative min-w-[140px] shadow-lg">
+                  {atacantName === opponent.jucator && !rezultat && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.5)] border border-red-400/50">ATACĂ</span>}
+                  <span className="text-[9px] font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate">{opponent.regiune || "Necunoscut"}</span>
+                  <span className="text-xl font-black text-white italic drop-shadow-sm">{opponent.jucator}</span>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="w-[140px] h-[180px] bg-[#080808]/50 rounded-[3rem] border-2 border-dashed border-white/10 animate-pulse flex items-center justify-center text-[10px] font-bold tracking-widest uppercase text-white/30 text-center px-4 mt-[30px] backdrop-blur-sm">
+                Așteptăm Adversar...
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex gap-2 bg-black/50 p-1 rounded-full border border-white/10 focus-within:border-red-500/50 transition-colors">
-          <input value={chatInput} onChange={e => setChatInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && handleChat()} placeholder="SCRIE UN MESAJ..." className="flex-1 bg-transparent pl-4 text-xs font-black outline-none text-white" />
-          <button onClick={handleChat} className="bg-white/10 w-10 h-10 rounded-full hover:bg-red-600 transition-colors">💬</button>
+
+        <div className="w-full max-w-sm px-4 mt-8 z-10">
+          {opponent && !rezultat && (
+            <button 
+              onClick={handleStrike} 
+              disabled={!canStrike || isStriking} 
+              className={`w-full py-6 rounded-[2rem] font-black uppercase tracking-[0.3em] text-sm md:text-base transition-all shadow-lg ${
+                canStrike && !isStriking 
+                  ? 'bg-red-600 text-white shadow-[0_20px_40px_rgba(220,38,38,0.4)] border-2 border-red-400/30 hover:scale-[1.02] active:scale-95 animate-pulse' 
+                  : 'bg-[#080808] text-white/30 cursor-not-allowed border-2 border-white/5 backdrop-blur-md'
+              }`}
+            >
+              {isStriking ? "⏳ ÎN IMPACT..." : (canStrike ? "💥 CIOCNEȘTE ACUM!" : "🛡️ APĂRĂ OUL!")}
+            </button>
+          )}
+        </div>
+
+        {/* CHAT REDESIGN (Premium OLED) */}
+        <div className="w-full max-w-md bg-[#080808] border border-white/10 p-5 md:p-6 rounded-[2.5rem] mt-4 z-10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-[40px] pointer-events-none"></div>
+          
+          <div className="h-36 overflow-y-auto flex flex-col-reverse gap-3 mb-4 custom-scrollbar pr-2 relative z-10">
+            {messages.map((m, i) => (
+              <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start'}`}>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30 px-2 mb-1">{m.autor}</span>
+                <div className={`px-4 py-2.5 rounded-2xl text-xs md:text-sm font-bold shadow-sm border border-white/5 ${m.autor === nume ? 'bg-red-600 text-white rounded-tr-sm' : 'bg-white/5 text-white/90 rounded-tl-sm backdrop-blur-md'}`}>
+                   {m.text}
+                </div>
+              </div>
+            ))}
+            {messages.length === 0 && (
+                <div className="text-center w-full h-full flex flex-col justify-center items-center opacity-30 mt-8">
+                    <span className="text-2xl mb-2">💬</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Liniște pe câmpul de bătălie</span>
+                </div>
+            )}
+          </div>
+          
+          <div className="flex gap-2 bg-black/60 p-1.5 rounded-full border border-white/5 focus-within:border-red-500/50 focus-within:bg-[#111] transition-all relative z-10">
+            <input 
+               value={chatInput} 
+               onChange={e => setChatInput(e.target.value.toUpperCase())} 
+               onKeyDown={e => e.key === 'Enter' && handleChat()} 
+               placeholder="SCRIE UN MESAJ..." 
+               className="flex-1 bg-transparent pl-5 text-xs font-black outline-none text-white tracking-widest placeholder:text-white/20" 
+            />
+            <button onClick={handleChat} className="bg-white/10 w-12 h-12 rounded-full hover:bg-red-600 transition-colors border border-white/5 text-sm active:scale-95">🕊️</button>
+          </div>
         </div>
       </div>
 
       <AnimatePresence>
         {rezultat && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-6 text-center backdrop-blur-2xl">
-            <motion.div initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5 }} className="max-w-sm w-full space-y-8 bg-[#0a0a0a] p-10 rounded-[3rem] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,1)]">
-              <div className="text-9xl mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">{rezultat.win ? '👑' : '🥀'}</div>
-              <h2 className={`text-5xl md:text-6xl font-black italic tracking-tighter drop-shadow-lg ${rezultat.win ? 'text-green-500' : 'text-red-600'}`}>
-                {rezultat.win ? 'VICTORIE!' : 'AI PIERDUT'}
-              </h2>
-              <div className="flex flex-col gap-4 mt-8">
-                <button onClick={handleRematch} className="bg-white/10 hover:bg-white/20 py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all active:scale-95 border border-white/5">Revanșă ⚔️</button>
-                <button onClick={() => router.push('/')} className="bg-red-600 py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-[0_15px_30px_rgba(220,38,38,0.4)] hover:bg-red-500 transition-all active:scale-95">Înapoi</button>
-              </div>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} // E important să aibă exit pentru a dispărea fin la Revanșă
+            className="fixed inset-0 bg-black/95 z-[2147483647] flex items-center justify-center p-6 text-center backdrop-blur-3xl"
+          >
+            <motion.div 
+              initial="hidden" 
+              animate="visible" 
+              variants={{
+                hidden: { scale: 0.8, y: 50, opacity: 0 },
+                visible: { scale: 1, y: 0, opacity: 1, transition: { type: "spring", bounce: 0.4, staggerChildren: 0.15 } }
+              }} 
+              className={`max-w-md w-full bg-[#080808] p-8 md:p-10 rounded-[3rem] border shadow-[0_50px_100px_rgba(0,0,0,0.9)] relative overflow-hidden pointer-events-auto ${rezultat.win ? 'border-green-500/30' : 'border-red-500/30'}`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-t to-transparent pointer-events-none ${rezultat.win ? 'from-green-600/10' : 'from-red-600/10'}`}></div>
+              <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 blur-[60px] pointer-events-none z-0 ${rezultat.win ? 'bg-green-500/20' : 'bg-red-500/20'}`}></div>
+              
+              <motion.div variants={{ hidden: { opacity: 0, scale: 0 }, visible: { opacity: 1, scale: 1 } }} className="text-8xl md:text-9xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] relative z-10 mb-4">
+                {rezultat.win ? '👑' : '🥀'}
+              </motion.div>
+              
+              <motion.h2 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className={`text-4xl md:text-5xl font-black italic tracking-tighter drop-shadow-lg uppercase relative z-10 ${rezultat.win ? 'text-green-500' : 'text-red-600'}`}>
+                {rezultat.win ? 'Victorie!' : 'Oul s-a spart'}
+              </motion.h2>
+              
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="relative mt-8 mb-8 z-10 pointer-events-none">
+                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#080808] px-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 z-10 border border-white/5 rounded-full">
+                   {rezultat.win ? 'Învățătură' : 'Alinare'}
+                 </div>
+                 <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl shadow-inner relative overflow-hidden">
+                   <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] pointer-events-none"></div>
+                   <span className="absolute top-2 left-4 text-5xl text-white/10 font-serif leading-none">"</span>
+                   <p className="text-sm md:text-base font-bold text-white/80 italic leading-relaxed relative z-10 mt-2">
+                     {citatFinal}
+                   </p>
+                   <span className="absolute bottom-[-15px] right-4 text-5xl text-white/10 font-serif leading-none">"</span>
+                 </div>
+              </motion.div>
+
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="flex flex-col gap-4 relative z-50">
+                <button 
+                  onClick={handleRematch} 
+                  className="w-full bg-[#111] hover:bg-[#222] py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-sm transition-all active:scale-95 border border-white/10 shadow-sm cursor-pointer relative z-50 pointer-events-auto"
+                >
+                  {rezultat.win ? 'Încă o luptă ⚔️' : 'Revanșă ⚔️'}
+                </button>
+                <button 
+                  onClick={() => router.push('/')} 
+                  className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-sm transition-all active:scale-95 shadow-lg border-2 border-transparent cursor-pointer relative z-50 pointer-events-auto ${rezultat.win ? 'bg-green-600 hover:bg-green-500 shadow-[0_15px_30px_rgba(22,163,74,0.3)] border-green-400/30' : 'bg-red-600 hover:bg-red-500 shadow-[0_15px_30px_rgba(220,38,38,0.4)] border-red-400/30'}`}
+                >
+                  Înapoi la Vatră
+                </button>
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
 
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
-    <main className="min-h-screen w-full bg-[#010101] text-white flex flex-col items-center justify-center relative overflow-hidden">
-      <div className="ambient-glow-red" />
-      <div className="ambient-glow-gold" />
-      <Suspense fallback={<div className="font-black animate-pulse text-red-500 tracking-widest text-sm">CONECTARE ARENĂ...</div>}>
+    <main className="min-h-screen w-full bg-[#010101] text-white flex flex-col items-center justify-center relative overflow-hidden pattern-tradition">
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-600/5 rounded-full blur-[150px] pointer-events-none" />
+      
+      <Suspense fallback={<div className="font-black animate-pulse text-red-500 tracking-widest text-sm uppercase">AȘEZĂM MASA...</div>}>
         <ArenaMaster room={resolvedParams.room} />
       </Suspense>
     </main>

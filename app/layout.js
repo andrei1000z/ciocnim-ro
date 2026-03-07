@@ -4,10 +4,10 @@ import ClientWrapper from "./components/ClientWrapper";
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (VERSION 23.0 - CLEAN SEO & OLED)
+ * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (VERSION 26.0 - PURE TRADITION & ULTIMATE SEO)
  * ====================================================================================================
  * Proiect: Infrastructură globală pentru ciocnit ouă virtuale.
- * Optimizări: Viewport Repair, Tank Lock V2, OLED Depth Engine, SEO Supreme.
+ * Optimizări: Viewport Repair, OLED Depth Engine, SEO Organic Max.
  * ====================================================================================================
  */
 
@@ -20,23 +20,20 @@ const outfit = Outfit({
 
 export const metadata = {
   title: {
-    default: "Ciocnim.ro - Ciocnește ouă online de Paște 2026",
+    default: "Ciocnim.ro - Ciocnește ouă de Paște online (2026)",
     template: "%s | Ciocnim.ro"
   },
-  description: "Ciocnește ouă online cu prietenii de Paște 2026. Pune-ți un nume, alege-ti regiunea și culoarea oului. Joacă cu un prieten, cu un străin sau creează un grup cu familia sau cu prietenii. Fiecare ou spart se adaugă la bilanțul național și fiecare victorie îți duce regiunea mai sus în clasamentul regiunilor. Hristos a Înviat!",
+  description: "Păstrăm tradiția vie! Ciocnește ouă online cu familia și prietenii de Paște 2026. Alege-ți regiunea, personalizează-ți oul roșu și intră în clasamentul național. Hristos a Înviat!",
   applicationName: "Ciocnim.ro",
   keywords: [
-    "ciocnit oua online", "paste 2026", "jocuri de paste", "ciocnim.ro", "sanctuarul ciocnirii",
-    "traditii romanesti digitalizate", "oul de aur", "arena nationala ciocnim", "hristos a inviat",
-    "ciocnit oua", "ciocnit online", "paste 2026", "ciocnit oua paste", "ciocnim.ro", "ciocnim online",
-    "ciocnim oua", "ciocnim paste", "ciocnim 2026", "ciocnim.ro joc", "ciocnim.ro arena", "ciocnim.ro traditii",
-    "ciocnim.ro ciocnit oua", "ciocnim.ro paste", "ciocnim.ro 2026", "ciocnim.ro joc online",
-    "ciocnim.ro arena online", "ciocnim.ro traditii romanesti", "ciocnim.ro oul de aur",
-    "ciocnim.ro clasament", "ciocnim.ro clanuri", "ciocnim.ro hristos a inviat"
+    "ciocnit oua online", "joc paste 2026", "ciocnim.ro", "traditii romanesti paste",
+    "ciocneste oua pe telefon", "ou rosu online", "hristos a inviat", "adevarat a inviat",
+    "jocuri romanesti paste", "competitie ciocnit oua", "cum se ciocnesc ouale", 
+    "paste 2026", "ciocnim online", "clasament regiuni paste", "grup ciocnit oua familia"
   ],
-  authors: [{ name: "Andrei" }, { name: "Echipa Ciocnim.ro" }],
-  creator: "The Master Architects",
-  publisher: "Ciocnim.ro Neural Network",
+  authors: [{ name: "Echipa Ciocnim.ro" }],
+  creator: "Ciocnim.ro",
+  publisher: "Ciocnim.ro",
   formatDetection: {
     email: false,
     address: false,
@@ -44,18 +41,18 @@ export const metadata = {
   },
   metadataBase: new URL("https://ciocnim.ro"),
   openGraph: {
-    title: "Ciocnim.ro - Ciocnește ouă online de Paște 2026",
-    description: "⚔️ Dueluri epice în timp real! Ciocnește Oul de Aur, apără-ți Clanul și devino Legendă. Hristos a Înviat!",
+    title: "Ciocnim.ro - Tradiția de Paște continuă online",
+    description: "Intră în arenă! Ciocnește ouă cu prietenii tăi, apără-ți regiunea și distrează-te de Paște. Hristos a Înviat!",
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
-    images: [{ url: "/og-image-paste.jpg", width: 1200, height: 630, alt: "Arena Ciocnim.ro" }],
+    images: [{ url: "/og-image-paste.jpg", width: 1200, height: 630, alt: "Arena Ciocnim.ro - Paște 2026" }],
     locale: "ro_RO",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ciocnim.ro - Ciocnește ouă online de Paște 2026",
-    description: "Ești gata pentru marea ciocneală a neamului? Intră acum în Arena!",
+    title: "Ciocnim.ro - Ciocnește ouă online!",
+    description: "Pregătește-ți oul cel mai tare și intră în joc alături de mii de români.",
     images: ["/og-image-paste.jpg"],
   },
   robots: {
@@ -71,7 +68,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#010101", // Actualizat pentru True OLED Black
+  themeColor: "#010101", // True OLED Black
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -107,7 +104,7 @@ export default function RootLayout({ children }) {
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_15%_50%,rgba(220,38,38,0.05),transparent_50%)]"></div>
           <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_85%_30%,rgba(234,179,8,0.03),transparent_50%)]"></div>
           
-          {/* Watermark-uri SEO Decorativ */}
+          {/* Watermark-uri Subtile Tradiție */}
           <div className="absolute top-[15%] right-[-10%] text-[20vh] md:text-[28vh] font-black italic text-white/[0.01] uppercase select-none rotate-12 tracking-tighter mix-blend-overlay">TRADIȚIE</div>
           <div className="absolute bottom-[15%] left-[-10%] text-[20vh] md:text-[28vh] font-black italic text-white/[0.01] uppercase select-none -rotate-12 tracking-tighter mix-blend-overlay">PAȘTE</div>
         </div>
@@ -122,7 +119,7 @@ export default function RootLayout({ children }) {
                <div className="flex flex-col items-center gap-3">
                  <div className="h-px w-40 bg-gradient-to-r from-transparent via-white/30 to-transparent mb-1" />
                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.6em]">
-                    CIOCNIM.RO • SĂRBĂTORI FERICITE 2026
+                    CIOCNIM.RO • TRADIȚIE DIGITALĂ 2026
                  </p>
                  <div className="flex gap-4 md:gap-6 mt-1">
                     <span className="text-[7px] font-bold uppercase tracking-widest text-white/50"></span>
@@ -133,7 +130,7 @@ export default function RootLayout({ children }) {
           </div>
         </ClientWrapper>
 
-        {/* CSS RUNTIME FIXES (THE TANK LOCK) */}
+        {/* CSS RUNTIME FIXES (THE TANK LOCK - Anti-crop sistem pentru iPhone/Android) */}
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
             --safe-area-left: env(safe-area-inset-left, 0px);

@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - PAGINA DE TRADIȚII ȘI SEO (V23.2 - LORE & IMMERSION)
+ * CIOCNIM.RO - PAGINA DE TRADIȚII ȘI SEO (V26.0 - PURE LORE & IMMERSION)
  * ====================================================================================================
  */
 
@@ -41,9 +41,9 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
 
 export default function TraditiiPage() {
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30">
+    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30 pattern-tradition">
       
-      {/* OLED GLOWS (Luate direct din globals.css pentru unificare) */}
+      {/* OLED GLOWS */}
       <div className="ambient-glow-red"></div>
       <div className="ambient-glow-gold"></div>
 
@@ -54,7 +54,7 @@ export default function TraditiiPage() {
             <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
          </Link>
          <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
-            Înapoi în Arenă
+            Înapoi la Vatră
          </Link>
       </div>
 
@@ -70,6 +70,7 @@ export default function TraditiiPage() {
         </motion.header>
         
         <section className="flex flex-col gap-8 w-full mt-6">
+          
           <ArticleSection title="De ce ciocnim ouă?" icon="🩸" delay={0.1}>
             <p>
               Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong className="text-white">"Hristos a Înviat!"</strong>.
@@ -93,22 +94,41 @@ export default function TraditiiPage() {
             </div>
           </ArticleSection>
 
-          {/* SECȚIUNE NOUĂ PENTRU RETENȚIE ȘI SEO */}
-          <ArticleSection title="Superstiții Românești" icon="✨" delay={0.3}>
-            <p>Jocul nu este doar o competiție, ci și un mod de a atrage norocul în Noul An agricol:</p>
-            <ul className="list-disc pl-6 space-y-3 mt-4">
-              <li>Cine are oul cel mai tare și iese învingător din toate duelurile, va fi sănătos și puternic tot restul anului.</li>
-              <li>Dacă găsești la masă un ou cu două gălbenușuri, vei avea parte de noroc dublu (și poate o nuntă în familie).</li>
-              <li>Cojile ouălor sparte și sfințite nu se aruncă la gunoi! Tradiția cere să le îngropi în pământul grădinii pentru a proteja recolta de rele.</li>
+          <ArticleSection title="Semnificația Culorilor" icon="🎨" delay={0.3}>
+            <p>Deși oul roșu este cel mai cunoscut, tradiția românească a păstrat și alte culori, fiecare având un sens aparte:</p>
+            <ul className="space-y-3 mt-4">
+              <li><strong className="text-red-500 uppercase tracking-wider text-xs">ROȘU:</strong> Simbolul jertfei, al vieții și al iubirii divine.</li>
+              <li><strong className="text-yellow-500 uppercase tracking-wider text-xs">GALBEN:</strong> Reprezintă lumina, belșugul și grâul copt al verii ce urmează.</li>
+              <li><strong className="text-blue-500 uppercase tracking-wider text-xs">ALBASTRU:</strong> Simbolizează cerul, credința și infinitul spiritual.</li>
+              <li><strong className="text-green-500 uppercase tracking-wider text-xs">VERDE:</strong> Culoarea primăverii, a reînnoirii naturii și a speranței.</li>
             </ul>
           </ArticleSection>
+
+          <ArticleSection title="Cum Alegi Oul Tare" icon="🛡️" delay={0.4}>
+            <p>Secretul câștigării duelurilor stă în alegerea oului potrivit din coș:</p>
+            <ul className="list-disc pl-6 space-y-3 mt-4">
+              <li>Caută un ou cu o formă cât mai ascuțită la vârf. Forța se concentrează mai bine pe o suprafață mică.</li>
+              <li>Verifică sunetul! Unii bat ușor oul de dinte – dacă sună plin și ascuțit, coaja este groasă.</li>
+              <li>Strânge-l ușor în mână. Oul trebuie să se simtă ferm, fără micro-fisuri ascunse sub stratul de vopsea.</li>
+            </ul>
+          </ArticleSection>
+
+          <ArticleSection title="Superstiții Românești" icon="✨" delay={0.5}>
+            <p>Jocul nu este doar o competiție, ci și un mod de a atrage norocul în casă:</p>
+            <ul className="list-disc pl-6 space-y-3 mt-4">
+              <li>Cine are oul cel mai tare și iese învingător din toate duelurile, va fi sănătos și puternic tot restul anului.</li>
+              <li>Dacă găsești la masă un ou cu două gălbenușuri, vei avea parte de noroc dublu.</li>
+              <li>Cojile ouălor sparte și sfințite nu se aruncă la gunoi! Tradiția cere să le îngropi în pământul grădinii pentru a proteja recolta.</li>
+            </ul>
+          </ArticleSection>
+
         </section>
 
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
           <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden">
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             <span className="relative z-10 flex items-center gap-3 drop-shadow-md">
-              JOACĂ ACUM ⚔️
+              INTRĂ ÎN ARENĂ ⚔️
             </span>
           </Link>
         </motion.div>

@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V25.8 - STRICT TRIM & SCORE FIX)
+ * CIOCNIM.RO - API ENDPOINT (V29.0 - UNIQUE USERNAMES & SCORE MIGRATION)
  * ====================================================================================================
  */
 
@@ -21,17 +21,25 @@ async function getClasamentRegiuni() {
     const raw = await redis.zrevrange('leaderboard_regiuni', 0, -1, 'WITHSCORES');
     const lista = [];
     for (let i = 0; i < raw.length; i += 2) {
-      lista.push({ 
-        regiune: raw[i], 
-        scor: parseInt(raw[i + 1]) || 0 
-      });
+      lista.push({ regiune: raw[i], scor: parseInt(raw[i + 1]) || 0 });
     }
     return lista;
-  } catch (e) {
-    console.error("[Neural Redis] Eroare getClasamentRegiuni:", e);
-    return [];
-  }
+  } catch (e) { return []; }
 }
+
+async function getClasamentJucatori() {
+  try {
+    const raw = await redis.zrevrange('leaderboard_jucatori', 0, 9, 'WITHSCORES'); // Top 10
+    const lista = [];
+    for (let i = 0; i < raw.length; i += 2) {
+      lista.push({ nume: raw[i], scor: parseInt(raw[i + 1]) || 0 });
+    }
+    return lista;
+  } catch (e) { return []; }
+}
+
+// Protejăm numele sistemului
+const NUME_INTERZISE = ["BOT", "BOT TRADIȚIONAL", "SISTEM", "ADMIN"];
 
 export async function POST(request) {
   try {
@@ -47,17 +55,34 @@ export async function POST(request) {
       case 'get-counter': {
         const totalCount = await redis.get('global_ciocniri_total') || 0;
         const topRegiuni = await getClasamentRegiuni();
-        return NextResponse.json({ success: true, total: parseInt(totalCount), topRegiuni });
+        const topJucatori = await getClasamentJucatori();
+        return NextResponse.json({ success: true, total: parseInt(totalCount), topRegiuni, topJucatori });
       }
 
       case 'increment-global': {
-        const noulTotal = await redis.incr('global_ciocniri_total');
+        const pipeline = redis.pipeline();
+        pipeline.incr('global_ciocniri_total');
+        
         if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-          await redis.zincrby('leaderboard_regiuni', 1, regiune.trim());
+          pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
         }
+        if (jucator && jucator.trim() !== "") {
+           pipeline.zincrby('leaderboard_jucatori', 1, jucator.trim().toUpperCase());
+        }
+        
+        const results = await pipeline.exec();
+        const noulTotal = results[0][1];
+        
         const topActualizat = await getClasamentRegiuni();
-        await pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat });
-        return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat });
+        const topJucatoriActualizat = await getClasamentJucatori();
+
+        await pusher.trigger('global', 'update-complet', { 
+            total: noulTotal, 
+            topRegiuni: topActualizat,
+            topJucatori: topJucatoriActualizat
+        });
+        
+        return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
       }
 
       case 'join': {
@@ -70,27 +95,37 @@ export async function POST(request) {
       case 'lovitura': {
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
         
-        const noulTotal = await redis.incr('global_ciocniri_total');
+        const pipeline = redis.pipeline();
+        pipeline.incr('global_ciocniri_total');
         
         if (esteCastigator) {
           if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-            await redis.zincrby('leaderboard_regiuni', 1, regiune.trim());
+            pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
+          }
+          if (jucator && jucator.trim() !== "") {
+            pipeline.zincrby('leaderboard_jucatori', 1, jucator.trim().toUpperCase());
           }
           if (teamId && teamId !== "null" && teamId !== "") {
-            await redis.zincrby(`team:${teamId}:membri`, 1, jucator.trim().toUpperCase());
+            pipeline.zincrby(`team:${teamId}:membri`, 1, jucator.trim().toUpperCase());
           }
         }
         
+        const pipelineResults = await pipeline.exec();
+        const noulTotal = pipelineResults[0][1]; 
+        
         const topActualizat = await getClasamentRegiuni();
+        const topJucatoriActualizat = await getClasamentJucatori();
 
-        await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', { 
-          jucator: jucator.trim().toUpperCase(), castigaCelCareDa, atacant: atacant.trim().toUpperCase(), t: Date.now() 
-        });
-
-        await pusher.trigger('global', 'update-complet', { 
-          total: noulTotal, 
-          topRegiuni: topActualizat 
-        });
+        await Promise.all([
+          pusher.trigger(`arena-v22-${roomId}`, 'lovitura', { 
+            jucator: jucator.trim().toUpperCase(), castigaCelCareDa, atacant: atacant.trim().toUpperCase(), t: Date.now() 
+          }),
+          pusher.trigger('global', 'update-complet', { 
+            total: noulTotal, 
+            topRegiuni: topActualizat,
+            topJucatori: topJucatoriActualizat
+          })
+        ]);
 
         return NextResponse.json({ success: true });
       }
@@ -114,23 +149,59 @@ export async function POST(request) {
       }
 
       case 'schimba-porecla': {
-        if (oldName && newName && teamIds && Array.isArray(teamIds)) {
-          const oldClean = oldName.trim().toUpperCase();
-          const newClean = newName.trim().toUpperCase();
-
-          for (const tid of teamIds) {
-            const scorVechi = await redis.zscore(`team:${tid}:membri`, oldClean);
-            
-            if (scorVechi !== null) {
-              const pipeline = redis.pipeline();
-              pipeline.zrem(`team:${tid}:membri`, oldClean);
-              pipeline.zadd(`team:${tid}:membri`, scorVechi, newClean);
-              await pipeline.exec();
-            }
-          }
-          return NextResponse.json({ success: true });
+        if (!newName || newName.trim().length < 3) {
+            return NextResponse.json({ success: false, error: "Nume prea scurt" });
         }
-        return NextResponse.json({ success: false });
+
+        const newClean = newName.trim().toUpperCase();
+        const oldClean = oldName ? oldName.trim().toUpperCase() : null;
+
+        // 1. Verificăm dacă numele este interzis
+        if (NUME_INTERZISE.includes(newClean)) {
+            return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." });
+        }
+
+        // 2. Verificăm unicitatea
+        const isTaken = await redis.get(`nume_rezervat:${newClean}`);
+        if (isTaken && isTaken !== oldClean) {
+            return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt haiduc!" });
+        }
+
+        const pipeline = redis.pipeline();
+
+        // 3. Rezervăm noul nume
+        pipeline.set(`nume_rezervat:${newClean}`, "1");
+
+        // 4. Dacă a avut un nume vechi, mutăm scorul și eliberăm numele
+        if (oldClean && oldClean !== newClean) {
+            pipeline.del(`nume_rezervat:${oldClean}`);
+
+            // Mutăm în Topul Global Jucători
+            const globalScore = await redis.zscore('leaderboard_jucatori', oldClean);
+            if (globalScore !== null) {
+                pipeline.zrem('leaderboard_jucatori', oldClean);
+                pipeline.zadd('leaderboard_jucatori', globalScore, newClean);
+            }
+
+            // Mutăm în Grupurile Private
+            if (teamIds && Array.isArray(teamIds)) {
+                for (const tid of teamIds) {
+                    const scorVechi = await redis.zscore(`team:${tid}:membri`, oldClean);
+                    if (scorVechi !== null) {
+                        pipeline.zrem(`team:${tid}:membri`, oldClean);
+                        pipeline.zadd(`team:${tid}:membri`, scorVechi, newClean);
+                    }
+                }
+            }
+        }
+        
+        await pipeline.exec();
+
+        // 5. Trimitem update instant pe global ca să se schimbe numele live pentru toți
+        const topJucatoriActualizat = await getClasamentJucatori();
+        await pusher.trigger('global', 'update-complet', { topJucatori: topJucatoriActualizat });
+
+        return NextResponse.json({ success: true });
       }
 
       case 'get-team-details': {

@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 25.8 - SYNC MASTER)
+ * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 29.0 - UNIQUE NAMES & Z-INDEX FIX)
  * ====================================================================================================
  */
 
@@ -23,7 +23,8 @@ export default function ClientWrapper({ children }) {
   const [userStats, setUserStats] = useState(DEFAULT_STATS);
   const [totalGlobal, setTotalGlobal] = useState(0);
   const [topRegiuni, setTopRegiuni] = useState([]);
-  const [nume, setNume] = useState("");
+  const [topJucatori, setTopJucatori] = useState([]);
+  const [nume, setNumeLocal] = useState("");
   const [notificare, setNotificare] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
   
@@ -45,6 +46,50 @@ export default function ClientWrapper({ children }) {
     });
   }, []);
 
+  // Funcția principală pentru a seta numele - Validează unicitatea prin API
+  const setNume = async (nouNume) => {
+    const cleanName = nouNume.toUpperCase().trim();
+    if (cleanName === nume) return true; // Deja e numele lui
+    if (cleanName.length < 3) {
+      alert("Numele trebuie să aibă minim 3 litere.");
+      return false;
+    }
+
+    try {
+      const res = await fetch('/api/ciocnire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actiune: 'schimba-porecla',
+          oldName: nume, // Numele vechi ca să mutăm scorul
+          newName: cleanName,
+          teamIds: [] // Vom lăsa gol aici pentru că e setat global, detaliile pe echipe le facem din page.js
+        })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        alert(data.error || "Acel nume este deja luat! Alege altul.");
+        return false;
+      }
+
+      // Dacă totul e ok, salvăm local
+      setNumeLocal(cleanName);
+      localStorage.setItem("c_nume", cleanName);
+      setUserStats(prev => {
+         const nextStats = { ...prev, nume: cleanName };
+         localStorage.setItem("c_stats", JSON.stringify(nextStats));
+         return nextStats;
+      });
+      return true;
+
+    } catch (e) {
+      console.error("Eroare la validare nume", e);
+      alert("Eroare la rețea. Încearcă din nou.");
+      return false;
+    }
+  };
+
   const incrementGlobal = useCallback(async (amCastigat = false) => {
     try {
       const res = await fetch('/api/ciocnire', {
@@ -52,6 +97,7 @@ export default function ClientWrapper({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             actiune: 'increment-global', 
+            jucator: amCastigat ? nume : null,
             regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null 
         })
       });
@@ -59,15 +105,21 @@ export default function ClientWrapper({ children }) {
       if (data.success) {
         setTotalGlobal(data.total);
         if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
+        if (data.topJucatori) setTopJucatori(data.topJucatori);
+
+        // Dacă ai câștigat vs Bot, actualizează MĂCAR local victoriile să se vadă instant
+        if (amCastigat) {
+            updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1}));
+        }
       }
     } catch (e) { console.error("Eroare la incrementare bilanț."); }
-  }, [userStats.regiune]);
+  }, [userStats.regiune, nume, updateUserStats]);
 
   useEffect(() => {
     const savedName = localStorage.getItem("c_nume");
     const savedStats = localStorage.getItem("c_stats");
     
-    if (savedName) setNume(savedName);
+    if (savedName) setNumeLocal(savedName);
     
     if (savedStats) {
       try { 
@@ -91,7 +143,11 @@ export default function ClientWrapper({ children }) {
       try {
         const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'get-counter' }) });
         const data = await res.json();
-        if (data.success) { setTotalGlobal(parseInt(data.total) || 0); setTopRegiuni(data.topRegiuni || []); }
+        if (data.success) { 
+          setTotalGlobal(parseInt(data.total) || 0); 
+          setTopRegiuni(data.topRegiuni || []); 
+          setTopJucatori(data.topJucatori || []); 
+        }
       } catch (err) {}
     };
     getInitialData();
@@ -105,6 +161,7 @@ export default function ClientWrapper({ children }) {
     globalChannel.bind('update-complet', (data) => {
       if (data.total !== undefined) setTotalGlobal(parseInt(data.total));
       if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
+      if (data.topJucatori) setTopJucatori(data.topJucatori); 
     });
 
     return () => { globalChannel.unbind_all(); pusherRef.current.unsubscribe('global'); };
@@ -127,18 +184,11 @@ export default function ClientWrapper({ children }) {
   }, [nume, isHydrated, pathname, playSound, triggerVibrate]);
 
   const contextValue = {
-    totalGlobal, topRegiuni, nume, 
-    setNume: (val) => { 
-        const cleanName = val.toUpperCase().trim(); 
-        setNume(cleanName); 
-        localStorage.setItem("c_nume", cleanName); 
-        
-        setUserStats(prev => {
-           const nextStats = { ...prev, nume: cleanName };
-           localStorage.setItem("c_stats", JSON.stringify(nextStats));
-           return nextStats;
-        });
-    },
+    totalGlobal, 
+    topRegiuni, 
+    topJucatori, 
+    nume, 
+    setNume, // Acum apelează funcția de validare
     userStats, 
     setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated
@@ -147,21 +197,62 @@ export default function ClientWrapper({ children }) {
   return (
     <GlobalStatsContext.Provider value={contextValue}>
       {children}
-      <AnimatePresence>
-        {notificare && (
-          <motion.div initial={{ opacity: 0, y: -50, x: '-50%', scale: 0.9 }} animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }} exit={{ opacity: 0, y: -50, x: '-50%', scale: 0.9 }} transition={{ type: "spring", bounce: 0.5 }} className="fixed top-6 md:top-10 left-1/2 w-[90%] max-w-sm z-[10000] bg-[#010101]/80 backdrop-blur-3xl p-6 md:p-8 rounded-[2.5rem] border border-red-500/30 shadow-[0_30px_60px_rgba(220,38,38,0.4)]">
-            <div className="text-center space-y-5">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500 animate-pulse bg-red-500/10 px-4 py-1.5 rounded-full inline-block">Provocare Nouă!</span>
-              <p className="font-black text-xl md:text-2xl text-white italic drop-shadow-md">⚔️ {notificare.deLa} te-a provocat!</p>
-              <div className="flex gap-3 pt-3">
-                <button className="flex-1 bg-red-600 p-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_10px_20px_rgba(220,38,38,0.3)] active:scale-95 text-white" onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}&teamId=${notificare.teamId || ''}`); }}>ACCEPTĂ</button>
-                <button className="flex-1 bg-white/5 p-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white/50 border border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95" onClick={() => setNotificare(null)}>REFUZĂ</button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {!isHydrated && <div className="fixed inset-0 bg-[#010101] z-[10001] flex items-center justify-center"><div className="text-white/20 text-[10px] font-black uppercase tracking-[1em] animate-pulse">CIOCNIM.RO...</div></div>}
+      
+      {/* =========================================================================
+          NOTIFICARE PROVOCARE - CONTAINER IZOLAT CU Z-INDEX EXTREM
+          ========================================================================= */}
+      <div className="fixed inset-0 z-[2147483647] pointer-events-none flex justify-center items-start pt-6 md:pt-10">
+          <AnimatePresence>
+            {notificare && (
+              <motion.div 
+                initial={{ opacity: 0, y: -50, scale: 0.9 }} 
+                animate={{ opacity: 1, y: 0, scale: 1 }} 
+                exit={{ opacity: 0, y: -50, scale: 0.9 }} 
+                transition={{ type: "spring", bounce: 0.5 }} 
+                className="relative w-[90%] max-w-sm bg-[#080808] p-8 md:p-10 rounded-[3rem] border border-red-500/30 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden pointer-events-auto"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-red-600/10 to-transparent pointer-events-none"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 blur-[60px] pointer-events-none z-0 bg-red-500/20"></div>
+
+                <div className="relative z-10 text-center mt-2">
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#080808] px-5 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-500 z-10 border border-red-500/30 rounded-full animate-pulse whitespace-nowrap shadow-lg">
+                    Provocare Nouă ⚔️
+                  </div>
+                  
+                  <p className="font-black text-2xl md:text-3xl text-white italic drop-shadow-md leading-tight mt-4">
+                    <span className="text-red-500">{notificare.deLa}</span> <br/> te-a chemat la luptă!
+                  </p>
+                  
+                  <div className="flex flex-col gap-3 pt-8 relative z-50">
+                    <button 
+                      className="w-full bg-red-600 py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_15px_30px_rgba(220,38,38,0.4)] active:scale-95 text-white border-2 border-red-400/30 cursor-pointer pointer-events-auto" 
+                      onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}&teamId=${notificare.teamId || ''}`); }}
+                    >
+                      Acceptă Duelul
+                    </button>
+                    <button 
+                      className="w-full bg-white/5 py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest text-white/50 border-2 border-transparent hover:border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95 cursor-pointer pointer-events-auto" 
+                      onClick={() => setNotificare(null)}
+                    >
+                      Refuză
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+      </div>
+
+      {!isHydrated && (
+        <div className="fixed inset-0 bg-[#010101] z-[100001] flex flex-col items-center justify-center pattern-tradition overflow-hidden">
+          <div className="ambient-glow-red"></div>
+          <div className="ambient-glow-gold"></div>
+          <div className="relative z-10 flex flex-col items-center gap-6 animate-pulse">
+            <span className="text-7xl drop-shadow-[0_0_40px_rgba(220,38,38,0.8)] animate-float-v9">🥚</span>
+            <div className="text-white/40 text-[10px] md:text-xs font-black uppercase tracking-[1em]">Așezăm Masa...</div>
+          </div>
+        </div>
+      )}
     </GlobalStatsContext.Provider>
   );
 }
