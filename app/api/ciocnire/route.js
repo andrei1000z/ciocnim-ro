@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V30.1 - SCORE MIGRATION FIX & CLEAN NAMING)
+ * CIOCNIM.RO - API ENDPOINT (V30.4 - FIX DUPLICATE GRUP, SYNC SCOR & ANTI-DOUBLE COUNT)
  * ====================================================================================================
  */
 
@@ -47,7 +47,7 @@ export async function POST(request) {
     const { 
       actiune, roomId, jucator, skin, isGolden, hasStar, 
       teamId, regiune, creator, text, newName, oponentNume,
-      atacant, esteCastigator, oldName
+      atacant, esteCastigator, oldName, scor, scorCurent, teamIds
     } = body;
 
     switch (actiune) {
@@ -66,8 +66,23 @@ export async function POST(request) {
         if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
           pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
         }
+        
+        // SYNC EXACT SCOR (rezolvă problema cu dublarea sau lipsa victoriei când te aperi)
         if (jucator && jucator.trim() !== "") {
-           pipeline.zincrby('leaderboard_jucatori', 1, jucator.trim().toUpperCase());
+           const safeName = jucator.trim().toUpperCase();
+           if (scorCurent !== undefined && scorCurent !== null) {
+               const valoareScor = parseInt(scorCurent) || 0;
+               pipeline.zadd('leaderboard_jucatori', valoareScor, safeName);
+               
+               // Dacă trimitem și teamIds, sincronizăm și în grupuri instant
+               if (teamIds && Array.isArray(teamIds)) {
+                   for (const tId of teamIds) {
+                       pipeline.zadd(`team:${tId}:membri`, valoareScor, safeName);
+                   }
+               }
+           } else {
+               pipeline.zincrby('leaderboard_jucatori', 1, safeName);
+           }
         }
         
         const results = await pipeline.exec();
@@ -95,21 +110,10 @@ export async function POST(request) {
       case 'lovitura': {
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
         
+        // Am eliminat ZINCRBY-urile de jucători de aici. 
+        // Lăsăm `increment-global` să se ocupe, ca să nu mai existe bug-ul de 2x victorii!
         const pipeline = redis.pipeline();
         pipeline.incr('global_ciocniri_total');
-        
-        if (esteCastigator) {
-          if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-            pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
-          }
-          if (jucator && jucator.trim() !== "") {
-            pipeline.zincrby('leaderboard_jucatori', 1, jucator.trim().toUpperCase());
-          }
-          if (teamId && teamId !== "null" && teamId !== "") {
-            pipeline.zincrby(`team:${teamId}:membri`, 1, jucator.trim().toUpperCase());
-          }
-        }
-        
         const pipelineResults = await pipeline.exec();
         const noulTotal = pipelineResults[0][1]; 
         
@@ -156,52 +160,40 @@ export async function POST(request) {
         const newClean = newName.trim().toUpperCase();
         const oldClean = oldName ? oldName.trim().toUpperCase() : null;
 
-        // 1. Verificăm dacă numele este interzis
         if (NUME_INTERZISE.includes(newClean)) {
             return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." });
         }
 
-        // 2. Verificăm unicitatea
         const isTaken = await redis.get(`nume_rezervat:${newClean}`);
         if (isTaken && isTaken !== oldClean) {
             return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" });
         }
 
         const pipeline = redis.pipeline();
-
-        // 3. Rezervăm noul nume
         pipeline.set(`nume_rezervat:${newClean}`, "1");
 
-        // 4. Dacă a avut un nume vechi, mutăm TOATE scorurile și eliberăm numele
+        // CLEAN-UP PERFECT (Fără duplicate în grupuri și topuri)
         if (oldClean && oldClean !== newClean) {
             pipeline.del(`nume_rezervat:${oldClean}`);
+            
+            // Ștergem din global vechiul nume
+            pipeline.zrem('leaderboard_jucatori', oldClean);
+            
+            // Adăugăm noul nume cu scorul exact (fără "NaN")
+            const validScore = parseInt(scor) || 0;
+            pipeline.zadd('leaderboard_jucatori', validScore, newClean);
 
-            // Migrăm din Topul Global
-            const globalScore = await redis.zscore('leaderboard_jucatori', oldClean);
-            if (globalScore !== null) {
-                pipeline.zrem('leaderboard_jucatori', oldClean);
-                pipeline.zadd('leaderboard_jucatori', parseFloat(globalScore), newClean);
-            }
-
-            // MIGRĂM AUTOMAT DIN TOATE GRUPURILE (Rezolvarea bug-ului cu dublarea)
-            try {
-                const toateGrupurile = await redis.keys('team:*:membri');
-                for (const cheieGrup of toateGrupurile) {
-                    const scorInGrup = await redis.zscore(cheieGrup, oldClean);
-                    if (scorInGrup !== null) {
-                        // Ștergem înregistrarea veche și o punem pe cea nouă cu același scor
-                        pipeline.zrem(cheieGrup, oldClean);
-                        pipeline.zadd(cheieGrup, parseFloat(scorInGrup), newClean);
-                    }
+            // Înlocuim DOAR în grupurile din care face parte, folosind teamIds
+            if (teamIds && Array.isArray(teamIds)) {
+                for (const tId of teamIds) {
+                    pipeline.zrem(`team:${tId}:membri`, oldClean); // Elimină fantoma veche
+                    pipeline.zadd(`team:${tId}:membri`, validScore, newClean); // Adaugă noul nume cu scorul lui
                 }
-            } catch (err) {
-                console.error("Eroare la migrarea scorului din grupuri:", err);
             }
         }
         
         await pipeline.exec();
 
-        // 5. Trimitem update instant pe global ca să se schimbe numele live pentru toți
         const topJucatoriActualizat = await getClasamentJucatori();
         await pusher.trigger('global', 'update-complet', { topJucatori: topJucatoriActualizat });
 

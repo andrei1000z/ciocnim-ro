@@ -2,12 +2,12 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - CORE ENGINE VIZUAL (V30.4 - TRADIȚIE PREMIUM & LEMN/FOC + MOBILE FIX)
+ * CIOCNIM.RO - CORE ENGINE VIZUAL (V30.5 - TRADIȚIE PREMIUM & FIX MOBILE HEIGHT)
  * ====================================================================================================
  * Optimizat pentru: Next.js + Tailwind v4
  * Nou: Pattern tradițional românesc (IA) în culori calde (chihlimbar/roșu).
+ * Fix: Suport complet pentru 100dvh (previne tăierea butoanelor pe iOS Safari / Android Chrome).
  * Fix: Eliminare totală a @apply pentru clasele complexe -> 0 erori de compilare.
- * Fix 2: Adăugat utilitare specifice pentru anti-crowding pe mobile.
  * ====================================================================================================
  */
 
@@ -25,6 +25,7 @@
   html {
     scroll-behavior: smooth;
     background-color: var(--bg-ultra-dark);
+    /* Setăm overflow-x hidden pe html, dar lăsăm body-ul să respire pe Y */
     overflow-x: hidden !important;
     width: 100vw;
     -webkit-text-size-adjust: 100%;
@@ -36,10 +37,12 @@
     color: #ffffff;
     margin: 0;
     padding: 0;
+    /* Suport perfect pentru mobile viewport */
+    min-height: 100vh;
     min-height: 100dvh;
     width: 100vw;
     background-color: var(--bg-ultra-dark);
-    overscroll-behavior: none;
+    overscroll-behavior-y: none; /* Previne efectul de bounce pe iPhone care rupea UI-ul */
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     font-family: var(--font-outfit), system-ui, sans-serif;
@@ -187,7 +190,7 @@
     padding-bottom: var(--safe-bottom);
   }
 
-  /* Previne înghesuirea textului pe ecrane foarte mici (iPhone SE etc.) */
+  /* Previne înghesuirea textului pe ecrane foarte mici (iPhone SE, foldables) */
   @media (max-width: 380px) {
     .text-mobile-shrink {
       font-size: 0.85rem !important;

@@ -2,7 +2,7 @@
 
 /**
  * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (V30.4 - MOBILE FIX, BOT RANDOM & CHAT REPAIR)
+ * CIOCNIM.RO - ARENA DE LUPTĂ (V30.5 - FIX VICTORII DUBLE, CHAT ACTIV & MOBILE LAYOUT)
  * ========================================================================================================================
  */
 
@@ -141,7 +141,6 @@ function ArenaMaster({ room }) {
       setIsBotMatch(true);
       const botName = "🤖 BOT";
       
-      // Alegere skin random pentru bot, fără stea
       const culoriDisponibile = ['red', 'blue', 'gold', 'diamond', 'cosmic'];
       const randomSkin = culoriDisponibile[Math.floor(Math.random() * culoriDisponibile.length)];
       
@@ -160,6 +159,7 @@ function ArenaMaster({ room }) {
       if (isBotMatch && atacantName === "🤖 BOT" && !rezultat && !isStriking) {
           const timeout = setTimeout(() => {
               executeBattle({ castigaCelCareDa: Math.random() < 0.5, atacant: "🤖 BOT" });
+              // DOAR AICI apelăm increment pentru bot, executeBattle NU mai are increment local
               incrementGlobal(); 
           }, 1500 + Math.random() * 1500);
           return () => clearTimeout(timeout);
@@ -194,10 +194,21 @@ function ArenaMaster({ room }) {
       setMessages(prev => [{ autor: data.jucator, text: data.text }, ...prev].slice(0, 20));
     });
 
-    arenaChannel.bind("lovitura", (data) => executeBattle(data));
+    arenaChannel.bind("lovitura", (data) => {
+       executeBattle(data);
+       // Sync back-end trigger - Dacă am fost loviți și am câștigat, trigger global-ul aici
+       if (data.atacant !== nume) {
+           const amCastigatDefense = !data.castigaCelCareDa;
+           if (amCastigatDefense) {
+               incrementGlobal(true, teamIdPreluat ? [teamIdPreluat] : []);
+           } else {
+               setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+           }
+       }
+    });
 
     return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
-  }, [room, nume, isBotMatch, broadcastJoin, isHost]);
+  }, [room, nume, isBotMatch, broadcastJoin, isHost, incrementGlobal, teamIdPreluat, setUserStats]);
 
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
@@ -244,15 +255,8 @@ function ArenaMaster({ room }) {
         playArenaSound(amCastigat ? 'victorie' : 'esec');
         if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         
-        setUserStats(prev => {
-          const noiStatistici = { 
-            ...prev, 
-            wins: amCastigat ? (prev.wins || 0) + 1 : (prev.wins || 0), 
-            losses: !amCastigat ? (prev.losses || 0) + 1 : (prev.losses || 0) 
-          };
-          localStorage.setItem("c_stats", JSON.stringify(noiStatistici));
-          return noiStatistici;
-        });
+        // AICI AM ELIMINAT SET_USER_STATS pentru Wins/Losses! 
+        // Ele sunt acum gestionate 100% de `incrementGlobal` ca să evităm +2 victorii.
       }, 400);
     }, 500);
   };
@@ -262,9 +266,15 @@ function ArenaMaster({ room }) {
     
     const castigaCelCareDaRandom = Math.random() < 0.5;
 
+    // Aici dăm trigger la `incrementGlobal` pentru noi, ca atacant
+    if (castigaCelCareDaRandom) {
+       incrementGlobal(true, teamIdPreluat ? [teamIdPreluat] : []);
+    } else {
+       setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+    }
+
     if (isBotMatch) {
       executeBattle({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
-      incrementGlobal(castigaCelCareDaRandom); 
     } else {
       fetch('/api/ciocnire', {
         method: 'POST',
@@ -274,10 +284,8 @@ function ArenaMaster({ room }) {
           actiune: 'lovitura', 
           jucator: nume, 
           regiune: userStats.regiune, 
-          teamId: teamIdPreluat, 
           castigaCelCareDa: castigaCelCareDaRandom,
-          atacant: nume, 
-          esteCastigator: castigaCelCareDaRandom
+          atacant: nume 
         })
       });
     }
@@ -332,7 +340,7 @@ function ArenaMaster({ room }) {
       {/* Wrapper principal - impact flash adăugat controlat */}
       <div className={`w-full max-w-4xl flex flex-col items-center justify-center min-h-[90vh] gap-6 md:gap-8 pt-6 pb-20 px-4 md:px-0 transition-all ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
         
-        {/* Buton Cod Cameră (Design Reparator pentru Overlap) */}
+        {/* Buton Cod Cameră */}
         {isPrivate && !isProvocare && (
           <button onClick={copyRoomCode} className="group relative bg-[#0a0505]/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/40 shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-[#140a0a] hover:border-red-500/50 transition-all active:scale-95 z-20 flex-shrink-0 mt-4 md:mt-8">
             <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none rounded-full"></div>
@@ -345,8 +353,8 @@ function ArenaMaster({ room }) {
           </button>
         )}
 
-        {/* Zona de Duel - Adaptată pentru Mobile fără overlap */}
-        <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mt-2">
+        {/* Zona de Duel */}
+        <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mt-2 relative z-10">
           
           {/* Jucător 1 (TU) */}
           <div className="flex flex-col items-center gap-4 md:gap-6 w-1/3 max-w-[160px]">
@@ -383,7 +391,7 @@ function ArenaMaster({ room }) {
         </div>
 
         {/* BUTON LUPTĂ */}
-        <div className="w-full max-w-sm z-20 relative">
+        <div className="w-full max-w-sm z-20 relative px-4">
           {opponent && !rezultat && (
             <button 
               onClick={handleStrike} 
@@ -407,8 +415,8 @@ function ArenaMaster({ room }) {
           )}
         </div>
 
-        {/* CHAT REDESIGN (Z-index superior pentru accesibilitate completă) */}
-        <div className="w-full max-w-md bg-[#0a0505] border-2 border-red-900/40 p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] mt-2 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-[50] pointer-events-auto">
+        {/* CHAT REDESIGN (Z-index 60 și fixat dinamic pe flex ca să nu iasă din ecran) */}
+        <div className="w-full max-w-md bg-[#0a0505] border-2 border-red-900/40 p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] mt-2 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-[60] pointer-events-auto">
           <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-red-700/10 rounded-full blur-[40px] pointer-events-none"></div>
           
@@ -437,7 +445,7 @@ function ArenaMaster({ room }) {
                placeholder="SCRIE UN MESAJ..." 
                className="flex-1 bg-transparent pl-4 md:pl-5 text-[10px] md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30" 
             />
-            <button onClick={handleChat} className="bg-red-900/30 w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-red-700 transition-colors border border-red-900/50 text-xs md:text-sm active:scale-95 shadow-md flex items-center justify-center">🕊️</button>
+            <button onClick={handleChat} className="bg-red-900/30 w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-red-700 transition-colors border border-red-900/50 text-xs md:text-sm active:scale-95 shadow-md flex items-center justify-center cursor-pointer pointer-events-auto">🕊️</button>
           </div>
         </div>
       </div>

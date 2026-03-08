@@ -2,10 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (V30.3 - TRADIȚIONAL DESIGN & SYNC REPAIR)
- * ====================================================================================================
- * FIX 1: Curățare nume vechi în grupuri (trimitem teamIds din localStorage).
- * FIX 2: Sincronizare forțată a scorului în clasamentul global (trimitem scorCurent).
+ * CIOCNIM.RO - NUCLEUL LOGIC (V30.5 - SYNC MASTER & ANTI-DOUBLE COUNT)
  * ====================================================================================================
  */
 
@@ -72,7 +69,7 @@ export default function ClientWrapper({ children }) {
           actiune: 'schimba-porecla',
           oldName: nume, 
           newName: cleanName,
-          teamIds: storedTeamIds, // Acum trimitem corect array-ul de grupuri
+          teamIds: storedTeamIds, // Trimitem corect array-ul de grupuri
           scor: scorCurent // Salvăm scorul să nu-l pierdem la redenumire
         })
       });
@@ -100,21 +97,25 @@ export default function ClientWrapper({ children }) {
   };
 
   // ==========================================================================
-  // INCREMENTARE SCOR (FIX PENTRU CLASAMENT JUCĂTORI)
+  // INCREMENTARE SCOR GLOBALĂ ȘI UNICĂ
   // ==========================================================================
-  const incrementGlobal = useCallback(async (amCastigat = false) => {
+  const incrementGlobal = useCallback(async (amCastigat = false, teamIdsArray = []) => {
     try {
-      // Forțăm backend-ul să afle scorul EXACT ca să nu mai rămână blocat pe 1
+      // Calculăm noul scor local pentru a forța backend-ul să-l preia
       const newWins = amCastigat ? (userStats.wins || 0) + 1 : (userStats.wins || 0);
+
+      // Prevenim rularea dacă nu avem nume valid
+      if (!nume || nume.trim() === "") return;
 
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             actiune: 'increment-global', 
-            jucator: amCastigat ? nume : null,
-            scorCurent: amCastigat ? newWins : null, // Sync master cu backend-ul
-            regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null 
+            jucator: nume,
+            scorCurent: amCastigat ? newWins : null, 
+            regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
+            teamIds: teamIdsArray // Opțional: Pentru a updata direct grupul din arena privată
         })
       });
       const data = await res.json();
@@ -123,6 +124,8 @@ export default function ClientWrapper({ children }) {
         if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
         if (data.topJucatori) setTopJucatori(data.topJucatori);
 
+        // Actualizăm local DOAR dacă a câștigat 
+        // și lăsăm arena să NU mai facă setUserStats a doua oară
         if (amCastigat) {
             updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1}));
         }
@@ -213,9 +216,7 @@ export default function ClientWrapper({ children }) {
     <GlobalStatsContext.Provider value={contextValue}>
       {children}
       
-      {/* =========================================================================
-          NOTIFICARE PROVOCARE - CONTAINER IZOLAT CU Z-INDEX EXTREM
-          ========================================================================= */}
+      {/* Container izolat pentru notificări */}
       <div className="fixed inset-0 z-[2147483647] pointer-events-none flex justify-center items-start pt-6 md:pt-10">
           <AnimatePresence>
             {notificare && (
