@@ -2,20 +2,20 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - CORE ENGINE VIZUAL (V26.0 - PURE TRADITION & OLED INTEGRITY)
+ * CIOCNIM.RO - CORE ENGINE VIZUAL (V30.1 - TRADIȚIE PREMIUM & LEMN/FOC)
  * ====================================================================================================
- * Optimizat pentru: Next.js 16 + Tailwind v4 (OLED Performance)
- * Nou: Pattern tradițional românesc (IA) integrat nativ în CSS (fără imagini grele).
+ * Optimizat pentru: Next.js + Tailwind v4
+ * Nou: Pattern tradițional românesc (IA) în culori calde (chihlimbar/roșu).
  * Fix: Eliminare totală a @apply pentru clasele complexe -> 0 erori de compilare.
  * ====================================================================================================
  */
 
 @layer base {
   :root {
-    --bg-ultra-dark: #010101; /* OLED Black pur pentru consum redus și contrast maxim */
+    --bg-ultra-dark: #050202; /* Negru cald, de vatră/lemn ars */
     --red-primary: #dc2626;
-    --red-glow: rgba(220, 38, 38, 0.4);
-    --gold-glow: rgba(245, 158, 11, 0.3);
+    --red-glow: rgba(185, 28, 28, 0.4); /* Roșu mai așezat, tradițional */
+    --gold-glow: rgba(245, 158, 11, 0.25); /* Chihlimbar/Auriu cald */
     --liquid-blur: 40px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -44,10 +44,10 @@
     font-family: var(--font-outfit), system-ui, sans-serif;
   }
 
-  /* Setare selecție text globală (roșu tradițional) */
+  /* Setare selecție text globală (roșu tradițional cu text auriu) */
   ::selection {
-    background-color: rgba(220, 38, 38, 0.4);
-    color: #ffffff;
+    background-color: rgba(127, 29, 29, 0.6); /* red-900 */
+    color: #fde68a; /* amber-200 */
   }
 
   /* Fix: Focus Outline universal */
@@ -56,8 +56,8 @@
   }
 
   input, textarea, select {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(20, 10, 10, 0.5);
+    border: 1px solid rgba(185, 28, 28, 0.3);
     border-radius: 0.75rem;
     padding: 0.5rem 1rem;
     color: #ffffff;
@@ -71,32 +71,34 @@
      MOTIVE TRADIȚIONALE (IA ROMÂNEASCĂ) - PURE CSS
      ========================================================================== */
   .pattern-tradition {
+    background-color: var(--bg-ultra-dark);
+    /* Motiv tradițional tip Romb (Cusătură de Ie) - extrem de subtil */
     background-image:
-      linear-gradient(45deg, rgba(220, 38, 38, 0.015) 25%, transparent 25%, transparent 75%, rgba(220, 38, 38, 0.015) 75%, rgba(220, 38, 38, 0.015)),
-      linear-gradient(-45deg, rgba(220, 38, 38, 0.015) 25%, transparent 25%, transparent 75%, rgba(220, 38, 38, 0.015) 75%, rgba(220, 38, 38, 0.015));
+      linear-gradient(45deg, rgba(185, 28, 28, 0.02) 25%, transparent 25%, transparent 75%, rgba(185, 28, 28, 0.02) 75%, rgba(185, 28, 28, 0.02)),
+      linear-gradient(-45deg, rgba(217, 119, 6, 0.015) 25%, transparent 25%, transparent 75%, rgba(217, 119, 6, 0.015) 75%, rgba(217, 119, 6, 0.015));
     background-size: 24px 24px;
     background-position: 0 0, 12px 12px;
     z-index: -1;
   }
 
   /* ==========================================================================
-     LIQUID GLASS & CARDURI (PURE CSS)
+     LIQUID GLASS & CARDURI (PREMIUM WOOD/GLASS)
      ========================================================================== */
- 
+  
   .liquid-glass {
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    background: rgba(10, 10, 10, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    background: rgba(15, 5, 5, 0.75);
+    border: 1px solid rgba(185, 28, 28, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
   }
 
   .clan-card-liquid {
     border-radius: 2.5rem;
     padding: 1.5rem;
-    border-left: 4px solid #dc2626; /* red-600 */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    border-left: 4px solid #b91c1c; /* red-700 */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, rgba(20,10,10,0.8) 0%, rgba(10,5,5,0.9) 100%);
     backdrop-filter: blur(var(--liquid-blur));
     -webkit-backdrop-filter: blur(var(--liquid-blur));
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
@@ -104,7 +106,7 @@
 
   .clan-card-liquid:hover {
     transform: translateY(-8px) scale(1.02);
-    border-left-color: #ef4444; /* red-500 */
+    border-left-color: #f59e0b; /* amber-500 */
   }
 
   /* ==========================================================================
@@ -119,8 +121,8 @@
     height: 80vw;
     z-index: -10;
     pointer-events: none;
-    background-color: rgba(220, 38, 38, 0.06);
-    filter: blur(120px);
+    background-color: var(--red-glow);
+    filter: blur(140px);
     border-radius: 9999px;
     mix-blend-mode: screen;
   }
@@ -133,14 +135,14 @@
     height: 70vw;
     z-index: -10;
     pointer-events: none;
-    background-color: rgba(234, 179, 8, 0.04); /* gold */
-    filter: blur(120px);
+    background-color: var(--gold-glow);
+    filter: blur(140px);
     border-radius: 9999px;
     mix-blend-mode: screen;
   }
 
   /* ==========================================================================
-     GPU ANIMATIONS (V26 INTEGRITY)
+     GPU ANIMATIONS (V30 INTEGRITY)
      ========================================================================== */
 
   .animate-float-v9 {
@@ -158,18 +160,18 @@
 
   @keyframes float-gentle {
     0%, 100% { transform: translateY(0) rotate(-1deg); }
-    50% { transform: translateY(-15px) rotate(2deg); }
+    50% { transform: translateY(-12px) rotate(2deg); filter: drop-shadow(0 10px 15px rgba(245, 158, 11, 0.1)); }
   }
 
   @keyframes impact-shake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-6px) rotate(-1deg); }
-    75% { transform: translateX(6px) rotate(1deg); }
+    25% { transform: translateX(-8px) rotate(-2deg); }
+    75% { transform: translateX(8px) rotate(2deg); }
   }
 
   @keyframes pop-smash {
     0% { transform: scale(1); filter: brightness(1); }
-    40% { transform: scale(1.15) rotate(8deg); filter: brightness(1.6); }
+    40% { transform: scale(1.15) rotate(8deg); filter: brightness(1.6) sepia(0.3); }
     100% { transform: scale(0.95) rotate(-2deg); opacity: 0.9; }
   }
 
@@ -200,10 +202,10 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(245, 158, 11, 0.2); /* Chihlimbar discret */
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(220, 38, 38, 0.6);
+    background: rgba(185, 28, 28, 0.6); /* Roșu la hover */
   }
 }

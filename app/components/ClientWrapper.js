@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (VERSION 29.0 - UNIQUE NAMES & Z-INDEX FIX)
+ * CIOCNIM.RO - NUCLEUL LOGIC (V30.1 - TRADIȚIONAL DESIGN & NOTIFICĂRI CLEAN)
  * ====================================================================================================
  */
 
@@ -63,7 +63,7 @@ export default function ClientWrapper({ children }) {
           actiune: 'schimba-porecla',
           oldName: nume, // Numele vechi ca să mutăm scorul
           newName: cleanName,
-          teamIds: [] // Vom lăsa gol aici pentru că e setat global, detaliile pe echipe le facem din page.js
+          teamIds: [] // Lăsăm gol, migrarea se face automat din backend acum
         })
       });
       const data = await res.json();
@@ -188,7 +188,7 @@ export default function ClientWrapper({ children }) {
     topRegiuni, 
     topJucatori, 
     nume, 
-    setNume, // Acum apelează funcția de validare
+    setNume, 
     userStats, 
     setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated
@@ -209,29 +209,30 @@ export default function ClientWrapper({ children }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }} 
                 exit={{ opacity: 0, y: -50, scale: 0.9 }} 
                 transition={{ type: "spring", bounce: 0.5 }} 
-                className="relative w-[90%] max-w-sm bg-[#080808] p-8 md:p-10 rounded-[3rem] border border-red-500/30 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden pointer-events-auto"
+                className="relative w-[90%] max-w-sm bg-[#0a0505] p-8 md:p-10 rounded-[3rem] border-2 border-red-900/50 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden pointer-events-auto"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-red-600/10 to-transparent pointer-events-none"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 blur-[60px] pointer-events-none z-0 bg-red-500/20"></div>
+                <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-red-900/20 to-transparent pointer-events-none"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 blur-[60px] pointer-events-none z-0 bg-red-700/20"></div>
 
                 <div className="relative z-10 text-center mt-2">
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#080808] px-5 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-500 z-10 border border-red-500/30 rounded-full animate-pulse whitespace-nowrap shadow-lg">
-                    Provocare Nouă ⚔️
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#140a0a] px-5 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-amber-500 z-10 border border-red-900/50 rounded-full animate-pulse whitespace-nowrap shadow-lg">
+                    Provocare ⚔️
                   </div>
                   
                   <p className="font-black text-2xl md:text-3xl text-white italic drop-shadow-md leading-tight mt-4">
-                    <span className="text-red-500">{notificare.deLa}</span> <br/> te-a chemat la luptă!
+                    <span className="text-red-500">{notificare.deLa}</span> <br/> te cheamă la duel!
                   </p>
                   
                   <div className="flex flex-col gap-3 pt-8 relative z-50">
                     <button 
-                      className="w-full bg-red-600 py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-red-500 transition-all shadow-[0_15px_30px_rgba(220,38,38,0.4)] active:scale-95 text-white border-2 border-red-400/30 cursor-pointer pointer-events-auto" 
+                      className="w-full bg-red-700 py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-[0_15px_30px_rgba(220,38,38,0.4)] active:scale-95 text-white border-2 border-red-500/50 cursor-pointer pointer-events-auto" 
                       onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}&teamId=${notificare.teamId || ''}`); }}
                     >
-                      Acceptă Duelul
+                      Acceptă
                     </button>
                     <button 
-                      className="w-full bg-white/5 py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest text-white/50 border-2 border-transparent hover:border-white/10 hover:bg-white/10 hover:text-white transition-all active:scale-95 cursor-pointer pointer-events-auto" 
+                      className="w-full bg-[#140a0a] py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest text-white/50 border-2 border-red-900/30 hover:border-red-900/50 hover:bg-red-900/20 hover:text-white transition-all active:scale-95 cursor-pointer pointer-events-auto" 
                       onClick={() => setNotificare(null)}
                     >
                       Refuză
@@ -244,12 +245,12 @@ export default function ClientWrapper({ children }) {
       </div>
 
       {!isHydrated && (
-        <div className="fixed inset-0 bg-[#010101] z-[100001] flex flex-col items-center justify-center pattern-tradition overflow-hidden">
-          <div className="ambient-glow-red"></div>
-          <div className="ambient-glow-gold"></div>
+        <div className="fixed inset-0 bg-[#050202] z-[100001] flex flex-col items-center justify-center pattern-tradition overflow-hidden">
+          <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-700/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-700/5 rounded-full blur-[150px]" />
           <div className="relative z-10 flex flex-col items-center gap-6 animate-pulse">
-            <span className="text-7xl drop-shadow-[0_0_40px_rgba(220,38,38,0.8)] animate-float-v9">🥚</span>
-            <div className="text-white/40 text-[10px] md:text-xs font-black uppercase tracking-[1em]">Așezăm Masa...</div>
+            <span className="text-7xl drop-shadow-[0_0_40px_rgba(220,38,38,0.8)] animate-float-v9 filter sepia-[0.3]">🥚</span>
+            <div className="text-amber-500/50 text-[10px] md:text-xs font-black uppercase tracking-[1em] drop-shadow-sm">Așezăm Masa...</div>
           </div>
         </div>
       )}

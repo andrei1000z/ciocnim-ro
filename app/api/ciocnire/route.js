@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V29.0 - UNIQUE USERNAMES & SCORE MIGRATION)
+ * CIOCNIM.RO - API ENDPOINT (V30.1 - SCORE MIGRATION FIX & CLEAN NAMING)
  * ====================================================================================================
  */
 
@@ -39,7 +39,7 @@ async function getClasamentJucatori() {
 }
 
 // Protejăm numele sistemului
-const NUME_INTERZISE = ["BOT", "BOT TRADIȚIONAL", "SISTEM", "ADMIN"];
+const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
 
 export async function POST(request) {
   try {
@@ -47,7 +47,7 @@ export async function POST(request) {
     const { 
       actiune, roomId, jucator, skin, isGolden, hasStar, 
       teamId, regiune, creator, text, newName, oponentNume,
-      atacant, esteCastigator, oldName, teamIds 
+      atacant, esteCastigator, oldName
     } = body;
 
     switch (actiune) {
@@ -164,7 +164,7 @@ export async function POST(request) {
         // 2. Verificăm unicitatea
         const isTaken = await redis.get(`nume_rezervat:${newClean}`);
         if (isTaken && isTaken !== oldClean) {
-            return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt haiduc!" });
+            return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" });
         }
 
         const pipeline = redis.pipeline();
@@ -172,26 +172,30 @@ export async function POST(request) {
         // 3. Rezervăm noul nume
         pipeline.set(`nume_rezervat:${newClean}`, "1");
 
-        // 4. Dacă a avut un nume vechi, mutăm scorul și eliberăm numele
+        // 4. Dacă a avut un nume vechi, mutăm TOATE scorurile și eliberăm numele
         if (oldClean && oldClean !== newClean) {
             pipeline.del(`nume_rezervat:${oldClean}`);
 
-            // Mutăm în Topul Global Jucători
+            // Migrăm din Topul Global
             const globalScore = await redis.zscore('leaderboard_jucatori', oldClean);
             if (globalScore !== null) {
                 pipeline.zrem('leaderboard_jucatori', oldClean);
-                pipeline.zadd('leaderboard_jucatori', globalScore, newClean);
+                pipeline.zadd('leaderboard_jucatori', parseFloat(globalScore), newClean);
             }
 
-            // Mutăm în Grupurile Private
-            if (teamIds && Array.isArray(teamIds)) {
-                for (const tid of teamIds) {
-                    const scorVechi = await redis.zscore(`team:${tid}:membri`, oldClean);
-                    if (scorVechi !== null) {
-                        pipeline.zrem(`team:${tid}:membri`, oldClean);
-                        pipeline.zadd(`team:${tid}:membri`, scorVechi, newClean);
+            // MIGRĂM AUTOMAT DIN TOATE GRUPURILE (Rezolvarea bug-ului cu dublarea)
+            try {
+                const toateGrupurile = await redis.keys('team:*:membri');
+                for (const cheieGrup of toateGrupurile) {
+                    const scorInGrup = await redis.zscore(cheieGrup, oldClean);
+                    if (scorInGrup !== null) {
+                        // Ștergem înregistrarea veche și o punem pe cea nouă cu același scor
+                        pipeline.zrem(cheieGrup, oldClean);
+                        pipeline.zadd(cheieGrup, parseFloat(scorInGrup), newClean);
                     }
                 }
+            } catch (err) {
+                console.error("Eroare la migrarea scorului din grupuri:", err);
             }
         }
         

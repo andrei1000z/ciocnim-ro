@@ -4,10 +4,10 @@ import ClientWrapper from "./components/ClientWrapper";
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (VERSION 26.0 - PURE TRADITION & ULTIMATE SEO)
+ * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (V30.1 - TRADIȚIE PREMIUM & ULTIMATE SEO)
  * ====================================================================================================
  * Proiect: Infrastructură globală pentru ciocnit ouă virtuale.
- * Optimizări: Viewport Repair, OLED Depth Engine, SEO Organic Max.
+ * Optimizări: Viewport Repair, OLED Depth Engine, SEO Organic Max, Textură Tradițională
  * ====================================================================================================
  */
 
@@ -23,13 +23,13 @@ export const metadata = {
     default: "Ciocnim.ro - Ciocnește ouă de Paște online (2026)",
     template: "%s | Ciocnim.ro"
   },
-  description: "Păstrăm tradiția vie! Ciocnește ouă online cu familia și prietenii de Paște 2026. Alege-ți regiunea, personalizează-ți oul roșu și intră în clasamentul național. Hristos a Înviat!",
+  description: "Păstrăm tradiția la viață! Ciocnește ouă online cu familia și prietenii de Paște 2026. Alege-ți regiunea, personalizează-ți oul roșu și intră în clasamentul național. Hristos a Înviat!",
   applicationName: "Ciocnim.ro",
   keywords: [
     "ciocnit oua online", "joc paste 2026", "ciocnim.ro", "traditii romanesti paste",
     "ciocneste oua pe telefon", "ou rosu online", "hristos a inviat", "adevarat a inviat",
     "jocuri romanesti paste", "competitie ciocnit oua", "cum se ciocnesc ouale", 
-    "paste 2026", "ciocnim online", "clasament regiuni paste", "grup ciocnit oua familia"
+    "paste 2026", "ciocnim online", "clasament regiuni paste", "grup privat ciocnit oua familia"
   ],
   authors: [{ name: "Echipa Ciocnim.ro" }],
   creator: "Ciocnim.ro",
@@ -68,7 +68,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#010101", // True OLED Black
+  themeColor: "#050202", // Negru cald tradițional
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -78,7 +78,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ro" className={`${outfit.variable} selection:bg-red-600/30 scroll-smooth`}>
+    <html lang="ro" className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -88,25 +88,27 @@ export default function RootLayout({ children }) {
       
       <body className={`
         ${outfit.className} 
-        bg-[#010101] 
+        bg-[#050202] 
         text-white 
         min-h-[100dvh] 
         w-full 
         max-w-[100vw] 
         overflow-x-hidden 
         antialiased 
-        selection:text-white
         scrollbar-hide
+        pattern-tradition
       `}>
         
-        {/* OLED DEPTH ENGINE: ELEMENTE AMBIENTALE */}
+        {/* OLED DEPTH ENGINE: ELEMENTE AMBIENTALE TRADIȚIONALE */}
         <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_15%_50%,rgba(220,38,38,0.05),transparent_50%)]"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_85%_30%,rgba(234,179,8,0.03),transparent_50%)]"></div>
+          <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-[0.03] mix-blend-overlay"></div>
+          
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_15%_50%,rgba(185,28,28,0.08),transparent_60%)]"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_85%_30%,rgba(217,119,6,0.05),transparent_60%)]"></div>
           
           {/* Watermark-uri Subtile Tradiție */}
-          <div className="absolute top-[15%] right-[-10%] text-[20vh] md:text-[28vh] font-black italic text-white/[0.01] uppercase select-none rotate-12 tracking-tighter mix-blend-overlay">TRADIȚIE</div>
-          <div className="absolute bottom-[15%] left-[-10%] text-[20vh] md:text-[28vh] font-black italic text-white/[0.01] uppercase select-none -rotate-12 tracking-tighter mix-blend-overlay">PAȘTE</div>
+          <div className="absolute top-[15%] right-[-10%] text-[20vh] md:text-[28vh] font-black italic text-amber-500/[0.02] uppercase select-none rotate-12 tracking-tighter mix-blend-screen drop-shadow-sm filter sepia-[0.5]">TRADIȚIE</div>
+          <div className="absolute bottom-[15%] left-[-10%] text-[20vh] md:text-[28vh] font-black italic text-amber-500/[0.02] uppercase select-none -rotate-12 tracking-tighter mix-blend-screen drop-shadow-sm filter sepia-[0.5]">PAȘTE</div>
         </div>
 
         <ClientWrapper>
@@ -115,16 +117,12 @@ export default function RootLayout({ children }) {
               {children}
             </main>
 
-            <footer className="w-full py-12 text-center pointer-events-none opacity-[0.2] mt-auto select-none" aria-hidden="true">
+            <footer className="w-full py-12 text-center pointer-events-none opacity-[0.3] mt-auto select-none relative z-10" aria-hidden="true">
                <div className="flex flex-col items-center gap-3">
-                 <div className="h-px w-40 bg-gradient-to-r from-transparent via-white/30 to-transparent mb-1" />
-                 <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.6em]">
-                    CIOCNIM.RO • TRADIȚIE DIGITALĂ 2026
+                 <div className="h-px w-40 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent mb-1" />
+                 <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.6em] text-amber-500/80 drop-shadow-sm">
+                    CIOCNIM.RO • PĂSTRĂM TRADIȚIA 2026
                  </p>
-                 <div className="flex gap-4 md:gap-6 mt-1">
-                    <span className="text-[7px] font-bold uppercase tracking-widest text-white/50"></span>
-                    <span className="text-[7px] font-bold uppercase tracking-widest text-white/50"></span>
-                 </div>
                </div>
             </footer>
           </div>
@@ -144,7 +142,7 @@ export default function RootLayout({ children }) {
             width: 100vw;
             max-width: 100%;
             position: relative;
-            background-color: #010101; /* OLED Sync */
+            background-color: #050202; /* Warm OLED Black */
             overscroll-behavior-y: auto; 
             overflow-x: hidden;
           }
@@ -179,7 +177,7 @@ export default function RootLayout({ children }) {
           
           .custom-scrollbar::-webkit-scrollbar { width: 4px; }
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.2); border-radius: 10px; }
 
           @media (prefers-reduced-motion: no-preference) {
             * { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
