@@ -348,14 +348,14 @@ function ArenaMaster({ room }) {
         
         {/* Buton Cod Cameră */}
         {isPrivate && !isProvocare && (
-          <button onClick={copyRoomCode} className="group relative bg-[#0a0505]/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/40 shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-[#140a0a] hover:border-red-500/50 transition-all active:scale-95 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
-            <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none rounded-full"></div>
+          <button onClick={copyRoomCode} className="group relative bg-white/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border-2 border-red-700 shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:bg-red-50 hover:border-red-800 transition-all active:scale-95 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
+            <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none rounded-full"></div>
             <div className="flex items-center gap-2 md:gap-3 relative z-10">
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/50 group-hover:text-amber-500/80 transition-colors hidden sm:inline">Cod Cameră: </span>
-              <span className="text-amber-500 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">{room.replace('privat-', '')}</span>
-              <span className="bg-red-900/30 p-1.5 md:p-2 rounded-xl text-[10px] md:text-xs ml-1 md:ml-2 group-hover:bg-red-900/50 transition-all border border-red-900/50">{copied ? '✅' : '📋'}</span>
+              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-600/70 group-hover:text-red-700 transition-colors hidden sm:inline">Cod Cameră: </span>
+              <span className="text-red-700 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]">{room.replace('privat-', '')}</span>
+              <span className="bg-red-100 p-1.5 md:p-2 rounded-xl text-[10px] md:text-xs ml-1 md:ml-2 group-hover:bg-red-200 transition-all border border-red-300">{copied ? '✅' : '📋'}</span>
             </div>
-            {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-green-500 tracking-widest">COPIAT!</span>}
+            {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-green-600 tracking-widest">COPIAT!</span>}
           </button>
         )}
 
@@ -365,30 +365,30 @@ function ArenaMaster({ room }) {
           {/* Jucător 1 (TU) */}
           <div className="flex flex-col items-center gap-4 w-1/3 max-w-[160px]">
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
-            <div className="bg-[#140a0a]/90 backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/40 border-l-4 border-l-green-500 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
-              <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
-              {atacantName === nume && !rezultat && opponent && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-700 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.5)] border border-red-500/50">ATACĂ</span>}
-              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-amber-500/50 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
-              <span className="text-sm md:text-xl font-black text-white italic drop-shadow-sm relative z-10 truncate block">{nume}</span>
+            <div className="bg-white/95 backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border-2 border-red-700 border-l-4 border-l-green-500 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.1)] overflow-hidden">
+              <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+              {atacantName === nume && !rezultat && opponent && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-700 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.3)] border border-red-500/50 text-white">ATACĂ</span>}
+              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-600/70 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
+              <span className="text-sm md:text-xl font-black text-gray-900 italic drop-shadow-sm relative z-10 truncate block">{nume}</span>
             </div>
           </div>
 
-          <div className="text-2xl md:text-5xl font-black text-amber-500/20 italic drop-shadow-sm filter sepia-[0.5] flex-shrink-0">VS</div>
+          <div className="text-2xl md:text-5xl font-black text-red-600/40 italic drop-shadow-sm filter sepia-[0.2] flex-shrink-0">VS</div>
           
           {/* Jucător 2 (OPONENT) */}
           <div className="flex flex-col items-center gap-4 w-1/3 max-w-[160px] text-center">
             {opponent ? (
               <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 w-full">
                 <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
-                <div className="bg-[#140a0a]/90 backdrop-blur-md p-3 md:p-4 rounded-2xl border border-red-900/40 border-r-4 border-r-red-600 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
-                  <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
-                  {atacantName === opponent.jucator && !rezultat && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-700 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.5)] border border-red-500/50">ATACĂ</span>}
-                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
-                  <span className="text-sm md:text-xl font-black text-white italic drop-shadow-sm relative z-10 truncate block">{opponent.jucator}</span>
+                <div className="bg-white/95 backdrop-blur-md p-3 md:p-4 rounded-2xl border-2 border-red-700 border-r-4 border-r-red-600 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.1)] overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+                  {atacantName === opponent.jucator && !rezultat && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-700 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.3)] border border-red-500/50 text-white">ATACĂ</span>}
+                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-600/70 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
+                  <span className="text-sm md:text-xl font-black text-gray-900 italic drop-shadow-sm relative z-10 truncate block">{opponent.jucator}</span>
                 </div>
               </motion.div>
             ) : (
-              <div className="w-full aspect-[1/1.35] bg-[#0a0505]/80 rounded-[2rem] border-2 border-dashed border-red-900/40 animate-pulse flex items-center justify-center text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-amber-500/40 text-center px-2 backdrop-blur-sm shadow-inner relative overflow-hidden">
+              <div className="w-full aspect-[1/1.35] bg-white/80 rounded-[2rem] border-2 border-dashed border-red-300 animate-pulse flex items-center justify-center text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-red-600/60 text-center px-2 backdrop-blur-sm shadow-inner relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
                 <span className="relative z-10">Așteptăm...</span>
               </div>
@@ -501,13 +501,13 @@ function ArenaMaster({ room }) {
               <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="flex flex-col gap-3 md:gap-4 relative z-50">
                 <button 
                   onClick={handleRematch} 
-                  className="w-full bg-[#140a0a] hover:bg-red-900/30 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 border-2 border-red-900/50 shadow-sm cursor-pointer relative z-50 pointer-events-auto text-white"
+                  className="w-full bg-white hover:bg-red-50 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 border-2 border-red-700 shadow-sm cursor-pointer relative z-50 pointer-events-auto text-red-700"
                 >
                   {rezultat.win ? 'Joacă din nou ⚔️' : 'Încă o încercare ⚔️'}
                 </button>
                 <button 
                   onClick={() => router.push('/')} 
-                  className={`w-full py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 shadow-lg border-2 cursor-pointer relative z-50 pointer-events-auto text-white ${rezultat.win ? 'bg-green-700 hover:bg-green-600 shadow-[0_15px_30px_rgba(22,163,74,0.3)] border-green-500/50' : 'bg-red-700 hover:bg-red-600 shadow-[0_15px_30px_rgba(220,38,38,0.4)] border-red-500/50'}`}
+                  className={`w-full py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 shadow-lg border-2 cursor-pointer relative z-50 pointer-events-auto text-white ${rezultat.win ? 'bg-green-600 hover:bg-green-700 shadow-[0_15px_30px_rgba(22,163,74,0.3)] border-green-500/50' : 'bg-red-600 hover:bg-red-700 shadow-[0_15px_30px_rgba(220,38,38,0.4)] border-red-500/50'}`}
                 >
                   Înapoi
                 </button>
@@ -523,11 +523,11 @@ function ArenaMaster({ room }) {
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
-    <main className="min-h-[100dvh] w-full bg-[#050202] text-white flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-700/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-700/5 rounded-full blur-[150px] pointer-events-none" />
+    <main className="min-h-[100dvh] w-full bg-yellow-50 text-gray-900 flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-200/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-200/20 rounded-full blur-[150px] pointer-events-none" />
       
-      <Suspense fallback={<div className="font-black animate-pulse text-amber-500/70 tracking-widest text-sm uppercase drop-shadow-sm flex-1 flex items-center justify-center">AȘEZĂM MASA...</div>}>
+      <Suspense fallback={<div className="font-black animate-pulse text-red-600/70 tracking-widest text-sm uppercase drop-shadow-sm flex-1 flex items-center justify-center">AȘEZĂM MASA...</div>}>
         <ArenaMaster room={resolvedParams.room} />
       </Suspense>
     </main>

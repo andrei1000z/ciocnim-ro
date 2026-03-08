@@ -24,16 +24,16 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
       hidden: { opacity: 0, y: 50 },
       visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay, ease: "easeOut" } }
     }}
-    className="bg-white/5 p-8 md:p-12 rounded-[2.5rem] border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden group hover:border-red-500/30 transition-colors duration-500"
+    className="bg-white p-8 md:p-12 rounded-[2.5rem] border-4 border-red-700 shadow-2xl relative overflow-hidden group hover:border-red-800 transition-colors duration-500"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     
     <div className="flex items-center gap-4 mb-6 relative z-10">
-      <span className="text-4xl md:text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:scale-110 transition-transform duration-500">{icon}</span>
-      <h2 className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-white">{title}</h2>
+      <span className="text-4xl md:text-5xl drop-shadow-[0_0_15px_rgba(255,0,0,0.2)] group-hover:scale-110 transition-transform duration-500">{icon}</span>
+      <h2 className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-red-700">{title}</h2>
     </div>
     
-    <div className="space-y-4 text-[13px] md:text-[15px] font-bold text-white/70 leading-relaxed relative z-10">
+    <div className="space-y-4 text-[13px] md:text-[15px] font-bold text-gray-800 leading-relaxed relative z-10">
       {children}
     </div>
   </motion.article>
@@ -87,19 +87,23 @@ export default function VopsitNaturalPage() {
       <meta property="og:title" content="Cum vopsești ouăle natural - Ghid Paște 2026 | Ciocnim.ro" />
       <meta property="og:description" content="Află rețeta tradițională pentru ouă roșii cu foi de ceapă și alte culori naturale." />
 
-      <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30 pattern-tradition">
+      <main className="relative min-h-screen w-full overflow-x-hidden bg-yellow-50 text-gray-900 selection:bg-red-600/30 pattern-tradition">
         
-        {/* OLED GLOWS */}
-        <div className="ambient-glow-red"></div>
-        <div className="ambient-glow-gold"></div>
+        {/* Traditional Easter decorations */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 left-10 text-6xl opacity-10">🥚</div>
+          <div className="absolute top-20 right-20 text-4xl opacity-10">🌿</div>
+          <div className="absolute bottom-20 left-20 text-5xl opacity-10">🌸</div>
+          <div className="absolute bottom-10 right-10 text-3xl opacity-10">🌷</div>
+        </div>
 
         {/* HEADER SIMPLU PENTRU NAVIGARE */}
         <div className="w-full flex justify-between items-center p-6 md:p-8 absolute top-0 left-0 z-50">
            <Link href="/" className="flex items-center gap-2 group">
               <span className="text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">🥚</span>
-              <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
+              <span className="font-bold text-lg md:text-xl tracking-tight text-red-700">Ciocnim<span className="text-red-600">.ro</span></span>
            </Link>
-           <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
+           <Link href="/" className="px-6 py-3 bg-red-700 border-2 border-red-700 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest text-white hover:bg-red-800 hover:border-red-800 transition-all shadow-lg active:scale-95">
               Înapoi
            </Link>
         </div>
@@ -107,10 +111,10 @@ export default function VopsitNaturalPage() {
         <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12 relative z-10">
           
           <motion.header initial="hidden" animate="visible" variants={fadeUpVariant} className="text-center space-y-6">
-            <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none drop-shadow-lg">
-              VOPSITUL <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">NATURAL</span>
+            <h1 className="text-5xl md:text-7xl font-black text-red-700 italic tracking-tighter leading-none drop-shadow-lg">
+              VOPSITUL <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-600">NATURAL</span>
             </h1>
-            <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
+            <p className="text-gray-700 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
               Cum să obții culori vibrante folosind doar ingrediente din natură.
             </p>
           </motion.header>
@@ -147,8 +151,8 @@ export default function VopsitNaturalPage() {
 
             <ArticleSection title="Atingerea Finală (Luciul)" icon="✨" delay={0.4}>
               <p>Vopselele naturale tind să lase ouăle cu un aspect mat. Bunicile noastre aveau însă un secret simplu și eficient pentru a le face să strălucească precum niște bijuterii pe masa de Paște.</p>
-              <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl shadow-inner">
-                 <p className="text-yellow-400 font-black italic text-center text-sm md:text-base">
+              <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-600 rounded-2xl shadow-inner">
+                 <p className="text-yellow-700 font-black italic text-center text-sm md:text-base">
                    Imediat ce scoți ouăle din vopsea și se usucă, unge-le ușor cu o bucățică de slănină sau cu o dischetă demachiantă înmuiată în puțin ulei de floarea soarelui. Lustruiește-le cu o cârpă moale!
                  </p>
               </div>
@@ -157,8 +161,8 @@ export default function VopsitNaturalPage() {
           </section>
 
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
-            <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden text-center">
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+            <Link href="/" className="group relative bg-red-700 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:bg-red-800 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden text-center">
+              <div className="absolute inset-0 bg-yellow-400/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
               <span className="relative z-10 flex items-center justify-center gap-3 drop-shadow-md">
                 Ciocnește ouă online
               </span>
