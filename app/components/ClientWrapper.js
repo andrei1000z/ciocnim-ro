@@ -2,7 +2,10 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (V30.1 - TRADIȚIONAL DESIGN & NOTIFICĂRI CLEAN)
+ * CIOCNIM.RO - NUCLEUL LOGIC (V30.3 - TRADIȚIONAL DESIGN & SYNC REPAIR)
+ * ====================================================================================================
+ * FIX 1: Curățare nume vechi în grupuri (trimitem teamIds din localStorage).
+ * FIX 2: Sincronizare forțată a scorului în clasamentul global (trimitem scorCurent).
  * ====================================================================================================
  */
 
@@ -46,24 +49,31 @@ export default function ClientWrapper({ children }) {
     });
   }, []);
 
-  // Funcția principală pentru a seta numele - Validează unicitatea prin API
+  // ==========================================================================
+  // SCHIMBARE NUME (FIX PENTRU DUPLICATE ÎN GRUP)
+  // ==========================================================================
   const setNume = async (nouNume) => {
     const cleanName = nouNume.toUpperCase().trim();
-    if (cleanName === nume) return true; // Deja e numele lui
+    if (cleanName === nume) return true; 
     if (cleanName.length < 3) {
       alert("Numele trebuie să aibă minim 3 litere.");
       return false;
     }
 
     try {
+      // Luăm grupurile în care ești pentru a face clean-up în backend
+      const storedTeamIds = JSON.parse(localStorage.getItem("c_teamIds") || "[]");
+      const scorCurent = JSON.parse(localStorage.getItem("c_stats") || "{}").wins || 0;
+
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           actiune: 'schimba-porecla',
-          oldName: nume, // Numele vechi ca să mutăm scorul
+          oldName: nume, 
           newName: cleanName,
-          teamIds: [] // Lăsăm gol, migrarea se face automat din backend acum
+          teamIds: storedTeamIds, // Acum trimitem corect array-ul de grupuri
+          scor: scorCurent // Salvăm scorul să nu-l pierdem la redenumire
         })
       });
       const data = await res.json();
@@ -73,7 +83,6 @@ export default function ClientWrapper({ children }) {
         return false;
       }
 
-      // Dacă totul e ok, salvăm local
       setNumeLocal(cleanName);
       localStorage.setItem("c_nume", cleanName);
       setUserStats(prev => {
@@ -90,14 +99,21 @@ export default function ClientWrapper({ children }) {
     }
   };
 
+  // ==========================================================================
+  // INCREMENTARE SCOR (FIX PENTRU CLASAMENT JUCĂTORI)
+  // ==========================================================================
   const incrementGlobal = useCallback(async (amCastigat = false) => {
     try {
+      // Forțăm backend-ul să afle scorul EXACT ca să nu mai rămână blocat pe 1
+      const newWins = amCastigat ? (userStats.wins || 0) + 1 : (userStats.wins || 0);
+
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             actiune: 'increment-global', 
             jucator: amCastigat ? nume : null,
+            scorCurent: amCastigat ? newWins : null, // Sync master cu backend-ul
             regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null 
         })
       });
@@ -107,13 +123,12 @@ export default function ClientWrapper({ children }) {
         if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
         if (data.topJucatori) setTopJucatori(data.topJucatori);
 
-        // Dacă ai câștigat vs Bot, actualizează MĂCAR local victoriile să se vadă instant
         if (amCastigat) {
             updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1}));
         }
       }
     } catch (e) { console.error("Eroare la incrementare bilanț."); }
-  }, [userStats.regiune, nume, updateUserStats]);
+  }, [userStats.regiune, userStats.wins, nume, updateUserStats]);
 
   useEffect(() => {
     const savedName = localStorage.getItem("c_nume");

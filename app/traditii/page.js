@@ -54,7 +54,7 @@ export default function TraditiiPage() {
             <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
          </Link>
          <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
-            Înapoi la Vatră
+            Înapoi
          </Link>
       </div>
 

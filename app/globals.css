@@ -2,11 +2,12 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - CORE ENGINE VIZUAL (V30.1 - TRADIȚIE PREMIUM & LEMN/FOC)
+ * CIOCNIM.RO - CORE ENGINE VIZUAL (V30.4 - TRADIȚIE PREMIUM & LEMN/FOC + MOBILE FIX)
  * ====================================================================================================
  * Optimizat pentru: Next.js + Tailwind v4
  * Nou: Pattern tradițional românesc (IA) în culori calde (chihlimbar/roșu).
  * Fix: Eliminare totală a @apply pentru clasele complexe -> 0 erori de compilare.
+ * Fix 2: Adăugat utilitare specifice pentru anti-crowding pe mobile.
  * ====================================================================================================
  */
 
@@ -184,6 +185,16 @@
     padding-right: calc(1.25rem + env(safe-area-inset-right));
     padding-top: var(--safe-top);
     padding-bottom: var(--safe-bottom);
+  }
+
+  /* Previne înghesuirea textului pe ecrane foarte mici (iPhone SE etc.) */
+  @media (max-width: 380px) {
+    .text-mobile-shrink {
+      font-size: 0.85rem !important;
+    }
+    .gap-mobile-shrink {
+      gap: 0.5rem !important;
+    }
   }
 
   .scrollbar-hide {
