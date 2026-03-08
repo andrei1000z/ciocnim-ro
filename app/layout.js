@@ -1,13 +1,15 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import ClientWrapper from "./components/ClientWrapper";
+import Script from "next/script"; // <-- Adăugat pentru Schema Markup la final
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (V30.1 - TRADIȚIE PREMIUM & ULTIMATE SEO)
+ * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (V30.2 - TRADIȚIE UMANIZATĂ & ULTIMATE SEO)
  * ====================================================================================================
  * Proiect: Infrastructură globală pentru ciocnit ouă virtuale.
- * Optimizări: Viewport Repair, OLED Depth Engine, SEO Organic Max, Textură Tradițională
+ * Optimizări: Viewport Repair, OLED Depth Engine, SEO Organic Max, Textură Tradițională,
+ * Umanizare termeni (eliminit "Arena" / "Luptă" din MetaData).
  * ====================================================================================================
  */
 
@@ -20,14 +22,14 @@ const outfit = Outfit({
 
 export const metadata = {
   title: {
-    default: "Ciocnim.ro - Ciocnește ouă de Paște online (2026)",
+    default: "Ciocnim.ro - Bucuria ciocnitului de ouă, oriunde te-ai afla.",
     template: "%s | Ciocnim.ro"
   },
-  description: "Păstrăm tradiția la viață! Ciocnește ouă online cu familia și prietenii de Paște 2026. Alege-ți regiunea, personalizează-ți oul roșu și intră în clasamentul național. Hristos a Înviat!",
+  description: "Îți e dor de ciocnitul de ouă cu familia? Ciocnim.ro aduce bucuria Paștelui online! Provoacă-ți prietenii sau familia la o ciocneală tradițională virtuală, oriunde te-ai afla. Hristos a Înviat!",
   applicationName: "Ciocnim.ro",
   keywords: [
-    "ciocnit ouă online", "jocul de paște 2026", "ciocnim.ro", "bătălia ouălor virtuale",
-    "simulare ciocnit ouă", "arena de luptă ouă", "joc browser paște", "ciocnit pe telefon fără download",
+    "ciocnit ouă online", "bucuria ciocnitului online", "jocul de paște 2026", "ciocnim.ro", "bătălia ouălor virtuale",
+    "simulare ciocnit ouă", "satul de paște virtual", "joc browser paște", "ciocnit pe telefon fără download",
     "multiplayer ciocnit ouă", "cel mai bun joc de paște", "campioni la ciocnit ouă", "ciocnit virtual gratis",
     "gameplay tradițional românesc", "concurs de paște online", "ciocnim ouă pe mobil", "aplicație ciocnit ouă 2026",
     "tradiții românești de paște", "obiceiuri pascale 2026", "semnificația ciocnitului ouălor", "vopsit ouă natural",
@@ -35,9 +37,8 @@ export const metadata = {
     "ia românească și paștele", "obiceiuri din strămoși", "hristos a înviat tradiție", "povești de paște pentru copii",
     "cum se ciocnesc ouăle corect", "rețete tradiționale de paște", "vopsit ouă cu foi de ceapă", "clasament național ciocnit ouă",
     "top jucători ciocnim.ro", "bătălia regiunilor românia", "provocare duel paște", "grup privat familie ciocnit",
-    "cine are cel mai tare ou", "regele arenei ciocnim.ro", "competiție inter-județeană ciocnit", "clans ciocnim.ro",
-    "invită prietenii la duel", "scor global ciocniri", "victorii și înfrângeri ouă", "trofeul arenei de paște",
-    "dueluri live cu prietenii", "ciocnit ouă transilvania", "tradiții moldova paște", "bătălia munteniei",
+    "cine are cel mai tare ou", "invită prietenii la duel", "scor global ciocniri", "victorii și înfrângeri ouă", 
+    "dueluri tradiționale online", "ciocnit ouă transilvania", "tradiții moldova paște", "bucuria munteniei",
     "campioni oltenia ciocnit", "jocul dobrogenilor", "bucovina tradiții vii", "banatul la masă", "maramureș ciocnit tradițional",
     "crișana paște 2026", "clasament regiuni istorice", "mândria regiunii tale", "provocări regionale online", "mesaje de paște 2026",
     "urări hristos a înviat", "felicitări virtuale paște", "cele mai frumoase mesaje de paște", "statusuri de paște facebook", "poze cu ouă roșii",
@@ -45,7 +46,7 @@ export const metadata = {
     "joc web mobil paște", "ciocnit ouă android", "ciocnit ouă ios online", "joc fără instalare", "ciocnește oul prin mișcare",
     "vibrate on strike game", "joc tradițional modernizat", "interfață modernă paște", "grafică premium tradițională", "joc de paște securizat",
     "experiență multiplayer fluidă", "joc românesc 2026", "ou de aur ciocnim.ro", "ou de diamant", "ou cosmic de paște", "culori ouă de paște",
-    "ouă personalizate online", "steaua campionului ciocnim", "skin-uri tradiționale ouă", "ouă de lux virtuale", "colecție de ouă 2026",
+    "ouă personalizate online", "skin-uri tradiționale ouă", "ouă de lux virtuale", "colecție de ouă 2026",
     "ouă roșii strălucitoare", "ouă albastre safir", "ouă imperiale aurii"
   ],
   authors: [{ name: "Echipa Ciocnim.ro" }],
@@ -58,18 +59,18 @@ export const metadata = {
   },
   metadataBase: new URL("https://ciocnim.ro"),
   openGraph: {
-    title: "Ciocnim.ro - Tradiția de Paște continuă online",
-    description: "Intră în arenă! Ciocnește ouă cu prietenii tăi, apără-ți regiunea și distrează-te de Paște. Hristos a Înviat!",
+    title: "Ciocnim.ro - Bucuria Paștelui e online",
+    description: "Îți e dor de ciocnitul de ouă cu familia? provoacă-ți familia la o ciocneală virtuală tradițională!",
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
-    images: [{ url: "/og-image-paste.jpg", width: 1200, height: 630, alt: "Arena Ciocnim.ro - Paște 2026" }],
+    images: [{ url: "/og-image-paste.jpg", width: 1200, height: 630, alt: "Ciocnim.ro - Paște 2026" }],
     locale: "ro_RO",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Ciocnim.ro - Ciocnește ouă online!",
-    description: "Pregătește-ți oul cel mai tare și intră în joc alături de mii de români.",
+    description: "Bucuria Paștelui, oriunde te-ai afla! Provoacă-ți familia la ciocnit.",
     images: ["/og-image-paste.jpg"],
   },
   robots: {
@@ -94,13 +95,41 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  const schemaMarkup = {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "Ciocnim.ro",
+    "url": "https://ciocnim.ro",
+    "description": "Un joc tradițional de Paște online, unde utilizatorii pot ciocni ouă virtuale cu prietenii și familia, personaliza ouă și participa în clasamentul național.",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "minValue": 1,
+      "maxValue": 2
+    },
+    "genre": ["Joc de Tradiție", "Multiplayer Online"],
+    "gamePlatform": ["Web Browser", "Mobil"],
+    "author": {
+      "@type": "Organization",
+      "name": "Ciocnim.ro"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Ciocnim.ro"
+    }
+  };
+
   return (
     <html lang="ro" className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name=" apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <Script
+          id="schema-main"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+        />
       </head>
       
       <body className={`

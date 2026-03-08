@@ -21,7 +21,7 @@ const MessageCard = ({ text }) => {
   const handleCopy = async () => {
     try {
       // Adăugăm automat și link-ul site-ului la finalul mesajului copiat (crește viralitatea)
-      const textDeCopiat = `${text} 🥚 Hai la o ciocneală online pe https://ciocnim.ro`;
+      const textDeCopiat = `${text} \n🥚 Hai la o ciocneală online pe https://ciocnim.ro`;
       await navigator.clipboard.writeText(textDeCopiat);
       setCopiat(true);
       setTimeout(() => setCopiat(false), 2000);
@@ -101,51 +101,58 @@ export default function UrariPage() {
   ];
 
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30 pattern-tradition">
-      
-      {/* OLED GLOWS */}
-      <div className="ambient-glow-red"></div>
-      <div className="ambient-glow-gold"></div>
+    <>
+      <title>Mesaje și Urări de Paște 2026 - Trimite lumina pe WhatsApp | Ciocnim.ro</title>
+      <meta name="description" content="Cele mai frumoase, scurte și amuzante mesaje de Paște. Copiază și trimite urările tale prietenilor și familiei alături de o invitație la ciocnit ouă online." />
+      <meta property="og:title" content="Cele mai frumoase Mesaje și Urări de Paște 2026" />
+      <meta property="og:description" content="Alege mesajul perfect pentru a-l trimite celor dragi în Săptămâna Mare." />
 
-      {/* HEADER SIMPLU */}
-      <div className="w-full flex justify-between items-center p-6 md:p-8 absolute top-0 left-0 z-50">
-         <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">🥚</span>
-            <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
-         </Link>
-         <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
-            Înapoi
-         </Link>
-      </div>
+      <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30 pattern-tradition">
+        
+        {/* OLED GLOWS */}
+        <div className="ambient-glow-red"></div>
+        <div className="ambient-glow-gold"></div>
 
-      <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12 relative z-10">
-        
-        <motion.header initial="hidden" animate="visible" variants={fadeUpVariant} className="text-center space-y-6">
-          <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none drop-shadow-lg">
-            MESAJE ȘI <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-red-500">URĂRI</span>
-          </h1>
-          <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
-            Copiază un mesaj și trimite vestea Învierii pe WhatsApp.
-          </p>
-        </motion.header>
-        
-        <div className="flex flex-col gap-8 w-full mt-6">
-          <CategorySection title="Tradiționale & De Familie" icon="🕊️" messages={mesajeTraditionale} delay={0.1} />
-          <CategorySection title="Scurte (Pentru SMS)" icon="📱" messages={mesajeScurte} delay={0.2} />
-          <CategorySection title="Pentru Prieteni (Amuzante)" icon="😂" messages={mesajeAmuzante} delay={0.3} />
-          <CategorySection title="Duhovnicești & Spirituale" icon="✨" messages={mesajeSpirituale} delay={0.4} />
+        {/* HEADER SIMPLU */}
+        <div className="w-full flex justify-between items-center p-6 md:p-8 absolute top-0 left-0 z-50">
+           <Link href="/" className="flex items-center gap-2 group">
+              <span className="text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">🥚</span>
+              <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
+           </Link>
+           <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
+              Înapoi
+           </Link>
         </div>
 
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
-          <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden text-center">
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-            <span className="relative z-10 flex items-center justify-center gap-3 drop-shadow-md">
-              Ciocnește ouă online
-            </span>
-          </Link>
-        </motion.div>
+        <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12 relative z-10">
+          
+          <motion.header initial="hidden" animate="visible" variants={fadeUpVariant} className="text-center space-y-6">
+            <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none drop-shadow-lg">
+              MESAJE ȘI <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-red-500">URĂRI</span>
+            </h1>
+            <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
+              Copiază un mesaj și trimite vestea Învierii pe WhatsApp.
+            </p>
+          </motion.header>
+          
+          <div className="flex flex-col gap-8 w-full mt-6">
+            <CategorySection title="Tradiționale & De Familie" icon="🕊️" messages={mesajeTraditionale} delay={0.1} />
+            <CategorySection title="Scurte (Pentru SMS)" icon="📱" messages={mesajeScurte} delay={0.2} />
+            <CategorySection title="Pentru Prieteni (Amuzante)" icon="😂" messages={mesajeAmuzante} delay={0.3} />
+            <CategorySection title="Duhovnicești & Spirituale" icon="✨" messages={mesajeSpirituale} delay={0.4} />
+          </div>
 
-      </div>
-    </main>
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
+            <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden text-center">
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              <span className="relative z-10 flex items-center justify-center gap-3 drop-shadow-md">
+                Ciocnește ouă online
+              </span>
+            </Link>
+          </motion.div>
+
+        </div>
+      </main>
+    </>
   );
 }

@@ -41,99 +41,106 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
 
 export default function TraditiiPage() {
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30 pattern-tradition">
-      
-      {/* OLED GLOWS */}
-      <div className="ambient-glow-red"></div>
-      <div className="ambient-glow-gold"></div>
+    <>
+      <title>Tradiții Paște 2026 - Cum se ciocnesc ouăle corect | Ciocnim.ro</title>
+      <meta name="description" content="Află de ce ciocnim ouă, semnificația culorilor și cum să câștigi bătălia de la masa de Paște. Reguli și tradiții românești autentice pentru Paștele din 2026." />
+      <meta property="og:title" content="Tradiția ciocnitului de ouă - Reguli și Semnificații | Ciocnim.ro" />
+      <meta property="og:description" content="Descoperă secretele din spatele celui mai popular joc tradițional românesc de Paște." />
 
-      {/* HEADER SIMPLU PENTRU NAVIGARE */}
-      <div className="w-full flex justify-between items-center p-6 md:p-8 absolute top-0 left-0 z-50">
-         <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">🥚</span>
-            <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
-         </Link>
-         <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
-            Înapoi
-         </Link>
-      </div>
+      <main className="relative min-h-screen w-full overflow-x-hidden bg-[#010101] text-white selection:bg-red-600/30 pattern-tradition">
+        
+        {/* OLED GLOWS */}
+        <div className="ambient-glow-red"></div>
+        <div className="ambient-glow-gold"></div>
 
-      <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12 relative z-10">
-        
-        <motion.header initial="hidden" animate="visible" variants={fadeUpVariant} className="text-center space-y-6">
-          <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none drop-shadow-lg">
-            TRADIȚIA <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">CIOCNITULUI</span>
-          </h1>
-          <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
-            Află regulile jocului de Paște care a unit generații.
-          </p>
-        </motion.header>
-        
-        <section className="flex flex-col gap-8 w-full mt-6">
+        {/* HEADER SIMPLU PENTRU NAVIGARE */}
+        <div className="w-full flex justify-between items-center p-6 md:p-8 absolute top-0 left-0 z-50">
+           <Link href="/" className="flex items-center gap-2 group">
+              <span className="text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">🥚</span>
+              <span className="font-bold text-lg md:text-xl tracking-tight">Ciocnim<span className="text-red-600">.ro</span></span>
+           </Link>
+           <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all shadow-lg active:scale-95">
+              Înapoi
+           </Link>
+        </div>
+
+        <div className="w-full max-w-3xl mx-auto pt-32 pb-24 px-5 flex flex-col gap-12 relative z-10">
           
-          <ArticleSection title="De ce ciocnim ouă?" icon="🩸" delay={0.1}>
-            <p>
-              Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong className="text-white">"Hristos a Înviat!"</strong>.
+          <motion.header initial="hidden" animate="visible" variants={fadeUpVariant} className="text-center space-y-6">
+            <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none drop-shadow-lg">
+              TRADIȚIA <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">CIOCNITULUI</span>
+            </h1>
+            <p className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-[0.3em] leading-relaxed">
+              Află regulile jocului de Paște care a unit generații.
             </p>
-            <p>
-              Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt. Astăzi, acest joc a devenit un prilej de bucurie și reunire a familiei.
-            </p>
-          </ArticleSection>
+          </motion.header>
+          
+          <section className="flex flex-col gap-8 w-full mt-6">
+            
+            <ArticleSection title="De ce ciocnim ouă?" icon="🩸" delay={0.1}>
+              <p>
+                Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong className="text-white">"Hristos a Înviat!"</strong>.
+              </p>
+              <p>
+                Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt. Astăzi, acest joc a devenit un prilej de bucurie și reunire a familiei.
+              </p>
+            </ArticleSection>
 
-          <ArticleSection title="Regulile Nescrise" icon="📜" delay={0.2}>
-            <p>Dacă te-ai întrebat vreodată cum se ciocnesc ouăle corect, există un protocol simplu păstrat din tată-n fiu:</p>
-            <ul className="list-disc pl-6 space-y-3 mt-4">
-              <li><strong className="text-white uppercase tracking-wider text-xs">Cap la Cap:</strong> Regula primei zile de Paște (Duminică).</li>
-              <li><strong className="text-white uppercase tracking-wider text-xs">Cap la Dos:</strong> Permis abia începând cu a doua zi (Luni).</li>
-              <li><strong className="text-white uppercase tracking-wider text-xs">Dos la Dos:</strong> Rezervat strict pentru a treia zi de sărbătoare.</li>
-            </ul>
-            <div className="mt-6 p-4 bg-red-600/10 border border-red-500/20 rounded-2xl shadow-inner">
-               <p className="text-red-400 font-black italic text-center text-sm md:text-base">
-                 Cel care lovește zice "Hristos a Înviat!", iar celălalt răspunde "Adevărat a Înviat!"
-               </p>
-            </div>
-          </ArticleSection>
+            <ArticleSection title="Regulile Nescrise" icon="📜" delay={0.2}>
+              <p>Dacă te-ai întrebat vreodată cum se ciocnesc ouăle corect, există un protocol simplu păstrat din tată-n fiu:</p>
+              <ul className="list-disc pl-6 space-y-3 mt-4">
+                <li><strong className="text-white uppercase tracking-wider text-xs">Cap la Cap:</strong> Regula primei zile de Paște (Duminică).</li>
+                <li><strong className="text-white uppercase tracking-wider text-xs">Cap la Dos:</strong> Permis abia începând cu a doua zi (Luni).</li>
+                <li><strong className="text-white uppercase tracking-wider text-xs">Dos la Dos:</strong> Rezervat strict pentru a treia zi de sărbătoare.</li>
+              </ul>
+              <div className="mt-6 p-4 bg-red-600/10 border border-red-500/20 rounded-2xl shadow-inner">
+                 <p className="text-red-400 font-black italic text-center text-sm md:text-base">
+                   Cel care lovește zice "Hristos a Înviat!", iar celălalt răspunde "Adevărat a Înviat!"
+                 </p>
+              </div>
+            </ArticleSection>
 
-          <ArticleSection title="Semnificația Culorilor" icon="🎨" delay={0.3}>
-            <p>Deși oul roșu este cel mai cunoscut, tradiția românească a păstrat și alte culori, fiecare având un sens aparte:</p>
-            <ul className="space-y-3 mt-4">
-              <li><strong className="text-red-500 uppercase tracking-wider text-xs">ROȘU:</strong> Simbolul jertfei, al vieții și al iubirii divine.</li>
-              <li><strong className="text-yellow-500 uppercase tracking-wider text-xs">GALBEN:</strong> Reprezintă lumina, belșugul și grâul copt al verii ce urmează.</li>
-              <li><strong className="text-blue-500 uppercase tracking-wider text-xs">ALBASTRU:</strong> Simbolizează cerul, credința și infinitul spiritual.</li>
-              <li><strong className="text-green-500 uppercase tracking-wider text-xs">VERDE:</strong> Culoarea primăverii, a reînnoirii naturii și a speranței.</li>
-            </ul>
-          </ArticleSection>
+            <ArticleSection title="Semnificația Culorilor" icon="🎨" delay={0.3}>
+              <p>Deși oul roșu este cel mai cunoscut, tradiția românească a păstrat și alte culori, fiecare având un sens aparte:</p>
+              <ul className="space-y-3 mt-4">
+                <li><strong className="text-red-500 uppercase tracking-wider text-xs">ROȘU:</strong> Simbolul jertfei, al vieții și al iubirii divine.</li>
+                <li><strong className="text-yellow-500 uppercase tracking-wider text-xs">GALBEN:</strong> Reprezintă lumina, belșugul și grâul copt al verii ce urmează.</li>
+                <li><strong className="text-blue-500 uppercase tracking-wider text-xs">ALBASTRU:</strong> Simbolizează cerul, credința și infinitul spiritual.</li>
+                <li><strong className="text-green-500 uppercase tracking-wider text-xs">VERDE:</strong> Culoarea primăverii, a reînnoirii naturii și a speranței.</li>
+              </ul>
+            </ArticleSection>
 
-          <ArticleSection title="Cum Alegi Oul Tare" icon="🛡️" delay={0.4}>
-            <p>Secretul câștigării duelurilor stă în alegerea oului potrivit din coș:</p>
-            <ul className="list-disc pl-6 space-y-3 mt-4">
-              <li>Caută un ou cu o formă cât mai ascuțită la vârf. Forța se concentrează mai bine pe o suprafață mică.</li>
-              <li>Verifică sunetul! Unii bat ușor oul de dinte – dacă sună plin și ascuțit, coaja este groasă.</li>
-              <li>Strânge-l ușor în mână. Oul trebuie să se simtă ferm, fără micro-fisuri ascunse sub stratul de vopsea.</li>
-            </ul>
-          </ArticleSection>
+            <ArticleSection title="Cum Alegi Oul Tare" icon="🛡️" delay={0.4}>
+              <p>Secretul câștigării duelurilor stă în alegerea oului potrivit din coș:</p>
+              <ul className="list-disc pl-6 space-y-3 mt-4">
+                <li>Caută un ou cu o formă cât mai ascuțită la vârf. Forța se concentrează mai bine pe o suprafață mică.</li>
+                <li>Verifică sunetul! Unii bat ușor oul de dinte – dacă sună plin și ascuțit, coaja este groasă.</li>
+                <li>Strânge-l ușor în mână. Oul trebuie să se simtă ferm, fără micro-fisuri ascunse sub stratul de vopsea.</li>
+              </ul>
+            </ArticleSection>
 
-          <ArticleSection title="Superstiții Românești" icon="✨" delay={0.5}>
-            <p>Jocul nu este doar o competiție, ci și un mod de a atrage norocul în casă:</p>
-            <ul className="list-disc pl-6 space-y-3 mt-4">
-              <li>Cine are oul cel mai tare și iese învingător din toate duelurile, va fi sănătos și puternic tot restul anului.</li>
-              <li>Dacă găsești la masă un ou cu două gălbenușuri, vei avea parte de noroc dublu.</li>
-              <li>Cojile ouălor sparte și sfințite nu se aruncă la gunoi! Tradiția cere să le îngropi în pământul grădinii pentru a proteja recolta.</li>
-            </ul>
-          </ArticleSection>
+            <ArticleSection title="Superstiții Românești" icon="✨" delay={0.5}>
+              <p>Jocul nu este doar o competiție, ci și un mod de a atrage norocul în casă:</p>
+              <ul className="list-disc pl-6 space-y-3 mt-4">
+                <li>Cine are oul cel mai tare și iese învingător din toate duelurile, va fi sănătos și puternic tot restul anului.</li>
+                <li>Dacă găsești la masă un ou cu două gălbenușuri, vei avea parte de noroc dublu.</li>
+                <li>Cojile ouălor sparte și sfințite nu se aruncă la gunoi! Tradiția cere să le îngropi în pământul grădinii pentru a proteja recolta.</li>
+              </ul>
+            </ArticleSection>
 
-        </section>
+          </section>
 
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
-          <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden">
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-            <span className="relative z-10 flex items-center gap-3 drop-shadow-md">
-              INTRĂ ÎN ARENĂ ⚔️
-            </span>
-          </Link>
-        </motion.div>
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="w-full flex justify-center mt-12">
+            <Link href="/" className="group relative bg-red-600 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-white hover:scale-105 transition-all duration-300 shadow-[0_15px_40px_rgba(220,38,38,0.4)] overflow-hidden">
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              <span className="relative z-10 flex items-center gap-3 drop-shadow-md">
+                INTRĂ ÎN ARENĂ ⚔️
+              </span>
+            </Link>
+          </motion.div>
 
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
