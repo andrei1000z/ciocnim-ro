@@ -44,17 +44,30 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   const safeMyScore = parseInt(myScore) || 0;
 
   return (
-    <div className="w-full bg-yellow-50 p-6 md:p-8 rounded-lg border-4 border-red-700 shadow-lg">
-      <div className="flex gap-4 mb-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.4 }}
+      className="bg-white/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300"
+    >
+      <div className="flex gap-2 mb-8 p-2 bg-gray-100 rounded-2xl">
         <button 
           onClick={() => setView("jucatori")}
-          className={`flex-1 py-3 font-bold text-center rounded border-2 transition ${view === "jucatori" ? 'bg-red-700 text-white border-red-900' : 'bg-white text-red-700 border-red-300'}`}
+          className={`flex-1 py-4 font-bold text-center rounded-xl transition-all duration-300 ${
+            view === "jucatori" 
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg scale-105' 
+              : 'bg-transparent text-gray-600 hover:text-red-600 hover:bg-white/50'
+          }`}
         >
           🏆 JUCĂTORI
         </button>
         <button 
           onClick={() => setView("regiuni")}
-          className={`flex-1 py-3 font-bold text-center rounded border-2 transition ${view === "regiuni" ? 'bg-red-700 text-white border-red-900' : 'bg-white text-red-700 border-red-300'}`}
+          className={`flex-1 py-4 font-bold text-center rounded-xl transition-all duration-300 ${
+            view === "regiuni" 
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg scale-105' 
+              : 'bg-transparent text-gray-600 hover:text-red-600 hover:bg-white/50'
+          }`}
         >
           🗺️ REGIUNI
         </button>
@@ -62,89 +75,162 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
 
       <AnimatePresence mode="wait">
         {view === "jucatori" ? (
-          <motion.div key="jucatori" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+          <motion.div 
+            key="jucatori" 
+            initial={{ opacity: 0, x: -20 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-3"
+          >
             {topPlayers && topPlayers.length > 0 ? (
               <>
                 {topPlayers.map((p, i) => (
-                  <div key={i} className={`flex justify-between items-center p-4 rounded border-2 ${p.nume === myName?.toUpperCase().trim() ? 'bg-amber-100 border-amber-700' : 'bg-white border-red-300'}`}>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-lg font-bold w-8 ${i === 0 ? 'text-amber-600' : (i === 1 ? 'text-gray-500' : (i === 2 ? 'text-amber-700' : 'text-gray-400'))}`}>
-                        #{i + 1}
-                      </span>
-                      <span className="font-bold text-red-900">{p.nume}</span>
+                  <motion.div 
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className={`flex justify-between items-center p-5 rounded-2xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      p.nume === myName?.toUpperCase().trim() 
+                        ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-yellow-400 shadow-yellow-200' 
+                        : 'bg-white/70 border-gray-200 hover:border-red-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-lg ${
+                        i === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
+                        i === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600' :
+                        i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
+                        'bg-gradient-to-br from-red-400 to-red-600'
+                      }`}>
+                        {i + 1}
+                      </div>
+                      <span className="font-bold text-gray-800 text-lg">{p.nume}</span>
                     </div>
-                    <span className="text-lg font-bold text-green-700">{parseInt(p.scor) || 0} 🥚</span>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🥚</span>
+                      <span className="font-bold text-green-700 text-xl">{parseInt(p.scor) || 0}</span>
+                    </div>
+                  </motion.div>
                 ))}
                 
                 {myName && myRank !== null && (
-                  <div className="mt-6 pt-4 border-t-4 border-red-700">
-                    <div className="bg-red-100 p-4 rounded border-2 border-red-700">
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-lg text-red-900">#{myRank}</span>
-                          <span className="font-bold text-red-900">{myName} (TU)</span>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mt-8 pt-6 border-t-2 border-red-200"
+                  >
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-300 shadow-lg">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg">
+                            #{myRank}
+                          </div>
+                          <div>
+                            <span className="font-bold text-gray-800 text-lg">{myName}</span>
+                            <div className="text-sm text-blue-600 font-medium">(TU)</div>
+                          </div>
                         </div>
-                        <span className="text-lg font-bold text-green-700">{safeMyScore} 🥚</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">🥚</span>
+                          <span className="font-bold text-green-700 text-xl">{safeMyScore}</span>
+                        </div>
                       </div>
-                      <p className="text-center font-bold text-red-900 text-sm">
-                        {myRank === 1 ? "🎉 CHAMPION! 🎉" : myRank <= 10 ? `Ai nevoie de ${ouaUrmatorulLoc} victoria/e pentru a avansa` : `Ai nevoie de ${ouaNecesareTop10} victoria/e pentru TOP 10`}
-                      </p>
+                      <div className="bg-white/70 p-4 rounded-xl">
+                        <p className="text-center font-bold text-blue-800 text-sm">
+                          {myRank === 1 ? "🎉 CAMPION NAȚIONAL! 🎉" : myRank <= 10 ? `Ai nevoie de ${ouaUrmatorulLoc} victorie/e pentru a avansa` : `Ai nevoie de ${ouaNecesareTop10} victorie/e pentru TOP 10`}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
               </>
             ) : (
-              <div className="text-center py-8 text-red-700 font-bold">
-                <p className="text-2xl mb-2">🥚</p>
-                <p>Nciun jucător în clasament</p>
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4 animate-bounce">🥚</div>
+                <p className="text-gray-600 font-semibold text-lg">Niciun jucător în clasament</p>
+                <p className="text-gray-500 text-sm mt-2">Fii primul care începe tradiția!</p>
               </div>
             )}
           </motion.div>
         ) : (
-          <motion.div key="regiuni" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
+          <motion.div 
+            key="regiuni" 
+            initial={{ opacity: 0, x: 20 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-4"
+          >
             {topRegiuni && topRegiuni.length > 0 ? (
               topRegiuni.map((reg, i) => (
-                <div key={reg.regiune}>
-                  <div className="flex justify-between mb-1">
-                    <span className="font-bold text-red-900">#{i + 1} {reg.regiune}</span>
-                    <span className="font-bold text-green-700">{parseInt(reg.scor) || 0} 🥚</span>
+                <motion.div 
+                  key={reg.regiune}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="space-y-3"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center font-bold text-white text-sm">
+                        {i + 1}
+                      </div>
+                      <span className="font-bold text-gray-800">#{i + 1} {reg.regiune}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🥚</span>
+                      <span className="font-bold text-green-700">{parseInt(reg.scor) || 0}</span>
+                    </div>
                   </div>
-                  <div className="w-full bg-red-200 rounded h-6 border-2 border-red-700 overflow-hidden">
-                    <div 
-                      className="h-full bg-red-700 transition-all duration-500"
-                      style={{ width: `${(parseInt(reg.scor || 0) / maxRegionScore) * 100}%` }}
+                  <div className="w-full bg-gray-200 rounded-full h-4 border border-gray-300 overflow-hidden shadow-inner">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(parseInt(reg.scor || 0) / maxRegionScore) * 100}%` }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                      className="h-full bg-gradient-to-r from-red-400 to-red-600 rounded-full shadow-sm"
                     />
                   </div>
-                </div>
+                </motion.div>
               ))
             ) : (
-              <div className="text-center py-8 text-red-700 font-bold">
-                <p>Așteptăm prima bătălie...</p>
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4 animate-pulse">🗺️</div>
+                <p className="text-gray-600 font-semibold text-lg">Așteptăm prima bătălie...</p>
               </div>
             )}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 
 // Butoane de acțiune
 const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => {
   return (
-    <button 
+    <motion.button 
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick} 
       disabled={loading}
-      className="w-full p-4 md:p-5 rounded-lg border-3 border-red-700 bg-yellow-50 hover:bg-red-100 transition flex items-center gap-4 text-left active:scale-95 disabled:opacity-50"
+      className="w-full p-6 md:p-8 rounded-2xl border-2 border-red-200 bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:border-red-300 transition-all duration-300 flex items-center gap-6 text-left active:scale-95 disabled:opacity-50 shadow-lg hover:shadow-xl group"
     >
-      <span className="text-3xl md:text-4xl flex-shrink-0">{icon}</span>
-      <div className="flex-1">
-        <div className="font-bold text-red-900 text-base md:text-lg">{title}</div>
-        {subtitle && <div className="text-xs md:text-sm text-red-700">{subtitle}</div>}
+      <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+        <span className="text-2xl md:text-3xl text-white group-hover:animate-bounce">{icon}</span>
       </div>
-      {loading && <div className="animate-spin text-red-700">⟳</div>}
-    </button>
+      <div className="flex-1">
+        <div className="font-bold text-gray-800 text-lg md:text-xl mb-1 group-hover:text-red-700 transition-colors">{title}</div>
+        {subtitle && <div className="text-sm text-gray-600 group-hover:text-red-600 transition-colors">{subtitle}</div>}
+      </div>
+      {loading && (
+        <div className="w-8 h-8 border-3 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+      )}
+      {!loading && (
+        <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-white text-sm">→</span>
+        </div>
+      )}
+    </motion.button>
   );
 };
 
@@ -176,44 +262,77 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[99999]">
-      <div className="bg-yellow-50 p-8 rounded-lg border-4 border-red-700 w-full max-w-sm shadow-2xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-red-700 text-2xl hover:text-red-900">✕</button>
-        
-        <h2 className="text-2xl font-bold text-center text-red-900 mb-8">Meci cu Prieten 🥚</h2>
-        
-        <div className="flex flex-col gap-4">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99999]"
+      onClick={onClose}
+    >
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white/95 backdrop-blur-md p-8 rounded-3xl border border-red-200 w-full max-w-md shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
+              <span className="text-white">🥚</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800">Meci Privat</h2>
+          </div>
           <button 
-            onClick={createRoom} 
-            className="w-full bg-red-700 text-white p-4 rounded-lg font-bold border-3 border-red-900 hover:bg-red-800 active:scale-95 transition"
+            onClick={onClose} 
+            className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
           >
-            ➕ Creează Cameră
+            <span className="text-gray-600 text-lg">×</span>
           </button>
+        </div>
+        
+        <div className="space-y-6">
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={createRoom} 
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white p-5 rounded-2xl font-bold border-2 border-red-500 hover:from-red-600 hover:to-red-700 transition-all active:scale-95 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-xl">➕</span>
+              <span>Creează Cameră</span>
+            </div>
+          </motion.button>
           
-          <div className="relative flex items-center">
-            <div className="flex-1 border-t-2 border-red-700"></div>
-            <span className="px-3 text-red-700 font-bold">SAU</span>
-            <div className="flex-1 border-t-2 border-red-700"></div>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-red-300 to-transparent"></div>
+            <span className="text-red-600 font-semibold px-3">SAU</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-red-300 to-transparent"></div>
           </div>
           
-          <div className="flex gap-2">
-            <input 
+          <div className="space-y-4">
+            <input
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase().trim())}
-              placeholder="COD"
+              placeholder="COD CAMERA"
               maxLength={6}
-              className="flex-1 p-3 rounded-lg border-2 border-red-700 font-bold text-center uppercase outline-none focus:bg-red-50"
+              className="w-full p-4 rounded-2xl border-2 border-gray-200 font-bold text-center text-lg uppercase outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all bg-white/50"
             />
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={joinRoom} 
-              className="px-6 bg-red-700 text-white font-bold rounded-lg border-2 border-red-900 hover:bg-red-800 active:scale-95 transition"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-2xl font-bold border-2 border-green-500 hover:from-green-600 hover:to-green-700 transition-all active:scale-95 shadow-lg hover:shadow-xl"
             >
-              INTRĂ
-            </button>
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xl">🎯</span>
+                <span>INTRĂ ÎN JOC</span>
+              </div>
+            </motion.button>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -258,104 +377,200 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   };
 
   return (
-    <div className="bg-yellow-50 p-6 md:p-8 rounded-lg border-4 border-red-700 w-full shadow-lg">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-2xl font-bold text-red-900">👥 Grup Privat</h3>
-          {teams.length > 1 && <span className="text-sm font-bold text-red-700 bg-red-100 px-3 py-1 rounded">{activeTeamIndex + 1}/{teams.length}</span>}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.6 }}
+      className="bg-white/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-red-200 w-full shadow-xl hover:shadow-2xl transition-all duration-300"
+    >
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-white text-xl">👥</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800">Grup Privat</h3>
+          </div>
+          {teams.length > 1 && (
+            <div className="bg-red-100 px-4 py-2 rounded-full border border-red-200">
+              <span className="text-sm font-bold text-red-700">{activeTeamIndex + 1}/{teams.length}</span>
+            </div>
+          )}
         </div>
         
-        <div className="mb-4">
+        <div className="mb-6">
           {isEditing ? (
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <input 
                 value={newName} 
                 onChange={e => setNewName(e.target.value)}
-                className="flex-1 p-3 border-2 border-red-700 rounded font-bold text-red-900 outline-none focus:bg-red-50"
+                className="flex-1 p-4 border-2 border-gray-200 rounded-xl font-semibold text-gray-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all bg-white/50"
               />
-              <button onClick={handleSave} className="px-4 bg-red-700 text-white font-bold rounded border-2 border-red-900 hover:bg-red-800 active:scale-95">OK</button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSave} 
+                className="px-6 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl border-2 border-green-500 hover:from-green-600 hover:to-green-700 transition-all active:scale-95 shadow-lg"
+              >
+                OK
+              </motion.button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setIsEditing(true)}>
-              <h4 className="text-xl font-bold text-red-900">{currentTeam.details.nume}</h4>
-              <span className="text-red-700 group-hover:text-red-900">✏️</span>
+            <div className="flex items-center gap-3 cursor-pointer group p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-all" onClick={() => setIsEditing(true)}>
+              <h4 className="text-xl font-bold text-gray-800">{currentTeam.details.nume}</h4>
+              <motion.span 
+                whileHover={{ scale: 1.2, rotate: 10 }}
+                className="text-red-500 group-hover:text-red-600 transition-colors"
+              >
+                ✏️
+              </motion.span>
             </div>
           )}
         </div>
 
-        <div className="flex gap-2">
-          <button onClick={handleInvite} className="flex-1 bg-red-700 text-white px-4 py-2 font-bold rounded border-2 border-red-900 hover:bg-red-800 transition active:scale-95">
+        <div className="flex gap-3">
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleInvite} 
+            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 font-bold rounded-xl border-2 border-blue-500 hover:from-blue-600 hover:to-blue-700 transition-all active:scale-95 shadow-lg hover:shadow-xl"
+          >
             {copyLinkText}
-          </button>
-          <button onClick={() => onLeave(currentTeam.details.id)} className="px-4 bg-red-100 text-red-700 font-bold rounded border-2 border-red-700 hover:bg-red-200 transition active:scale-95">
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onLeave(currentTeam.details.id)} 
+            className="px-6 py-4 bg-red-100 text-red-700 font-bold rounded-xl border-2 border-red-300 hover:bg-red-200 transition-all active:scale-95 shadow-lg"
+          >
             Ieși
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {teams.length > 1 && (
-        <div className="flex gap-2 mb-4 justify-between items-center bg-red-100 p-2 rounded border-2 border-red-300">
-          <button onClick={prevTeam} className="px-3 py-2 bg-red-700 text-white font-bold rounded hover:bg-red-800">◀</button>
-          <span className="text-sm font-bold text-red-900">Schimbă Grupul</span>
-          <button onClick={nextTeam} className="px-3 py-2 bg-red-700 text-white font-bold rounded hover:bg-red-800">▶</button>
+        <div className="flex gap-3 mb-6 justify-between items-center bg-gray-100 p-4 rounded-2xl border border-gray-200">
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={prevTeam} 
+            className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-full hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
+          >
+            ◀
+          </motion.button>
+          <span className="text-sm font-bold text-gray-700">Schimbă Grupul</span>
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={nextTeam} 
+            className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-full hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
+          >
+            ▶
+          </motion.button>
         </div>
       )}
 
-      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+      <div className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-red-300 scrollbar-track-transparent">
         {currentTeam.top.map((m, i) => (
-          <div key={i} className={`p-3 rounded border-2 flex justify-between items-center ${m.member === numePreluat?.toUpperCase().trim() ? 'bg-amber-100 border-amber-700' : 'bg-white border-red-300'}`}>
-            <div className="flex items-center gap-3">
-              <span className={`font-bold text-lg ${i === 0 ? 'text-amber-600' : 'text-gray-600'}`}>#{i + 1}</span>
-              <span className="font-bold text-red-900">{m.member}</span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-green-700">{parseInt(m.score) || 0} 🥚</span>
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className={`p-5 rounded-2xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              m.member === numePreluat?.toUpperCase().trim() 
+                ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-yellow-400' 
+                : 'bg-white/70 border-gray-200 hover:border-red-300'
+            }`}
+          >
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-lg ${
+                  i === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
+                  i === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600' :
+                  i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
+                  'bg-gradient-to-br from-red-400 to-red-600'
+                }`}>
+                  {i + 1}
+                </div>
+                <span className="font-bold text-gray-800 text-lg">{m.member}</span>
+              </div>
               
-              {m.member !== numePreluat?.toUpperCase().trim() && (
-                <button 
-                  onClick={() => onProvoca(m.member, currentTeam.details.id)}
-                  className="bg-red-700 text-white px-3 py-1 rounded font-bold text-sm transition hover:bg-red-800 active:scale-95 border-2 border-red-900"
-                >
-                  ⚔️
-                </button>
-              )}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🥚</span>
+                  <span className="font-bold text-green-700 text-lg">{parseInt(m.score) || 0}</span>
+                </div>
+                
+                {m.member !== numePreluat?.toUpperCase().trim() && (
+                  <motion.button 
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onProvoca(m.member, currentTeam.details.id)}
+                    className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full flex items-center justify-center transition-all hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-xl"
+                    title="Provocă la duel"
+                  >
+                    ⚔️
+                  </motion.button>
+                )}
+              </div>
             </div>
-          </div>
+          </motion.div>
         ))}
         
         {currentTeam.top.length <= 1 && (
-          <div className="text-center py-8 text-red-700">
-            <p className="font-bold">Invită prieteni pentru a juca 👥</p>
+          <div className="text-center py-12 bg-white/50 rounded-2xl border-2 border-dashed border-red-300">
+            <div className="text-6xl mb-4 animate-bounce">👥</div>
+            <p className="text-gray-600 font-semibold text-lg">Invită prieteni pentru a juca</p>
+            <p className="text-gray-500 text-sm mt-2">Construiește-ți echipa!</p>
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 // Selectoare Culoare și Regiune
 const ColorSelector = ({ selected, onSelect }) => {
   const culori = [
-    { id: 'red', color: '#dc2626', name: 'Roșu' },
-    { id: 'blue', color: '#2563eb', name: 'Albastru' },
-    { id: 'gold', color: '#f59e0b', name: 'Auriu' },
-    { id: 'diamond', color: '#10b981', name: 'Verde' },
-    { id: 'cosmic', color: '#8b5cf6', name: 'Violet' }
+    { id: 'red', color: '#dc2626', name: 'Roșu', emoji: '❤️' },
+    { id: 'blue', color: '#2563eb', name: 'Albastru', emoji: '💙' },
+    { id: 'gold', color: '#f59e0b', name: 'Auriu', emoji: '🥇' },
+    { id: 'diamond', color: '#10b981', name: 'Verde', emoji: '💚' },
+    { id: 'cosmic', color: '#8b5cf6', name: 'Violet', emoji: '💜' }
   ];
   
   return (
-    <div className="w-full">
-      <label className="block font-bold text-red-900 text-sm mb-2">Culoare Ou</label>
-      <div className="flex gap-2 justify-between">
+    <div className="space-y-3">
+      <label className="block font-semibold text-gray-700 text-sm">Culoare Ou</label>
+      <div className="grid grid-cols-5 gap-3">
         {culori.map(c => (
-          <button 
+          <motion.button 
             key={c.id} 
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(c.id)} 
-            className={`w-12 h-12 rounded-lg border-4 transition ${selected === c.id ? 'scale-110 border-red-900' : 'border-gray-300 opacity-50'}`}
+            className={`aspect-square rounded-2xl border-3 transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden ${
+              selected === c.id 
+                ? 'scale-110 border-red-500 ring-4 ring-red-200' 
+                : 'border-gray-300 opacity-70 hover:opacity-100'
+            }`}
             style={{ backgroundColor: c.color }}
             title={c.name}
-          />
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl drop-shadow-lg">{c.emoji}</span>
+            </div>
+            {selected === c.id && (
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+              >
+                <span className="text-white text-xs">✓</span>
+              </motion.div>
+            )}
+          </motion.button>
         ))}
       </div>
     </div>
@@ -366,36 +581,52 @@ const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   return (
-    <div className="w-full">
-      <label className="block font-bold text-red-900 text-sm mb-2">Regiunea Ta</label>
+    <div className="space-y-3">
+      <label className="block font-semibold text-gray-700 text-sm">Regiunea Ta</label>
       <div className="relative">
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           onClick={() => setIsOpen(!isOpen)} 
-          className="w-full p-3 bg-white rounded-lg border-2 border-red-700 font-bold text-left flex justify-between items-center hover:bg-red-50"
+          className="w-full p-4 bg-white/70 rounded-2xl border-2 border-gray-200 font-semibold text-left flex justify-between items-center hover:bg-white/80 hover:border-red-300 transition-all duration-300 shadow-lg"
         >
-          <span>{selectedRegion || "Alege regiunea..."}</span>
-          <span className={`transition ${isOpen ? 'rotate-180' : ''}`}>▼</span>
-        </button>
+          <span className={selectedRegion ? 'text-gray-800' : 'text-gray-500'}>
+            {selectedRegion || "Alege regiunea..."}
+          </span>
+          <motion.span 
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-gray-500"
+          >
+            ▼
+          </motion.span>
+        </motion.button>
         
         <AnimatePresence>
           {isOpen && (
             <motion.div 
-              initial={{ opacity: 0, y: -10 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 w-full mt-2 bg-yellow-50 rounded-lg border-2 border-red-700 p-3 grid grid-cols-2 gap-2 z-50 shadow-lg"
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="absolute top-full left-0 w-full mt-3 bg-white/95 backdrop-blur-md rounded-2xl border-2 border-red-200 p-4 grid grid-cols-2 gap-3 z-50 shadow-2xl"
             >
               {REGIUNI_ISTORICE.map((regiune) => (
-                <button 
+                <motion.button 
                   key={regiune}
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(220, 38, 38, 0.1)" }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => { 
                     onSelectRegion(regiune); 
                     setIsOpen(false); 
                   }}
-                  className={`p-3 font-bold rounded border-2 transition ${selectedRegion === regiune ? 'bg-red-700 text-white border-red-900' : 'bg-white text-red-900 border-red-300 hover:bg-red-100'}`}
+                  className={`p-4 font-semibold rounded-xl border-2 transition-all duration-200 ${
+                    selectedRegion === regiune 
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-500 shadow-lg' 
+                      : 'bg-white/70 text-gray-700 border-gray-200 hover:border-red-300'
+                  }`}
                 >
                   {regiune}
-                </button>
+                </motion.button>
               ))}
             </motion.div>
           )}
@@ -590,57 +821,101 @@ function HomeContent() {
   const isNameInvalid = localNume.trim().length < 3 || localNume.trim().toUpperCase() === (nume || "").trim().toUpperCase();
 
   return (
-    <div className="w-full max-w-4xl mx-auto pt-20 pb-16 px-4 space-y-8">
+    <div className="w-full max-w-5xl mx-auto pt-24 pb-20 px-4 space-y-12 relative z-10">
       
       {/* HEADER */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-red-700 mb-2">Ciocnim.ro 🥚</h1>
-        <p className="text-red-600 font-bold text-sm">Ciocniri Naționale: {totalGlobal?.toLocaleString('ro-RO') || '...'}</p>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-12"
+      >
+        <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full border border-red-200 shadow-lg mb-6">
+          <span className="text-3xl animate-bounce">🥚</span>
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+            Ciocnim.ro
+          </h1>
+          <span className="text-3xl animate-bounce">🥚</span>
+        </div>
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-red-200 shadow-lg">
+          <p className="text-red-700 font-semibold text-sm md:text-base">
+            Ciocniri Naționale: 
+            <span className="text-2xl font-bold text-red-800 ml-2">
+              {totalGlobal?.toLocaleString('ro-RO') || '...'}
+            </span>
+          </p>
+        </div>
+      </motion.div>
 
       {/* PROFIL JUCĂTOR */}
-      <div className="bg-yellow-50 p-6 md:p-8 rounded-lg border-4 border-red-700 shadow-lg">
-        <h2 className="text-2xl font-bold text-red-900 mb-6">👤 Profilul Tău</h2>
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="bg-white/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300"
+      >
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg">
+            <span className="text-white text-xl">👤</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Profilul Tău</h2>
+        </div>
         
-        <div className="space-y-4">
-          <div>
-            <label className="block font-bold text-red-900 text-sm mb-2">Porecla Ta</label>
-            <div className="flex gap-2">
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <label className="block font-semibold text-gray-700 text-sm">Porecla Ta</label>
+            <div className="flex gap-3">
               <input 
                 value={localNume} 
                 onChange={e => setLocalNume(e.target.value)}
                 placeholder="Scrie porecla..."
                 maxLength={30}
-                className="flex-1 p-3 border-2 border-red-700 rounded-lg font-bold text-red-900 outline-none focus:bg-red-50"
+                className="flex-1 p-4 border-2 border-gray-200 rounded-xl font-semibold text-gray-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all duration-200 bg-white/50"
               />
               <button 
                 onClick={handleSaveNume} 
                 disabled={isSavingName || isNameInvalid}
-                className={`px-6 py-3 font-bold rounded-lg border-2 transition active:scale-95 ${isNameInvalid || isSavingName ? 'bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed' : 'bg-red-700 text-white border-red-900 hover:bg-red-800'}`}
+                className={`px-8 py-4 font-semibold rounded-xl border-2 transition-all duration-200 active:scale-95 shadow-lg ${
+                  isNameInvalid || isSavingName 
+                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-500 hover:from-red-600 hover:to-red-700 hover:shadow-xl'
+                }`}
               >
-                {isSavingName ? "..." : "Salvează"}
+                {isSavingName ? (
+                  <div className="animate-spin">⟳</div>
+                ) : (
+                  "Salvează"
+                )}
               </button>
             </div>
             {localNume.trim().length > 0 && localNume.trim().length < 3 && (
-              <p className="text-red-600 font-bold text-xs mt-1">Minim 3 caractere!</p>
+              <p className="text-red-500 font-medium text-sm animate-pulse">Minim 3 caractere!</p>
             )}
           </div>
           
-          <RegionSelector selectedRegion={userStats.regiune} onSelectRegion={(reg) => setUserStats({...userStats, regiune: reg})} />
-          <ColorSelector selected={userStats.skin || 'red'} onSelect={(s) => setUserStats({...userStats, skin: s})} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <RegionSelector selectedRegion={userStats.regiune} onSelectRegion={(reg) => setUserStats({...userStats, regiune: reg})} />
+            <ColorSelector selected={userStats.skin || 'red'} onSelect={(s) => setUserStats({...userStats, skin: s})} />
+          </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-6">
-            <div className="bg-white p-4 rounded-lg border-3 border-green-600 text-center">
-              <p className="text-xs font-bold text-green-700 mb-1">VICTORII</p>
-              <p className="text-3xl font-bold text-green-700">{parseInt(userStats.wins) || 0}</p>
+          <div className="grid grid-cols-2 gap-4 mt-8">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl border border-green-200 text-center shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <span className="text-white text-xl">🏆</span>
+              </div>
+              <p className="text-xs font-bold text-green-700 mb-2 uppercase tracking-wide">Victorii</p>
+              <p className="text-3xl font-bold text-green-800">{parseInt(userStats.wins) || 0}</p>
             </div>
-            <div className="bg-white p-4 rounded-lg border-3 border-red-600 text-center">
-              <p className="text-xs font-bold text-red-700 mb-1">ÎNFRÂNGERI</p>
-              <p className="text-3xl font-bold text-red-700">{parseInt(userStats.losses) || 0}</p>
+            <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl border border-red-200 text-center shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <span className="text-white text-xl">💔</span>
+              </div>
+              <p className="text-xs font-bold text-red-700 mb-2 uppercase tracking-wide">Înfrângeri</p>
+              <p className="text-3xl font-bold text-red-800">{parseInt(userStats.losses) || 0}</p>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* BUTOANE ACȚIUNI */}
       <div className="space-y-3">
@@ -716,8 +991,24 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-yellow-100 text-red-900">
-      <Suspense fallback={<div className="h-screen flex items-center justify-center"><p className="text-xl font-bold animate-pulse">Loading...</p></div>}>
+    <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 text-gray-900 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-10 left-10 text-8xl">🥚</div>
+        <div className="absolute top-20 right-20 text-6xl">🐔</div>
+        <div className="absolute bottom-20 left-20 text-7xl">🌸</div>
+        <div className="absolute bottom-10 right-10 text-5xl">🌷</div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl opacity-10">✝️</div>
+      </div>
+
+      <Suspense fallback={
+        <div className="h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin text-4xl">🥚</div>
+            <p className="text-lg font-semibold text-red-600 animate-pulse">Se încarcă tradiția...</p>
+          </div>
+        </div>
+      }>
         <HomeContent />
       </Suspense>
     </main>
