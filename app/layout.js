@@ -22,10 +22,10 @@ const outfit = Outfit({
 
 export const metadata = {
   title: {
-    default: "Ciocnim.ro - Bucuria ciocnitului de ouă, oriunde te-ai afla.",
+    default: "Ciocnim.ro - Ciocnește ouă online",
     template: "%s | Ciocnim.ro"
   },
-  description: "Îți e dor de ciocnitul de ouă cu familia? Ciocnim.ro aduce bucuria Paștelui online! Provoacă-ți prietenii sau familia la o ciocneală tradițională virtuală, oriunde te-ai afla. Hristos a Înviat!",
+  description: "În 2026, ciocnim ouăle și online! Provoacă-ți familia la o ciocneală virtuală tradițională, personalizând ouăle și urcând în clasamentul național. Bucuria Paștelui e acum la un click distanță!",
   applicationName: "Ciocnim.ro",
   keywords: [
     "ciocnit ouă online", "bucuria ciocnitului online", "jocul de paște 2026", "ciocnim.ro", "bătălia ouălor virtuale",
@@ -59,19 +59,19 @@ export const metadata = {
   },
   metadataBase: new URL("https://ciocnim.ro"),
   openGraph: {
-    title: "Ciocnim.ro - Bucuria Paștelui e online",
-    description: "Îți e dor de ciocnitul de ouă cu familia? provoacă-ți familia la o ciocneală virtuală tradițională!",
+    title: "Ciocnim.ro - Ciocnește ouă online",
+    description: "În 2026, ciocnim ouăle și online! Provoacă-ți familia la o ciocneală virtuală tradițională, personalizând ouăle și urcând în clasamentul național. Bucuria Paștelui e acum la un click distanță!",
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
-    images: [{ url: "/og-image-paste.jpg", width: 1200, height: 630, alt: "Ciocnim.ro - Paște 2026" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro - Paște 2026" }],
     locale: "ro_RO",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Ciocnim.ro - Ciocnește ouă online!",
-    description: "Bucuria Paștelui, oriunde te-ai afla! Provoacă-ți familia la ciocnit.",
-    images: ["/og-image-paste.jpg"],
+    description: "Ciocnitul ouălor, oriunde te-ai afla! Provoacă-ți prietenii sau familia la ciocnit.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
