@@ -158,13 +158,19 @@ function ArenaMaster({ room }) {
   useEffect(() => {
       if (isBotMatch && atacantName === "🤖 BOT" && !rezultat && !isStriking) {
           const timeout = setTimeout(() => {
-              executeBattle({ castigaCelCareDa: Math.random() < 0.5, atacant: "🤖 BOT" });
-              // DOAR AICI apelăm increment pentru bot, executeBattle NU mai are increment local
-              incrementGlobal(); 
+              const castigaCelCareDaRandom = Math.random() < 0.5;
+              executeBattle({ castigaCelCareDa: castigaCelCareDaRandom, atacant: "🤖 BOT" });
+              
+              // Doar dacă botul nu a câștigat, declanșăm incrementul nostru (noi apărăm și câștigăm)
+              if (!castigaCelCareDaRandom) {
+                 incrementGlobal(true, teamIdPreluat ? [teamIdPreluat] : []);
+              } else {
+                 setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+              }
           }, 1500 + Math.random() * 1500);
           return () => clearTimeout(timeout);
       }
-  }, [isBotMatch, atacantName, rezultat, isStriking, incrementGlobal]);
+  }, [isBotMatch, atacantName, rezultat, isStriking, incrementGlobal, setUserStats, teamIdPreluat]);
 
   // PUSHER SYNC 
   useEffect(() => {
@@ -256,7 +262,7 @@ function ArenaMaster({ room }) {
         if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         
         // AICI AM ELIMINAT SET_USER_STATS pentru Wins/Losses! 
-        // Ele sunt acum gestionate 100% de `incrementGlobal` ca să evităm +2 victorii.
+        // Ele sunt gestionate strict de `handleStrike` (dacă atacăm) sau event-ul Pusher (dacă suntem loviți).
       }, 400);
     }, 500);
   };
@@ -337,12 +343,12 @@ function ArenaMaster({ room }) {
 
   return (
     <>
-      {/* Wrapper principal - impact flash adăugat controlat */}
-      <div className={`w-full max-w-4xl flex flex-col items-center justify-center min-h-[90vh] gap-6 md:gap-8 pt-6 pb-20 px-4 md:px-0 transition-all ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
+      {/* Wrapper principal: Modificat pentru anti-suprapunere. Folosim flex-col cu overflow safe */}
+      <div className={`w-full max-w-4xl flex flex-col items-center justify-start md:justify-center flex-1 py-4 md:py-6 px-4 md:px-0 transition-all z-10 ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
         
         {/* Buton Cod Cameră */}
         {isPrivate && !isProvocare && (
-          <button onClick={copyRoomCode} className="group relative bg-[#0a0505]/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/40 shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-[#140a0a] hover:border-red-500/50 transition-all active:scale-95 z-20 flex-shrink-0 mt-4 md:mt-8">
+          <button onClick={copyRoomCode} className="group relative bg-[#0a0505]/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/40 shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:bg-[#140a0a] hover:border-red-500/50 transition-all active:scale-95 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
             <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none rounded-full"></div>
             <div className="flex items-center gap-2 md:gap-3 relative z-10">
               <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/50 group-hover:text-amber-500/80 transition-colors hidden sm:inline">Cod Cameră: </span>
@@ -353,11 +359,11 @@ function ArenaMaster({ room }) {
           </button>
         )}
 
-        {/* Zona de Duel */}
-        <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mt-2 relative z-10">
+        {/* Zona de Duel - Containere separate flex-shrink-0 pentru a nu se strivi */}
+        <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mb-6 relative z-10 flex-shrink-0">
           
           {/* Jucător 1 (TU) */}
-          <div className="flex flex-col items-center gap-4 md:gap-6 w-1/3 max-w-[160px]">
+          <div className="flex flex-col items-center gap-4 w-1/3 max-w-[160px]">
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
             <div className="bg-[#140a0a]/90 backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/40 border-l-4 border-l-green-500 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
               <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
@@ -370,9 +376,9 @@ function ArenaMaster({ room }) {
           <div className="text-2xl md:text-5xl font-black text-amber-500/20 italic drop-shadow-sm filter sepia-[0.5] flex-shrink-0">VS</div>
           
           {/* Jucător 2 (OPONENT) */}
-          <div className="flex flex-col items-center gap-4 md:gap-6 w-1/3 max-w-[160px] text-center">
+          <div className="flex flex-col items-center gap-4 w-1/3 max-w-[160px] text-center">
             {opponent ? (
-              <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 md:gap-6 w-full">
+              <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 w-full">
                 <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
                 <div className="bg-[#140a0a]/90 backdrop-blur-md p-3 md:p-4 rounded-2xl border border-red-900/40 border-r-4 border-r-red-600 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
                   <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
@@ -391,7 +397,7 @@ function ArenaMaster({ room }) {
         </div>
 
         {/* BUTON LUPTĂ */}
-        <div className="w-full max-w-sm z-20 relative px-4">
+        <div className="w-full max-w-sm z-30 relative mb-4 flex-shrink-0">
           {opponent && !rezultat && (
             <button 
               onClick={handleStrike} 
@@ -399,7 +405,7 @@ function ArenaMaster({ room }) {
               className={`w-full py-5 md:py-6 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
                 canStrike && !isStriking 
                   ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.4)] border-2 border-red-500/50 hover:bg-red-600 hover:scale-[1.02] active:scale-95 animate-pulse cursor-pointer pointer-events-auto' 
-                  : 'bg-[#140a0a] text-white/30 cursor-not-allowed border-2 border-red-900/30 backdrop-blur-md'
+                  : 'bg-[#140a0a] text-white/30 cursor-not-allowed border-2 border-red-900/30 backdrop-blur-md pointer-events-none'
               }`}
             >
               <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
@@ -415,12 +421,11 @@ function ArenaMaster({ room }) {
           )}
         </div>
 
-        {/* CHAT REDESIGN (Z-index 60 și fixat dinamic pe flex ca să nu iasă din ecran) */}
-        <div className="w-full max-w-md bg-[#0a0505] border-2 border-red-900/40 p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] mt-2 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-[60] pointer-events-auto">
+        {/* CHAT REDESIGN: Z-index separat suprem (70) pentru a fi mereu accesibil */}
+        <div className="w-full max-w-sm bg-[#0a0505] border-2 border-red-900/40 p-4 md:p-6 rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-[70] flex-shrink-0 pointer-events-auto">
           <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-700/10 rounded-full blur-[40px] pointer-events-none"></div>
           
-          <div className="h-32 md:h-36 overflow-y-auto flex flex-col-reverse gap-2 md:gap-3 mb-3 md:mb-4 custom-scrollbar pr-2 relative z-10 pointer-events-auto">
+          <div className="h-28 md:h-36 overflow-y-auto flex flex-col-reverse gap-2 mb-3 custom-scrollbar pr-2 relative z-10">
             {messages.map((m, i) => (
               <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start'}`}>
                 <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-amber-500/50 px-2 mb-1">{m.autor}</span>
@@ -430,22 +435,22 @@ function ArenaMaster({ room }) {
               </div>
             ))}
             {messages.length === 0 && (
-                <div className="text-center w-full h-full flex flex-col justify-center items-center opacity-40 mt-4 md:mt-8 pointer-events-none">
-                    <span className="text-xl md:text-2xl mb-1 md:mb-2 filter sepia-[0.3]">💬</span>
+                <div className="text-center w-full h-full flex flex-col justify-center items-center opacity-40 mt-2 pointer-events-none">
+                    <span className="text-xl md:text-2xl mb-1 filter sepia-[0.3]">💬</span>
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/70">Liniște la masă...</span>
                 </div>
             )}
           </div>
           
-          <div className="flex gap-2 bg-[#140a0a] p-1.5 rounded-full border border-red-900/40 focus-within:border-red-500/50 focus-within:bg-[#1a0f0f] transition-all relative z-10 shadow-inner pointer-events-auto">
+          <div className="flex gap-2 bg-[#140a0a] p-1.5 rounded-full border border-red-900/40 focus-within:border-red-500/50 focus-within:bg-[#1a0f0f] transition-all relative z-10 shadow-inner">
             <input 
                value={chatInput} 
                onChange={e => setChatInput(e.target.value.toUpperCase())} 
                onKeyDown={e => e.key === 'Enter' && handleChat()} 
                placeholder="SCRIE UN MESAJ..." 
-               className="flex-1 bg-transparent pl-4 md:pl-5 text-[10px] md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30" 
+               className="flex-1 bg-transparent pl-4 text-[10px] md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30" 
             />
-            <button onClick={handleChat} className="bg-red-900/30 w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-red-700 transition-colors border border-red-900/50 text-xs md:text-sm active:scale-95 shadow-md flex items-center justify-center cursor-pointer pointer-events-auto">🕊️</button>
+            <button onClick={handleChat} className="bg-red-900/30 w-10 h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/50 text-xs md:text-sm active:scale-95 shadow-md flex items-center justify-center cursor-pointer">🕊️</button>
           </div>
         </div>
       </div>

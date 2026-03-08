@@ -2,7 +2,7 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (V30.5 - SYNC MASTER & ANTI-DOUBLE COUNT)
+ * CIOCNIM.RO - NUCLEUL LOGIC (V30.5 - SYNC MASTER & SCOR CENTRALIZAT SERVER-SIDE)
  * ====================================================================================================
  */
 
@@ -58,7 +58,6 @@ export default function ClientWrapper({ children }) {
     }
 
     try {
-      // Luăm grupurile în care ești pentru a face clean-up în backend
       const storedTeamIds = JSON.parse(localStorage.getItem("c_teamIds") || "[]");
       const scorCurent = JSON.parse(localStorage.getItem("c_stats") || "{}").wins || 0;
 
@@ -69,8 +68,8 @@ export default function ClientWrapper({ children }) {
           actiune: 'schimba-porecla',
           oldName: nume, 
           newName: cleanName,
-          teamIds: storedTeamIds, // Trimitem corect array-ul de grupuri
-          scor: scorCurent // Salvăm scorul să nu-l pierdem la redenumire
+          teamIds: storedTeamIds, 
+          scor: scorCurent // Aici păstrăm scorul curent local doar pentru migrarea pe noul nume
         })
       });
       const data = await res.json();
@@ -97,41 +96,39 @@ export default function ClientWrapper({ children }) {
   };
 
   // ==========================================================================
-  // INCREMENTARE SCOR GLOBALĂ ȘI UNICĂ
+  // INCREMENTARE SCOR (CLEAN & BULLETPROOF)
   // ==========================================================================
-  const incrementGlobal = useCallback(async (amCastigat = false, teamIdsArray = []) => {
+  const incrementGlobal = useCallback(async (amCastigat = false, teamIdToUpdate = null) => {
     try {
-      // Calculăm noul scor local pentru a forța backend-ul să-l preia
-      const newWins = amCastigat ? (userStats.wins || 0) + 1 : (userStats.wins || 0);
-
-      // Prevenim rularea dacă nu avem nume valid
       if (!nume || nume.trim() === "") return;
+
+      // Serverul va număra automat lovitura totală, dar va da +1 la victorie DOAR dacă îi dăm jucătorul
+      const payload = { 
+        actiune: 'increment-global', 
+        jucator: amCastigat ? nume : null, // Dacă nu a câștigat, nu trimitem numele ca să nu i se pună victorie
+        regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
+        teamId: amCastigat ? teamIdToUpdate : null // Trimitem ID-ul grupului curent ca să îi crească scorul acolo
+      };
 
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            actiune: 'increment-global', 
-            jucator: nume,
-            scorCurent: amCastigat ? newWins : null, 
-            regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
-            teamIds: teamIdsArray // Opțional: Pentru a updata direct grupul din arena privată
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
+      
       if (data.success) {
         setTotalGlobal(data.total);
         if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
         if (data.topJucatori) setTopJucatori(data.topJucatori);
 
-        // Actualizăm local DOAR dacă a câștigat 
-        // și lăsăm arena să NU mai facă setUserStats a doua oară
+        // UI Update: Creștem instant victoria în interfață ca să nu existe delay
         if (amCastigat) {
             updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1}));
         }
       }
     } catch (e) { console.error("Eroare la incrementare bilanț."); }
-  }, [userStats.regiune, userStats.wins, nume, updateUserStats]);
+  }, [userStats.regiune, nume, updateUserStats]);
 
   useEffect(() => {
     const savedName = localStorage.getItem("c_nume");

@@ -4,7 +4,7 @@ import redis from '@/app/lib/redis';
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V30.4 - FIX DUPLICATE GRUP, SYNC SCOR & ANTI-DOUBLE COUNT)
+ * CIOCNIM.RO - API ENDPOINT (V30.5 - SEPARARE GRUPURI & INCREMENTARE SINGULARĂ)
  * ====================================================================================================
  */
 
@@ -47,7 +47,7 @@ export async function POST(request) {
     const { 
       actiune, roomId, jucator, skin, isGolden, hasStar, 
       teamId, regiune, creator, text, newName, oponentNume,
-      atacant, esteCastigator, oldName, scor, scorCurent, teamIds
+      atacant, esteCastigator, oldName, teamIds
     } = body;
 
     switch (actiune) {
@@ -61,28 +61,26 @@ export async function POST(request) {
 
       case 'increment-global': {
         const pipeline = redis.pipeline();
+        // Aici se contorizează DOAR faptul că a avut loc o lovitură globală pe site
         pipeline.incr('global_ciocniri_total');
         
-        if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-          pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
-        }
-        
-        // SYNC EXACT SCOR (rezolvă problema cu dublarea sau lipsa victoriei când te aperi)
+        // Când frontend-ul trimite "jucator", înseamnă că ACEL jucător a CÂȘTIGAT meciul. Punct.
+        // Serverul face doar +1, nu mai acceptă un număr precalculat din front-end care să o ia razna.
         if (jucator && jucator.trim() !== "") {
-           const safeName = jucator.trim().toUpperCase();
-           if (scorCurent !== undefined && scorCurent !== null) {
-               const valoareScor = parseInt(scorCurent) || 0;
-               pipeline.zadd('leaderboard_jucatori', valoareScor, safeName);
-               
-               // Dacă trimitem și teamIds, sincronizăm și în grupuri instant
-               if (teamIds && Array.isArray(teamIds)) {
-                   for (const tId of teamIds) {
-                       pipeline.zadd(`team:${tId}:membri`, valoareScor, safeName);
-                   }
-               }
-           } else {
-               pipeline.zincrby('leaderboard_jucatori', 1, safeName);
-           }
+            const safeName = jucator.trim().toUpperCase();
+            
+            // +1 în clasamentul global
+            pipeline.zincrby('leaderboard_jucatori', 1, safeName);
+
+            // +1 în clasamentul regiunii (dacă jucătorul are regiune setată)
+            if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
+              pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
+            }
+
+            // +1 DOAR în grupul în care se joacă meciul acum (dacă e cazul)
+            if (teamId && teamId !== "null" && teamId !== "") {
+                pipeline.zincrby(`team:${teamId}:membri`, 1, safeName);
+            }
         }
         
         const results = await pipeline.exec();
@@ -91,6 +89,7 @@ export async function POST(request) {
         const topActualizat = await getClasamentRegiuni();
         const topJucatoriActualizat = await getClasamentJucatori();
 
+        // Update în timp real pentru toți cei de pe Home
         await pusher.trigger('global', 'update-complet', { 
             total: noulTotal, 
             topRegiuni: topActualizat,
@@ -110,8 +109,8 @@ export async function POST(request) {
       case 'lovitura': {
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
         
-        // Am eliminat ZINCRBY-urile de jucători de aici. 
-        // Lăsăm `increment-global` să se ocupe, ca să nu mai existe bug-ul de 2x victorii!
+        // Lovitura este ACUM pură animație și sincronizare în arenă.
+        // Nu se mai ocupă deloc de incrementarea scorului (previne dublurile).
         const pipeline = redis.pipeline();
         pipeline.incr('global_ciocniri_total');
         const pipelineResults = await pipeline.exec();
@@ -176,18 +175,24 @@ export async function POST(request) {
         if (oldClean && oldClean !== newClean) {
             pipeline.del(`nume_rezervat:${oldClean}`);
             
-            // Ștergem din global vechiul nume
+            // Mutăm scorul din clasamentul global (dacă există)
+            const globalScore = await redis.zscore('leaderboard_jucatori', oldClean);
             pipeline.zrem('leaderboard_jucatori', oldClean);
-            
-            // Adăugăm noul nume cu scorul exact (fără "NaN")
-            const validScore = parseInt(scor) || 0;
-            pipeline.zadd('leaderboard_jucatori', validScore, newClean);
+            if (globalScore !== null) {
+               pipeline.zadd('leaderboard_jucatori', parseFloat(globalScore), newClean);
+            }
 
-            // Înlocuim DOAR în grupurile din care face parte, folosind teamIds
+            // Înlocuim numele DOAR în grupurile din care face parte, și PĂSTRĂM scorul specific acelui grup
             if (teamIds && Array.isArray(teamIds)) {
                 for (const tId of teamIds) {
+                    const scorInGrup = await redis.zscore(`team:${tId}:membri`, oldClean);
                     pipeline.zrem(`team:${tId}:membri`, oldClean); // Elimină fantoma veche
-                    pipeline.zadd(`team:${tId}:membri`, validScore, newClean); // Adaugă noul nume cu scorul lui
+                    
+                    if (scorInGrup !== null) {
+                       pipeline.zadd(`team:${tId}:membri`, parseFloat(scorInGrup), newClean); 
+                    } else {
+                       pipeline.zadd(`team:${tId}:membri`, 0, newClean);
+                    }
                 }
             }
         }
@@ -207,10 +212,13 @@ export async function POST(request) {
         
         const teamStats = await redis.hgetall(`team:${teamId}:stats`);
         
+        // Dacă jucătorul a intrat pe link-ul de grup, îi forțăm scorul pe 0 (nu aducem cel global)
         if (jucator && jucator.trim().length >= 3) {
           const cleanPlayer = jucator.trim().toUpperCase();
           const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
-          if (exists === null) await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
+          if (exists === null) {
+             await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
+          }
         }
         
         const membriRaw = await redis.zrevrange(`team:${teamId}:membri`, 0, 14, 'WITHSCORES');
@@ -231,6 +239,7 @@ export async function POST(request) {
         const pipeline = redis.pipeline();
         pipeline.set(`team:${newId}:nume`, finalTeamName);
         pipeline.hset(`team:${newId}:stats`, { creator: cleanCreator, victorii: 0, creat_la: Date.now() });
+        // Scorul pornește de la ZERO curat
         pipeline.zadd(`team:${newId}:membri`, 0, cleanCreator); 
         await pipeline.exec();
         

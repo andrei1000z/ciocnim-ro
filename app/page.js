@@ -26,7 +26,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
 
   const maxRegionScore = useMemo(() => {
     if (!topRegiuni || topRegiuni.length === 0) return 1;
-    return Math.max(...topRegiuni.map(r => r.scor), 1);
+    return Math.max(...topRegiuni.map(r => parseInt(r.scor) || 0), 1);
   }, [topRegiuni]);
 
   // Logica REPARATĂ pentru Rangul utilizatorului + Prevenire afisare " - victorii"
@@ -70,7 +70,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   const safeMyScore = parseInt(myScore) || 0;
 
   return (
-    <div className="w-full bg-[#0a0505] p-5 md:p-8 rounded-[2.5rem] md:rounded-[3rem] border-2 border-red-900/40 backdrop-blur-3xl mt-4 relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-10">
+    <div className="w-full bg-[#0a0505] p-5 md:p-8 rounded-[2.5rem] md:rounded-[3rem] border-2 border-red-900/40 backdrop-blur-3xl mt-4 relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-10 flex-shrink-0">
       <div className="absolute top-0 right-0 w-40 h-40 bg-red-700/10 rounded-full blur-[60px] -z-10 pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-red-900/20 to-transparent pointer-events-none"></div>
 
@@ -78,7 +78,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
         <button onClick={toggleView} className="text-red-500/40 hover:text-red-500 p-2 w-10 h-8 flex justify-center items-center rounded-xl hover:bg-red-900/20 transition-colors">◀</button>
         <div className="flex flex-col items-center">
             <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-amber-500/90 drop-shadow-sm text-center">
-                {view === "jucatori" ? "Top Jucători" : "Top Regiuni"}
+                {view === "jucatori" ? "Clasament Jucători" : "Clasament Regiuni"}
             </h3>
             <span className="text-[8px] font-bold text-red-500 uppercase tracking-widest mt-1 animate-pulse">Live</span>
         </div>
@@ -124,7 +124,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                      {/* MESAJELE DINAMICE DE PROGRESIE CLARE */}
                      <p className="text-center mt-3 md:mt-4 text-[9px] md:text-xs uppercase font-black tracking-widest text-white/60 drop-shadow-sm leading-relaxed px-2">
                        {myRank === 1 ? (
-                         <span className="text-amber-500 animate-pulse">Ești Regele Arenei! 👑</span>
+                         <span className="text-amber-500 animate-pulse">Ești Campion național la ciocnit! 👑</span>
                        ) : myRank <= 10 ? (
                          ouaUrmatorulLoc === 1 ? (
                            <span className="text-amber-500 animate-pulse">Încă 1 victorie te urcă pe locul {rankDeasupra}! 🔥</span>
@@ -197,7 +197,7 @@ const ActionButton = ({ onClick, icon, title, subtitle, variant = "glass", loadi
     <button 
       onClick={onClick} 
       disabled={loading} 
-      className={`relative w-full flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-[2rem] md:rounded-[2.2rem] transition-all duration-300 active:scale-95 text-left border-2 overflow-hidden
+      className={`relative w-full flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-[2rem] md:rounded-[2.2rem] transition-all duration-300 active:scale-95 text-left border-2 overflow-hidden flex-shrink-0
         ${isRed ? "bg-red-700 border-red-500 hover:bg-red-600 text-white shadow-[0_10px_30px_rgba(220,38,38,0.3)]" : "bg-[#0a0505] border-red-900/30 hover:bg-[#140a0a] hover:border-red-500/50 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]"}
         ${loading ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
     >
@@ -317,7 +317,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   };
 
   return (
-    <div className="bg-[#0a0505] p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] w-full border-2 border-red-900/30 backdrop-blur-3xl flex flex-col min-h-[280px] shadow-[0_30px_60px_rgba(0,0,0,0.6)] relative overflow-hidden z-10">
+    <div className="bg-[#0a0505] p-5 md:p-6 rounded-[2.5rem] md:rounded-[3rem] w-full border-2 border-red-900/30 backdrop-blur-3xl flex flex-col min-h-[280px] shadow-[0_30px_60px_rgba(0,0,0,0.6)] relative overflow-hidden z-10 flex-shrink-0">
        <div className="absolute top-0 right-0 w-40 h-40 bg-red-700/10 rounded-full blur-[60px] -z-10 pointer-events-none"></div>
 
        <div className="flex flex-col gap-3 md:gap-4 mb-5 border-b border-red-900/30 pb-4 relative z-10">
@@ -413,7 +413,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
 const ColorSelector = ({ selected, onSelect }) => {
   const culori = [{ id: 'red', color: '#dc2626' }, { id: 'blue', color: '#2563eb' }, { id: 'gold', color: '#f59e0b' }, { id: 'diamond', color: '#10b981' }, { id: 'cosmic', color: '#8b5cf6' }];
   return (
-    <div className="flex flex-col gap-2 md:gap-3 w-full mt-2 relative z-10">
+    <div className="flex flex-col gap-2 md:gap-3 w-full mt-2 relative z-[90]">
       <label className="text-[10px] font-black uppercase text-amber-500/70 tracking-[0.3em] pl-3 text-center sm:text-left drop-shadow-sm">Culoarea Oului</label>
       <div className="flex justify-center sm:justify-start gap-2 md:gap-3 w-full">
         {culori.map(c => (
@@ -685,7 +685,7 @@ function HomeContent() {
               <button 
                 onClick={handleSaveNume} 
                 disabled={isSavingName || isNameInvalid}
-                className={`w-full sm:w-auto px-6 py-4 md:px-8 md:py-4 rounded-[1.2rem] md:rounded-[1.5rem] font-black uppercase tracking-widest transition-all border-2 
+                className={`w-full sm:w-auto px-6 py-4 md:px-8 md:py-4 rounded-[1.2rem] md:rounded-[1.5rem] font-black uppercase tracking-widest transition-all border-2 flex-shrink-0
                   ${isNameInvalid || isSavingName 
                     ? 'bg-red-900/10 border-red-900/20 text-white/20 cursor-not-allowed' 
                     : 'bg-red-700 border-red-500/50 hover:bg-red-600 text-white active:scale-95 shadow-[0_15px_30px_rgba(220,38,38,0.4)]'}`}
@@ -728,7 +728,7 @@ function HomeContent() {
             />
           )}
           
-          <div className="space-y-3 md:space-y-4 w-full mt-auto">
+          <div className="space-y-3 md:space-y-4 w-full mt-auto flex flex-col flex-1">
              <ActionButton variant="red" icon="⚔️" title="Meci Cu Un Prieten" subtitle="Creează o cameră privată" onClick={() => { if (!nume || nume.length < 3) return alert("Poreclă prea scurtă!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
              <ActionButton variant="glass" icon="🏰" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup Privat"} subtitle="Pentru prieteni sau familie" onClick={handleCreateTeam} loading={loadingTeam} />
              <ActionButton variant="glass" icon="🌍" title="Arenă Națională" subtitle="Joacă cu cineva din țară" onClick={() => { if (!nume || nume.length < 3) return alert("Poreclă prea scurtă!"); triggerVibrate(); router.push(`/joc/global-arena?skin=${userStats.skin || 'red'}`); }} />
@@ -745,7 +745,7 @@ function HomeContent() {
       />
 
       {/* BUTOANE SEO HUB */}
-      <div className="w-full bg-[#0a0505] border-2 border-red-900/30 p-5 md:p-8 rounded-[2.5rem] md:rounded-[3rem] mt-2 md:mt-4 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-10">
+      <div className="w-full bg-[#0a0505] border-2 border-red-900/30 p-5 md:p-8 rounded-[2.5rem] md:rounded-[3rem] mt-2 md:mt-4 shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-10 flex-shrink-0">
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-red-900/10 to-transparent pointer-events-none"></div>
         <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
         
