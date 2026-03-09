@@ -86,12 +86,19 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#050202", // Negru cald tradițional
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fef8f3" },
+    { media: "(prefers-color-scheme: dark)", color: "#050202" }
+  ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  minimumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
+  colorScheme: "light dark",
+  /** @type {string} */
+  viewportMetaTags: true,
 };
 
 export default function RootLayout({ children }) {
@@ -134,8 +141,9 @@ export default function RootLayout({ children }) {
       
       <body className={`
         ${outfit.className} 
-        bg-[#050202] 
-        text-white 
+        bg-gradient-to-br from-amber-50 via-orange-50 to-red-50
+        text-gray-900 
+        min-h-screen
         min-h-[100dvh] 
         w-full 
         max-w-[100vw] 

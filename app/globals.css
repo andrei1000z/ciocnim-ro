@@ -2,71 +2,127 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - CORE ENGINE VIZUAL (V30.5 - TRADIȚIE PREMIUM & FIX MOBILE HEIGHT)
+ * CIOCNIM.RO - CORE ENGINE VIZUAL (V31.0 - TRADIȚIE PREMIUM & MOBILE PERFECT)
  * ====================================================================================================
- * Optimizat pentru: Next.js + Tailwind v4
- * Nou: Pattern tradițional românesc (IA) în culori calde (chihlimbar/roșu).
- * Fix: Suport complet pentru 100dvh (previne tăierea butoanelor pe iOS Safari / Android Chrome).
- * Fix: Eliminare totală a @apply pentru clasele complexe -> 0 erori de compilare.
+ * Optimizat pentru: Next.js + Tailwind v4 + Mobile First Design
+ * Design: Pattern tradițional românesc (IA) în culori calde roșu tradițional + chihlimbar.
+ * Mobile: Viewport Fix, Touch Optimization, 100dvh support, Safe Areas.
+ * UX: Smooth animations, haptic feedback ready, gesture-friendly.
  * ====================================================================================================
  */
 
 @layer base {
   :root {
     --bg-ultra-dark: #050202; /* Negru cald, de vatră/lemn ars */
-    --red-primary: #dc2626;
-    --red-glow: rgba(185, 28, 28, 0.4); /* Roșu mai așezat, tradițional */
-    --gold-glow: rgba(245, 158, 11, 0.25); /* Chihlimbar/Auriu cald */
+    --bg-light: #fef8f3; /* Bej cald tradițional */
+    --red-primary: #dc2626; /* Roșu tradițional */
+    --red-dark: #991b1b; /* Roșu închis - ciocnim tradițional */
+    --red-glow: rgba(185, 28, 28, 0.4); /* Roșu mai așezat */
+    --gold-primary: #d97706; /* Auriu/Chihlimbar cald */
+    --gold-glow: rgba(245, 158, 11, 0.25); /* Chihlimbar soft */
     --liquid-blur: 40px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  @media (prefers-color-scheme: light) {
+    body {
+      background-color: #fef8f3;
+    }
+  }
+
   html {
     scroll-behavior: smooth;
-    background-color: var(--bg-ultra-dark);
-    /* Setăm overflow-x hidden pe html, dar lăsăm body-ul să respire pe Y */
+    background-color: #fef8f3;
     overflow-x: hidden !important;
     width: 100vw;
     -webkit-text-size-adjust: 100%;
+    /* Mobile viewport fix */
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #ffffff;
+    color: #1f2937;
     margin: 0;
     padding: 0;
-    /* Suport perfect pentru mobile viewport */
     min-height: 100vh;
     min-height: 100dvh;
     width: 100vw;
-    background-color: var(--bg-ultra-dark);
-    overscroll-behavior-y: none; /* Previne efectul de bounce pe iPhone care rupea UI-ul */
+    background-color: #fef8f3;
+    background-attachment: fixed;
+    overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     font-family: var(--font-outfit), system-ui, sans-serif;
+    /* Touch optimization */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    /* Safe area support */
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
   }
 
-  /* Setare selecție text globală (roșu tradițional cu text auriu) */
+  /* Setare selecție text - roșu tradițional cu text auriu */
   ::selection {
-    background-color: rgba(127, 29, 29, 0.6); /* red-900 */
-    color: #fde68a; /* amber-200 */
+    background-color: rgba(153, 27, 27, 0.7); /* red-900 */
+    color: #fbbf24; /* amber-300 */
+  }
+  ::-moz-selection {
+    background-color: rgba(153, 27, 27, 0.7);
+    color: #fbbf24;
   }
 
-  /* Fix: Focus Outline universal */
+  /* Focus accessibility */
+  *:focus-visible {
+    outline: 3px solid var(--red-primary) !important;
+    outline-offset: 2px !important;
+  }
+  
   *:focus {
     outline: none !important;
   }
 
+  /* Input styling */
   input, textarea, select {
-    background-color: rgba(20, 10, 10, 0.5);
-    border: 1px solid rgba(185, 28, 28, 0.3);
-    border-radius: 0.75rem;
-    padding: 0.5rem 1rem;
-    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--red-primary);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+    color: #1f2937;
     user-select: text !important;
-    touch-action: auto;
+    touch-action: manipulation;
+    font-size: 16px; /* Prevent zoom on iOS */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--red-dark);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+
+  /* Smooth tap feedback */
+  button:active {
+    transition: transform 0.1s;
+  }
+
+  /* Prevent zoom on input focus iOS */
+  @supports (-webkit-touch-callout: none) {
+    input, textarea, select {
+      font-size: 16px;
+    }
   }
 }
 
@@ -75,78 +131,82 @@
      MOTIVE TRADIȚIONALE (IA ROMÂNEASCĂ) - PURE CSS
      ========================================================================== */
   .pattern-tradition {
-    background-color: var(--bg-ultra-dark);
-    /* Motiv tradițional tip Romb (Cusătură de Ie) - extrem de subtil */
+    background-color: transparent;
     background-image:
-      linear-gradient(45deg, rgba(185, 28, 28, 0.02) 25%, transparent 25%, transparent 75%, rgba(185, 28, 28, 0.02) 75%, rgba(185, 28, 28, 0.02)),
-      linear-gradient(-45deg, rgba(217, 119, 6, 0.015) 25%, transparent 25%, transparent 75%, rgba(217, 119, 6, 0.015) 75%, rgba(217, 119, 6, 0.015));
+      radial-gradient(circle at 2px 2px, var(--red-primary) 1px, transparent 1px),
+      radial-gradient(circle at 12px 7px, var(--gold-primary) 1.5px, transparent 1.5px);
     background-size: 24px 24px;
-    background-position: 0 0, 12px 12px;
-    z-index: -1;
+    background-position: 0 0, 6px 3px;
+    background-repeat: repeat;
   }
 
   /* ==========================================================================
-     LIQUID GLASS & CARDURI (PREMIUM WOOD/GLASS)
+     LIQUID GLASS & CARDURI (MODERNIZATE)
      ========================================================================== */
   
   .liquid-glass {
-    backdrop-filter: blur(40px) saturate(150%);
-    -webkit-backdrop-filter: blur(40px) saturate(150%);
-    background: rgba(15, 5, 5, 0.75);
-    border: 1px solid rgba(185, 28, 28, 0.2);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 2px solid rgba(220, 38, 38, 0.2);
+    box-shadow: 0 20px 40px -10px rgba(153, 27, 27, 0.15);
+    border-radius: 1.75rem;
   }
 
   .clan-card-liquid {
     border-radius: 2.5rem;
     padding: 1.5rem;
-    border-left: 4px solid #b91c1c; /* red-700 */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    background: linear-gradient(135deg, rgba(20,10,10,0.8) 0%, rgba(10,5,5,0.9) 100%);
-    backdrop-filter: blur(var(--liquid-blur));
-    -webkit-backdrop-filter: blur(var(--liquid-blur));
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
+    border-left: 5px solid var(--red-primary);
+    box-shadow: 0 10px 30px -5px rgba(220, 38, 38, 0.15);
+    background: linear-gradient(135deg, rgba(254, 248, 243, 0.95) 0%, rgba(255, 255, 255, 0.90) 100%);
+    border-top-right-radius: 3rem;
+    border-bottom-right-radius: 3rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .clan-card-liquid:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-left-color: #f59e0b; /* amber-500 */
+    transform: translateY(-6px) translateX(4px);
+    box-shadow: 0 15px 40px -5px rgba(220, 38, 38, 0.25);
+    border-left-color: var(--gold-primary);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 240, 0.95) 100%);
   }
 
   /* ==========================================================================
-     ATMOSPHERIC GLOWS (PURE CSS)
+     ATMOSPHERIC GLOWS (MODERNIZATE PENTRU LIGHT MODE)
      ========================================================================== */
 
   .ambient-glow-red {
     position: fixed;
-    top: -20%;
-    left: -20%;
-    width: 80vw;
-    height: 80vw;
+    top: -10%;
+    left: -5%;
+    width: 50vw;
+    height: 50vw;
     z-index: -10;
     pointer-events: none;
-    background-color: var(--red-glow);
-    filter: blur(140px);
+    background: radial-gradient(circle, var(--red-glow) 0%, transparent 70%);
+    filter: blur(100px);
     border-radius: 9999px;
-    mix-blend-mode: screen;
+    mix-blend-mode: multiply;
+    opacity: 0.8;
   }
 
   .ambient-glow-gold {
     position: fixed;
-    bottom: -20%;
-    right: -20%;
-    width: 70vw;
-    height: 70vw;
+    bottom: -15%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
     z-index: -10;
     pointer-events: none;
-    background-color: var(--gold-glow);
-    filter: blur(140px);
+    background: radial-gradient(circle, var(--gold-glow) 0%, transparent 60%);
+    filter: blur(120px);
     border-radius: 9999px;
     mix-blend-mode: screen;
+    opacity: 0.9;
   }
 
   /* ==========================================================================
-     GPU ANIMATIONS (V30 INTEGRITY)
+     ENHANCED ANIMATIONS
      ========================================================================== */
 
   .animate-float-v9 {
@@ -162,15 +222,32 @@
     animation: pop-smash 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
+  .animate-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-star {
+    animation: star-twinkle 1.5s ease-in-out infinite;
+  }
+
   @keyframes float-gentle {
-    0%, 100% { transform: translateY(0) rotate(-1deg); }
-    50% { transform: translateY(-12px) rotate(2deg); filter: drop-shadow(0 10px 15px rgba(245, 158, 11, 0.1)); }
+    0%, 100% { 
+      transform: translateY(0) rotate(-1deg) scale(1);
+      filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.1));
+    }
+    50% { 
+      transform: translateY(-12px) rotate(2deg) scale(1.02);
+      filter: drop-shadow(0 10px 15px rgba(245, 158, 11, 0.15));
+    }
   }
 
   @keyframes impact-shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px) rotate(-2deg); }
-    75% { transform: translateX(8px) rotate(2deg); }
+    0%, 100% { transform: translateX(0) translateY(0); }
+    10% { transform: translateX(-6px) translateY(-6px); }
+    20% { transform: translateX(6px) translateY(-6px); }
+    30% { transform: translateX(-6px) translateY(0); }
+    40% { transform: translateX(6px) translateY(0); }
+    50% { transform: translateX(0) translateY(-3px); }
   }
 
   @keyframes pop-smash {
@@ -179,15 +256,33 @@
     100% { transform: scale(0.95) rotate(-2deg); opacity: 0.9; }
   }
 
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.6); }
+  }
+
+  @keyframes star-twinkle {
+    0%, 100% { 
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+    50% { 
+      transform: scale(0.8) rotate(180deg);
+      opacity: 0.6;
+    }
+  }
+
   /* ==========================================================================
-     SCROLLBARS & MOBILE RESPONSIVENESS (ANTI-CROP SYSTEM)
+     SCROLLBARS & MOBILE RESPONSIVENESS
      ========================================================================== */
 
   .px-mobile-fix {
-    padding-left: calc(1.25rem + env(safe-area-inset-left));
-    padding-right: calc(1.25rem + env(safe-area-inset-right));
-    padding-top: var(--safe-top);
-    padding-bottom: var(--safe-bottom);
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+  }
+
+  .pb-safe {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   /* Previne înghesuirea textului pe ecrane foarte mici (iPhone SE, foldables) */

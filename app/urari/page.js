@@ -107,7 +107,7 @@ export default function UrariPage() {
       <meta property="og:title" content="Cele mai frumoase Mesaje și Urări de Paște 2026" />
       <meta property="og:description" content="Alege mesajul perfect pentru a-l trimite celor dragi în Săptămâna Mare." />
 
-      <main className="relative min-h-screen w-full overflow-x-hidden bg-yellow-50 text-gray-900 selection:bg-red-600/30 pattern-tradition">
+      <main className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900 selection:bg-red-600/30 pattern-tradition">
         
         {/* Traditional Easter decorations */}
         <div className="absolute inset-0 pointer-events-none">

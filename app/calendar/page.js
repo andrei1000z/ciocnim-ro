@@ -30,7 +30,7 @@ export default function CalendarPage() {
       <meta property="og:title" content="Calendarul Paștelui - Află când pică în 2026" />
       <meta property="og:description" content="Verifică datele pentru Paștele Ortodox și cel Catolic." />
 
-      <main className="min-h-screen bg-yellow-50 text-red-900">
+      <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900">
         
         {/* Header */}
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-white shadow-lg border-b-4 border-red-700">

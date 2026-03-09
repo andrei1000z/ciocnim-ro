@@ -962,24 +962,24 @@ function HomeContent() {
       />
 
       {/* LINKURI TRADIȚII */}
-      <div className="bg-yellow-50 p-6 md:p-8 rounded-lg border-4 border-red-700 shadow-lg">
-        <h3 className="text-xl font-bold text-red-900 mb-6 text-center">📚 Tradiții și Ghiduri</h3>
+      <div className="bg-gradient-to-r from-red-100 to-orange-100 p-6 md:p-8 rounded-3xl border-4 border-red-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+        <h3 className="text-2xl md:text-3xl font-black text-red-900 mb-6 text-center">📚 Tradiții și Ghiduri</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link href="/traditii" className="bg-white p-4 rounded-lg border-3 border-red-500 hover:bg-red-50 transition text-center active:scale-95">
+          <Link href="/traditii" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
             <span className="text-3xl block mb-2">📖</span>
-            <span className="font-bold text-xs text-red-900">Reguli</span>
+            <span className="font-bold text-sm text-red-900">Reguli</span>
           </Link>
-          <Link href="/vopsit-natural" className="bg-white p-4 rounded-lg border-3 border-red-500 hover:bg-red-50 transition text-center active:scale-95">
+          <Link href="/vopsit-natural" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
             <span className="text-3xl block mb-2">🧅</span>
-            <span className="font-bold text-xs text-red-900">Vopsit</span>
+            <span className="font-bold text-sm text-red-900">Vopsit</span>
           </Link>
-          <Link href="/calendar" className="bg-white p-4 rounded-lg border-3 border-red-500 hover:bg-red-50 transition text-center active:scale-95">
+          <Link href="/calendar" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
             <span className="text-3xl block mb-2">📅</span>
-            <span className="font-bold text-xs text-red-900">Calendar</span>
+            <span className="font-bold text-sm text-red-900">Calendar</span>
           </Link>
-          <Link href="/urari" className="bg-white p-4 rounded-lg border-3 border-red-500 hover:bg-red-50 transition text-center active:scale-95">
+          <Link href="/urari" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
             <span className="text-3xl block mb-2">🕊️</span>
-            <span className="font-bold text-xs text-red-900">Urări</span>
+            <span className="font-bold text-sm text-red-900">Urări</span>
           </Link>
         </div>
       </div>
@@ -991,13 +991,13 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 text-gray-900 relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900 relative overflow-hidden">
       {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 left-10 text-8xl">🥚</div>
-        <div className="absolute top-20 right-20 text-6xl">🐔</div>
-        <div className="absolute bottom-20 left-20 text-7xl">🌸</div>
-        <div className="absolute bottom-10 right-10 text-5xl">🌷</div>
+      <div className="absolute inset-0 opacity-3 pointer-events-none">
+        <div className="absolute top-10 left-10 text-6xl md:text-8xl animate-float-slow">🥚</div>
+        <div className="absolute top-20 right-20 text-4xl md:text-6xl">🐔</div>
+        <div className="absolute bottom-20 left-20 text-5xl md:text-7xl animate-float-slow">🌸</div>
+        <div className="absolute bottom-10 right-10 text-3xl md:text-5xl">🌷</div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl opacity-10">✝️</div>
       </div>
 

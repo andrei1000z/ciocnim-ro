@@ -6,7 +6,7 @@
  * ========================================================================================================================
  */
 
-import React, { useEffect, useState, Suspense, useMemo, useCallback } from "react";
+import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
@@ -100,11 +100,11 @@ function ArenaMaster({ room }) {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
-
-  const isPrivate = room.includes("privat-");
-  const isProvocare = searchParams.get("provocare") === "true";
+  const chatContainerRef = useRef(null);
   const teamIdPreluat = searchParams.get("teamId"); 
   const isHost = searchParams.get("host") === "true"; 
+  const isPrivate = room.includes("privat-");
+  const isProvocare = searchParams.get("provocare") === "true";
 
   const canStrike = !rezultat && !isStriking && opponent && atacantName === nume;
 
@@ -216,6 +216,13 @@ function ArenaMaster({ room }) {
     return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
   }, [room, nume, isBotMatch, broadcastJoin, isHost, incrementGlobal, teamIdPreluat, setUserStats]);
 
+  // Auto-scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
       const retry = setTimeout(broadcastJoin, 3000);
@@ -313,12 +320,18 @@ function ArenaMaster({ room }) {
 
   const handleChat = () => {
     if (!chatInput.trim()) return;
-    fetch('/api/ciocnire', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: chatInput }) 
-    });
-    setChatInput("");
+    if (isBotMatch) {
+      // For bot matches, add message locally
+      setMessages(prev => [{ autor: nume, text: chatInput.trim() }, ...prev].slice(0, 20));
+      setChatInput("");
+    } else {
+      fetch('/api/ciocnire', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: chatInput }) 
+      });
+      setChatInput("");
+    }
   };
 
   const handleRematch = () => {
@@ -425,7 +438,7 @@ function ArenaMaster({ room }) {
         <div className="w-full max-w-sm bg-[#0a0505] border-2 border-red-900/40 p-4 md:p-6 rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden z-[70] flex-shrink-0 pointer-events-auto">
           <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
           
-          <div className="h-28 md:h-36 overflow-y-auto flex flex-col-reverse gap-2 mb-3 custom-scrollbar pr-2 relative z-10">
+          <div className="h-28 md:h-36 overflow-y-auto flex flex-col-reverse gap-2 mb-3 custom-scrollbar pr-2 relative z-10" ref={chatContainerRef}>
             {messages.map((m, i) => (
               <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start'}`}>
                 <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-amber-500/50 px-2 mb-1">{m.autor}</span>
@@ -448,9 +461,9 @@ function ArenaMaster({ room }) {
                onChange={e => setChatInput(e.target.value.toUpperCase())} 
                onKeyDown={e => e.key === 'Enter' && handleChat()} 
                placeholder="SCRIE UN MESAJ..." 
-               className="flex-1 bg-transparent pl-4 text-[10px] md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30" 
+               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30" 
             />
-            <button onClick={handleChat} className="bg-red-900/30 w-10 h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/50 text-xs md:text-sm active:scale-95 shadow-md flex items-center justify-center cursor-pointer">🕊️</button>
+            <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/50 text-sm md:text-xs active:scale-95 shadow-md flex items-center justify-center cursor-pointer">🕊️</button>
           </div>
         </div>
       </div>
@@ -523,7 +536,7 @@ function ArenaMaster({ room }) {
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
-    <main className="min-h-[100dvh] w-full bg-yellow-50 text-gray-900 flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
+    <main className="min-h-[100dvh] w-full bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900 flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-200/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-200/20 rounded-full blur-[150px] pointer-events-none" />
       
