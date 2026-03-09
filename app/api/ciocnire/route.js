@@ -101,7 +101,7 @@ export async function POST(request) {
 
       case 'join': {
         await pusher.trigger(`arena-v22-${roomId}`, 'join', { 
-          jucator: jucator.trim().toUpperCase(), skin, isGolden, hasStar, t: Date.now(), seed: body.seed 
+          jucator: jucator.trim().toUpperCase(), skin, isGolden, hasStar, regiune: regiune, t: Date.now(), seed: body.seed 
         });
         return NextResponse.json({ success: true });
       }

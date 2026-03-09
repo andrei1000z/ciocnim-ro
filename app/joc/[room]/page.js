@@ -135,7 +135,7 @@ function ArenaMaster({ room }) {
     if (opponent || rezultat || isStriking || isBotMatch) return;
     if (isPrivate && !isProvocare) return;
 
-    const waitTime = isProvocare ? 7000 : 5000;
+    const waitTime = isProvocare ? 11000 : 5000;
 
     const botTimeout = setTimeout(() => {
       setIsBotMatch(true);
@@ -188,6 +188,8 @@ function ArenaMaster({ room }) {
         
         if (isHost && data.isHost) {
            setAtacantName([nume, data.jucator].sort()[0]);
+        } else if (isProvocare) {
+           setAtacantName(Math.random() < 0.5 ? nume : data.jucator);
         } else {
            setAtacantName(isHost ? nume : data.jucator);
         }
@@ -360,7 +362,7 @@ function ArenaMaster({ room }) {
       <div className={`w-full max-w-4xl flex flex-col items-center justify-start md:justify-center flex-1 py-4 md:py-6 px-4 md:px-0 transition-all z-10 ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
         
         {/* Buton Cod Cameră */}
-        {isPrivate && !isProvocare && (
+        {isPrivate && !isProvocare && !teamIdPreluat && (
           <button onClick={copyRoomCode} className="group relative bg-white/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border-2 border-red-700 shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:bg-red-50 hover:border-red-800 transition-all active:scale-95 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
             <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none rounded-full"></div>
             <div className="flex items-center gap-2 md:gap-3 relative z-10">
