@@ -9,8 +9,7 @@
 import { useEffect, useState, createContext, useContext, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useRouter, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-
+import { motion, AnimatePresence } from "framer-motion";import AchievementModal from './AchievementModal';
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
@@ -27,6 +26,9 @@ export default function ClientWrapper({ children }) {
   const [nume, setNumeLocal] = useState("");
   const [notificare, setNotificare] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [achievements, setAchievements] = useState([]);
+  const [newAchievements, setNewAchievements] = useState([]);
+  const [showAchievementModal, setShowAchievementModal] = useState(false);
   
   const pusherRef = useRef(null);
 
@@ -45,6 +47,32 @@ export default function ClientWrapper({ children }) {
       return updated;
     });
   }, []);
+
+  const fetchAchievements = useCallback(async () => {
+    if (!nume) return;
+    try {
+      const res = await fetch('/api/ciocnire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actiune: 'get-achievements', jucator: nume })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAchievements(data.achievements);
+      }
+    } catch (e) {}
+  }, [nume]);
+
+  const updateStats = useCallback(async (type) => {
+    if (!nume) return;
+    try {
+      await fetch('/api/ciocnire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actiune: 'update-stats', jucator: nume, text: type })
+      });
+    } catch (e) {}
+  }, [nume]);
 
   // ==========================================================================
   // SCHIMBARE NUME (FIX PENTRU DUPLICATE ÎN GRUP)
@@ -183,20 +211,10 @@ export default function ClientWrapper({ children }) {
   }, [isHydrated]);
 
   useEffect(() => {
-    if (!isHydrated || !nume || nume.length < 3) return;
-    if (!pusherRef.current) return;
-
-    const channelName = `user-notif-${nume.trim().toUpperCase()}`;
-    const userChannel = pusherRef.current.subscribe(channelName);
-    
-    userChannel.bind('duel-request', (data) => {
-      if (pathname.includes('/joc/')) return; 
-      playSound('victorie'); triggerVibrate([100, 50, 100]); setNotificare(data);
-      setTimeout(() => setNotificare(null), 15000);
-    });
-
-    return () => { userChannel.unbind_all(); pusherRef.current.unsubscribe(channelName); };
-  }, [nume, isHydrated, pathname, playSound, triggerVibrate]);
+    if (nume && nume.length >= 3) {
+      fetchAchievements();
+    }
+  }, [nume, fetchAchievements]);
 
   const contextValue = {
     totalGlobal, 
@@ -206,7 +224,9 @@ export default function ClientWrapper({ children }) {
     setNume, 
     userStats, 
     setUserStats: updateUserStats,
-    playSound, triggerVibrate, incrementGlobal, isHydrated
+    playSound, triggerVibrate, incrementGlobal, isHydrated,
+    achievements, fetchAchievements, newAchievements, updateStats,
+    showAchievementModal, setShowAchievementModal
   };
 
   return (
@@ -267,6 +287,12 @@ export default function ClientWrapper({ children }) {
           </div>
         </div>
       )}
+
+      <AchievementModal
+        isOpen={showAchievementModal}
+        onClose={() => setShowAchievementModal(false)}
+        achievements={achievements}
+      />
     </GlobalStatsContext.Provider>
   );
 }

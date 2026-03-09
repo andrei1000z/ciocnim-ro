@@ -847,6 +847,32 @@ function HomeContent() {
         </div>
       </motion.div>
 
+      {/* HERO SECTION */}
+      <motion.div 
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-center py-8 md:py-12 px-4 mb-8"
+      >
+        <motion.h1 
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6, type: "spring", bounce: 0.4 }}
+          className="text-3xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 mb-3 drop-shadow-2xl"
+        >
+          CIOCNIM.RO
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="text-base md:text-lg text-gray-700 font-medium max-w-2xl mx-auto leading-relaxed px-4"
+        >
+          Tradiția românească a ciocnitului ouălor, modernizată pentru 2026. 
+          Joacă online cu familia și prietenii!
+        </motion.p>
+      </motion.div>
+
       {/* PROFIL JUCĂTOR */}
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
@@ -965,22 +991,24 @@ function HomeContent() {
       <div className="bg-gradient-to-r from-red-100 to-orange-100 p-6 md:p-8 rounded-3xl border-4 border-red-700 shadow-xl hover:shadow-2xl transition-all duration-300">
         <h3 className="text-2xl md:text-3xl font-black text-red-900 mb-6 text-center">📚 Tradiții și Ghiduri</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link href="/traditii" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
-            <span className="text-3xl block mb-2">📖</span>
-            <span className="font-bold text-sm text-red-900">Reguli</span>
-          </Link>
-          <Link href="/vopsit-natural" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
-            <span className="text-3xl block mb-2">🧅</span>
-            <span className="font-bold text-sm text-red-900">Vopsit</span>
-          </Link>
-          <Link href="/calendar" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
-            <span className="text-3xl block mb-2">📅</span>
-            <span className="font-bold text-sm text-red-900">Calendar</span>
-          </Link>
-          <Link href="/urari" className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl">
-            <span className="text-3xl block mb-2">🕊️</span>
-            <span className="font-bold text-sm text-red-900">Urări</span>
-          </Link>
+          {[
+            { href: "/traditii", icon: "📖", text: "Reguli" },
+            { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
+            { href: "/calendar", icon: "📅", text: "Calendar" },
+            { href: "/urari", icon: "🕊️", text: "Urări" }
+          ].map((item, index) => (
+            <motion.div
+              key={item.href}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+            >
+              <Link href={item.href} className="bg-white/90 p-4 rounded-2xl border-3 border-red-500 hover:bg-red-50 transition-all active:scale-95 text-center shadow-lg hover:shadow-xl block">
+                <span className="text-3xl block mb-2">{item.icon}</span>
+                <span className="font-bold text-sm text-red-900">{item.text}</span>
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
 

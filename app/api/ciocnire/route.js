@@ -41,6 +41,132 @@ async function getClasamentJucatori() {
 // Protejăm numele sistemului
 const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
 
+// SISTEM DE ACHIEVEMENT-URI
+const ACHIEVEMENTS = {
+  'first_win': { name: 'Prima Victorie', desc: 'Câștigă primul meci', icon: '🏆', rarity: 'common' },
+  'wins_10': { name: 'Ciocnitor Amator', desc: 'Câștigă 10 meciuri', icon: '🥇', rarity: 'common' },
+  'wins_50': { name: 'Ciocnitor Experimentat', desc: 'Câștigă 50 meciuri', icon: '🥈', rarity: 'uncommon' },
+  'wins_100': { name: 'Maestru al Ouălor', desc: 'Câștigă 100 meciuri', icon: '🥉', rarity: 'rare' },
+  'wins_500': { name: 'Legendă Vie', desc: 'Câștigă 500 meciuri', icon: '👑', rarity: 'epic' },
+  'wins_1000': { name: 'Zeul Ciocnitului', desc: 'Câștigă 1000 meciuri', icon: '⚡', rarity: 'legendary' },
+  'first_group': { name: 'Prieten Bun', desc: 'Joacă primul meci în grup', icon: '👥', rarity: 'common' },
+  'group_wins_25': { name: 'Eroul Grupului', desc: 'Câștigă 25 meciuri în grup', icon: '🛡️', rarity: 'uncommon' },
+  'regional_champion': { name: 'Campion Regional', desc: 'Ajunge pe primul loc în regiunea ta', icon: '🏅', rarity: 'rare' },
+  'golden_egg': { name: 'Ou de Aur', desc: 'Folosește un ou auriu în meci', icon: '🥚', rarity: 'rare' },
+  'chat_master': { name: 'Maestru al Vorbei', desc: 'Trimite 100 de mesaje în chat', icon: '💬', rarity: 'uncommon' },
+  'streak_5': { name: 'Fără Pauză', desc: 'Câștigă 5 meciuri consecutive', icon: '🔥', rarity: 'uncommon' },
+  'streak_10': { name: 'Flamă Vie', desc: 'Câștigă 10 meciuri consecutive', icon: '🌟', rarity: 'rare' },
+  'provocator': { name: 'Provocatorul', desc: 'Provoacă 50 de jucători la duel', icon: '⚔️', rarity: 'uncommon' },
+  'tradition_keeper': { name: 'Păstrător al Tradiției', desc: 'Vizitează toate paginile educaționale', icon: '📚', rarity: 'rare' },
+  'social_butterfly': { name: 'Fluture Social', desc: 'Adaugă 10 prieteni', icon: '🦋', rarity: 'uncommon' }
+};
+
+async function checkAndAwardAchievements(jucator, stats, teamId = null) {
+  const achievementsToAward = [];
+  const userKey = `user:${jucator}:achievements`;
+  const existingAchievements = await redis.smembers(userKey);
+  
+  // Prima victorie
+  if (stats.wins >= 1 && !existingAchievements.includes('first_win')) {
+    achievementsToAward.push('first_win');
+  }
+  
+  // Victoriile cumulative
+  const winMilestones = [10, 50, 100, 500, 1000];
+  for (const milestone of winMilestones) {
+    const achKey = `wins_${milestone}`;
+    if (stats.wins >= milestone && !existingAchievements.includes(achKey)) {
+      achievementsToAward.push(achKey);
+    }
+  }
+  
+  // Primul meci în grup
+  if (teamId && !existingAchievements.includes('first_group')) {
+    achievementsToAward.push('first_group');
+  }
+  
+  // Victoriile în grup
+  if (teamId && stats.teamWins >= 25 && !existingAchievements.includes('group_wins_25')) {
+    achievementsToAward.push('group_wins_25');
+  }
+  
+  // Ou auriu
+  if (stats.goldenUsed && !existingAchievements.includes('golden_egg')) {
+    achievementsToAward.push('golden_egg');
+  }
+  
+  // Chat master
+  if (stats.messagesSent >= 100 && !existingAchievements.includes('chat_master')) {
+    achievementsToAward.push('chat_master');
+  }
+  
+  // Streak
+  if (stats.currentStreak >= 5 && !existingAchievements.includes('streak_5')) {
+    achievementsToAward.push('streak_5');
+  }
+  if (stats.currentStreak >= 10 && !existingAchievements.includes('streak_10')) {
+    achievementsToAward.push('streak_10');
+  }
+  
+  // Provocator
+  if (stats.duelsSent >= 50 && !existingAchievements.includes('provocator')) {
+    achievementsToAward.push('provocator');
+  }
+  
+  // Adaugă achievement-urile noi
+  if (achievementsToAward.length > 0) {
+    await redis.sadd(userKey, ...achievementsToAward);
+    
+    // Trimite notificare în timp real
+    await pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
+      achievements: achievementsToAward.map(key => ACHIEVEMENTS[key]),
+      t: Date.now()
+    });
+  }
+  
+  return achievementsToAward;
+}
+
+async function updateUserStats(jucator, updates) {
+  const userStatsKey = `user:${jucator}:stats`;
+  const pipeline = redis.pipeline();
+  
+  for (const [field, value] of Object.entries(updates)) {
+    if (typeof value === 'number') {
+      pipeline.hincrby(userStatsKey, field, value);
+    } else {
+      pipeline.hset(userStatsKey, field, value);
+    }
+  }
+  
+  await pipeline.exec();
+}
+
+async function getUserStats(jucator) {
+  const userStatsKey = `user:${jucator}:stats`;
+  const stats = await redis.hgetall(userStatsKey);
+  return {
+    wins: parseInt(stats.wins) || 0,
+    losses: parseInt(stats.losses) || 0,
+    teamWins: parseInt(stats.teamWins) || 0,
+    messagesSent: parseInt(stats.messagesSent) || 0,
+    currentStreak: parseInt(stats.currentStreak) || 0,
+    duelsSent: parseInt(stats.duelsSent) || 0,
+    goldenUsed: stats.goldenUsed === 'true',
+    regiune: stats.regiune || 'Muntenia'
+  };
+}
+
+async function getUserAchievements(jucator) {
+  const userKey = `user:${jucator}:achievements`;
+  const earnedKeys = await redis.smembers(userKey);
+  return earnedKeys.map(key => ({
+    key,
+    ...ACHIEVEMENTS[key],
+    earned: true
+  }));
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -85,6 +211,27 @@ export async function POST(request) {
         
         const results = await pipeline.exec();
         const noulTotal = results[0][1];
+        
+        // Update user stats and check achievements
+        if (jucator && jucator.trim() !== "") {
+          const safeName = jucator.trim().toUpperCase();
+          const currentStats = await getUserStats(safeName);
+          
+          const updates = {
+            wins: 1,
+            currentStreak: esteCastigator ? currentStats.currentStreak + 1 : 0
+          };
+          
+          if (teamId) {
+            updates.teamWins = 1;
+          }
+          
+          await updateUserStats(safeName, updates);
+          
+          // Check for achievements
+          const updatedStats = { ...currentStats, ...updates };
+          await checkAndAwardAchievements(safeName, updatedStats, teamId);
+        }
         
         const topActualizat = await getClasamentRegiuni();
         const topJucatoriActualizat = await getClasamentJucatori();
@@ -138,6 +285,25 @@ export async function POST(request) {
         await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', { 
           jucator: jucator.trim().toUpperCase(), text: text.trim(), t: Date.now() 
         });
+        return NextResponse.json({ success: true });
+      }
+
+      case 'get-achievements': {
+        const achievements = await getUserAchievements(jucator);
+        return NextResponse.json({ success: true, achievements });
+      }
+
+      case 'update-stats': {
+        const updates = {};
+        if (text === 'message') updates.messagesSent = 1;
+        if (text === 'duel') updates.duelsSent = 1;
+        if (text === 'golden') updates.goldenUsed = true;
+        
+        if (Object.keys(updates).length > 0) {
+          await updateUserStats(jucator, updates);
+          const stats = await getUserStats(jucator);
+          await checkAndAwardAchievements(jucator, stats);
+        }
         return NextResponse.json({ success: true });
       }
 

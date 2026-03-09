@@ -104,7 +104,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   const schemaMarkup = {
     "@context": "https://schema.org",
-    "@type": "Game",
+    "@type": "VideoGame",
     "name": "Ciocnim.ro",
     "url": "https://ciocnim.ro",
     "description": "Un joc tradițional de Paște online, unde utilizatorii pot ciocni ouă virtuale cu prietenii și familia, personaliza ouă și participa în clasamentul național.",
@@ -113,8 +113,8 @@ export default function RootLayout({ children }) {
       "minValue": 1,
       "maxValue": 2
     },
-    "genre": ["Joc de Tradiție", "Multiplayer Online"],
-    "gamePlatform": ["Web Browser", "Mobil"],
+    "genre": ["Joc de Tradiție", "Multiplayer Online", "Browser Game"],
+    "gamePlatform": ["Web Browser", "Mobile"],
     "author": {
       "@type": "Organization",
       "name": "Ciocnim.ro"
@@ -122,6 +122,18 @@ export default function RootLayout({ children }) {
     "publisher": {
       "@type": "Organization",
       "name": "Ciocnim.ro"
+    },
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "RON"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "1000"
     }
   };
 

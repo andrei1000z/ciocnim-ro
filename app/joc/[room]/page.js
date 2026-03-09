@@ -10,8 +10,6 @@ import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } fr
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
-import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
 
 // --- BAZA DE DATE CITATE ---
 const CITATE_IERTARE = [
@@ -82,7 +80,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal } = useGlobalStats();
+  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, setShowAchievementModal } = useGlobalStats();
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -101,6 +99,7 @@ function ArenaMaster({ room }) {
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
   const chatContainerRef = useRef(null);
+  const [revansaRequests, setRevansaRequests] = useState({});
   const teamIdPreluat = searchParams.get("teamId"); 
   const isHost = searchParams.get("host") === "true"; 
   const isPrivate = room.includes("privat-");
@@ -128,7 +127,13 @@ function ArenaMaster({ room }) {
         regiune: userStats.regiune
       })
     });
-  }, [room, nume, me, isHost, userStats.regiune]);
+    if (me.isGolden) {
+      updateStats('golden');
+    }
+    if (me.hasStar) {
+      updateStats('star');
+    }
+  }, [room, nume, me, isHost, userStats.regiune, updateStats]);
 
   // LOGICĂ BOT
   useEffect(() => {
@@ -202,6 +207,10 @@ function ArenaMaster({ room }) {
       setMessages(prev => [{ autor: data.jucator, text: data.text }, ...prev].slice(0, 20));
     });
 
+    arenaChannel.bind("revansa", (data) => {
+      setRevansaRequests(prev => ({ ...prev, [data.jucator]: true }));
+    });
+
     arenaChannel.bind("lovitura", (data) => {
        executeBattle(data);
        // Sync back-end trigger - Dacă am fost loviți și am câștigat, trigger global-ul aici
@@ -224,6 +233,19 @@ function ArenaMaster({ room }) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Handle revansa when both agree
+  useEffect(() => {
+    if (!opponent || isBotMatch) return;
+    const players = [nume, opponent.jucator];
+    if (players.every(p => revansaRequests[p])) {
+      setRezultat(null);
+      setRezultatAmanat(null);
+      setIsStriking(false);
+      setRevansaRequests({});
+      setAtacantName(prev => prev === nume ? opponent.jucator : nume);
+    }
+  }, [revansaRequests, nume, opponent, isBotMatch]);
 
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
@@ -333,7 +355,22 @@ function ArenaMaster({ room }) {
           body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: chatInput }) 
       });
       setChatInput("");
+      updateStats('message');
     }
+  };
+
+  const handleRevansa = () => {
+    if (revansaRequests[nume]) return; // already requested
+    if (isBotMatch) {
+      handleRematch();
+      return;
+    }
+    fetch('/api/ciocnire', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume }) 
+    });
+    setRevansaRequests(prev => ({ ...prev, [nume]: true }));
   };
 
   const handleRematch = () => {
@@ -413,12 +450,12 @@ function ArenaMaster({ room }) {
 
         {/* BUTON LUPTĂ */}
         <div className="w-full max-w-sm z-30 relative mb-4 flex-shrink-0">
-          {opponent && !rezultat && (
+          {opponent && !rezultat && canStrike && (
             <button 
               onClick={handleStrike} 
-              disabled={!canStrike || isStriking} 
+              disabled={isStriking} 
               className={`w-full py-5 md:py-6 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
-                canStrike && !isStriking 
+                !isStriking 
                   ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.4)] border-2 border-red-500/50 hover:bg-red-600 hover:scale-[1.02] active:scale-95 animate-pulse cursor-pointer pointer-events-auto' 
                   : 'bg-[#140a0a] text-white/30 cursor-not-allowed border-2 border-red-900/30 backdrop-blur-md pointer-events-none'
               }`}
@@ -426,13 +463,19 @@ function ArenaMaster({ room }) {
               <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
               <span className="relative z-10 text-center flex flex-col items-center justify-center gap-1">
                 <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base">
-                  {isStriking ? "⏳ SE CIOCNEȘTE..." : (canStrike ? "💥 CIOCNEȘTE OUL!" : "🛡️ APĂRĂ OUL!")}
+                  {isStriking ? "⏳ SE CIOCNEȘTE..." : "💥 CIOCNESTE OUL!"}
                 </span>
                 {canStrike && !isStriking && (
                   <span className="text-[9px] md:text-[10px] opacity-80 normal-case tracking-widest font-bold text-amber-200 block">Apasă sau mișcă telefonul</span>
                 )}
               </span>
             </button>
+          )}
+          {opponent && !rezultat && !canStrike && (
+            <div className="w-full py-5 md:py-6 rounded-[2rem] bg-[#140a0a] text-white/60 border-2 border-red-900/30 backdrop-blur-md text-center flex items-center justify-center shadow-lg overflow-hidden relative">
+              <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+              <span className="relative z-10 font-black uppercase tracking-[0.3em] text-sm md:text-base">🛡️ AȘTEAPTĂ RÂNDUL TĂU...</span>
+            </div>
           )}
         </div>
 
@@ -515,10 +558,10 @@ function ArenaMaster({ room }) {
 
               <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="flex flex-col gap-3 md:gap-4 relative z-50">
                 <button 
-                  onClick={handleRematch} 
+                  onClick={handleRevansa} 
                   className="w-full bg-white hover:bg-red-50 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 border-2 border-red-700 shadow-sm cursor-pointer relative z-50 pointer-events-auto text-red-700"
                 >
-                  {rezultat.win ? 'Joacă din nou ⚔️' : 'Încă o încercare ⚔️'}
+                  {isBotMatch ? 'REVANȘA ⚔️' : `REVANȘA (${Object.values(revansaRequests).filter(Boolean).length}/2)`}
                 </button>
                 <button 
                   onClick={() => router.push('/')} 
@@ -531,6 +574,15 @@ function ArenaMaster({ room }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Achievement Button */}
+      <button
+        onClick={() => setShowAchievementModal(true)}
+        className="fixed top-4 right-4 md:top-6 md:right-6 bg-gradient-to-br from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white p-3 md:p-4 rounded-full shadow-lg transition-all active:scale-95 z-50 animate-bounce"
+        title="Realizări"
+      >
+        🏆
+      </button>
     </>
   );
 }
