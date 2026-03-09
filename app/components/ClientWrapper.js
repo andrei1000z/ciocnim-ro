@@ -10,8 +10,6 @@ import { useEffect, useState, createContext, useContext, useCallback, useRef } f
 import Pusher from "pusher-js";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import AchievementModal from './AchievementModal';
-import DailyChallenges from './DailyChallenges';
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
@@ -28,10 +26,6 @@ export default function ClientWrapper({ children }) {
   const [nume, setNumeLocal] = useState("");
   const [notificare, setNotificare] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [achievements, setAchievements] = useState([]);
-  const [newAchievements, setNewAchievements] = useState([]);
-  const [showAchievementModal, setShowAchievementModal] = useState(false);
-  const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   
   const pusherRef = useRef(null);
 
@@ -50,21 +44,6 @@ export default function ClientWrapper({ children }) {
       return updated;
     });
   }, []);
-
-  const fetchAchievements = useCallback(async () => {
-    if (!nume) return;
-    try {
-      const res = await fetch('/api/ciocnire', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actiune: 'get-achievements', jucator: nume })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setAchievements(data.achievements);
-      }
-    } catch (e) {}
-  }, [nume]);
 
   const updateStats = useCallback(async (type) => {
     if (!nume) return;
@@ -213,12 +192,6 @@ export default function ClientWrapper({ children }) {
     return () => { globalChannel.unbind_all(); pusherRef.current.unsubscribe('global'); };
   }, [isHydrated]);
 
-  useEffect(() => {
-    if (nume && nume.length >= 3) {
-      fetchAchievements();
-    }
-  }, [nume, fetchAchievements]);
-
   const contextValue = {
     totalGlobal, 
     topRegiuni, 
@@ -228,9 +201,7 @@ export default function ClientWrapper({ children }) {
     userStats, 
     setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated,
-    achievements, fetchAchievements, newAchievements, updateStats,
-    showAchievementModal, setShowAchievementModal,
-    showDailyChallenges, setShowDailyChallenges
+    updateStats
   };
 
   return (
@@ -291,24 +262,6 @@ export default function ClientWrapper({ children }) {
           </div>
         </div>
       )}
-
-      <AchievementModal
-        isOpen={showAchievementModal}
-        onClose={() => setShowAchievementModal(false)}
-        achievements={achievements}
-        userStats={userStats}
-      />
-
-      <DailyChallenges
-        isOpen={showDailyChallenges}
-        onClose={() => setShowDailyChallenges(false)}
-        userStats={userStats}
-        onCompleteChallenge={(challenge) => {
-          // Handle challenge completion - could give rewards
-          playSound('achievement');
-          triggerVibrate([100, 50, 100, 50, 100]);
-        }}
-      />
     </GlobalStatsContext.Provider>
   );
 }
