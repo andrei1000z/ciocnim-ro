@@ -641,7 +641,7 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate } = useGlobalStats();
+  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, showAchievementModal, setShowAchievementModal } = useGlobalStats();
   
   const [loadedTeams, setLoadedTeams] = useState([]); 
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -940,6 +940,18 @@ function HomeContent() {
               <p className="text-3xl font-bold text-red-800">{parseInt(userStats.losses) || 0}</p>
             </div>
           </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowAchievementModal(true)}
+            className="w-full mt-6 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white p-4 rounded-2xl font-bold border-2 border-yellow-500 hover:border-orange-600 transition-all active:scale-95 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl">🏆</span>
+              <span>Vizualizează Realizările</span>
+            </div>
+          </motion.button>
         </div>
       </motion.div>
 
