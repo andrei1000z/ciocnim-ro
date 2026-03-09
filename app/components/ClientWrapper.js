@@ -9,7 +9,9 @@
 import { useEffect, useState, createContext, useContext, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useRouter, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";import AchievementModal from './AchievementModal';
+import { motion, AnimatePresence } from "framer-motion";
+import AchievementModal from './AchievementModal';
+import DailyChallenges from './DailyChallenges';
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
@@ -29,6 +31,7 @@ export default function ClientWrapper({ children }) {
   const [achievements, setAchievements] = useState([]);
   const [newAchievements, setNewAchievements] = useState([]);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [showDailyChallenges, setShowDailyChallenges] = useState(false);
   
   const pusherRef = useRef(null);
 
@@ -226,7 +229,8 @@ export default function ClientWrapper({ children }) {
     setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated,
     achievements, fetchAchievements, newAchievements, updateStats,
-    showAchievementModal, setShowAchievementModal
+    showAchievementModal, setShowAchievementModal,
+    showDailyChallenges, setShowDailyChallenges
   };
 
   return (
@@ -292,6 +296,18 @@ export default function ClientWrapper({ children }) {
         isOpen={showAchievementModal}
         onClose={() => setShowAchievementModal(false)}
         achievements={achievements}
+        userStats={userStats}
+      />
+
+      <DailyChallenges
+        isOpen={showDailyChallenges}
+        onClose={() => setShowDailyChallenges(false)}
+        userStats={userStats}
+        onCompleteChallenge={(challenge) => {
+          // Handle challenge completion - could give rewards
+          playSound('achievement');
+          triggerVibrate([100, 50, 100, 50, 100]);
+        }}
       />
     </GlobalStatsContext.Provider>
   );

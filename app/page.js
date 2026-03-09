@@ -641,7 +641,7 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, showAchievementModal, setShowAchievementModal } = useGlobalStats();
+  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, showAchievementModal, setShowAchievementModal, showDailyChallenges, setShowDailyChallenges } = useGlobalStats();
   
   const [loadedTeams, setLoadedTeams] = useState([]); 
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -950,6 +950,18 @@ function HomeContent() {
             <div className="flex items-center justify-center gap-3">
               <span className="text-2xl">🏆</span>
               <span>Vizualizează Realizările</span>
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowDailyChallenges(true)}
+            className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-4 rounded-2xl font-bold border-2 border-blue-500 hover:border-purple-600 transition-all active:scale-95 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl">📅</span>
+              <span>Provocări Zilnice</span>
             </div>
           </motion.button>
         </div>
