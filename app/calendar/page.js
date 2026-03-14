@@ -25,11 +25,6 @@ const datePaste = [
 export default function CalendarPage() {
   return (
     <>
-      <title>Când pică Paștele Ortodox și Catolic în 2026? Calendar complet | Ciocnim.ro</title>
-      <meta name="description" content="Află datele exacte pentru Paștele Ortodox și Catolic între anii 2026 și 2030. Cum se calculează data Paștelui și de ce se schimbă în fiecare an." />
-      <meta property="og:title" content="Calendarul Paștelui - Află când pică în 2026" />
-      <meta property="og:description" content="Verifică datele pentru Paștele Ortodox și cel Catolic." />
-
       <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900">
         
         {/* Header */}

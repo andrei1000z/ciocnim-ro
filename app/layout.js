@@ -23,10 +23,10 @@ const outfit = Outfit({
 
 export const metadata = {
   title: {
-    default: "Ciocnim.ro - Ciocnește ouă online",
+    default: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii",
     template: "%s | Ciocnim.ro"
   },
-  description: "În 2026, ciocnim ouăle și online! Provoacă-ți familia la o ciocneală virtuală tradițională, personalizând ouăle și urcând în clasamentul național. Bucuria Paștelui e acum la un click distanță!",
+  description: "Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național. Gratuit, fără instalare, pe orice telefon. Hristos a Înviat 2026!",
   applicationName: "Ciocnim.ro",
   keywords: [
     "ciocnit ouă online", "bucuria ciocnitului online", "jocul de paște 2026", "ciocnim.ro", "bătălia ouălor virtuale",
@@ -60,18 +60,18 @@ export const metadata = {
   },
   metadataBase: new URL("https://ciocnim.ro"),
   openGraph: {
-    title: "Ciocnim.ro - Ciocnește ouă online",
-    description: "În 2026, ciocnim ouăle și online! Provoacă-ți familia la o ciocneală virtuală tradițională, personalizând ouăle și urcând în clasamentul național. Bucuria Paștelui e acum la un click distanță!",
+    title: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii",
+    description: "Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat 2026!",
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro - Paște 2026" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro – Joc de Paște Online" }],
     locale: "ro_RO",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ciocnim.ro - Ciocnește ouă online!",
-    description: "Ciocnitul ouălor, oriunde te-ai afla! Provoacă-ți prietenii sau familia la ciocnit.",
+    title: "Ciocnim.ro – Ciocnește Ouă Online! Hristos a Înviat 2026",
+    description: "Provoacă-ți familia la ciocnit ouă virtual. Gratuit, pe orice telefon, fără instalare. Hristos a Înviat!",
     images: ["/og-image.jpg"],
   },
   robots: {

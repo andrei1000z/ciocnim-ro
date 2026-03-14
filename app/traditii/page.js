@@ -42,11 +42,6 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
 export default function TraditiiPage() {
   return (
     <>
-      <title>Tradiții Paște 2026 - Cum se ciocnesc ouăle corect | Ciocnim.ro</title>
-      <meta name="description" content="Află de ce ciocnim ouă, semnificația culorilor și cum să câștigi bătălia de la masa de Paște. Reguli și tradiții românești autentice pentru Paștele din 2026." />
-      <meta property="og:title" content="Tradiția ciocnitului de ouă - Reguli și Semnificații | Ciocnim.ro" />
-      <meta property="og:description" content="Descoperă secretele din spatele celui mai popular joc tradițional românesc de Paște." />
-
       <main className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900 selection:bg-red-600/30 pattern-tradition">
         
         {/* Traditional Easter decorations */}
