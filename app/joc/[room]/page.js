@@ -10,6 +10,8 @@ import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } fr
 import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
+import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- BAZA DE DATE CITATE ---
 const CITATE_IERTARE = [
@@ -80,7 +82,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, setShowAchievementModal } = useGlobalStats();
+  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats } = useGlobalStats();
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -575,14 +577,6 @@ function ArenaMaster({ room }) {
         )}
       </AnimatePresence>
 
-      {/* Floating Achievement Button */}
-      <button
-        onClick={() => setShowAchievementModal(true)}
-        className="fixed top-4 right-4 md:top-6 md:right-6 bg-gradient-to-br from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white p-3 md:p-4 rounded-full shadow-lg transition-all active:scale-95 z-50 animate-bounce"
-        title="Realizări"
-      >
-        🏆
-      </button>
     </>
   );
 }

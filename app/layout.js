@@ -1,7 +1,8 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import ClientWrapper from "./components/ClientWrapper";
-import Script from "next/script"; // <-- Adăugat pentru Schema Markup la final
+import Script from "next/script";
+import ScrollToTop from "./components/ScrollToTop";
 
 /**
  * ====================================================================================================
@@ -152,45 +153,30 @@ export default function RootLayout({ children }) {
       </head>
       
       <body className={`
-        ${outfit.className} 
-        bg-gradient-to-br from-amber-50 via-orange-50 to-red-50
-        text-gray-900 
+        ${outfit.className}
+        bg-white
+        text-gray-900
         min-h-screen
-        min-h-[100dvh] 
-        w-full 
-        max-w-[100vw] 
-        overflow-x-hidden 
-        antialiased 
+        min-h-[100dvh]
+        w-full
+        max-w-[100vw]
+        overflow-x-hidden
+        antialiased
         scrollbar-hide
-        pattern-tradition
       `}>
         
-        {/* OLED DEPTH ENGINE: ELEMENTE AMBIENTALE TRADIȚIONALE */}
+        {/* Ambient glow subtil */}
         <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none">
-          <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-[0.03] mix-blend-overlay"></div>
-          
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_15%_50%,rgba(185,28,28,0.08),transparent_60%)]"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_85%_30%,rgba(217,119,6,0.05),transparent_60%)]"></div>
-          
-          {/* Watermark-uri Subtile Tradiție */}
-          <div className="absolute top-[15%] right-[-10%] text-[20vh] md:text-[28vh] font-black italic text-amber-500/[0.02] uppercase select-none rotate-12 tracking-tighter mix-blend-screen drop-shadow-sm filter sepia-[0.5]">TRADIȚIE</div>
-          <div className="absolute bottom-[15%] left-[-10%] text-[20vh] md:text-[28vh] font-black italic text-amber-500/[0.02] uppercase select-none -rotate-12 tracking-tighter mix-blend-screen drop-shadow-sm filter sepia-[0.5]">PAȘTE</div>
+          <div className="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(185,28,28,0.04),transparent_70%)] blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(217,119,6,0.03),transparent_70%)] blur-3xl"></div>
         </div>
 
         <ClientWrapper>
+          <ScrollToTop />
           <div className="relative z-10 w-full max-w-[100vw] overflow-x-hidden min-h-[100dvh] flex flex-col">
             <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative">
               {children}
             </main>
-
-            <footer className="w-full py-12 text-center pointer-events-none opacity-[0.3] mt-auto select-none relative z-10" aria-hidden="true">
-               <div className="flex flex-col items-center gap-3">
-                 <div className="h-px w-40 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent mb-1" />
-                 <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.6em] text-amber-500/80 drop-shadow-sm">
-                    CIOCNIM.RO • PĂSTRĂM TRADIȚIA 2026
-                 </p>
-               </div>
-            </footer>
           </div>
         </ClientWrapper>
 
@@ -208,8 +194,8 @@ export default function RootLayout({ children }) {
             width: 100vw;
             max-width: 100%;
             position: relative;
-            background-color: #050202; /* Warm OLED Black */
-            overscroll-behavior-y: auto; 
+            background-color: #ffffff;
+            overscroll-behavior-y: auto;
             overflow-x: hidden;
           }
 

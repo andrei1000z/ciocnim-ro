@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node scripts/reset-data.mjs)"
+      "Bash(node scripts/reset-data.mjs)",
+      "Bash(npx next build)"
     ]
   }
 }
