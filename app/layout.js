@@ -216,12 +216,12 @@ export default function RootLayout({ children }) {
           }
 
           main {
-            animation: page-fade-in 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            animation: page-fade-in 0.6s ease-out forwards;
           }
 
           @keyframes page-fade-in {
-            0% { opacity: 0; transform: translateY(15px); filter: blur(10px); }
-            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+            0% { opacity: 0; }
+            100% { opacity: 1; }
           }
 
           .scrollbar-hide::-webkit-scrollbar { display: none; }

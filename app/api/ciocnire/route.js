@@ -237,12 +237,18 @@ export async function POST(request) {
         const topJucatoriActualizat = await getClasamentJucatori();
 
         // Update în timp real pentru toți cei de pe Home
-        await pusher.trigger('global', 'update-complet', { 
-            total: noulTotal, 
+        await pusher.trigger('global', 'update-complet', {
+            total: noulTotal,
             topRegiuni: topActualizat,
             topJucatori: topJucatoriActualizat
         });
-        
+
+        // Update în timp real pentru clasamentul grupului
+        const teamIdStr = Array.isArray(teamId) ? teamId[0] : teamId;
+        if (teamIdStr && teamIdStr !== "null" && teamIdStr !== "") {
+          await pusher.trigger(`team-${teamIdStr}`, 'team-update', { t: Date.now() });
+        }
+
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
       }
 
@@ -394,6 +400,7 @@ export async function POST(request) {
           const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
           if (exists === null) {
              await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
+             await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
           }
         }
         

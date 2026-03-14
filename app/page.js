@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo } from "react";
+import { useState, useEffect, Suspense, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
+import Pusher from "pusher-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalStats } from "./components/ClientWrapper";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
-const REGIUNI_ISTORICE = ["Transilvania", "Moldova", "Muntenia", "Oltenia", "Dobrogea", "Crișana", "Banat", "Maramureș", "Bucovina"];
+const REGIUNI_ISTORICE = ["Transilvania", "Moldova", "Muntenia", "Oltenia", "Dobrogea", "Crișana", "Banat", "Maramureș", "Bucovina", "Diaspora"];
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18, filter: "blur(6px)" },
@@ -158,20 +160,20 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
     else alert("Codul trebuie să aibă minim 3 caractere!");
   };
 
-  return (
+  const modalContent = (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 z-[99999]"
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 99999 }}
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 24 }}
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 24 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
-        className="bg-white/96 backdrop-blur-2xl rounded-3xl border border-red-900/10 w-full max-w-sm shadow-2xl shadow-black/15 p-6"
+        style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)', borderRadius: '24px', border: '1px solid rgba(127,29,29,0.1)', width: '100%', maxWidth: '384px', boxShadow: '0 25px 50px rgba(0,0,0,0.15)', padding: '24px' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -215,6 +217,9 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
       </motion.div>
     </motion.div>
   );
+
+  if (typeof document === 'undefined') return null;
+  return createPortal(modalContent, document.body);
 };
 
 // ─── Hub Grup Privat ────────────────────────────────────────────────────────────
@@ -385,6 +390,7 @@ function HomeContent() {
   const [localNume, setLocalNume] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [hasInitializedName, setHasInitializedName] = useState(false);
+  const teamPusherRef = useRef(null);
 
   useEffect(() => {
     if (nume && !hasInitializedName) { setLocalNume(nume); setHasInitializedName(true); }
@@ -402,6 +408,36 @@ function HomeContent() {
     const n = getStoredTeamIds().filter(t => t !== id);
     localStorage.setItem("c_teamIds", JSON.stringify(n));
   };
+
+  const teamIds = loadedTeams.map(t => t.details.id).join(",");
+  useEffect(() => {
+    if (!isHydrated || !teamIds) return;
+
+    if (!teamPusherRef.current) {
+      teamPusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+    }
+
+    const channels = teamIds.split(",").map(tid => {
+      const ch = teamPusherRef.current.subscribe(`team-${tid}`);
+      ch.bind("team-update", async () => {
+        try {
+          const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) });
+          const d = await r.json();
+          if (d.success) {
+            setLoadedTeams(prev => prev.map(t => t.details.id === tid ? { ...t, top: d.top || [] } : t));
+          }
+        } catch {}
+      });
+      return { tid, ch };
+    });
+
+    return () => {
+      channels.forEach(({ tid, ch }) => {
+        ch.unbind_all();
+        if (teamPusherRef.current) teamPusherRef.current.unsubscribe(`team-${tid}`);
+      });
+    };
+  }, [isHydrated, teamIds, nume]);
 
   const handleSaveNume = async () => {
     const final = localNume.trim().toUpperCase();

@@ -8,7 +8,8 @@
       "Bash(curl -s \"http://localhost:3000/urari\")",
       "Bash(curl -s \"http://localhost:3000/calendar\")",
       "Bash(curl -s \"http://localhost:3000/vopsit-natural\")",
-      "Bash(curl -s \"http://localhost:3000/robots.txt\")"
+      "Bash(curl -s \"http://localhost:3000/robots.txt\")",
+      "Bash(npm run build)"
     ]
   }
 }

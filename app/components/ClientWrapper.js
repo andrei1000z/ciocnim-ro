@@ -192,6 +192,25 @@ export default function ClientWrapper({ children }) {
     return () => { globalChannel.unbind_all(); pusherRef.current.unsubscribe('global'); };
   }, [isHydrated]);
 
+  useEffect(() => {
+    if (!isHydrated || !nume) return;
+    if (!pusherRef.current) pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+
+    const userChannel = pusherRef.current.subscribe(`user-notif-${nume}`);
+    let notifTimer = null;
+    userChannel.bind('duel-request', (data) => {
+      setNotificare({ deLa: data.deLa, roomId: data.roomId, teamId: data.teamId || null });
+      if (notifTimer) clearTimeout(notifTimer);
+      notifTimer = setTimeout(() => setNotificare(null), 6000);
+    });
+
+    return () => {
+      if (notifTimer) clearTimeout(notifTimer);
+      userChannel.unbind_all();
+      if (pusherRef.current) pusherRef.current.unsubscribe(`user-notif-${nume}`);
+    };
+  }, [isHydrated, nume]);
+
   const contextValue = {
     totalGlobal, 
     topRegiuni, 
