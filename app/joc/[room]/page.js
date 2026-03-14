@@ -215,6 +215,13 @@ function ArenaMaster({ room }) {
       setRevansaRequests(prev => ({ ...prev, [data.jucator]: true }));
     });
 
+    arenaChannel.bind("revansa-ok", () => {
+      setRezultat(null);
+      setIsStriking(false);
+      setCollisionAnim(false);
+      setRevansaRequests({});
+    });
+
     arenaChannel.bind("lovitura", (data) => {
        executeBattle(data);
        // Sync back-end trigger - Dacă am fost loviți și am câștigat, trigger global-ul aici
@@ -238,19 +245,6 @@ function ArenaMaster({ room }) {
     }
   }, [messages]);
 
-  // Handle revansa when both agree
-  useEffect(() => {
-    if (!opponent || isBotMatch) return;
-    const players = [nume, opponent.jucator];
-    if (players.every(p => revansaRequests[p])) {
-      setRezultat(null);
-      setIsStriking(false);
-      setCollisionAnim(false);
-      setRevansaRequests({});
-      setAtacantName(prev => prev === nume ? opponent.jucator : nume);
-      broadcastJoin();
-    }
-  }, [revansaRequests, nume, opponent, isBotMatch, broadcastJoin]);
 
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
@@ -359,29 +353,25 @@ function ArenaMaster({ room }) {
   };
 
   const handleRevansa = () => {
-    if (revansaRequests[nume]) return; // already requested
-    if (isBotMatch) {
-      handleRematch();
-      return;
-    }
-    fetch('/api/ciocnire', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume }) 
-    });
-    setRevansaRequests(prev => ({ ...prev, [nume]: true }));
-  };
+    if (isBotMatch) { window.location.reload(); return; }
+    if (revansaRequests[nume]) return;
 
-  const handleRematch = () => {
-    if (isBotMatch) {
-      window.location.reload();
+    const opAlreadyRequested = opponent && revansaRequests[opponent.jucator];
+
+    setRevansaRequests(prev => ({ ...prev, [nume]: true }));
+
+    if (opAlreadyRequested) {
+      // Eu sunt al doilea — confirm revanșa → ambii primesc 'revansa-ok' și resetează
+      fetch('/api/ciocnire', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId: room, actiune: 'revansa-ok' })
+      });
     } else {
-      setRezultat(null);
-      setIsStriking(false);
-      setCollisionAnim(false);
-      setAtacantName(prev => prev === nume ? opponent.jucator : nume);
-      triggerVibrate();
-      broadcastJoin();
+      // Eu sunt primul — anunț că vreau revanșă
+      fetch('/api/ciocnire', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume })
+      });
     }
   };
 

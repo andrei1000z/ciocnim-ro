@@ -282,9 +282,19 @@ export async function POST(request) {
 
       case 'arena-chat': {
         if (!text || text.trim() === "") return NextResponse.json({ success: false });
-        await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', { 
-          jucator: jucator.trim().toUpperCase(), text: text.trim(), t: Date.now() 
+        await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', {
+          jucator: jucator.trim().toUpperCase(), text: text.trim(), t: Date.now()
         });
+        return NextResponse.json({ success: true });
+      }
+
+      case 'revansa': {
+        await pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: jucator.trim().toUpperCase(), t: Date.now() });
+        return NextResponse.json({ success: true });
+      }
+
+      case 'revansa-ok': {
+        await pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { t: Date.now() });
         return NextResponse.json({ success: true });
       }
 
