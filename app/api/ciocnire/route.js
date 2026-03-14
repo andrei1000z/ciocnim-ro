@@ -415,7 +415,7 @@ export async function POST(request) {
 
       case 'creeaza-echipa': {
         if (!creator || creator.trim().length < 3) return NextResponse.json({ success: false });
-        const newId = `grup_${Math.random().toString(36).substring(2, 9)}`;
+        const newId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const cleanCreator = creator.trim().toUpperCase();
         const finalTeamName = `GRUPUL LUI ${cleanCreator}`;
         

@@ -25,19 +25,30 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
     return Math.max(...topRegiuni.map(r => parseInt(r.scor) || 0), 1);
   }, [topRegiuni]);
 
-  const { myRank, ouaUrmatorulLoc, ouaNecesareTop10 } = useMemo(() => {
-    if (!topPlayers || !myName || myName.trim() === "") return { myRank: null };
+  const { myRank, winsNeeded, targetRank } = useMemo(() => {
+    if (!topPlayers || !myName || myName.trim() === "") return { myRank: null, winsNeeded: 0, targetRank: null };
     const clean = myName.trim().toUpperCase();
     const idx = topPlayers.findIndex(p => p.nume === clean);
     const myScoreNum = parseInt(myScore) || 0;
+
     if (idx !== -1) {
-      if (idx === 0) return { myRank: 1, ouaUrmatorulLoc: 0, ouaNecesareTop10: 0 };
-      const prev = parseInt(topPlayers[idx - 1].scor) || 0;
-      return { myRank: idx + 1, ouaUrmatorulLoc: Math.max(1, prev - myScoreNum + 1), ouaNecesareTop10: 0 };
+      if (idx === 0) return { myRank: 1, winsNeeded: 0, targetRank: 1 };
+      // Găsim primul jucător de deasupra cu scor strict mai mare
+      let targetIdx = idx - 1;
+      while (targetIdx > 0 && (parseInt(topPlayers[targetIdx].scor) || 0) <= myScoreNum) {
+        targetIdx--;
+      }
+      const targetScore = parseInt(topPlayers[targetIdx].scor) || 0;
+      const wins = targetScore <= myScoreNum ? 1 : targetScore - myScoreNum;
+      return { myRank: idx + 1, winsNeeded: wins, targetRank: targetIdx + 1 };
     }
-    const s10 = topPlayers.length >= 10 ? (parseInt(topPlayers[9].scor) || 1) : (topPlayers.length > 0 ? (parseInt(topPlayers[topPlayers.length - 1].scor) || 1) : 1);
-    const diff = Math.max(1, s10 - myScoreNum);
-    return { myRank: 10 + diff, ouaUrmatorulLoc: diff, ouaNecesareTop10: diff };
+
+    // Nu ești în clasament — calculează victorii pentru a intra pe ultimul loc din top
+    const n = topPlayers.length;
+    if (n === 0) return { myRank: null, winsNeeded: 1, targetRank: 1 };
+    const lastScore = parseInt(topPlayers[n - 1].scor) || 0;
+    const wins = Math.max(1, lastScore - myScoreNum + 1);
+    return { myRank: null, winsNeeded: wins, targetRank: n };
   }, [topPlayers, myName, myScore]);
 
   const medals = ["🥇", "🥈", "🥉"];
@@ -72,10 +83,14 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                       <span className="font-bold text-red-800 text-sm">{parseInt(p.scor) || 0} 🥚</span>
                     </div>
                   ))}
-                  {myName && myRank !== null && (
+                  {myName && (myRank !== null || targetRank !== null) && (
                     <div className="mt-3 pt-3 border-t border-red-900/8">
                       <p className="text-center text-[11px] font-semibold text-red-800">
-                        {myRank === 1 ? "🎉 Ești Campion Național!" : myRank <= 10 ? `Locul #${myRank} — mai ai nevoie de ${ouaUrmatorulLoc} victorie/e` : `Ai nevoie de ${ouaNecesareTop10} victorie/e pentru TOP 10`}
+                        {myRank === 1
+                          ? "🎉 Ești Campion Național!"
+                          : myRank !== null
+                            ? `Locul #${myRank} · mai ai nevoie de ${winsNeeded} ${winsNeeded === 1 ? "victorie" : "victorii"} pentru locul ${targetRank}`
+                            : `Mai ai nevoie de ${winsNeeded} ${winsNeeded === 1 ? "victorie" : "victorii"} pentru locul ${targetRank} în clasament`}
                       </p>
                     </div>
                   )}
@@ -350,11 +365,11 @@ const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.97 }}
+              initial={{ opacity: 0, y: 6, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+              exit={{ opacity: 0, y: 6, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 w-full mt-1.5 bg-white/96 backdrop-blur-xl rounded-2xl border border-gray-200 p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/10"
+              className="absolute bottom-full left-0 w-full mb-1.5 bg-white/96 backdrop-blur-xl rounded-2xl border border-gray-200 p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/10"
             >
               {REGIUNI_ISTORICE.map(r => (
                 <button
@@ -390,6 +405,8 @@ function HomeContent() {
   const [localNume, setLocalNume] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [hasInitializedName, setHasInitializedName] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [joinModalNume, setJoinModalNume] = useState("");
   const teamPusherRef = useRef(null);
 
   useEffect(() => {
@@ -450,10 +467,15 @@ function HomeContent() {
 
   useEffect(() => {
     if (!isHydrated) return;
-    if (!nume || nume.length < 3) { setLoadedTeams([]); return; }
+    const pId = searchParams.get("joinTeam");
+    if (!nume || nume.length < 3) {
+      if (pId) setShowJoinModal(true);
+      setLoadedTeams([]);
+      return;
+    }
+    setShowJoinModal(false);
     const fetchTeams = async () => {
       let ids = getStoredTeamIds();
-      const pId = searchParams.get("joinTeam");
       if (pId && !ids.includes(pId)) { ids.push(pId); addStoredTeamId(pId); }
       if (!ids.length) { setLoadedTeams([]); return; }
       const results = [], valid = [];
@@ -470,6 +492,15 @@ function HomeContent() {
     };
     fetchTeams();
   }, [nume, searchParams, router, isHydrated]);
+
+  const handleJoinModalSubmit = async () => {
+    const final = joinModalNume.trim().toUpperCase();
+    if (final.length < 3) return;
+    setIsSavingName(true);
+    const ok = await setNume(final);
+    setIsSavingName(false);
+    if (ok) { setLocalNume(final); setShowJoinModal(false); }
+  };
 
   const handleCreateTeam = async () => {
     if (!nume || nume.trim().length < 3) return alert("Pune-ți o poreclă mai întâi!");
@@ -632,6 +663,47 @@ function HomeContent() {
       </motion.div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
+
+      <AnimatePresence>
+        {showJoinModal && typeof document !== "undefined" && createPortal(
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", zIndex: 99999 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+              style={{ background: "rgba(255,255,255,0.98)", borderRadius: "24px", border: "1px solid rgba(127,29,29,0.1)", width: "100%", maxWidth: "360px", padding: "28px", boxShadow: "0 25px 50px rgba(0,0,0,0.2)" }}
+            >
+              <div className="text-center mb-5">
+                <div className="text-4xl mb-3">🥚</div>
+                <h2 className="text-lg font-black text-gray-900">Ai fost invitat într-un grup!</h2>
+                <p className="text-xs text-gray-400 mt-1">Pune-ți o poreclă ca să te alături</p>
+              </div>
+              <input
+                value={joinModalNume}
+                onChange={e => setJoinModalNume(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleJoinModalSubmit()}
+                placeholder="Porecla ta..."
+                maxLength={30}
+                autoFocus
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:border-red-800 transition-all text-sm bg-gray-50 focus:bg-white mb-3"
+              />
+              {joinModalNume.trim().length > 0 && joinModalNume.trim().length < 3 && (
+                <p className="text-red-500 text-xs mb-3 font-medium">Minim 3 caractere</p>
+              )}
+              <button
+                onClick={handleJoinModalSubmit}
+                disabled={isSavingName || joinModalNume.trim().length < 3}
+                className="w-full py-3.5 bg-red-800 hover:bg-red-900 text-white font-black rounded-2xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isSavingName ? "…" : "Intră în grup →"}
+              </button>
+            </motion.div>
+          </motion.div>,
+          document.body
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -103,6 +103,7 @@ function ArenaMaster({ room }) {
   const [copied, setCopied] = useState(false);
   const chatContainerRef = useRef(null);
   const [revansaRequests, setRevansaRequests] = useState({});
+  const opponentRef = useRef(null);
   const teamIdPreluat = searchParams.get("teamId"); 
   const isHost = searchParams.get("host") === "true"; 
   const isPrivate = room.includes("privat-");
@@ -173,7 +174,7 @@ function ArenaMaster({ room }) {
               
               // Doar dacă botul nu a câștigat, declanșăm incrementul nostru (noi apărăm și câștigăm)
               if (!castigaCelCareDaRandom) {
-                 incrementGlobal(true, teamIdPreluat ? [teamIdPreluat] : []);
+                 incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
               } else {
                  setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
               }
@@ -193,18 +194,20 @@ function ArenaMaster({ room }) {
     });
 
     arenaChannel.bind("join", (data) => {
-      if (data.jucator !== nume) { 
-        setOpponent(data); 
-        
-        if (isHost && data.isHost) {
-           setAtacantName([nume, data.jucator].sort()[0]);
-        } else if (isProvocare) {
-           setAtacantName(Math.random() < 0.5 ? nume : data.jucator);
-        } else {
-           setAtacantName(isHost ? nume : data.jucator);
-        }
+      if (data.jucator !== nume) {
+        setOpponent(data);
+        opponentRef.current = data;
 
-        broadcastJoin(); 
+        // Set attacker only ONCE (prevent flickering from repeated join events)
+        setAtacantName(prev => {
+          if (prev !== null) return prev;
+          // Arena: both can always strike (isArena=true), but set for consistency
+          if (!isPrivate && !isProvocare) return [nume, data.jucator].sort()[0];
+          // Provoaca + private: truly random 50/50
+          return Math.random() < 0.5 ? nume : data.jucator;
+        });
+
+        broadcastJoin();
       }
     });
 
@@ -221,6 +224,13 @@ function ArenaMaster({ room }) {
       setIsStriking(false);
       setCollisionAnim(false);
       setRevansaRequests({});
+      // Swap attacker each round for fairness
+      if (!isArena) {
+        setAtacantName(prev => {
+          if (!prev || !opponentRef.current) return prev;
+          return prev === nume ? opponentRef.current.jucator : nume;
+        });
+      }
     });
 
     arenaChannel.bind("lovitura", (data) => {
@@ -229,7 +239,7 @@ function ArenaMaster({ room }) {
        if (data.atacant !== nume) {
            const amCastigatDefense = !data.castigaCelCareDa;
            if (amCastigatDefense) {
-               incrementGlobal(true, teamIdPreluat ? [teamIdPreluat] : []);
+               incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
            } else {
                setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
            }
@@ -299,7 +309,7 @@ function ArenaMaster({ room }) {
 
     // Aici dăm trigger la `incrementGlobal` pentru noi, ca atacant
     if (castigaCelCareDaRandom) {
-       incrementGlobal(true, teamIdPreluat ? [teamIdPreluat] : []);
+       incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
     } else {
        setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
     }
