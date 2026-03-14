@@ -87,15 +87,16 @@ function ArenaMaster({ room }) {
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
   
-  const [isStriking, setIsStriking] = useState(false); 
-  const [rezultatAmanat, setRezultatAmanat] = useState(null); 
-  const [rezultat, setRezultat] = useState(null); 
+  const [isStriking, setIsStriking] = useState(false);
+
+  const [rezultat, setRezultat] = useState(null);
 
   const [citatFinal, setCitatFinal] = useState("");
   const [impactFlash, setImpactFlash] = useState(false);
   const [isBotMatch, setIsBotMatch] = useState(false);
-  
-  const [atacantName, setAtacantName] = useState(null); 
+  const [collisionAnim, setCollisionAnim] = useState(false);
+
+  const [atacantName, setAtacantName] = useState(null);
   
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -107,7 +108,8 @@ function ArenaMaster({ room }) {
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
 
-  const canStrike = !rezultat && !isStriking && opponent && atacantName === nume;
+  // În multiplayer ambii jucători pot lovi; în bot match se respectă rândul
+  const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && (!isBotMatch || atacantName === nume);
 
   const playArenaSound = (name) => {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
@@ -242,12 +244,13 @@ function ArenaMaster({ room }) {
     const players = [nume, opponent.jucator];
     if (players.every(p => revansaRequests[p])) {
       setRezultat(null);
-      setRezultatAmanat(null);
       setIsStriking(false);
+      setCollisionAnim(false);
       setRevansaRequests({});
       setAtacantName(prev => prev === nume ? opponent.jucator : nume);
+      broadcastJoin();
     }
-  }, [revansaRequests, nume, opponent, isBotMatch]);
+  }, [revansaRequests, nume, opponent, isBotMatch, broadcastJoin]);
 
   useEffect(() => {
     if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
@@ -258,7 +261,7 @@ function ArenaMaster({ room }) {
 
   const executeBattle = async (data) => {
     if (rezultat || isStriking) return;
-    
+
     setIsStriking(true);
 
     let amCastigat = false;
@@ -267,37 +270,31 @@ function ArenaMaster({ room }) {
     if (me.isGolden) amCastigat = true;
     else if (opponent?.isGolden) amCastigat = false;
     else {
-        if (celCareALovit === nume) {
-            amCastigat = data.castigaCelCareDa;
-        } else {
-            amCastigat = !data.castigaCelCareDa;
-        }
+      amCastigat = celCareALovit === nume ? data.castigaCelCareDa : !data.castigaCelCareDa;
     }
 
-    setRezultatAmanat({ win: amCastigat });
-
-    const citatAles = amCastigat 
+    const citatAles = amCastigat
       ? CITATE_SMERENIE[Math.floor(Math.random() * CITATE_SMERENIE.length)]
       : CITATE_IERTARE[Math.floor(Math.random() * CITATE_IERTARE.length)];
-    
     setCitatFinal(citatAles);
 
+    // Faza 1: ouăle se mișcă unul spre celălalt (550ms)
+    setCollisionAnim(true);
+
     setTimeout(() => {
+      // Faza 2: impact + flash (500ms)
       setImpactFlash(true);
       playArenaSound('spargere');
       triggerVibrate(amCastigat ? [100, 50, 100] : [800]);
-      
-      setRezultat({ win: amCastigat });
 
       setTimeout(() => {
+        setCollisionAnim(false);
         setImpactFlash(false);
+        setRezultat({ win: amCastigat });
         playArenaSound(amCastigat ? 'victorie' : 'esec');
-        if (amCastigat) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        
-        // AICI AM ELIMINAT SET_USER_STATS pentru Wins/Losses! 
-        // Ele sunt gestionate strict de `handleStrike` (dacă atacăm) sau event-ul Pusher (dacă suntem loviți).
-      }, 400);
-    }, 500);
+        if (amCastigat) confetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] });
+      }, 500);
+    }, 550);
   };
 
   const handleStrike = () => {
@@ -378,14 +375,13 @@ function ArenaMaster({ room }) {
   const handleRematch = () => {
     if (isBotMatch) {
       window.location.reload();
-    } else { 
-      setRezultat(null); 
-      setRezultatAmanat(null);
+    } else {
+      setRezultat(null);
       setIsStriking(false);
-      
+      setCollisionAnim(false);
       setAtacantName(prev => prev === nume ? opponent.jucator : nume);
-      triggerVibrate(); 
-      broadcastJoin(); 
+      triggerVibrate();
+      broadcastJoin();
     }
   };
 
@@ -413,30 +409,61 @@ function ArenaMaster({ room }) {
           </button>
         )}
 
-        {/* Zona de Duel - Containere separate flex-shrink-0 pentru a nu se strivi */}
+        {/* Zona de Duel */}
         <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mb-6 relative z-10 flex-shrink-0">
-          
+
           {/* Jucător 1 (TU) */}
-          <div className="flex flex-col items-center gap-4 w-1/3 max-w-[160px]">
+          <motion.div
+            className="flex flex-col items-center gap-4 w-1/3 max-w-[160px]"
+            animate={collisionAnim ? { x: 52, scale: 1.1 } : { x: 0, scale: 1 }}
+            transition={{ duration: 0.45, ease: [0.55, 0, 1, 0.45] }}
+          >
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
             <div className="bg-white/95 backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border-2 border-red-700 border-l-4 border-l-green-500 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.1)] overflow-hidden">
               <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
-              {atacantName === nume && !rezultat && opponent && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-700 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.3)] border border-red-500/50 text-white">ATACĂ</span>}
               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-600/70 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
               <span className="text-sm md:text-xl font-black text-gray-900 italic drop-shadow-sm relative z-10 truncate block">{nume}</span>
             </div>
+          </motion.div>
+
+          {/* VS / Impact */}
+          <div className="relative flex-shrink-0 flex items-center justify-center w-10 md:w-16">
+            <AnimatePresence mode="wait">
+              {impactFlash ? (
+                <motion.div
+                  key="impact"
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1.6, rotate: 0 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: "spring", bounce: 0.6, duration: 0.4 }}
+                  className="text-4xl md:text-6xl select-none drop-shadow-[0_0_30px_rgba(220,38,38,0.8)] z-20"
+                >
+                  💥
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="vs"
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-2xl md:text-5xl font-black text-red-600/40 italic drop-shadow-sm filter sepia-[0.2]"
+                >
+                  VS
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          <div className="text-2xl md:text-5xl font-black text-red-600/40 italic drop-shadow-sm filter sepia-[0.2] flex-shrink-0">VS</div>
-          
           {/* Jucător 2 (OPONENT) */}
-          <div className="flex flex-col items-center gap-4 w-1/3 max-w-[160px] text-center">
+          <motion.div
+            className="flex flex-col items-center gap-4 w-1/3 max-w-[160px] text-center"
+            animate={collisionAnim ? { x: -52, scale: 1.1 } : { x: 0, scale: 1 }}
+            transition={{ duration: 0.45, ease: [0.55, 0, 1, 0.45] }}
+          >
             {opponent ? (
               <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 w-full">
                 <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
                 <div className="bg-white/95 backdrop-blur-md p-3 md:p-4 rounded-2xl border-2 border-red-700 border-r-4 border-r-red-600 relative w-full shadow-[0_10px_30px_rgba(0,0,0,0.1)] overflow-hidden">
                   <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
-                  {atacantName === opponent.jucator && !rezultat && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-700 text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 rounded-full shadow-[0_5px_15px_rgba(220,38,38,0.3)] border border-red-500/50 text-white">ATACĂ</span>}
                   <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-600/70 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
                   <span className="text-sm md:text-xl font-black text-gray-900 italic drop-shadow-sm relative z-10 truncate block">{opponent.jucator}</span>
                 </div>
@@ -447,37 +474,44 @@ function ArenaMaster({ room }) {
                 <span className="relative z-10">Așteptăm...</span>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* BUTON LUPTĂ */}
         <div className="w-full max-w-sm z-30 relative mb-4 flex-shrink-0">
-          {opponent && !rezultat && canStrike && (
-            <button 
-              onClick={handleStrike} 
-              disabled={isStriking} 
+          {opponent && !rezultat && !collisionAnim && (
+            <motion.button
+              onClick={canStrike ? handleStrike : undefined}
+              whileTap={canStrike ? { scale: 0.94 } : {}}
+              animate={canStrike ? { scale: [1, 1.03, 1] } : {}}
+              transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
               className={`w-full py-5 md:py-6 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
-                !isStriking 
-                  ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.4)] border-2 border-red-500/50 hover:bg-red-600 hover:scale-[1.02] active:scale-95 animate-pulse cursor-pointer pointer-events-auto' 
-                  : 'bg-[#140a0a] text-white/30 cursor-not-allowed border-2 border-red-900/30 backdrop-blur-md pointer-events-none'
+                canStrike
+                  ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.4)] border-2 border-red-500/50 hover:bg-red-600 cursor-pointer pointer-events-auto'
+                  : 'bg-[#140a0a] text-white/40 border-2 border-red-900/30 backdrop-blur-md cursor-not-allowed pointer-events-none'
               }`}
             >
               <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
               <span className="relative z-10 text-center flex flex-col items-center justify-center gap-1">
                 <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base">
-                  {isStriking ? "⏳ SE CIOCNEȘTE..." : "💥 CIOCNESTE OUL!"}
+                  {canStrike ? "💥 CIOCNEȘTE OUL!" : "⏳ SE PREGĂTEȘTE..."}
                 </span>
-                {canStrike && !isStriking && (
-                  <span className="text-[9px] md:text-[10px] opacity-80 normal-case tracking-widest font-bold text-amber-200 block">Apasă sau mișcă telefonul</span>
+                {canStrike && (
+                  <span className="text-[9px] md:text-[10px] opacity-80 normal-case tracking-widest font-bold text-amber-200 block">
+                    Apasă sau mișcă telefonul
+                  </span>
                 )}
               </span>
-            </button>
+            </motion.button>
           )}
-          {opponent && !rezultat && !canStrike && (
-            <div className="w-full py-5 md:py-6 rounded-[2rem] bg-[#140a0a] text-white/60 border-2 border-red-900/30 backdrop-blur-md text-center flex items-center justify-center shadow-lg overflow-hidden relative">
-              <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
-              <span className="relative z-10 font-black uppercase tracking-[0.3em] text-sm md:text-base">🛡️ AȘTEAPTĂ RÂNDUL TĂU...</span>
-            </div>
+          {opponent && !rezultat && collisionAnim && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="w-full py-5 md:py-6 rounded-[2rem] bg-[#140a0a] text-white/60 border-2 border-red-900/30 backdrop-blur-md text-center flex items-center justify-center shadow-lg"
+            >
+              <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base animate-pulse">⚡ CIOCNIRE...</span>
+            </motion.div>
           )}
         </div>
 
@@ -517,59 +551,97 @@ function ArenaMaster({ room }) {
 
       <AnimatePresence>
         {rezultat && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }} 
-            className="fixed inset-0 bg-black/95 z-[2147483647] flex items-center justify-center p-4 md:p-6 text-center backdrop-blur-3xl"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4 text-center backdrop-blur-2xl"
+            style={{ background: rezultat.win ? 'radial-gradient(ellipse at center, rgba(0,40,10,0.97) 0%, rgba(0,0,0,0.98) 100%)' : 'radial-gradient(ellipse at center, rgba(40,0,0,0.97) 0%, rgba(0,0,0,0.98) 100%)' }}
           >
-            <motion.div 
-              initial="hidden" 
-              animate="visible" 
-              variants={{
-                hidden: { scale: 0.8, y: 50, opacity: 0 },
-                visible: { scale: 1, y: 0, opacity: 1, transition: { type: "spring", bounce: 0.4, staggerChildren: 0.15 } }
-              }} 
-              className={`max-w-md w-full bg-[#0a0505] p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border-2 shadow-[0_50px_100px_rgba(0,0,0,0.9)] relative overflow-hidden pointer-events-auto ${rezultat.win ? 'border-green-600/40' : 'border-red-600/40'}`}
+            {/* Glow fundal */}
+            <div className={`absolute inset-0 pointer-events-none ${rezultat.win ? 'bg-[radial-gradient(ellipse_at_50%_30%,rgba(34,197,94,0.12),transparent_60%)]' : 'bg-[radial-gradient(ellipse_at_50%_30%,rgba(220,38,38,0.15),transparent_60%)]'}`} />
+
+            <motion.div
+              initial={{ scale: 0.7, y: 60, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              transition={{ type: "spring", bounce: 0.45, duration: 0.7 }}
+              className={`max-w-sm w-full bg-[#080404] rounded-[2.5rem] border shadow-[0_60px_120px_rgba(0,0,0,0.95)] relative overflow-hidden pointer-events-auto ${rezultat.win ? 'border-green-700/40' : 'border-red-800/40'}`}
             >
-              <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
-              <div className={`absolute inset-0 bg-gradient-to-t to-transparent pointer-events-none ${rezultat.win ? 'from-green-900/20' : 'from-red-900/20'}`}></div>
-              <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 blur-[60px] pointer-events-none z-0 ${rezultat.win ? 'bg-green-700/20' : 'bg-red-700/20'}`}></div>
-              
-              <motion.div variants={{ hidden: { opacity: 0, scale: 0 }, visible: { opacity: 1, scale: 1 } }} className="text-7xl md:text-9xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] relative z-10 mb-3 md:mb-4 filter sepia-[0.3]">
-                {rezultat.win ? '👑' : '🥀'}
-              </motion.div>
-              
-              <motion.h2 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className={`text-3xl md:text-5xl font-black italic tracking-tighter drop-shadow-lg uppercase relative z-10 ${rezultat.win ? 'text-green-500' : 'text-red-500'}`}>
-                {rezultat.win ? 'Victorie!' : 'Oul s-a spart'}
-              </motion.h2>
-              
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="relative mt-6 mb-6 md:mt-8 md:mb-8 z-10 pointer-events-none">
-                 <div className={`absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0a0505] px-4 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] z-10 border rounded-full ${rezultat.win ? 'text-green-500/70 border-green-900/50' : 'text-red-500/70 border-red-900/50'}`}>
-                   {rezultat.win ? 'Învățătură' : 'Alinare'}
-                 </div>
-                 <div className="bg-[#140a0a] border border-red-900/30 p-5 md:p-8 rounded-3xl shadow-inner relative overflow-hidden">
-                   <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] pointer-events-none"></div>
-                   <span className="absolute top-1 left-3 md:top-2 md:left-4 text-4xl md:text-5xl text-amber-500/10 font-serif leading-none">"</span>
-                   <p className="text-xs md:text-base font-bold text-amber-500/80 italic leading-relaxed relative z-10 mt-1 md:mt-2 drop-shadow-sm px-2">
-                     {citatFinal}
-                   </p>
-                   <span className="absolute bottom-[-10px] right-3 md:bottom-[-15px] md:right-4 text-4xl md:text-5xl text-amber-500/10 font-serif leading-none">"</span>
-                 </div>
+              <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-[0.07] mix-blend-overlay pointer-events-none" />
+
+              {/* Header colorat */}
+              <div className={`relative px-6 pt-8 pb-6 ${rezultat.win ? 'bg-gradient-to-b from-green-900/30 to-transparent' : 'bg-gradient-to-b from-red-900/30 to-transparent'}`}>
+                <motion.div
+                  initial={{ scale: 0, rotate: -15 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.6, delay: 0.15 }}
+                  className="text-6xl md:text-8xl mb-3 select-none"
+                >
+                  {rezultat.win ? '👑' : '🥚'}
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.4 }}
+                >
+                  <p className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1 ${rezultat.win ? 'text-green-400/70' : 'text-red-400/70'}`}>
+                    {rezultat.win ? 'Hristos a Înviat!' : 'Adevărat a Înviat!'}
+                  </p>
+                  <h2 className={`text-3xl md:text-4xl font-black italic tracking-tight ${rezultat.win ? 'text-green-400' : 'text-red-400'}`}>
+                    {rezultat.win ? 'Victorie!' : 'Oul s-a spart'}
+                  </h2>
+                  {/* Scor */}
+                  <div className="flex items-center justify-center gap-3 mt-3">
+                    <span className="text-[10px] font-black text-green-500/70 uppercase tracking-widest">{userStats.wins || 0} victorii</span>
+                    <span className="text-white/20">·</span>
+                    <span className="text-[10px] font-black text-red-500/50 uppercase tracking-widest">{userStats.losses || 0} înfrângeri</span>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Citat */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="mx-5 mb-5 bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 relative"
+              >
+                <span className="absolute top-1 left-3 text-3xl text-amber-500/10 font-serif leading-none">"</span>
+                <p className="text-[11px] md:text-sm font-medium text-amber-400/70 italic leading-relaxed px-2 mt-1">
+                  {citatFinal}
+                </p>
               </motion.div>
 
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="flex flex-col gap-3 md:gap-4 relative z-50">
-                <button 
-                  onClick={handleRevansa} 
-                  className="w-full bg-white hover:bg-red-50 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 border-2 border-red-700 shadow-sm cursor-pointer relative z-50 pointer-events-auto text-red-700"
+              {/* Butoane */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55, duration: 0.4 }}
+                className="flex flex-col gap-2.5 px-5 pb-6"
+              >
+                <button
+                  onClick={handleRevansa}
+                  disabled={!isBotMatch && revansaRequests[nume]}
+                  className={`w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border-2 cursor-pointer relative z-50 pointer-events-auto
+                    ${!isBotMatch && revansaRequests[nume]
+                      ? 'bg-white/5 text-white/30 border-white/10 cursor-default'
+                      : 'bg-white text-red-800 border-white/80 hover:bg-red-50 shadow-[0_10px_30px_rgba(255,255,255,0.1)]'
+                    }`}
                 >
-                  {isBotMatch ? 'REVANȘA ⚔️' : `REVANȘA (${Object.values(revansaRequests).filter(Boolean).length}/2)`}
+                  {isBotMatch
+                    ? '⚔️ Revanșă'
+                    : revansaRequests[nume]
+                      ? `⏳ Așteptăm (${Object.values(revansaRequests).filter(Boolean).length}/2)...`
+                      : `⚔️ Revanșă (${Object.values(revansaRequests).filter(Boolean).length}/2)`
+                  }
                 </button>
-                <button 
-                  onClick={() => router.push('/')} 
-                  className={`w-full py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs md:text-sm transition-all active:scale-95 shadow-lg border-2 cursor-pointer relative z-50 pointer-events-auto text-white ${rezultat.win ? 'bg-green-600 hover:bg-green-700 shadow-[0_15px_30px_rgba(22,163,74,0.3)] border-green-500/50' : 'bg-red-600 hover:bg-red-700 shadow-[0_15px_30px_rgba(220,38,38,0.4)] border-red-500/50'}`}
+                <button
+                  onClick={() => router.push('/')}
+                  className={`w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto text-white/70 bg-white/5 border-white/10 hover:bg-white/10 hover:text-white`}
                 >
-                  Înapoi
+                  ← Înapoi acasă
                 </button>
               </motion.div>
             </motion.div>
