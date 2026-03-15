@@ -111,6 +111,10 @@ function ArenaMaster({ room }) {
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
 
+  // Ref stabil pentru regiune — previne recrearea Pusher la hidratare (când se încarcă stats din localStorage)
+  const regiuneRef = useRef(userStats.regiune);
+  useEffect(() => { regiuneRef.current = userStats.regiune; }, [userStats.regiune]);
+
   const isArena = !isPrivate && !isBotMatch;
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
 
@@ -127,7 +131,7 @@ function ArenaMaster({ room }) {
         body: JSON.stringify({
           roomId: room, actiune: 'join', jucator: nume,
           skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar,
-          isHost: isHost, regiune: userStats.regiune
+          isHost: isHost, regiune: regiuneRef.current
         })
       });
       const data = await res.json();
@@ -138,7 +142,7 @@ function ArenaMaster({ room }) {
     } catch {}
     if (me.isGolden) updateStats('golden');
     if (me.hasStar) updateStats('star');
-  }, [room, nume, me, isHost, userStats.regiune, updateStats, router]);
+  }, [room, nume, me, isHost, updateStats, router]);
 
   // LOGICĂ BOT
   useEffect(() => {
@@ -187,13 +191,16 @@ function ArenaMaster({ room }) {
   // PUSHER SYNC 
   useEffect(() => {
     if (isBotMatch) return;
+    const _forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
+    const _wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
       wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
-      wsPort: process.env.NEXT_PUBLIC_PUSHER_PORT ? parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT) : undefined,
-      forceTLS: false,
+      wsPort: _wsPort,
+      wssPort: _wsPort,
+      forceTLS: _forceTLS,
       disableStats: true,
-      enabledTransports: ['ws', 'wss'],
+      enabledTransports: _forceTLS ? ['wss'] : ['ws'],
     });
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 

@@ -30,13 +30,16 @@ export default function ClientWrapper({ children }) {
 
   // Inițializare Pusher o singură dată — disconnect la unmount
   useEffect(() => {
+    const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
+    const wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
     pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
       wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
-      wsPort: process.env.NEXT_PUBLIC_PUSHER_PORT ? parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT) : undefined,
-      forceTLS: false,
+      wsPort: wsPort,
+      wssPort: wsPort,
+      forceTLS: forceTLS,
       disableStats: true,
-      enabledTransports: ['ws', 'wss'],
+      enabledTransports: forceTLS ? ['wss'] : ['ws'],
     });
     return () => {
       pusherRef.current?.disconnect();

@@ -12,7 +12,14 @@
       "Bash(npm run build)",
       "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")",
       "Bash(curl -s http://localhost:3000/api/ciocnire -X POST -H \"Content-Type: application/json\" -d '{\"\"actiune\"\":\"\"get-counter\"\"}')",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(curl -s --connect-timeout 5 \"http://161.35.201.178:6001\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(curl -s --connect-timeout 5 \"http://161.35.201.178:6001/app/ciocnim-key-2026\" -H \"Connection: Upgrade\" -H \"Upgrade: websocket\")",
+      "Bash(curl -sv --connect-timeout 5 \"http://161.35.201.178:6001/apps/ciocnim-app/channels\" -u \"ciocnim-key-2026:ciocnim-secret-top\")",
+      "Bash(node -e \":*)",
+      "Bash(curl -sv --connect-timeout 5 -H \"Connection: Upgrade\" -H \"Upgrade: websocket\" -H \"Sec-WebSocket-Version: 13\" -H \"Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\" \"http://161.35.201.178:6001/app/ciocnim-key-2026?protocol=7&client=js&version=8.0.0\")",
+      "Bash(curl -s --max-time 5 \"http://161.35.201.178:6001/app/ciocnim-key-2026?protocol=7&client=js&version=8.0.0\")"
     ]
   }
 }

@@ -485,13 +485,16 @@ function HomeContent() {
     if (!isHydrated || !teamIds) return;
 
     if (!teamPusherRef.current) {
+      const _forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
+      const _wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
       teamPusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
         cluster: 'eu',
         wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
-        wsPort: process.env.NEXT_PUBLIC_PUSHER_PORT ? parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT) : undefined,
-        forceTLS: false,
+        wsPort: _wsPort,
+        wssPort: _wsPort,
+        forceTLS: _forceTLS,
         disableStats: true,
-        enabledTransports: ['ws', 'wss'],
+        enabledTransports: _forceTLS ? ['wss'] : ['ws'],
       });
     }
 
