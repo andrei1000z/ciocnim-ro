@@ -41,6 +41,11 @@ async function getClasamentJucatori() {
 // Protejăm numele sistemului
 const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
 
+// Filtru poreclă
+const CUVINTE_INTERZISE_SERVER = ['pula','pule','pulica','pulete','pulamea','pularie','pizda','pizdi','pizdica','muie','muist','muista','sugi','sugipula','sugio','fut','fute','futut','fututi','futuma','coaie','coaiele','cur','curu','curul','morti','mortii','cacat','labagiu'];
+function _norm(s) { return s.toLowerCase().replace(/@/g,'a').replace(/0/g,'o').replace(/1/g,'i').replace(/7/g,'t').replace(/9/g,'g').replace(/[_\-\s\.]/g,''); }
+function esteNumeInterzisServer(name) { const n=_norm(name); const nv=n.replace(/v/g,'u'); const noo=nv.replace(/oo/g,'u'); return CUVINTE_INTERZISE_SERVER.some(w=>n.includes(w)||nv.includes(w)||noo.includes(w)); }
+
 // SISTEM DE ACHIEVEMENT-URI
 const ACHIEVEMENTS = {
   'first_win': { name: 'Prima Victorie', desc: 'Câștigă primul meci', icon: '🏆', rarity: 'common' },
@@ -347,6 +352,10 @@ export async function POST(request) {
 
         if (NUME_INTERZISE.includes(newClean)) {
             return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." });
+        }
+
+        if (esteNumeInterzisServer(newClean) || newClean.length > 21) {
+            return NextResponse.json({ success: false, error: "Ai chef de glume? Alege alt nume 😅" });
         }
 
         const isTaken = await redis.get(`nume_rezervat:${newClean}`);

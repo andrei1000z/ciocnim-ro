@@ -10,6 +10,31 @@ import Link from "next/link";
 
 const REGIUNI_ISTORICE = ["Transilvania", "Moldova", "Muntenia", "Oltenia", "Dobrogea", "Crișana", "Banat", "Maramureș", "Bucovina", "Diaspora"];
 
+// ─── Filtru Poreclă ─────────────────────────────────────────────────────────────
+const CUVINTE_INTERZISE = [
+  'pula','pule','pulica','pulete','pulamea','pularie',
+  'pizda','pizdi','pizdica',
+  'muie','muist','muista',
+  'sugi','sugipula','sugio',
+  'fut','fute','futut','fututi','futuma',
+  'coaie','coaiele',
+  'cur','curu','curul',
+  'morti','mortii',
+  'cacat','labagiu',
+];
+function normalizeForFilter(s) {
+  return s.toLowerCase()
+    .replace(/@/g,'a').replace(/0/g,'o').replace(/1/g,'i')
+    .replace(/7/g,'t').replace(/9/g,'g')
+    .replace(/[_\-\s\.]/g,'');
+}
+function esteNumeInterzis(name) {
+  const n = normalizeForFilter(name);
+  const nv = n.replace(/v/g,'u');        // pvla→pula, mvie→muie, fvt→fut
+  const noo = nv.replace(/oo/g,'u');     // mooie→muie (din m00ie)
+  return CUVINTE_INTERZISE.some(w => n.includes(w) || nv.includes(w) || noo.includes(w));
+}
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18, filter: "blur(6px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -425,6 +450,7 @@ function HomeContent() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinModalNume, setJoinModalNume] = useState("");
   const [toastMsg, setToastMsg] = useState("");
+  const [numeError, setNumeError] = useState("");
   const teamPusherRef = useRef(null);
 
   useEffect(() => {
@@ -486,6 +512,8 @@ function HomeContent() {
   const handleSaveNume = async () => {
     const final = localNume.trim().toUpperCase();
     if (final.length < 3 || final === (nume || "").trim().toUpperCase()) return;
+    if (esteNumeInterzis(final)) { setNumeError("Ai chef de glume? Alege alt nume 😅"); return; }
+    setNumeError("");
     triggerVibrate(); setIsSavingName(true);
     const ok = await setNume(final);
     if (!ok) setLocalNume(nume || "");
@@ -594,10 +622,10 @@ function HomeContent() {
             <div className="flex gap-2">
               <input
                 value={localNume}
-                onChange={e => setLocalNume(e.target.value)}
+                onChange={e => { setLocalNume(e.target.value); setNumeError(""); }}
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
                 placeholder="Porecla ta..."
-                maxLength={30}
+                maxLength={21}
                 className="flex-1 px-4 py-3 border border-gray-200 rounded-xl font-bold text-gray-800 outline-none focus:border-red-800 transition-all text-sm bg-gray-50 focus:bg-white"
               />
               <motion.button
@@ -611,9 +639,11 @@ function HomeContent() {
               </motion.button>
             </div>
             <AnimatePresence>
-              {localNume.trim().length > 0 && localNume.trim().length < 3 && (
-                <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-xs mt-1.5 font-medium">Minim 3 caractere</motion.p>
-              )}
+              {numeError ? (
+                <motion.p key="err-rau" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-orange-500 text-xs mt-1.5 font-medium">{numeError}</motion.p>
+              ) : localNume.trim().length > 0 && localNume.trim().length < 3 ? (
+                <motion.p key="err-scurt" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-xs mt-1.5 font-medium">Minim 3 caractere</motion.p>
+              ) : null}
             </AnimatePresence>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -723,7 +753,7 @@ function HomeContent() {
                 onChange={e => setJoinModalNume(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleJoinModalSubmit()}
                 placeholder="Porecla ta..."
-                maxLength={30}
+                maxLength={21}
                 autoFocus
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:border-red-800 transition-all text-sm bg-gray-50 focus:bg-white mb-3"
               />
