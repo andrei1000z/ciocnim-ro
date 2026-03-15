@@ -111,9 +111,11 @@ function ArenaMaster({ room }) {
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
 
-  // Ref stabil pentru regiune — previne recrearea Pusher la hidratare (când se încarcă stats din localStorage)
+  // Ref stabil pentru regiune și nume — previne reconnect-ul Pusher la hidratare
   const regiuneRef = useRef(userStats.regiune);
   useEffect(() => { regiuneRef.current = userStats.regiune; }, [userStats.regiune]);
+  const numeRef = useRef(nume);
+  useEffect(() => { numeRef.current = nume; }, [nume]);
 
   const isArena = !isPrivate && !isBotMatch;
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
@@ -205,11 +207,14 @@ function ArenaMaster({ room }) {
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
     arenaChannel.bind("pusher:subscription_succeeded", () => {
-      broadcastJoin();
+      // Trimitem join imediat dacă avem deja nume (hidratat)
+      if (numeRef.current) broadcastJoin();
     });
 
     arenaChannel.bind("join", (data) => {
-      if (data.jucator !== nume) {
+      // Folosim numeRef.current în loc de nome din closure (evităm stale closure cu nome="")
+      const currentNume = numeRef.current;
+      if (data.jucator !== currentNume) {
         setOpponent(data);
         opponentRef.current = data;
 
@@ -219,15 +224,16 @@ function ArenaMaster({ room }) {
           fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
         }
 
-        // Set attacker only ONCE (prevent flickering from repeated join events)
+        // Set attacker only ONCE — guard și pentru "" (stale closure cu nome gol)
         setAtacantName(prev => {
-          if (prev !== null) return prev;
-          if (!isPrivate && !isProvocare) return [nume, data.jucator].sort()[0];
+          if (prev !== null && prev !== "") return prev;
+          const n = numeRef.current;
+          if (!n) return null; // nome nu e încă setat, resetăm la null să poată fi setat mai târziu
+          if (!isPrivate && !isProvocare) return [n, data.jucator].sort()[0];
           // Deterministic 50/50 bazat pe codul camerei — ambii jucători calculează același rezultat
           const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
           const hostAttacks = roomSum % 2 === 0;
-          // dacă hostAttacks: host-ul atacă; altfel joiner-ul atacă
-          return hostAttacks ? (isHost ? nume : data.jucator) : (isHost ? data.jucator : nume);
+          return hostAttacks ? (isHost ? n : data.jucator) : (isHost ? data.jucator : n);
         });
 
         broadcastJoin();
@@ -280,12 +286,14 @@ function ArenaMaster({ room }) {
   }, [messages]);
 
 
+  // Retry interval: se anunță la fiecare 3s până apare adversarul
+  // Pornește imediat când avem nume — nu mai depinde de subscription_succeeded
   useEffect(() => {
-    if (isPrivate && !opponent && !rezultat && !isStriking && !isBotMatch) {
-      const retry = setTimeout(broadcastJoin, 3000);
-      return () => clearTimeout(retry);
-    }
-  }, [opponent, isPrivate, broadcastJoin, rezultat, isStriking, isBotMatch]);
+    if (!isPrivate || opponent || rezultat || isStriking || isBotMatch || !nume) return;
+    broadcastJoin(); // trimite imediat
+    const interval = setInterval(broadcastJoin, 3000);
+    return () => clearInterval(interval);
+  }, [isPrivate, opponent, rezultat, isStriking, isBotMatch, nume, broadcastJoin]);
 
   const executeBattle = async (data) => {
     if (rezultat || isStriking) return;
