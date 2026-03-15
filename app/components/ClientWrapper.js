@@ -29,6 +29,15 @@ export default function ClientWrapper({ children }) {
   
   const pusherRef = useRef(null);
 
+  // Inițializare Pusher o singură dată — disconnect la unmount
+  useEffect(() => {
+    pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+    return () => {
+      pusherRef.current?.disconnect();
+      pusherRef.current = null;
+    };
+  }, []);
+
   const triggerVibrate = useCallback((pattern = [50]) => {
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(pattern);
   }, []);
@@ -179,26 +188,28 @@ export default function ClientWrapper({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) return;
-    if (!pusherRef.current) pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
-    
-    const globalChannel = pusherRef.current.subscribe('global');
-    globalChannel.bind('update-complet', (data) => {
+    if (!isHydrated || !pusherRef.current) return;
+
+    const channel = pusherRef.current.subscribe('global');
+    channel.bind('update-complet', (data) => {
       if (data.total !== undefined) setTotalGlobal(parseInt(data.total));
       if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
-      if (data.topJucatori) setTopJucatori(data.topJucatori); 
+      if (data.topJucatori) setTopJucatori(data.topJucatori);
     });
 
-    return () => { globalChannel.unbind_all(); pusherRef.current.unsubscribe('global'); };
+    return () => {
+      channel.unbind_all();
+      pusherRef.current?.unsubscribe('global');
+    };
   }, [isHydrated]);
 
   useEffect(() => {
-    if (!isHydrated || !nume) return;
-    if (!pusherRef.current) pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+    if (!isHydrated || !nume || !pusherRef.current) return;
 
-    const userChannel = pusherRef.current.subscribe(`user-notif-${nume}`);
+    const channelName = `user-notif-${nume}`;
+    const channel = pusherRef.current.subscribe(channelName);
     let notifTimer = null;
-    userChannel.bind('duel-request', (data) => {
+    channel.bind('duel-request', (data) => {
       setNotificare({ deLa: data.deLa, roomId: data.roomId, teamId: data.teamId || null });
       if (notifTimer) clearTimeout(notifTimer);
       notifTimer = setTimeout(() => setNotificare(null), 6000);
@@ -206,8 +217,8 @@ export default function ClientWrapper({ children }) {
 
     return () => {
       if (notifTimer) clearTimeout(notifTimer);
-      userChannel.unbind_all();
-      if (pusherRef.current) pusherRef.current.unsubscribe(`user-notif-${nume}`);
+      channel.unbind_all();
+      pusherRef.current?.unsubscribe(channelName);
     };
   }, [isHydrated, nume]);
 
