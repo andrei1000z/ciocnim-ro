@@ -104,6 +104,7 @@ function ArenaMaster({ room }) {
   const chatContainerRef = useRef(null);
   const [revansaRequests, setRevansaRequests] = useState({});
   const opponentRef = useRef(null);
+  const matchmakingCancelledRef = useRef(false);
   const teamIdPreluat = searchParams.get("teamId"); 
   const isHost = searchParams.get("host") === "true"; 
   const isPrivate = room.includes("privat-");
@@ -143,20 +144,21 @@ function ArenaMaster({ room }) {
     if (opponent || rezultat || isStriking || isBotMatch) return;
     if (isPrivate && !isProvocare) return;
 
-    const waitTime = isProvocare ? 11000 : 5000;
+    const isArenaRoom = room.startsWith('arena-');
+    const waitTime = isArenaRoom ? 7000 : (isProvocare ? 11000 : 5000);
 
     const botTimeout = setTimeout(() => {
+      // Scoate camera din coada de matchmaking (dacă e arenă)
+      if (isArenaRoom) {
+        fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
+      }
       setIsBotMatch(true);
       const botName = "🤖 BOT";
-      
       const culoriDisponibile = ['red', 'blue', 'gold', 'diamond', 'cosmic'];
       const randomSkin = culoriDisponibile[Math.floor(Math.random() * culoriDisponibile.length)];
-      
       setOpponent({ jucator: botName, skin: randomSkin, isGolden: false, hasStar: false, regiune: "România" });
-      
       const botLoveseste = Math.random() > 0.5;
       setAtacantName(botLoveseste ? botName : nume);
-
     }, waitTime);
 
     return () => clearTimeout(botTimeout);
@@ -195,6 +197,12 @@ function ArenaMaster({ room }) {
       if (data.jucator !== nume) {
         setOpponent(data);
         opponentRef.current = data;
+
+        // Scoate camera din coada de matchmaking (o singură dată, doar host-ul)
+        if (isHost && room.startsWith('arena-') && !matchmakingCancelledRef.current) {
+          matchmakingCancelledRef.current = true;
+          fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
+        }
 
         // Set attacker only ONCE (prevent flickering from repeated join events)
         setAtacantName(prev => {

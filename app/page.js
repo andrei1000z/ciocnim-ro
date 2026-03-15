@@ -451,6 +451,7 @@ function HomeContent() {
   const [joinModalNume, setJoinModalNume] = useState("");
   const [toastMsg, setToastMsg] = useState("");
   const [numeError, setNumeError] = useState("");
+  const [isJoiningArena, setIsJoiningArena] = useState(false);
   const teamPusherRef = useRef(null);
 
   useEffect(() => {
@@ -555,6 +556,17 @@ function HomeContent() {
     const ok = await setNume(final);
     setIsSavingName(false);
     if (ok) { setLocalNume(final); setShowJoinModal(false); }
+  };
+
+  const handleArena = async () => {
+    if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!");
+    triggerVibrate(); setIsJoiningArena(true);
+    try {
+      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-matchmaking' }) });
+      const data = await res.json();
+      if (data.success) router.push(`/joc/${data.roomId}?host=${data.isHost}&skin=${userStats.skin || 'red'}`);
+    } catch { alert("Eroare de rețea!"); }
+    finally { setIsJoiningArena(false); }
   };
 
   const handleCreateTeam = async () => {
@@ -669,7 +681,7 @@ function HomeContent() {
         <div className="space-y-2">
           <ActionButton icon="⚔️" title="Meci cu un Prieten" subtitle="Cameră privată" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
           <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup Privat"} subtitle="Invită prietenii în grupul tău" onClick={handleCreateTeam} loading={loadingTeam} />
-          <ActionButton icon="🌍" title="Arenă Națională" subtitle="Joacă cu cineva din România" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); router.push(`/joc/global-arena?skin=${userStats.skin || "red"}`); }} />
+          <ActionButton icon="🌍" title="Arenă Națională" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
         </div>
       </motion.div>
 

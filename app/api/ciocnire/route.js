@@ -450,6 +450,27 @@ export async function POST(request) {
         return NextResponse.json({ success: false });
       }
 
+      case 'arena-matchmaking': {
+        const now = Date.now();
+        // Curăță intrările vechi (>12s) din coadă
+        await redis.zremrangebyscore('arena:queue', 0, now - 12000);
+        // Încearcă să găsească o cameră care așteaptă
+        const waiting = await redis.zpopmin('arena:queue', 1);
+        if (waiting && waiting.length >= 1) {
+          const foundRoom = waiting[0];
+          return NextResponse.json({ success: true, roomId: foundRoom, isHost: false });
+        }
+        // Nu e nimeni — creăm camera și așteptăm
+        const newRoomId = `arena-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+        await redis.zadd('arena:queue', now, newRoomId);
+        return NextResponse.json({ success: true, roomId: newRoomId, isHost: true });
+      }
+
+      case 'arena-cancel-matchmaking': {
+        if (roomId) await redis.zrem('arena:queue', roomId);
+        return NextResponse.json({ success: true });
+      }
+
       case 'creeaza-camera-privata': {
         // Generăm un cod unic - reîncercăm dacă e deja rezervat
         let cod, attempts = 0;
