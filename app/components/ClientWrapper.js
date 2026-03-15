@@ -32,15 +32,16 @@ export default function ClientWrapper({ children }) {
   useEffect(() => {
     const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
     const wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
-    pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-      cluster: 'eu',
-      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
+    const pusherOpts = {
+      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST,
       wsPort: wsPort,
       wssPort: wsPort,
       forceTLS: forceTLS,
       disableStats: true,
       enabledTransports: forceTLS ? ['wss'] : ['ws'],
-    });
+    };
+    if (!process.env.NEXT_PUBLIC_PUSHER_HOST) pusherOpts.cluster = 'eu';
+    pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, pusherOpts);
     return () => {
       pusherRef.current?.disconnect();
       pusherRef.current = null;
