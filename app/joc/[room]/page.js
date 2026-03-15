@@ -117,29 +117,27 @@ function ArenaMaster({ room }) {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
   };
 
-  const broadcastJoin = useCallback(() => {
+  const broadcastJoin = useCallback(async () => {
     if (!nume) return;
-    fetch('/api/ciocnire', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        roomId: room, 
-        actiune: 'join', 
-        jucator: nume, 
-        skin: me.skin, 
-        isGolden: me.isGolden, 
-        hasStar: me.hasStar, 
-        isHost: isHost,
-        regiune: userStats.regiune
-      })
-    });
-    if (me.isGolden) {
-      updateStats('golden');
-    }
-    if (me.hasStar) {
-      updateStats('star');
-    }
-  }, [room, nume, me, isHost, userStats.regiune, updateStats]);
+    try {
+      const res = await fetch('/api/ciocnire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: room, actiune: 'join', jucator: nume,
+          skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar,
+          isHost: isHost, regiune: userStats.regiune
+        })
+      });
+      const data = await res.json();
+      if (!data.success && data.error === "Camera este ocupată!") {
+        router.replace('/?error=ocupata');
+        return;
+      }
+    } catch {}
+    if (me.isGolden) updateStats('golden');
+    if (me.hasStar) updateStats('star');
+  }, [room, nume, me, isHost, userStats.regiune, updateStats, router]);
 
   // LOGICĂ BOT
   useEffect(() => {
@@ -202,10 +200,12 @@ function ArenaMaster({ room }) {
         // Set attacker only ONCE (prevent flickering from repeated join events)
         setAtacantName(prev => {
           if (prev !== null) return prev;
-          // Arena: both can always strike (isArena=true), but set for consistency
           if (!isPrivate && !isProvocare) return [nume, data.jucator].sort()[0];
-          // Provoaca + private: truly random 50/50
-          return Math.random() < 0.5 ? nume : data.jucator;
+          // Deterministic 50/50 bazat pe codul camerei — ambii jucători calculează același rezultat
+          const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+          const hostAttacks = roomSum % 2 === 0;
+          // dacă hostAttacks: host-ul atacă; altfel joiner-ul atacă
+          return hostAttacks ? (isHost ? nume : data.jucator) : (isHost ? data.jucator : nume);
         });
 
         broadcastJoin();

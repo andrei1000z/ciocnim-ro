@@ -253,9 +253,31 @@ export async function POST(request) {
       }
 
       case 'join': {
-        await pusher.trigger(`arena-v22-${roomId}`, 'join', { 
-          jucator: jucator.trim().toUpperCase(), skin, isGolden, hasStar, regiune: regiune, t: Date.now(), seed: body.seed 
+        const cleanName = jucator.trim().toUpperCase();
+        // Tracking jucători per cameră (max 2)
+        if (roomId.startsWith('privat-')) {
+          const playerSetKey = `room:${roomId}:players`;
+          const added = await redis.sadd(playerSetKey, cleanName);
+          await redis.expire(playerSetKey, 7200);
+          if (added === 1) {
+            const count = await redis.scard(playerSetKey);
+            if (count > 2) {
+              await redis.srem(playerSetKey, cleanName);
+              return NextResponse.json({ success: false, error: "Camera este ocupată!" });
+            }
+          }
+        }
+        await pusher.trigger(`arena-v22-${roomId}`, 'join', {
+          jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: body.isHost, t: Date.now()
         });
+        return NextResponse.json({ success: true });
+      }
+
+      case 'check-room': {
+        const cod = body.cod;
+        if (!cod) return NextResponse.json({ success: false, error: "Cod lipsă" });
+        const count = await redis.scard(`room:privat-${cod}:players`);
+        if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." });
         return NextResponse.json({ success: true });
       }
 
@@ -420,9 +442,14 @@ export async function POST(request) {
       }
 
       case 'creeaza-camera-privata': {
-        const codPIN = Math.floor(1000 + Math.random() * 9000).toString();
-        await redis.setex(`room:${codPIN}`, 3600, JSON.stringify({ creator, t: Date.now() }));
-        return NextResponse.json({ success: true, cod: codPIN });
+        // Generăm un cod unic - reîncercăm dacă e deja rezervat
+        let cod, attempts = 0;
+        do {
+          cod = Math.random().toString(36).substring(2, 6).toUpperCase();
+          attempts++;
+        } while (attempts < 20 && await redis.exists(`room:privat-${cod}`));
+        await redis.setex(`room:privat-${cod}`, 7200, JSON.stringify({ status: 'waiting', t: Date.now() }));
+        return NextResponse.json({ success: true, cod });
       }
 
       default:

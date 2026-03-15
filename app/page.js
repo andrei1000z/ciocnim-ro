@@ -155,24 +155,38 @@ const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => (
 // ─── Modal Meci Privat ──────────────────────────────────────────────────────────
 const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   const [roomCode, setRoomCode] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [roomError, setRoomError] = useState("");
 
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
+    if (isOpen) { document.body.style.overflow = "hidden"; setRoomError(""); }
     else document.body.style.overflow = "unset";
     return () => { document.body.style.overflow = "unset"; };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const createRoom = () => {
-    const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-    onClose();
-    router.push(`/joc/privat-${code}?host=true&skin=${userSkin}`);
+  const createRoom = async () => {
+    setIsCreating(true);
+    try {
+      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'creeaza-camera-privata' }) });
+      const data = await res.json();
+      if (data.success) { onClose(); router.push(`/joc/privat-${data.cod}?host=true&skin=${userSkin}`); }
+    } catch { setRoomError("Eroare de rețea. Încearcă din nou."); }
+    finally { setIsCreating(false); }
   };
 
-  const joinRoom = () => {
-    if (roomCode.length >= 3) { onClose(); router.push(`/joc/privat-${roomCode}?host=false&skin=${userSkin}`); }
-    else alert("Codul trebuie să aibă minim 3 caractere!");
+  const joinRoom = async () => {
+    if (roomCode.length < 3) { setRoomError("Codul trebuie să aibă minim 3 caractere!"); return; }
+    setIsJoining(true); setRoomError("");
+    try {
+      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'check-room', cod: roomCode }) });
+      const data = await res.json();
+      if (!data.success) { setRoomError(data.error || "Camera este ocupată!"); }
+      else { onClose(); router.push(`/joc/privat-${roomCode}?host=false&skin=${userSkin}`); }
+    } catch { setRoomError("Eroare de rețea. Încearcă din nou."); }
+    finally { setIsJoining(false); }
   };
 
   const modalContent = (
@@ -203,9 +217,10 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             onClick={createRoom}
-            className="w-full bg-red-800 hover:bg-red-900 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-red-900/20"
+            disabled={isCreating}
+            className="w-full bg-red-800 hover:bg-red-900 disabled:opacity-60 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-red-900/20"
           >
-            ➕ Creează Cameră Nouă
+            {isCreating ? "⏳ Se creează..." : "➕ Creează Cameră Nouă"}
           </motion.button>
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-100" />
@@ -214,19 +229,21 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
           </div>
           <input
             value={roomCode}
-            onChange={e => setRoomCode(e.target.value.toUpperCase().trim())}
+            onChange={e => { setRoomCode(e.target.value.toUpperCase().trim()); setRoomError(""); }}
             onKeyDown={e => e.key === "Enter" && joinRoom()}
             placeholder="COD CAMERĂ"
             maxLength={6}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 font-bold text-center text-base uppercase outline-none focus:border-red-800 transition-all bg-gray-50 focus:bg-white"
+            className={`w-full px-4 py-3 rounded-2xl border-2 font-bold text-center text-base uppercase outline-none transition-all bg-gray-50 focus:bg-white ${roomError ? "border-red-400 focus:border-red-600" : "border-gray-200 focus:border-red-800"}`}
           />
+          {roomError && <p className="text-red-500 text-xs font-semibold text-center -mt-1">{roomError}</p>}
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             onClick={joinRoom}
-            className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-2xl font-bold text-sm transition-all"
+            disabled={isJoining}
+            className="w-full bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-sm transition-all"
           >
-            🎯 Intră în Joc
+            {isJoining ? "⏳ Se verifică..." : "🎯 Intră în Joc"}
           </motion.button>
         </div>
       </motion.div>
@@ -407,11 +424,21 @@ function HomeContent() {
   const [hasInitializedName, setHasInitializedName] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinModalNume, setJoinModalNume] = useState("");
+  const [toastMsg, setToastMsg] = useState("");
   const teamPusherRef = useRef(null);
 
   useEffect(() => {
     if (nume && !hasInitializedName) { setLocalNume(nume); setHasInitializedName(true); }
   }, [nume, hasInitializedName]);
+
+  useEffect(() => {
+    if (searchParams.get("error") === "ocupata") {
+      setToastMsg("Camera este ocupată! Încearcă alt cod.");
+      router.replace("/");
+      const t = setTimeout(() => setToastMsg(""), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, router]);
 
   const getStoredTeamIds = () => {
     try { return JSON.parse(localStorage.getItem("c_teamIds") || "[]"); } catch { return []; }
@@ -663,6 +690,17 @@ function HomeContent() {
       </motion.div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
+
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-red-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl whitespace-nowrap"
+          >
+            🚫 {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showJoinModal && typeof document !== "undefined" && createPortal(
