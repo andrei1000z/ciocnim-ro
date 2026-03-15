@@ -486,8 +486,9 @@ function HomeContent() {
 
     if (!teamPusherRef.current) {
       teamPusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-        wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST,
-        wsPort: parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT),
+        cluster: 'eu',
+        wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
+        wsPort: process.env.NEXT_PUBLIC_PUSHER_PORT ? parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT) : undefined,
         forceTLS: false,
         disableStats: true,
         enabledTransports: ['ws', 'wss'],

@@ -8,7 +8,7 @@
 
 import { useEffect, useState, createContext, useContext, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
@@ -17,7 +17,6 @@ const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", teamId: null,
 
 export default function ClientWrapper({ children }) {
   const router = useRouter();
-  const pathname = usePathname();
   
   const [userStats, setUserStats] = useState(DEFAULT_STATS);
   const [totalGlobal, setTotalGlobal] = useState(0);
@@ -32,8 +31,9 @@ export default function ClientWrapper({ children }) {
   // Inițializare Pusher o singură dată — disconnect la unmount
   useEffect(() => {
     pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST,
-      wsPort: parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT),
+      cluster: 'eu',
+      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
+      wsPort: process.env.NEXT_PUBLIC_PUSHER_PORT ? parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT) : undefined,
       forceTLS: false,
       disableStats: true,
       enabledTransports: ['ws', 'wss'],
