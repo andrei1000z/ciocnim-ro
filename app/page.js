@@ -555,7 +555,7 @@ function HomeContent() {
         <p className="text-[11px] font-semibold text-red-800/35 uppercase tracking-[0.4em] mt-1.5">Tradiția Românească · Paști 2026</p>
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-4 inline-flex items-center gap-2 border border-red-900/12 bg-red-50/60 text-red-900 px-4 py-2 rounded-full text-sm font-bold">
           🥚 <span className="tabular-nums">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
-          <span className="font-normal text-red-900/40 text-xs">ciocniri</span>
+          <span className="font-normal text-red-900/40 text-xs">Ciocniri Naționale</span>
         </motion.div>
       </motion.div>
 

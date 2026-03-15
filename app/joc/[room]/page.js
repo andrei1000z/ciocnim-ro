@@ -177,6 +177,7 @@ function ArenaMaster({ room }) {
                  incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
               } else {
                  setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+                 incrementGlobal(false); // contorul crește și la înfrângere
               }
           }, 1500 + Math.random() * 1500);
           return () => clearTimeout(timeout);
@@ -307,11 +308,11 @@ function ArenaMaster({ room }) {
     
     const castigaCelCareDaRandom = Math.random() < 0.5;
 
-    // Aici dăm trigger la `incrementGlobal` pentru noi, ca atacant
     if (castigaCelCareDaRandom) {
        incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
     } else {
        setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+       if (isBotMatch) incrementGlobal(false); // contorul crește și la înfrângere cu bot
     }
 
     if (isBotMatch) {

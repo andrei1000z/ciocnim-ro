@@ -261,28 +261,10 @@ export async function POST(request) {
 
       case 'lovitura': {
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
-        
-        // Lovitura este ACUM pură animație și sincronizare în arenă.
-        // Nu se mai ocupă deloc de incrementarea scorului (previne dublurile).
-        const pipeline = redis.pipeline();
-        pipeline.incr('global_ciocniri_total');
-        const pipelineResults = await pipeline.exec();
-        const noulTotal = pipelineResults[0][1]; 
-        
-        const topActualizat = await getClasamentRegiuni();
-        const topJucatoriActualizat = await getClasamentJucatori();
-
-        await Promise.all([
-          pusher.trigger(`arena-v22-${roomId}`, 'lovitura', { 
-            jucator: jucator.trim().toUpperCase(), castigaCelCareDa, atacant: atacant.trim().toUpperCase(), t: Date.now() 
-          }),
-          pusher.trigger('global', 'update-complet', { 
-            total: noulTotal, 
-            topRegiuni: topActualizat,
-            topJucatori: topJucatoriActualizat
-          })
-        ]);
-
+        // Lovitura = sincronizare pură în arenă. Contorul crește EXCLUSIV prin increment-global (o singură dată, de la câștigător sau de la cel care pierde cu bot).
+        await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', {
+          jucator: jucator.trim().toUpperCase(), castigaCelCareDa, atacant: atacant.trim().toUpperCase(), t: Date.now()
+        });
         return NextResponse.json({ success: true });
       }
 
