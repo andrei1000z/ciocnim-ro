@@ -105,6 +105,7 @@ function ArenaMaster({ room }) {
   const [revansaRequests, setRevansaRequests] = useState({});
   const opponentRef = useRef(null);
   const matchmakingCancelledRef = useRef(false);
+  const lastStrikeRef = useRef(0); // debounce: max 1 lovitură la 150ms
   const teamIdPreluat = searchParams.get("teamId"); 
   const isHost = searchParams.get("host") === "true"; 
   const isPrivate = room.includes("privat-");
@@ -318,6 +319,9 @@ function ArenaMaster({ room }) {
 
   const handleStrike = () => {
     if (!canStrike) return;
+    const now = Date.now();
+    if (now - lastStrikeRef.current < 150) return;
+    lastStrikeRef.current = now;
     
     const castigaCelCareDaRandom = Math.random() < 0.5;
 

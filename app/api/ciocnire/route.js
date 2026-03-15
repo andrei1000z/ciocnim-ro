@@ -185,10 +185,12 @@ export async function POST(request) {
     switch (actiune) {
       
       case 'get-counter': {
-        const totalCount = await redis.get('global_ciocniri_total') || 0;
-        const topRegiuni = await getClasamentRegiuni();
-        const topJucatori = await getClasamentJucatori();
-        return NextResponse.json({ success: true, total: parseInt(totalCount), topRegiuni, topJucatori });
+        const [totalCount, topRegiuni, topJucatori] = await Promise.all([
+          redis.get('global_ciocniri_total'),
+          getClasamentRegiuni(),
+          getClasamentJucatori()
+        ]);
+        return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori });
       }
 
       case 'increment-global': {
@@ -215,41 +217,29 @@ export async function POST(request) {
             }
         }
         
-        const results = await pipeline.exec();
+        const safeName = jucator && jucator.trim() !== "" ? jucator.trim().toUpperCase() : null;
+
+        // Runda 1: pipeline (scrieri) + leaderboard reads + user stats — toate în paralel
+        const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([
+          pipeline.exec(),
+          getClasamentRegiuni(),
+          getClasamentJucatori(),
+          safeName ? getUserStats(safeName) : Promise.resolve(null)
+        ]);
         const noulTotal = results[0][1];
-        
-        // Update user stats and check achievements
-        if (jucator && jucator.trim() !== "") {
-          const safeName = jucator.trim().toUpperCase();
-          const currentStats = await getUserStats(safeName);
-          
-          const updates = {
-            wins: 1,
-            currentStreak: esteCastigator ? currentStats.currentStreak + 1 : 0
-          };
-          
-          if (teamId) {
-            updates.teamWins = 1;
-          }
-          
-          await updateUserStats(safeName, updates);
-          
-          // Check for achievements
-          const updatedStats = { ...currentStats, ...updates };
-          await checkAndAwardAchievements(safeName, updatedStats, teamId);
-        }
-        
-        const topActualizat = await getClasamentRegiuni();
-        const topJucatoriActualizat = await getClasamentJucatori();
 
-        // Update în timp real pentru toți cei de pe Home
-        await pusher.trigger('global', 'update-complet', {
-            total: noulTotal,
-            topRegiuni: topActualizat,
-            topJucatori: topJucatoriActualizat
-        });
+        // Runda 2: scrieri stats + pusher — în paralel între ele
+        const updates = safeName && currentStats ? {
+          wins: 1,
+          currentStreak: esteCastigator ? currentStats.currentStreak + 1 : 0,
+          ...(teamId ? { teamWins: 1 } : {})
+        } : null;
 
-        // Update în timp real pentru clasamentul grupului
+        await Promise.all([
+          pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }),
+          updates ? updateUserStats(safeName, updates).then(() => checkAndAwardAchievements(safeName, { ...currentStats, ...updates }, teamId)) : Promise.resolve()
+        ]);
+
         const teamIdStr = Array.isArray(teamId) ? teamId[0] : teamId;
         if (teamIdStr && teamIdStr !== "null" && teamIdStr !== "") {
           await pusher.trigger(`team-${teamIdStr}`, 'team-update', { t: Date.now() });
@@ -364,35 +354,34 @@ export async function POST(request) {
             return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" });
         }
 
+        // Citim toate scorurile în paralel înainte de a construi pipeline-ul
+        const hasTeams = oldClean && oldClean !== newClean && teamIds && Array.isArray(teamIds) && teamIds.length > 0;
+        const [globalScore, ...teamScores] = (oldClean && oldClean !== newClean)
+          ? await Promise.all([
+              redis.zscore('leaderboard_jucatori', oldClean),
+              ...(hasTeams ? teamIds.map(tId => redis.zscore(`team:${tId}:membri`, oldClean)) : [])
+            ])
+          : [null];
+
         const pipeline = redis.pipeline();
         pipeline.set(`nume_rezervat:${newClean}`, "1");
 
         // CLEAN-UP PERFECT (Fără duplicate în grupuri și topuri)
         if (oldClean && oldClean !== newClean) {
             pipeline.del(`nume_rezervat:${oldClean}`);
-            
-            // Mutăm scorul din clasamentul global (dacă există)
-            const globalScore = await redis.zscore('leaderboard_jucatori', oldClean);
             pipeline.zrem('leaderboard_jucatori', oldClean);
             if (globalScore !== null) {
                pipeline.zadd('leaderboard_jucatori', parseFloat(globalScore), newClean);
             }
 
-            // Înlocuim numele DOAR în grupurile din care face parte, și PĂSTRĂM scorul specific acelui grup
-            if (teamIds && Array.isArray(teamIds)) {
-                for (const tId of teamIds) {
-                    const scorInGrup = await redis.zscore(`team:${tId}:membri`, oldClean);
-                    pipeline.zrem(`team:${tId}:membri`, oldClean); // Elimină fantoma veche
-                    
-                    if (scorInGrup !== null) {
-                       pipeline.zadd(`team:${tId}:membri`, parseFloat(scorInGrup), newClean); 
-                    } else {
-                       pipeline.zadd(`team:${tId}:membri`, 0, newClean);
-                    }
-                }
+            if (hasTeams) {
+                teamIds.forEach((tId, i) => {
+                    pipeline.zrem(`team:${tId}:membri`, oldClean);
+                    pipeline.zadd(`team:${tId}:membri`, teamScores[i] !== null ? parseFloat(teamScores[i]) : 0, newClean);
+                });
             }
         }
-        
+
         await pipeline.exec();
 
         const topJucatoriActualizat = await getClasamentJucatori();
