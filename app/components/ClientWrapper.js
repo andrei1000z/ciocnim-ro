@@ -292,12 +292,10 @@ export default function ClientWrapper({ children }) {
       </div>
 
       {!isHydrated && (
-        <div className="fixed inset-0 bg-[#050202] z-[100001] flex flex-col items-center justify-center pattern-tradition overflow-hidden">
-          <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-700/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-yellow-700/5 rounded-full blur-[150px]" />
-          <div className="relative z-10 flex flex-col items-center gap-6 animate-pulse">
-            <span className="text-7xl drop-shadow-[0_0_40px_rgba(220,38,38,0.8)] animate-float-v9 filter sepia-[0.3]">🥚</span>
-            <div className="text-amber-500/50 text-[10px] md:text-xs font-black uppercase tracking-[1em] drop-shadow-sm">Așezăm Masa...</div>
+        <div className="fixed inset-0 bg-white z-[100001] flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center gap-5">
+            <span className="text-8xl animate-bounce">🥚</span>
+            <p className="text-sm font-black text-red-800 uppercase tracking-[0.4em] animate-pulse">Se încarcă...</p>
           </div>
         </div>
       )}

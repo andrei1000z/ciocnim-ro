@@ -58,13 +58,15 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
 
     if (idx !== -1) {
       if (idx === 0) return { myRank: 1, winsNeeded: 0, targetRank: 1 };
+      // Folosim scorul din clasament (server-side) ca referință
+      const myServerScore = parseInt(topPlayers[idx].scor) || 0;
       // Găsim primul jucător de deasupra cu scor strict mai mare
       let targetIdx = idx - 1;
-      while (targetIdx > 0 && (parseInt(topPlayers[targetIdx].scor) || 0) <= myScoreNum) {
+      while (targetIdx > 0 && (parseInt(topPlayers[targetIdx].scor) || 0) <= myServerScore) {
         targetIdx--;
       }
       const targetScore = parseInt(topPlayers[targetIdx].scor) || 0;
-      const wins = targetScore <= myScoreNum ? 1 : targetScore - myScoreNum;
+      const wins = Math.max(1, targetScore - myServerScore);
       return { myRank: idx + 1, winsNeeded: wins, targetRank: targetIdx + 1 };
     }
 
@@ -105,7 +107,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                         <span className="text-base w-6 text-center">{medals[i] || `${i + 1}.`}</span>
                         <span className="font-bold text-gray-800 text-sm">{p.nume}</span>
                       </div>
-                      <span className="font-bold text-red-800 text-sm">{parseInt(p.scor) || 0} 🥚</span>
+                      <span className="font-bold text-red-800 text-sm">{parseInt(p.scor) || 0} 🏆</span>
                     </div>
                   ))}
                   {myName && (myRank !== null || targetRank !== null) && (
@@ -131,7 +133,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                   <div key={reg.regiune} className="space-y-1.5">
                     <div className="flex justify-between text-sm">
                       <span className="font-bold text-gray-800">{medals[i] || `${i + 1}.`} {reg.regiune}</span>
-                      <span className="font-bold text-red-800">{parseInt(reg.scor) || 0} 🥚</span>
+                      <span className="font-bold text-red-800">{parseInt(reg.scor) || 0} 🏆</span>
                     </div>
                     <div className="w-full bg-red-100/60 rounded-full h-1.5 overflow-hidden">
                       <motion.div
@@ -344,7 +346,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
                 <span className="font-bold text-gray-800 text-sm">{m.member}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-red-800 text-xs">{parseInt(m.score) || 0} 🥚</span>
+                <span className="font-bold text-red-800 text-xs">{parseInt(m.score) || 0} 🏆</span>
                 {m.member !== numePreluat?.toUpperCase().trim() && (
                   <button onClick={() => onProvoca(m.member, currentTeam.details.id)} className="w-7 h-7 bg-red-800 text-white rounded-lg text-xs hover:bg-red-900 transition-all active:scale-95 flex items-center justify-center" title="Provoacă">⚔️</button>
                 )}
@@ -494,7 +496,7 @@ function HomeContent() {
         wssPort: _wsPort,
         forceTLS: _forceTLS,
         disableStats: true,
-        enabledTransports: _forceTLS ? ['wss'] : ['ws'],
+        enabledTransports: ['ws', 'wss'],
       });
     }
 
