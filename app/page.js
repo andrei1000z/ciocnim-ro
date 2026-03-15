@@ -485,7 +485,13 @@ function HomeContent() {
     if (!isHydrated || !teamIds) return;
 
     if (!teamPusherRef.current) {
-      teamPusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+      teamPusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+        wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST,
+        wsPort: parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT),
+        forceTLS: false,
+        disableStats: true,
+        enabledTransports: ['ws', 'wss'],
+      });
     }
 
     const channels = teamIds.split(",").map(tid => {
@@ -505,8 +511,10 @@ function HomeContent() {
     return () => {
       channels.forEach(({ tid, ch }) => {
         ch.unbind_all();
-        if (teamPusherRef.current) teamPusherRef.current.unsubscribe(`team-${tid}`);
+        teamPusherRef.current?.unsubscribe(`team-${tid}`);
       });
+      teamPusherRef.current?.disconnect();
+      teamPusherRef.current = null;
     };
   }, [isHydrated, teamIds, nume]);
 

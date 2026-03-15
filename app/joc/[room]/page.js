@@ -186,7 +186,13 @@ function ArenaMaster({ room }) {
   // PUSHER SYNC 
   useEffect(() => {
     if (isBotMatch) return;
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, { cluster: "eu", forceTLS: true });
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST,
+      wsPort: parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT),
+      forceTLS: false,
+      disableStats: true,
+      enabledTransports: ['ws', 'wss'],
+    });
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
     arenaChannel.bind("pusher:subscription_succeeded", () => {
