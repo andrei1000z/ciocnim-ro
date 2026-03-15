@@ -190,11 +190,12 @@ function ArenaMaster({ room }) {
       }
   }, [isBotMatch, atacantName, rezultat, isStriking, incrementGlobal, setUserStats, teamIdPreluat]);
 
-  // PUSHER SYNC 
+  // PUSHER SYNC
   useEffect(() => {
     if (isBotMatch) return;
     const _forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
     const _wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
+    console.log('[PUSHER DEBUG] KEY:', process.env.NEXT_PUBLIC_PUSHER_KEY, 'HOST:', process.env.NEXT_PUBLIC_PUSHER_HOST, 'PORT:', _wsPort, 'TLS:', _forceTLS);
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
       wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
@@ -204,6 +205,8 @@ function ArenaMaster({ room }) {
       disableStats: true,
       enabledTransports: _forceTLS ? ['wss'] : ['ws'],
     });
+    pusher.connection.bind('state_change', (s) => console.log('[PUSHER STATE]', s.previous, '->', s.current));
+    pusher.connection.bind('error', (e) => console.log('[PUSHER ERROR]', JSON.stringify(e)));
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
     arenaChannel.bind("pusher:subscription_succeeded", () => {
