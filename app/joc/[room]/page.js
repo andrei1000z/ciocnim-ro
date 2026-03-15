@@ -195,7 +195,6 @@ function ArenaMaster({ room }) {
     if (isBotMatch) return;
     const _forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
     const _wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
-    console.log('[PUSHER DEBUG] KEY:', process.env.NEXT_PUBLIC_PUSHER_KEY, 'HOST:', process.env.NEXT_PUBLIC_PUSHER_HOST, 'PORT:', _wsPort, 'TLS:', _forceTLS);
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
       wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
@@ -205,11 +204,6 @@ function ArenaMaster({ room }) {
       disableStats: true,
       enabledTransports: ['ws', 'wss'],
     });
-    console.log('[PUSHER CREATED] state:', pusher.connection?.state, 'conn:', !!pusher.connection);
-    try {
-      pusher.connection.bind('state_change', (s) => console.log('[PUSHER STATE]', s.previous, '->', s.current));
-      pusher.connection.bind('error', (e) => console.log('[PUSHER ERROR]', JSON.stringify(e)));
-    } catch(e) { console.log('[PUSHER BIND ERROR]', e.message); }
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
     arenaChannel.bind("pusher:subscription_succeeded", () => {
