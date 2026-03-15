@@ -12,8 +12,8 @@ const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
   key: process.env.NEXT_PUBLIC_PUSHER_KEY,
   secret: process.env.PUSHER_SECRET,
-  host: '161.35.201.178',
-  port: 6001,
+  host: process.env.PUSHER_HOST || '161.35.201.178',
+  port: parseInt(process.env.PUSHER_PORT || '6001'),
   useTLS: false,
 });
 
