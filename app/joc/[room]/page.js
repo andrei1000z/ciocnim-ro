@@ -109,9 +109,8 @@ function ArenaMaster({ room }) {
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
 
-  // Arena națională: ambii pot lovi. Privat + bot: se respectă rândul (atacant/apărător)
   const isArena = !isPrivate && !isBotMatch;
-  const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && (isArena || atacantName === nume);
+  const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
 
   const playArenaSound = (name) => {
     try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
@@ -496,7 +495,7 @@ function ArenaMaster({ room }) {
               <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
               <span className="relative z-10 text-center flex flex-col items-center justify-center gap-1">
                 <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base">
-                  {canStrike ? "💥 CIOCNEȘTE OUL!" : isArena ? "⏳ SE PREGĂTEȘTE..." : "🛡️ APĂRĂ OUL!"}
+                  {canStrike ? "💥 CIOCNEȘTE OUL!" : "🛡️ APĂRĂ OUL!"}
                 </span>
                 {canStrike && (
                   <span className="text-[9px] md:text-[10px] opacity-80 normal-case tracking-widest font-bold text-amber-200 block">
