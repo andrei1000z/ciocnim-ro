@@ -434,10 +434,26 @@ export async function POST(request) {
 
       case 'redenumeste-echipa': {
         if (teamId && newName && newName.trim().length >= 3) {
+          const teamStats = await redis.hgetall(`team:${teamId}:stats`);
+          if (teamStats.creator && jucator && teamStats.creator !== jucator.trim().toUpperCase()) {
+            return NextResponse.json({ success: false, error: "Doar creatorul poate redenumi grupul." });
+          }
           await redis.set(`team:${teamId}:nume`, newName.toUpperCase().trim());
           return NextResponse.json({ success: true });
         }
         return NextResponse.json({ success: false });
+      }
+
+      case 'kick-member': {
+        const memberToKick = body.member;
+        if (!teamId || !memberToKick) return NextResponse.json({ success: false, error: "Date incomplete" });
+        const teamStats = await redis.hgetall(`team:${teamId}:stats`);
+        if (!teamStats.creator || !jucator || teamStats.creator !== jucator.trim().toUpperCase()) {
+          return NextResponse.json({ success: false, error: "Doar creatorul poate elimina membri." });
+        }
+        await redis.zrem(`team:${teamId}:membri`, memberToKick.trim().toUpperCase());
+        await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
+        return NextResponse.json({ success: true });
       }
 
       case 'arena-matchmaking': {

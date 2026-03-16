@@ -151,6 +151,23 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
             </motion.div>
           )}
         </AnimatePresence>
+        {myName && myRank !== null && (
+          <button
+            onClick={() => {
+              const text = myRank === 1
+                ? `Sunt Campionul Național la ciocnit ouă pe ciocnim.ro! Îndrăznește să mă provoci? 🥚🏆`
+                : `Sunt pe locul ${myRank} în clasamentul național de ciocnit ouă! Hai și tu la o ciocneală pe ciocnim.ro 🥚⚔️`;
+              if (navigator.share) {
+                navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
+              } else {
+                navigator.clipboard.writeText(`${text}\nhttps://ciocnim.ro`);
+              }
+            }}
+            className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-700 hover:text-red-900 hover:bg-red-50 transition-all flex items-center justify-center gap-2 rounded-b-xl"
+          >
+            <span>📲</span> Distribuie clasamentul tău
+          </button>
+        )}
       </div>
     </div>
   );
@@ -282,11 +299,12 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
 };
 
 // ─── Hub Grup Privat ────────────────────────────────────────────────────────────
-const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onLeave, onRename, onProvoca }) => {
+const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onLeave, onRename, onProvoca, onKick }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [copyText, setCopyText] = useState("🔗 Invită");
   const currentTeam = teams?.[activeTeamIndex];
   const [newName, setNewName] = useState(currentTeam?.details?.nume || "");
+  const isCreator = currentTeam?.details?.creator === numePreluat?.toUpperCase().trim();
 
   useEffect(() => {
     if (currentTeam) { setNewName(currentTeam.details.nume); setIsEditing(false); }
@@ -298,10 +316,11 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
 
   const handleInvite = async () => {
     const url = `${window.location.origin}/?joinTeam=${currentTeam.details.id}`;
+    const shareText = `Hai în grupul meu de ciocnit ouă! Intră pe ${url} și arată-ne cine are cel mai tare ou 🥚⚔️`;
     if (navigator.share) {
-      try { await navigator.share({ title: "Jucă Ciocnim cu mine!", url }); } catch {}
+      try { await navigator.share({ title: "Ciocnim.ro - Hai la ciocneală!", text: shareText, url }); } catch {}
     } else {
-      navigator.clipboard.writeText(url);
+      navigator.clipboard.writeText(shareText);
       setCopyText("✅ Copiat!");
       setTimeout(() => setCopyText("🔗 Invită"), 2000);
     }
@@ -321,17 +340,17 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
       </div>
       <div className="p-5 space-y-4">
         <div className="flex items-center gap-2">
-          {isEditing ? (
+          {isEditing && isCreator ? (
             <div className="flex gap-2 flex-1">
               <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-800 outline-none focus:border-red-800 bg-gray-50" />
               <button onClick={handleSave} className="px-3 py-2 bg-red-800 text-white rounded-xl text-sm font-bold hover:bg-red-900 transition-all">OK</button>
               <button onClick={() => setIsEditing(false)} className="px-2.5 py-2 bg-gray-100 rounded-xl text-sm hover:bg-gray-200 transition-all">✕</button>
             </div>
           ) : (
-            <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 flex-1 group">
+            <div className="flex items-center gap-2 flex-1">
               <span className="font-bold text-gray-900 text-sm">{currentTeam.details.nume}</span>
-              <span className="text-gray-300 group-hover:text-red-800 transition-colors text-xs">✏️</span>
-            </button>
+              {isCreator && <button onClick={() => setIsEditing(true)} className="text-gray-300 hover:text-red-800 transition-colors text-xs">✏️</button>}
+            </div>
           )}
         </div>
         <div className="flex gap-2">
@@ -348,7 +367,12 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
               <div className="flex items-center gap-2">
                 <span className="font-bold text-red-800 text-xs">{parseInt(m.score) || 0} 🏆</span>
                 {m.member !== numePreluat?.toUpperCase().trim() && (
-                  <button onClick={() => onProvoca(m.member, currentTeam.details.id)} className="w-7 h-7 bg-red-800 text-white rounded-lg text-xs hover:bg-red-900 transition-all active:scale-95 flex items-center justify-center" title="Provoacă">⚔️</button>
+                  <>
+                    <button onClick={() => onProvoca(m.member, currentTeam.details.id)} className="w-7 h-7 bg-red-800 text-white rounded-lg text-xs hover:bg-red-900 transition-all active:scale-95 flex items-center justify-center" title="Provoacă">⚔️</button>
+                    {isCreator && (
+                      <button onClick={() => onKick(m.member, currentTeam.details.id)} className="w-7 h-7 bg-gray-200 text-gray-500 rounded-lg text-xs hover:bg-red-100 hover:text-red-700 transition-all active:scale-95 flex items-center justify-center" title="Elimină din grup">✕</button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -602,7 +626,7 @@ function HomeContent() {
     if (nouNume.length < 3) return alert("Nume prea scurt.");
     triggerVibrate();
     setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, details: { ...t.details, nume: nouNume.toUpperCase().trim() } } : t));
-    fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "redenumeste-echipa", teamId, newName: nouNume }) });
+    fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "redenumeste-echipa", teamId, newName: nouNume, jucator: nume }) });
   };
 
   const handleLeaveTeam = (teamId) => {
@@ -611,6 +635,15 @@ function HomeContent() {
       setLoadedTeams(prev => prev.filter(t => t.details.id !== teamId));
       setActiveTeamIndex(0);
     }
+  };
+
+  const handleKickMember = async (member, teamId) => {
+    if (!confirm(`Ești sigur că vrei să-l elimini pe ${member} din grup?`)) return;
+    triggerVibrate();
+    try {
+      await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume }) });
+      setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, top: t.top.filter(m => m.member !== member) } : t));
+    } catch { alert("Eroare la eliminare."); }
   };
 
   const handleProvocare = async (oponent, teamId) => {
@@ -705,7 +738,7 @@ function HomeContent() {
         {loadedTeams.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
             <SectionLabel>Grupurile Mele</SectionLabel>
-            <GroupHub teams={loadedTeams} activeTeamIndex={activeTeamIndex} setActiveTeamIndex={setActiveTeamIndex} numePreluat={nume} onRename={handleRenameTeam} onProvoca={handleProvocare} onLeave={handleLeaveTeam} />
+            <GroupHub teams={loadedTeams} activeTeamIndex={activeTeamIndex} setActiveTeamIndex={setActiveTeamIndex} numePreluat={nume} onRename={handleRenameTeam} onProvoca={handleProvocare} onLeave={handleLeaveTeam} onKick={handleKickMember} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -736,13 +769,33 @@ function HomeContent() {
         </div>
       </motion.div>
 
+      {/* SHARE SITE */}
+      <motion.div {...fadeUp(0.26)}>
+        <button
+          onClick={() => {
+            const text = `Am descoperit cel mai tare joc de Paște! Hai la o ciocneală de ouă pe ciocnim.ro 🥚⚔️`;
+            if (navigator.share) {
+              navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
+            } else {
+              navigator.clipboard.writeText(`${text}\nhttps://ciocnim.ro`);
+              setToastMsg("Link copiat! Trimite-l prietenilor.");
+              setTimeout(() => setToastMsg(""), 3000);
+            }
+          }}
+          className="w-full py-4 rounded-2xl border-2 border-dashed border-red-200 bg-red-50/50 hover:bg-red-100/60 hover:border-red-300 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+        >
+          <span className="text-xl">📲</span>
+          <span className="font-black text-red-800 text-sm">Trimite jocul prietenilor</span>
+        </button>
+      </motion.div>
+
       {/* FOOTER */}
       <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
         <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
         <div className="flex items-center justify-center gap-4">
-          <button onClick={() => { navigator.clipboard.writeText("ciocnim@mail.com"); alert("Email copiat: ciocnim@mail.com"); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
+          <button onClick={() => { navigator.clipboard.writeText("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); setTimeout(() => setToastMsg(""), 3000); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
           <span className="text-gray-200 text-xs">·</span>
-          <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație ☕</button>
+          <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație</button>
         </div>
       </motion.div>
 

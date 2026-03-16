@@ -220,8 +220,10 @@ export default function ClientWrapper({ children }) {
     let notifTimer = null;
     channel.bind('duel-request', (data) => {
       setNotificare({ deLa: data.deLa, roomId: data.roomId, teamId: data.teamId || null });
+      triggerVibrate([100, 50, 100, 50, 200]);
+      playSound('hit');
       if (notifTimer) clearTimeout(notifTimer);
-      notifTimer = setTimeout(() => setNotificare(null), 6000);
+      notifTimer = setTimeout(() => setNotificare(null), 20000);
     });
 
     return () => {
@@ -251,35 +253,31 @@ export default function ClientWrapper({ children }) {
       <div className="fixed inset-0 z-[2147483647] pointer-events-none flex justify-center items-start pt-6 md:pt-10">
           <AnimatePresence>
             {notificare && (
-              <motion.div 
-                initial={{ opacity: 0, y: -50, scale: 0.9 }} 
-                animate={{ opacity: 1, y: 0, scale: 1 }} 
-                exit={{ opacity: 0, y: -50, scale: 0.9 }} 
-                transition={{ type: "spring", bounce: 0.5 }} 
-                className="relative w-[90%] max-w-sm bg-[#0a0505] p-8 md:p-10 rounded-[3rem] border-2 border-red-900/50 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden pointer-events-auto"
+              <motion.div
+                initial={{ opacity: 0, y: -50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -50, scale: 0.9 }}
+                transition={{ type: "spring", bounce: 0.5 }}
+                className="relative w-[90%] max-w-sm bg-white p-8 md:p-10 rounded-3xl border-2 border-red-200 shadow-[0_25px_60px_rgba(0,0,0,0.2)] overflow-hidden pointer-events-auto"
               >
-                <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-red-900/20 to-transparent pointer-events-none"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 blur-[60px] pointer-events-none z-0 bg-red-700/20"></div>
-
-                <div className="relative z-10 text-center mt-2">
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#140a0a] px-5 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-amber-500 z-10 border border-red-900/50 rounded-full animate-pulse whitespace-nowrap shadow-lg">
-                    Provocare ⚔️
+                <div className="relative z-10 text-center">
+                  <div className="inline-flex items-center gap-2 bg-red-100 px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-700 rounded-full mb-4">
+                    ⚔️ Provocare
                   </div>
-                  
-                  <p className="font-black text-2xl md:text-3xl text-white italic drop-shadow-md leading-tight mt-4">
-                    <span className="text-red-500">{notificare.deLa}</span> <br/> te cheamă la duel!
+
+                  <p className="font-black text-2xl md:text-3xl text-gray-900 leading-tight">
+                    <span className="text-red-700">{notificare.deLa}</span> <br/> te cheamă la duel!
                   </p>
-                  
-                  <div className="flex flex-col gap-3 pt-8 relative z-50">
-                    <button 
-                      className="w-full bg-red-700 py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-[0_15px_30px_rgba(220,38,38,0.4)] active:scale-95 text-white border-2 border-red-500/50 cursor-pointer pointer-events-auto" 
+
+                  <div className="flex flex-col gap-3 pt-6 relative z-50">
+                    <button
+                      className="w-full bg-red-700 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg shadow-red-900/20 active:scale-95 text-white cursor-pointer pointer-events-auto"
                       onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}&teamId=${notificare.teamId || ''}`); }}
                     >
                       Acceptă
                     </button>
-                    <button 
-                      className="w-full bg-[#140a0a] py-4 rounded-[2rem] font-black text-sm uppercase tracking-widest text-white/50 border-2 border-red-900/30 hover:border-red-900/50 hover:bg-red-900/20 hover:text-white transition-all active:scale-95 cursor-pointer pointer-events-auto" 
+                    <button
+                      className="w-full bg-gray-100 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-95 cursor-pointer pointer-events-auto"
                       onClick={() => setNotificare(null)}
                     >
                       Refuză

@@ -426,22 +426,39 @@ function ArenaMaster({ room }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const shareRoom = () => {
+    const code = room.replace('privat-', '');
+    const url = `${window.location.origin}/joc/${room}?host=false`;
+    const text = `Hai la o ciocneală de ouă! Codul camerei: ${code} sau intră direct pe`;
+    if (navigator.share) {
+      navigator.share({ title: "Ciocnim.ro - Hai la duel!", text, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`${text} ${url}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <>
       {/* Wrapper principal: Modificat pentru anti-suprapunere. Folosim flex-col cu overflow safe */}
       <div className={`w-full max-w-4xl flex flex-col items-center justify-start md:justify-center flex-1 py-4 md:py-6 px-4 md:px-0 transition-all z-10 ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
         
-        {/* Buton Cod Cameră */}
+        {/* Buton Cod Cameră + Share */}
         {isPrivate && !isProvocare && !teamIdPreluat && (
-          <button onClick={copyRoomCode} className="group relative bg-white/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border-2 border-red-700 shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:bg-red-50 hover:border-red-800 transition-all active:scale-95 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
-            <div className="absolute inset-0 bg-[url('/pattern-wood.png')] opacity-5 mix-blend-overlay pointer-events-none rounded-full"></div>
-            <div className="flex items-center gap-2 md:gap-3 relative z-10">
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-600/70 group-hover:text-red-700 transition-colors hidden sm:inline">Cod Cameră: </span>
-              <span className="text-red-700 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]">{room.replace('privat-', '')}</span>
-              <span className="bg-red-100 p-1.5 md:p-2 rounded-xl text-[10px] md:text-xs ml-1 md:ml-2 group-hover:bg-red-200 transition-all border border-red-300">{copied ? '✅' : '📋'}</span>
-            </div>
-            {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-green-600 tracking-widest">COPIAT!</span>}
-          </button>
+          <div className="flex items-center gap-2 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
+            <button onClick={copyRoomCode} className="group relative bg-white/95 backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border-2 border-red-700 shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:bg-red-50 hover:border-red-800 transition-all active:scale-95">
+              <div className="flex items-center gap-2 md:gap-3 relative z-10">
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-600/70 group-hover:text-red-700 transition-colors hidden sm:inline">Cod Cameră: </span>
+                <span className="text-red-700 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]">{room.replace('privat-', '')}</span>
+                <span className="bg-red-100 p-1.5 md:p-2 rounded-xl text-[10px] md:text-xs ml-1 md:ml-2 group-hover:bg-red-200 transition-all border border-red-300">{copied ? '✅' : '📋'}</span>
+              </div>
+              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-green-600 tracking-widest">COPIAT!</span>}
+            </button>
+            <button onClick={shareRoom} className="bg-red-700 hover:bg-red-800 text-white p-3 md:p-4 rounded-full border-2 border-red-900 shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-all active:scale-95" title="Trimite prietenului">
+              <span className="text-base md:text-lg">📲</span>
+            </button>
+          </div>
         )}
 
         {/* Zona de Duel */}
