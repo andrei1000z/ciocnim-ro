@@ -219,9 +219,9 @@ function ArenaMaster({ room }) {
     });
 
     arenaChannel.bind("join", (data) => {
-      // Folosim numeRef.current în loc de nome din closure (evităm stale closure cu nome="")
       const currentNume = numeRef.current;
       if (data.jucator !== currentNume) {
+        const hadOpponent = !!opponentRef.current;
         setOpponent(data);
         opponentRef.current = data;
 
@@ -235,15 +235,15 @@ function ArenaMaster({ room }) {
         setAtacantName(prev => {
           if (prev !== null && prev !== "") return prev;
           const n = numeRef.current;
-          if (!n) return null; // nome nu e încă setat, resetăm la null să poată fi setat mai târziu
+          if (!n) return null;
           if (!isPrivate && !isProvocare) return [n, data.jucator].sort()[0];
-          // Deterministic 50/50 bazat pe codul camerei — ambii jucători calculează același rezultat
           const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
           const hostAttacks = roomSum % 2 === 0;
           return hostAttacks ? (isHost ? n : data.jucator) : (isHost ? data.jucator : n);
         });
 
-        broadcastJoin();
+        // Răspundem cu join-ul nostru DOAR prima dată — previne loop infinit
+        if (!hadOpponent) broadcastJoin();
       }
     });
 
