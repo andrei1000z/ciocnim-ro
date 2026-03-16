@@ -97,7 +97,7 @@ function ArenaMaster({ room }) {
   const [collisionAnim, setCollisionAnim] = useState(false);
 
   const [atacantName, setAtacantName] = useState(null);
-  
+
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
@@ -106,16 +106,23 @@ function ArenaMaster({ room }) {
   const opponentRef = useRef(null);
   const matchmakingCancelledRef = useRef(false);
   const lastStrikeRef = useRef(0); // debounce: max 1 lovitură la 150ms
-  const teamIdPreluat = searchParams.get("teamId"); 
-  const isHost = searchParams.get("host") === "true"; 
+  const teamIdPreluat = searchParams.get("teamId");
+  const isHost = searchParams.get("host") === "true";
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
 
-  // Ref stabil pentru regiune și nume — previne reconnect-ul Pusher la hidratare
+  // Refs stabile — rezolvă stale closure-uri din Pusher handlers
   const regiuneRef = useRef(userStats.regiune);
   useEffect(() => { regiuneRef.current = userStats.regiune; }, [userStats.regiune]);
   const numeRef = useRef(nume);
   useEffect(() => { numeRef.current = nume; }, [nume]);
+
+  // Refs pt guard-uri executeBattle — imperative, fără stale closures
+  const rezultatRef = useRef(null);
+  const isStrikingRef = useRef(false);
+  const executeBattleRef = useRef(null);
+  const incrementGlobalRef = useRef(incrementGlobal);
+  useEffect(() => { incrementGlobalRef.current = incrementGlobal; }, [incrementGlobal]);
 
   const isArena = !isPrivate && !isBotMatch;
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
@@ -176,19 +183,19 @@ function ArenaMaster({ room }) {
       if (isBotMatch && atacantName === "🤖 BOT" && !rezultat && !isStriking) {
           const timeout = setTimeout(() => {
               const castigaCelCareDaRandom = Math.random() < 0.5;
-              executeBattle({ castigaCelCareDa: castigaCelCareDaRandom, atacant: "🤖 BOT" });
-              
+              executeBattleRef.current({ castigaCelCareDa: castigaCelCareDaRandom, atacant: "🤖 BOT" });
+
               // Doar dacă botul nu a câștigat, declanșăm incrementul nostru (noi apărăm și câștigăm)
               if (!castigaCelCareDaRandom) {
-                 incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
+                 incrementGlobalRef.current(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
               } else {
                  setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
-                 incrementGlobal(false); // contorul crește și la înfrângere
+                 incrementGlobalRef.current(false); // contorul crește și la înfrângere
               }
           }, 1500 + Math.random() * 1500);
           return () => clearTimeout(timeout);
       }
-  }, [isBotMatch, atacantName, rezultat, isStriking, incrementGlobal, setUserStats, teamIdPreluat]);
+  }, [isBotMatch, atacantName, rezultat, isStriking, setUserStats, teamIdPreluat, isProvocare]);
 
   // PUSHER SYNC
   useEffect(() => {
@@ -249,26 +256,32 @@ function ArenaMaster({ room }) {
     });
 
     arenaChannel.bind("revansa-ok", () => {
+      // Reset refs ÎNAINTE de state — previne race conditions
+      rezultatRef.current = null;
+      isStrikingRef.current = false;
       setRezultat(null);
       setIsStriking(false);
       setCollisionAnim(false);
       setRevansaRequests({});
-      // Swap attacker each round for fairness
-      if (!isArena) {
+      // Swap attacker each round for fairness — folosim numeRef pt fresh value
+      const currentNume = numeRef.current;
+      if (isPrivate || isBotMatch) {
         setAtacantName(prev => {
           if (!prev || !opponentRef.current) return prev;
-          return prev === nume ? opponentRef.current.jucator : nume;
+          return prev === currentNume ? opponentRef.current.jucator : currentNume;
         });
       }
     });
 
     arenaChannel.bind("lovitura", (data) => {
-       executeBattle(data);
+       // Apelăm ref-ul — mereu versiunea curentă a executeBattle
+       executeBattleRef.current(data);
        // Sync back-end trigger - Dacă am fost loviți și am câștigat, trigger global-ul aici
-       if (data.atacant !== nume) {
+       const currentNume = numeRef.current;
+       if (data.atacant !== currentNume) {
            const amCastigatDefense = !data.castigaCelCareDa;
            if (amCastigatDefense) {
-               incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
+               incrementGlobalRef.current(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
            } else {
                setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
            }
@@ -276,7 +289,9 @@ function ArenaMaster({ room }) {
     });
 
     return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
-  }, [room, nume, isBotMatch, broadcastJoin, isHost, incrementGlobal, teamIdPreluat, setUserStats]);
+  // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, nume, isBotMatch, broadcastJoin, isHost, isPrivate, isProvocare, teamIdPreluat]);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -295,18 +310,21 @@ function ArenaMaster({ room }) {
     return () => clearInterval(interval);
   }, [isPrivate, opponent, rezultat, isStriking, isBotMatch, nume, broadcastJoin]);
 
-  const executeBattle = async (data) => {
-    if (rezultat || isStriking) return;
-
+  const executeBattle = (data) => {
+    // Guard cu refs — funcționează chiar și în stale closures din Pusher
+    if (rezultatRef.current || isStrikingRef.current) return;
+    rezultatRef.current = 'pending';
+    isStrikingRef.current = true;
     setIsStriking(true);
 
     let amCastigat = false;
-    const celCareALovit = data.atacant || (atacantName === nume ? nume : opponent?.jucator);
+    const myName = numeRef.current;
+    const celCareALovit = data.atacant || myName;
 
     if (me.isGolden) amCastigat = true;
-    else if (opponent?.isGolden) amCastigat = false;
+    else if (opponentRef.current?.isGolden) amCastigat = false;
     else {
-      amCastigat = celCareALovit === nume ? data.castigaCelCareDa : !data.castigaCelCareDa;
+      amCastigat = celCareALovit === myName ? data.castigaCelCareDa : !data.castigaCelCareDa;
     }
 
     const citatAles = amCastigat
@@ -326,6 +344,7 @@ function ArenaMaster({ room }) {
       setTimeout(() => {
         setCollisionAnim(false);
         setImpactFlash(false);
+        rezultatRef.current = { win: amCastigat };
         setRezultat({ win: amCastigat });
         playArenaSound(amCastigat ? 'victorie' : 'esec');
         if (amCastigat) confetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] });
@@ -333,34 +352,38 @@ function ArenaMaster({ room }) {
     }, 550);
   };
 
+  // Ref actualizat la fiecare render — Pusher handler-ul apelează mereu versiunea curentă
+  executeBattleRef.current = executeBattle;
+
   const handleStrike = () => {
     if (!canStrike) return;
+    if (rezultatRef.current || isStrikingRef.current) return; // extra guard cu refs
     const now = Date.now();
     if (now - lastStrikeRef.current < 150) return;
     lastStrikeRef.current = now;
-    
+
     const castigaCelCareDaRandom = Math.random() < 0.5;
 
     if (castigaCelCareDaRandom) {
-       incrementGlobal(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
+       incrementGlobalRef.current(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
     } else {
        setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
-       if (isBotMatch) incrementGlobal(false); // contorul crește și la înfrângere cu bot
+       if (isBotMatch) incrementGlobalRef.current(false); // contorul crește și la înfrângere cu bot
     }
 
     if (isBotMatch) {
-      executeBattle({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
+      executeBattleRef.current({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
     } else {
       fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          roomId: room, 
-          actiune: 'lovitura', 
-          jucator: nume, 
-          regiune: userStats.regiune, 
+        body: JSON.stringify({
+          roomId: room,
+          actiune: 'lovitura',
+          jucator: nume,
+          regiune: userStats.regiune,
           castigaCelCareDa: castigaCelCareDaRandom,
-          atacant: nume 
+          atacant: nume
         })
       });
     }

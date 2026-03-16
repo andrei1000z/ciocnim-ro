@@ -39,7 +39,7 @@ export default function ClientWrapper({ children }) {
       wssPort: wsPort,
       forceTLS: forceTLS,
       disableStats: true,
-      enabledTransports: forceTLS ? ['wss'] : ['ws'],
+      enabledTransports: ['ws', 'wss'],
     });
     return () => {
       pusherRef.current?.disconnect();
