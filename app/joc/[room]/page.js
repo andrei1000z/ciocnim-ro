@@ -220,7 +220,9 @@ function ArenaMaster({ room }) {
 
     arenaChannel.bind("join", (data) => {
       const currentNume = numeRef.current;
-      if (data.jucator !== currentNume) {
+      // Guard: ignoră dacă numele nu e încă setat SAU dacă evenimentul e al nostru
+      if (!currentNume || data.jucator === currentNume) return;
+      {
         const hadOpponent = !!opponentRef.current;
         setOpponent(data);
         opponentRef.current = data;
