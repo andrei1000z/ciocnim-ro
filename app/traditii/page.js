@@ -50,7 +50,7 @@ export default function TraditiiPage() {
 
           <ArticleSection title="De ce ciocnim ouă?" icon="🥚" delay={0.05}>
             <p>
-              Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong className="text-red-800">"Hristos a Înviat!"</strong>.
+              Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong className="text-red-800">&ldquo;Hristos a Înviat!&rdquo;</strong>.
             </p>
             <p>
               Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt. Astăzi, acest joc a devenit un prilej de bucurie și reunire a familiei.
@@ -66,7 +66,7 @@ export default function TraditiiPage() {
             </ul>
             <div className="mt-6 p-4 bg-red-50 border-2 border-red-700 rounded-2xl">
               <p className="text-red-700 font-black italic text-center text-sm md:text-base">
-                Cel care lovește zice "Hristos a Înviat!", iar celălalt răspunde "Adevărat a Înviat!"
+                Cel care lovește zice &ldquo;Hristos a Înviat!&rdquo;, iar celălalt răspunde &ldquo;Adevărat a Înviat!&rdquo;
               </p>
             </div>
           </ArticleSection>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import Pusher from "pusher-js";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -306,9 +306,11 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   const [newName, setNewName] = useState(currentTeam?.details?.nume || "");
   const isCreator = currentTeam?.details?.creator === numePreluat?.toUpperCase().trim();
 
-  useEffect(() => {
+  const [prevIndex, setPrevIndex] = useState(activeTeamIndex);
+  if (activeTeamIndex !== prevIndex) {
+    setPrevIndex(activeTeamIndex);
     if (currentTeam) { setNewName(currentTeam.details.nume); setIsEditing(false); }
-  }, [activeTeamIndex, currentTeam]);
+  }
 
   if (!teams || teams.length === 0) return null;
 
@@ -496,11 +498,11 @@ function HomeContent() {
   const getStoredTeamIds = () => {
     try { return JSON.parse(localStorage.getItem("c_teamIds") || "[]"); } catch { return []; }
   };
-  const addStoredTeamId = (id) => {
+  const addStoredTeamId = useCallback((id) => {
     const ids = getStoredTeamIds();
     if (!ids.includes(id)) { const n = [...ids, id]; localStorage.setItem("c_teamIds", JSON.stringify(n)); return n; }
     return ids;
-  };
+  }, []);
   const removeStoredTeamId = (id) => {
     const n = getStoredTeamIds().filter(t => t !== id);
     localStorage.setItem("c_teamIds", JSON.stringify(n));
@@ -585,7 +587,7 @@ function HomeContent() {
       if (pId) router.replace("/");
     };
     fetchTeams();
-  }, [nume, searchParams, router, isHydrated]);
+  }, [nume, searchParams, router, isHydrated, addStoredTeamId]);
 
   const handleJoinModalSubmit = async () => {
     const final = joinModalNume.trim().toUpperCase();

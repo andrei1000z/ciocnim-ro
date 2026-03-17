@@ -2,11 +2,14 @@
   "name": "Sanctuarul Ciocnirii - Ciocnim.ro",
   "short_name": "Ciocnim.ro",
   "description": "Arena Națională de ciocnit ouă online. Alege-ți regiunea și domină Sanctuarul! Hristos a Înviat!",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#010000",
   "theme_color": "#dc2626",
   "orientation": "portrait-primary",
+  "categories": ["games", "entertainment"],
   "icons": [
     {
       "src": "/apple-touch-icon.png",
@@ -19,6 +22,15 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Joacă Acum",
+      "short_name": "Arena",
+      "url": "/?autoArena=true",
+      "description": "Intră direct în arena de ciocnit ouă",
+      "icons": [{ "src": "/apple-touch-icon.png", "sizes": "192x192" }]
     }
   ]
 }

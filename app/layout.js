@@ -142,6 +142,7 @@ export default function RootLayout({ children }) {
     <html lang="ro" className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name=" apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

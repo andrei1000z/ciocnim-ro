@@ -19,7 +19,7 @@ const MessageCard = ({ text }) => {
   return (
     <div className="bg-white p-5 rounded-lg border-2 border-red-300 hover:border-red-600 transition-colors group relative shadow-sm">
       <p className="text-gray-800 text-sm md:text-base font-medium italic pr-14 leading-relaxed">
-        "{text}"
+        &ldquo;{text}&rdquo;
       </p>
       <button
         onClick={handleCopy}

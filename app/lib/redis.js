@@ -34,8 +34,16 @@ const redisClientSingleton = () => {
 };
 
 const globalForRedis = globalThis;
-const redis = globalForRedis.redis ?? redisClientSingleton();
+
+// Lazy proxy: defers Redis connection until first method call (build-safe)
+const redis = new Proxy({}, {
+  get(_target, prop) {
+    if (!globalForRedis._redisClient) {
+      globalForRedis._redisClient = redisClientSingleton();
+    }
+    const val = globalForRedis._redisClient[prop];
+    return typeof val === 'function' ? val.bind(globalForRedis._redisClient) : val;
+  }
+});
 
 export default redis;
-
-if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis;

@@ -3,20 +3,19 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const MOCK_FRIENDS = [
+  { id: 1, name: "ION_POPESCU", status: "online", inGame: false },
+  { id: 2, name: "MARIA_IONESCU", status: "in_game", inGame: true, gameType: "private" },
+  { id: 3, name: "ANDREI_VASILE", status: "offline", inGame: false },
+  { id: 4, name: "ANA_MARIA", status: "online", inGame: false }
+];
+
 const FriendList = ({ isOpen, onClose, currentUser }) => {
-  const [friends, setFriends] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [friends] = useState(MOCK_FRIENDS);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      // Mock data for now - in real implementation, fetch from API
-      setFriends([
-        { id: 1, name: "ION_POPESCU", status: "online", inGame: false },
-        { id: 2, name: "MARIA_IONESCU", status: "in_game", inGame: true, gameType: "private" },
-        { id: 3, name: "ANDREI_VASILE", status: "offline", inGame: false },
-        { id: 4, name: "ANA_MARIA", status: "online", inGame: false }
-      ]);
     } else {
       document.body.style.overflow = 'unset';
     }

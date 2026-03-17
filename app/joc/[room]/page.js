@@ -82,7 +82,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats } = useGlobalStats();
+  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal } = useGlobalStats();
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -128,7 +128,12 @@ function ArenaMaster({ room }) {
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
 
   const playArenaSound = (name) => {
-    try { const audio = new Audio(`/${name}.mp3`); audio.volume = 0.5; audio.play().catch(() => {}); } catch (err) {}
+    try {
+      const audio = new Audio(`/${name}.mp3`);
+      audio.volume = 0.35 + Math.random() * 0.3;
+      audio.playbackRate = 0.9 + Math.random() * 0.2;
+      audio.play().catch(() => {});
+    } catch (err) {}
   };
 
   const broadcastJoin = useCallback(async () => {
@@ -176,7 +181,7 @@ function ArenaMaster({ room }) {
     }, waitTime);
 
     return () => clearTimeout(botTimeout);
-  }, [opponent, rezultat, isStriking, isBotMatch, isPrivate, isProvocare, nume]);
+  }, [opponent, rezultat, isStriking, isBotMatch, isPrivate, isProvocare, nume, room]);
 
   // Dacă botul e atacantul, dă el
   useEffect(() => {
@@ -357,7 +362,7 @@ function ArenaMaster({ room }) {
   // Ref actualizat la fiecare render — Pusher handler-ul apelează mereu versiunea curentă
   executeBattleRef.current = executeBattle;
 
-  const handleStrike = () => {
+  const handleStrike = useCallback(() => {
     if (!canStrike) return;
     if (rezultatRef.current || isStrikingRef.current) return; // extra guard cu refs
     const now = Date.now();
@@ -389,7 +394,7 @@ function ArenaMaster({ room }) {
         })
       });
     }
-  };
+  }, [canStrike, isBotMatch, isProvocare, teamIdPreluat, nume, room, userStats.regiune, setUserStats]);
 
   useEffect(() => {
     if (!canStrike) return;
@@ -403,7 +408,7 @@ function ArenaMaster({ room }) {
     };
     window.addEventListener("devicemotion", handleMotion);
     return () => window.removeEventListener("devicemotion", handleMotion);
-  }, [canStrike]);
+  }, [canStrike, handleStrike]);
 
   const handleChat = () => {
     if (!chatInput.trim()) return;
@@ -485,6 +490,13 @@ function ArenaMaster({ room }) {
             </button>
           </div>
         )}
+
+        {/* LIVE Indicator */}
+        <div className="flex items-center gap-2 mb-3 flex-shrink-0">
+          <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span></span>
+          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-600/70">LIVE</span>
+          <span className="text-[10px] md:text-xs font-bold text-gray-500">{totalGlobal.toLocaleString('ro-RO')} ciocniri</span>
+        </div>
 
         {/* Zona de Duel */}
         <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mb-6 relative z-10 flex-shrink-0">
@@ -685,7 +697,7 @@ function ArenaMaster({ room }) {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="mx-5 mb-5 bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 relative"
               >
-                <span className="absolute top-1 left-3 text-3xl text-amber-500/10 font-serif leading-none">"</span>
+                <span className="absolute top-1 left-3 text-3xl text-amber-500/10 font-serif leading-none">&ldquo;</span>
                 <p className="text-[11px] md:text-sm font-medium text-amber-400/70 italic leading-relaxed px-2 mt-1">
                   {citatFinal}
                 </p>

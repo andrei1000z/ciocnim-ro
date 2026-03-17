@@ -6,7 +6,7 @@
  * ====================================================================================================
  */
 
-import { useEffect, useState, createContext, useContext, useCallback, useRef } from "react";
+import { useEffect, useState, useSyncExternalStore, createContext, useContext, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,17 +14,39 @@ const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
 const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", teamId: null, regiune: "Muntenia" };
+const emptySubscribe = () => () => {};
 
 export default function ClientWrapper({ children }) {
   const router = useRouter();
-  
-  const [userStats, setUserStats] = useState(DEFAULT_STATS);
+
+  const [userStats, setUserStats] = useState(() => {
+    if (typeof window === 'undefined') return DEFAULT_STATS;
+    const savedStats = localStorage.getItem("c_stats");
+    const savedName = localStorage.getItem("c_nume");
+    if (savedStats) {
+      try {
+        const parsed = JSON.parse(savedStats);
+        const safeStats = { ...DEFAULT_STATS, ...parsed };
+        if (savedName && safeStats.nume !== savedName) {
+          const healed = { ...safeStats, nume: savedName };
+          localStorage.setItem("c_stats", JSON.stringify(healed));
+          return healed;
+        }
+        return safeStats;
+      } catch {}
+    }
+    if (savedName) return { ...DEFAULT_STATS, nume: savedName };
+    return DEFAULT_STATS;
+  });
   const [totalGlobal, setTotalGlobal] = useState(0);
   const [topRegiuni, setTopRegiuni] = useState([]);
   const [topJucatori, setTopJucatori] = useState([]);
-  const [nume, setNumeLocal] = useState("");
+  const [nume, setNumeLocal] = useState(() => {
+    if (typeof window === 'undefined') return "";
+    return localStorage.getItem("c_nume") || "";
+  });
   const [notificare, setNotificare] = useState(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
   
   const pusherRef = useRef(null);
 
@@ -159,37 +181,14 @@ export default function ClientWrapper({ children }) {
   }, [userStats.regiune, nume, updateUserStats]);
 
   useEffect(() => {
-    const savedName = localStorage.getItem("c_nume");
-    const savedStats = localStorage.getItem("c_stats");
-    
-    if (savedName) setNumeLocal(savedName);
-    
-    if (savedStats) {
-      try { 
-        const parsed = JSON.parse(savedStats);
-        const safeStats = { ...DEFAULT_STATS, ...parsed };
-        setUserStats(safeStats); 
-        
-        if (savedName && safeStats.nume !== savedName) {
-            const healedStats = { ...safeStats, nume: savedName };
-            setUserStats(healedStats);
-            localStorage.setItem("c_stats", JSON.stringify(healedStats));
-        }
-      } catch (e) {}
-    } else if (savedName) {
-        setUserStats(prev => ({ ...prev, nume: savedName }));
-    }
-    
-    setIsHydrated(true);
-
     const getInitialData = async () => {
       try {
         const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'get-counter' }) });
         const data = await res.json();
-        if (data.success) { 
-          setTotalGlobal(parseInt(data.total) || 0); 
-          setTopRegiuni(data.topRegiuni || []); 
-          setTopJucatori(data.topJucatori || []); 
+        if (data.success) {
+          setTotalGlobal(parseInt(data.total) || 0);
+          setTopRegiuni(data.topRegiuni || []);
+          setTopJucatori(data.topJucatori || []);
         }
       } catch (err) {}
     };
@@ -231,7 +230,7 @@ export default function ClientWrapper({ children }) {
       channel.unbind_all();
       pusherRef.current?.unsubscribe(channelName);
     };
-  }, [isHydrated, nume]);
+  }, [isHydrated, nume, playSound, triggerVibrate]);
 
   const contextValue = {
     totalGlobal, 
