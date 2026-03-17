@@ -392,13 +392,59 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   );
 };
 
+// ─── Mini Egg SVG (pentru selector) ──────────────────────────────────────────
+const MiniEgg = ({ grad1, grad2, patternType, patternColor }) => {
+  const uid = `mini-${grad1.replace('#','')}-${patternType}`;
+  const eggPath = "M25 0 C10 0 0 20 0 40 C0 55 10 65 25 65 C40 65 50 55 50 40 C50 20 40 0 25 0 Z";
+  const renderPat = () => {
+    const c = patternColor;
+    switch (patternType) {
+      case 'cross-stitch':
+        return <pattern id={`mp-${uid}`} width="10" height="10" patternUnits="userSpaceOnUse">
+          <line x1="1" y1="1" x2="4" y2="4" stroke={c} strokeWidth="0.8"/><line x1="4" y1="1" x2="1" y2="4" stroke={c} strokeWidth="0.8"/>
+          <line x1="6" y1="6" x2="9" y2="9" stroke={c} strokeWidth="0.8"/><line x1="9" y1="6" x2="6" y2="9" stroke={c} strokeWidth="0.8"/>
+        </pattern>;
+      case 'brau':
+        return <pattern id={`mp-${uid}`} width="12" height="65" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="28" x2="12" y2="28" stroke={c} strokeWidth="1"/><line x1="0" y1="37" x2="12" y2="37" stroke={c} strokeWidth="1"/>
+          <line x1="0" y1="30" x2="6" y2="33" stroke={c} strokeWidth="0.7"/><line x1="6" y1="33" x2="0" y2="36" stroke={c} strokeWidth="0.7"/>
+          <line x1="6" y1="30" x2="12" y2="33" stroke={c} strokeWidth="0.7"/><line x1="12" y1="33" x2="6" y2="36" stroke={c} strokeWidth="0.7"/>
+        </pattern>;
+      case 'ie-gala':
+        return <pattern id={`mp-${uid}`} width="14" height="14" patternUnits="userSpaceOnUse">
+          <circle cx="7" cy="7" r="2" fill="none" stroke={c} strokeWidth="0.6"/><circle cx="7" cy="7" r="0.7" fill={c} opacity="0.5"/>
+          <line x1="7" y1="0" x2="7" y2="5" stroke={c} strokeWidth="0.4" opacity="0.3"/><line x1="7" y1="9" x2="7" y2="14" stroke={c} strokeWidth="0.4" opacity="0.3"/>
+        </pattern>;
+      case 'brad':
+        return <pattern id={`mp-${uid}`} width="12" height="12" patternUnits="userSpaceOnUse">
+          <line x1="6" y1="1" x2="2" y2="6" stroke={c} strokeWidth="0.7"/><line x1="6" y1="1" x2="10" y2="6" stroke={c} strokeWidth="0.7"/>
+          <line x1="6" y1="5" x2="1" y2="11" stroke={c} strokeWidth="0.7"/><line x1="6" y1="5" x2="11" y2="11" stroke={c} strokeWidth="0.7"/>
+        </pattern>;
+      default: return null;
+    }
+  };
+  return (
+    <svg viewBox="0 0 50 65" className="w-full h-full">
+      <defs>
+        <linearGradient id={`mg-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor={grad1}/><stop offset="100%" stopColor={grad2}/></linearGradient>
+        <clipPath id={`mc-${uid}`}><path d={eggPath}/></clipPath>
+        <radialGradient id={`mh-${uid}`} cx="38%" cy="28%" r="50%"><stop offset="0%" stopColor="rgba(255,255,255,0.45)"/><stop offset="100%" stopColor="rgba(255,255,255,0)"/></radialGradient>
+        {renderPat()}
+      </defs>
+      <path d={eggPath} fill={`url(#mg-${uid})`}/>
+      <rect x="0" y="0" width="50" height="65" fill={`url(#mp-${uid})`} clipPath={`url(#mc-${uid})`}/>
+      <path d={eggPath} fill={`url(#mh-${uid})`} opacity="0.5"/>
+    </svg>
+  );
+};
+
 // ─── Selector Culoare ───────────────────────────────────────────────────────────
 const ColorSelector = ({ selected, onSelect }) => {
   const culori = [
-    { id: "red", color: "linear-gradient(135deg, #dc2626, #7f1d1d)", label: "Roșu" },
-    { id: "white", color: "linear-gradient(135deg, #f5f0e8, #d4c9b8)", label: "Perlat" },
-    { id: "black", color: "linear-gradient(135deg, #2d2d2d, #0a0a0a)", label: "Antracit" },
-    { id: "green", color: "linear-gradient(135deg, #166534, #052e16)", label: "Codru" },
+    { id: "red", label: "Roșu", grad1: '#dc2626', grad2: '#7f1d1d', patternType: 'cross-stitch', patternColor: 'rgba(255,255,255,0.2)' },
+    { id: "blue", label: "Albastru", grad1: '#2563eb', grad2: '#1e3a8a', patternType: 'brau', patternColor: 'rgba(255,255,255,0.25)' },
+    { id: "gold", label: "Auriu", grad1: '#f59e0b', grad2: '#78350f', patternType: 'ie-gala', patternColor: 'rgba(255,255,255,0.3)' },
+    { id: "green", label: "Verde", grad1: '#166534', grad2: '#052e16', patternType: 'brad', patternColor: 'rgba(255,255,255,0.22)' },
   ];
   return (
     <div className="space-y-2">
@@ -407,14 +453,17 @@ const ColorSelector = ({ selected, onSelect }) => {
         {culori.map(c => (
           <motion.button
             key={c.id}
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(c.id)}
-            className={`aspect-square rounded-xl border-2 transition-all relative flex items-center justify-center ${selected === c.id ? "border-white shadow-md" : "border-transparent opacity-55 hover:opacity-90"}`}
-            style={{ background: c.color }}
+            className={`rounded-xl border-2 transition-all relative flex flex-col items-center justify-center p-1.5 ${selected === c.id ? "border-white shadow-md bg-white/[0.08]" : "border-transparent opacity-60 hover:opacity-90 bg-white/[0.03]"}`}
           >
+            <div className="w-8 h-10">
+              <MiniEgg grad1={c.grad1} grad2={c.grad2} patternType={c.patternType} patternColor={c.patternColor} />
+            </div>
+            <span className="text-[8px] font-bold text-gray-400 mt-0.5">{c.label}</span>
             {selected === c.id && (
-              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-900 rounded-full flex items-center justify-center text-white text-[9px]">✓</motion.span>
+              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-900 rounded-full flex items-center justify-center text-white text-[9px] border border-white/30">✓</motion.span>
             )}
           </motion.button>
         ))}
@@ -692,19 +741,20 @@ function HomeContent() {
           <div className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/30" />
         </div>
 
-        {/* LIVE ARENA COUNTER */}
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2.5 relative z-10">
-          <div className="inline-flex items-center gap-3 bg-white/[0.06] backdrop-blur-xl border border-red-500/20 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-400">LIVE</span>
-            <span className="tabular-nums text-white text-xl">{onlineCount || 1}</span>
-            <span className="font-semibold text-white/40 text-xs">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+        {/* COUNTER CIOCNIRI + LIVE */}
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2 relative z-10">
+          <div className="inline-flex items-center gap-2 bg-white/[0.06] backdrop-blur-xl border border-red-500/15 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20">
+            <span className="text-lg">🥚</span>
+            <span className="tabular-nums text-white text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
+            <span className="font-semibold text-white/40 text-xs">Ciocniri Naționale</span>
           </div>
-          <div className="inline-flex items-center gap-1.5 text-[11px] text-red-400/30 font-bold tabular-nums">
-            {totalGlobal?.toLocaleString("ro-RO") || "…"} ciocniri totale
+          <div className="inline-flex items-center gap-2 text-[11px] text-green-400/60 font-bold">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="tabular-nums">{onlineCount || 1}</span>
+            <span className="text-green-400/40">{onlineCount === 1 ? 'persoană' : 'persoane'} online acum</span>
           </div>
         </motion.div>
       </motion.div>
@@ -755,6 +805,15 @@ function HomeContent() {
               <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide mt-0.5">Înfrângeri 💔</p>
             </div>
           </div>
+          {(parseInt(userStats.wins) || 0) < 10 && (
+            <p className="text-center text-[10px] font-semibold text-amber-500/50 mt-1">
+              ⭐ La 10 victorii primești o stea pe oul tău!
+              {(parseInt(userStats.wins) || 0) > 0 && ` (mai ai ${10 - (parseInt(userStats.wins) || 0)})`}
+            </p>
+          )}
+          {(parseInt(userStats.wins) || 0) >= 10 && (
+            <p className="text-center text-[10px] font-bold text-amber-400 mt-1">⭐ Ai steaua de campion pe ou!</p>
+          )}
         </div>
       </motion.div>
 
@@ -764,7 +823,7 @@ function HomeContent() {
         <div className="space-y-2">
           <ActionButton icon="⚔️" title="Meci cu un Prieten" subtitle="Cameră privată" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
           <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup Privat"} subtitle="Invită prietenii în grupul tău" onClick={handleCreateTeam} loading={loadingTeam} />
-          <ActionButton icon="🌍" title="Arenă Națională" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} primary />
+          <ActionButton icon="🌍" title="Arenă Națională" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
         </div>
       </motion.div>
 

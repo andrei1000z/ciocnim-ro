@@ -229,6 +229,9 @@ export default function ClientWrapper({ children }) {
       if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
       if (data.topJucatori) setTopJucatori(data.topJucatori);
     });
+    channel.bind('online-count', (data) => {
+      if (typeof data.online === 'number') setOnlineCount(data.online);
+    });
 
     return () => {
       channel.unbind_all();

@@ -43,18 +43,18 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
       patternColor: 'rgba(255,255,255,0.18)',
       patternType: 'cross-stitch',
     },
-    white: {
-      label: 'Alb Perlat',
-      grad1: '#f5f0e8', grad2: '#d4c9b8',
-      glow: 'rgba(245,240,232,0.4)',
-      patternColor: '#dc2626',
+    blue: {
+      label: 'Albastru Safir',
+      grad1: '#2563eb', grad2: '#1e3a8a',
+      glow: 'rgba(37,99,235,0.5)',
+      patternColor: 'rgba(255,255,255,0.25)',
       patternType: 'brau',
     },
-    black: {
-      label: 'Negru Antracit',
-      grad1: '#2d2d2d', grad2: '#0a0a0a',
-      glow: 'rgba(212,175,55,0.4)',
-      patternColor: '#d4af37',
+    gold: {
+      label: 'Auriu Imperial',
+      grad1: '#f59e0b', grad2: '#78350f',
+      glow: 'rgba(245,158,11,0.5)',
+      patternColor: 'rgba(255,255,255,0.3)',
       patternType: 'ie-gala',
     },
     green: {
@@ -186,7 +186,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal } = useGlobalStats();
+  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount } = useGlobalStats();
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -443,13 +443,17 @@ function ArenaMaster({ room }) {
       : CITATE_IERTARE[Math.floor(Math.random() * CITATE_IERTARE.length)];
     setCitatFinal(citatAles);
 
-    // Faza 1: ouăle se mișcă unul spre celălalt (550ms)
+    // Faza 1: ouăle se mișcă unul spre celălalt (450ms)
     setCollisionAnim(true);
 
+    // Pre-load sunetul de ciocnit ca să fie instant
+    let crackAudio;
+    try { crackAudio = new Audio('/spargere.mp3'); crackAudio.volume = 0.5 + Math.random() * 0.2; crackAudio.load(); } catch {}
+
     setTimeout(() => {
-      // Faza 2: impact + flash (500ms)
+      // Faza 2: EXACT la impact — sunet + shake + vibrație
       setImpactFlash(true);
-      playArenaSound('spargere');
+      try { crackAudio?.play().catch(() => {}); } catch {}
       triggerVibrate(amCastigat ? [100, 50, 100] : [800]);
 
       setTimeout(() => {
@@ -460,7 +464,7 @@ function ArenaMaster({ room }) {
         playArenaSound(amCastigat ? 'victorie' : 'esec');
         if (amCastigat) confetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] });
       }, 500);
-    }, 550);
+    }, 450);
   };
 
   // Ref actualizat la fiecare render — Pusher handler-ul apelează mereu versiunea curentă
@@ -596,10 +600,14 @@ function ArenaMaster({ room }) {
         )}
 
         {/* LIVE Indicator */}
-        <div className="flex items-center gap-2 mb-3 flex-shrink-0">
-          <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span></span>
-          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-500">LIVE</span>
-          <span className="text-[10px] md:text-xs font-bold text-gray-500">{totalGlobal.toLocaleString('ro-RO')} ciocniri</span>
+        <div className="flex flex-col items-center gap-1 mb-3 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
+            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-green-400">LIVE</span>
+            <span className="text-[11px] md:text-xs font-black text-white tabular-nums">{onlineCount || 1}</span>
+            <span className="text-[9px] md:text-[10px] font-semibold text-white/30">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+          </div>
+          <span className="text-[9px] md:text-[10px] font-bold text-gray-600 tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
         </div>
 
         {/* Zona de Duel */}

@@ -48,7 +48,10 @@ export const metadata = {
     "vibrate on strike game", "joc tradițional modernizat", "interfață modernă paște", "grafică premium tradițională", "joc de paște securizat",
     "experiență multiplayer fluidă", "joc românesc 2026", "ou de aur ciocnim.ro", "ou de diamant", "ou cosmic de paște", "culori ouă de paște",
     "ouă personalizate online", "skin-uri tradiționale ouă", "ouă de lux virtuale", "colecție de ouă 2026",
-    "ouă roșii strălucitoare", "ouă albastre safir", "ouă imperiale aurii"
+    "ouă roșii strălucitoare", "ouă albastre safir", "ouă imperiale aurii",
+    "skin tradițional ou roșu", "ou albastru safir online", "ou auriu imperial",
+    "ou verde de codru", "motive cross-stitch tradiționale", "ie românească pe ou",
+    "ciocnit ouă live online", "câți oameni joacă acum", "clasament live paște 2026"
   ],
   authors: [{ name: "Echipa Ciocnim.ro" }],
   creator: "Ciocnim.ro",

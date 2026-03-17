@@ -487,6 +487,8 @@ export async function POST(request) {
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
+        // Broadcast online count to all clients in real-time
+        await pusher.trigger('global', 'online-count', { online: count });
         return NextResponse.json({ success: true, online: count });
       }
 
