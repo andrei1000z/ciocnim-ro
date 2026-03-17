@@ -179,9 +179,9 @@ function sanitizeStr(val, maxLen = 100) {
   return val.slice(0, maxLen).trim();
 }
 function sanitizeId(val) {
-  if (typeof val !== 'string') return '';
-  // IDs: alphanumeric, hyphens, max 64 chars
-  return val.slice(0, 64).replace(/[^a-zA-Z0-9\-_]/g, '');
+  if (typeof val !== 'string' || val === 'null' || val === 'undefined') return '';
+  const clean = val.slice(0, 64).replace(/[^a-zA-Z0-9\-_]/g, '');
+  return clean || '';
 }
 
 export async function POST(request) {
@@ -196,7 +196,7 @@ export async function POST(request) {
     const skin = sanitizeStr(body.skin, 20);
     const isGolden = body.isGolden === true;
     const hasStar = body.hasStar === true;
-    const teamId = sanitizeId(body.teamId);
+    const teamId = sanitizeId(Array.isArray(body.teamId) ? body.teamId[0] : body.teamId);
     const regiune = sanitizeStr(body.regiune, 40);
     const creator = sanitizeStr(body.creator, 30);
     const text = sanitizeStr(body.text, 500);
@@ -295,7 +295,7 @@ export async function POST(request) {
       }
 
       case 'check-room': {
-        const cod = body.cod;
+        const cod = sanitizeId(body.cod);
         if (!cod) return NextResponse.json({ success: false, error: "Cod lipsă" });
         const count = await redis.scard(`room:privat-${cod}:players`);
         if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." });
@@ -505,7 +505,7 @@ export async function POST(request) {
       }
 
       case 'arena-heartbeat': {
-        const visitorId = body.visitorId;
+        const visitorId = sanitizeId(body.visitorId);
         if (!visitorId) return NextResponse.json({ success: false });
         const now = Date.now();
         const pipeline = redis.pipeline();
