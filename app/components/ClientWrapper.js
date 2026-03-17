@@ -46,9 +46,11 @@ export default function ClientWrapper({ children }) {
     return localStorage.getItem("c_nume") || "";
   });
   const [notificare, setNotificare] = useState(null);
+  const [onlineCount, setOnlineCount] = useState(0);
   const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  
+
   const pusherRef = useRef(null);
+  const visitorIdRef = useRef(null);
 
   // Inițializare Pusher o singură dată — disconnect la unmount
   useEffect(() => {
@@ -180,6 +182,29 @@ export default function ClientWrapper({ children }) {
     } catch (e) { console.error("Eroare la incrementare bilanț."); }
   }, [userStats.regiune, nume, updateUserStats]);
 
+  // HEARTBEAT: ping la fiecare 15s pentru a număra utilizatorii activi
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (!visitorIdRef.current) {
+      visitorIdRef.current = localStorage.getItem('c_visitorId') || `v-${Math.random().toString(36).substring(2, 10)}`;
+      localStorage.setItem('c_visitorId', visitorIdRef.current);
+    }
+    const sendHeartbeat = async () => {
+      try {
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actiune: 'arena-heartbeat', visitorId: visitorIdRef.current })
+        });
+        const data = await res.json();
+        if (data.success && typeof data.online === 'number') setOnlineCount(data.online);
+      } catch {}
+    };
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 15000);
+    return () => clearInterval(interval);
+  }, [isHydrated]);
+
   useEffect(() => {
     const getInitialData = async () => {
       try {
@@ -233,15 +258,16 @@ export default function ClientWrapper({ children }) {
   }, [isHydrated, nume, playSound, triggerVibrate]);
 
   const contextValue = {
-    totalGlobal, 
-    topRegiuni, 
-    topJucatori, 
-    nume, 
-    setNume, 
-    userStats, 
+    totalGlobal,
+    topRegiuni,
+    topJucatori,
+    nume,
+    setNume,
+    userStats,
     setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated,
-    updateStats
+    updateStats,
+    onlineCount
   };
 
   return (

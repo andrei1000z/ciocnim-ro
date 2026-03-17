@@ -477,6 +477,19 @@ export async function POST(request) {
         return NextResponse.json({ success: true });
       }
 
+      case 'arena-heartbeat': {
+        const visitorId = body.visitorId;
+        if (!visitorId) return NextResponse.json({ success: false });
+        const now = Date.now();
+        const pipeline = redis.pipeline();
+        pipeline.zadd('arena:online', now, visitorId);
+        pipeline.zremrangebyscore('arena:online', 0, now - 30000);
+        pipeline.zcard('arena:online');
+        const results = await pipeline.exec();
+        const count = results[2][1];
+        return NextResponse.json({ success: true, online: count });
+      }
+
       case 'creeaza-camera-privata': {
         // Generăm un cod unic - reîncercăm dacă e deja rezervat
         let cod, attempts = 0;

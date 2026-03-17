@@ -174,24 +174,30 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
 };
 
 // ─── Buton Acțiune ──────────────────────────────────────────────────────────────
-const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => (
+const ActionButton = ({ onClick, icon, title, subtitle, loading = false, primary = false }) => (
   <motion.button
     whileHover={{ scale: 1.015, x: 2 }}
-    whileTap={{ scale: 0.98 }}
+    whileTap={{ scale: 0.97 }}
     onClick={onClick}
     disabled={loading}
-    className="w-full px-5 py-4 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-lg"
+    className={`w-full px-5 py-4.5 rounded-2xl border group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-xl backdrop-blur-xl ${
+      primary
+        ? 'bg-gradient-to-r from-red-700 to-red-800 border-red-600/30 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-900/30'
+        : 'border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.08] hover:border-red-500/20'
+    }`}
   >
-    <div className="w-10 h-10 rounded-xl bg-red-900/20 group-hover:bg-white/20 flex items-center justify-center transition-all text-xl flex-shrink-0">
+    <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all text-xl flex-shrink-0 ${
+      primary ? 'bg-white/15' : 'bg-red-900/20 group-hover:bg-red-900/30'
+    }`}>
       {icon}
     </div>
     <div className="flex-1 min-w-0">
-      <div className="font-bold text-gray-200 group-hover:text-white transition-colors text-sm leading-tight">{title}</div>
-      {subtitle && <div className="text-xs text-gray-400 group-hover:text-red-200 transition-colors mt-0.5">{subtitle}</div>}
+      <div className={`font-bold transition-colors text-sm leading-tight ${primary ? 'text-white' : 'text-gray-200 group-hover:text-white'}`}>{title}</div>
+      {subtitle && <div className={`text-xs transition-colors mt-0.5 ${primary ? 'text-red-200/70' : 'text-gray-500 group-hover:text-gray-400'}`}>{subtitle}</div>}
     </div>
     {loading
       ? <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-      : <span className="text-gray-300 group-hover:text-white/60 transition-colors text-sm flex-shrink-0">→</span>
+      : <span className={`transition-colors text-sm flex-shrink-0 ${primary ? 'text-white/40' : 'text-gray-600 group-hover:text-gray-400'}`}>→</span>
     }
   </motion.button>
 );
@@ -389,16 +395,15 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
 // ─── Selector Culoare ───────────────────────────────────────────────────────────
 const ColorSelector = ({ selected, onSelect }) => {
   const culori = [
-    { id: "red", color: "#dc2626" },
-    { id: "blue", color: "#2563eb" },
-    { id: "gold", color: "#f59e0b" },
-    { id: "diamond", color: "#10b981" },
-    { id: "cosmic", color: "#8b5cf6" },
+    { id: "red", color: "linear-gradient(135deg, #dc2626, #7f1d1d)", label: "Roșu" },
+    { id: "white", color: "linear-gradient(135deg, #f5f0e8, #d4c9b8)", label: "Perlat" },
+    { id: "black", color: "linear-gradient(135deg, #2d2d2d, #0a0a0a)", label: "Antracit" },
+    { id: "green", color: "linear-gradient(135deg, #166534, #052e16)", label: "Codru" },
   ];
   return (
     <div className="space-y-2">
       <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Culoare Ou</label>
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-4 gap-1.5">
         {culori.map(c => (
           <motion.button
             key={c.id}
@@ -406,7 +411,7 @@ const ColorSelector = ({ selected, onSelect }) => {
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(c.id)}
             className={`aspect-square rounded-xl border-2 transition-all relative flex items-center justify-center ${selected === c.id ? "border-white shadow-md" : "border-transparent opacity-55 hover:opacity-90"}`}
-            style={{ backgroundColor: c.color }}
+            style={{ background: c.color }}
           >
             {selected === c.id && (
               <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-900 rounded-full flex items-center justify-center text-white text-[9px]">✓</motion.span>
@@ -466,7 +471,7 @@ const SectionLabel = ({ children }) => (
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate } = useGlobalStats();
+  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, onlineCount } = useGlobalStats();
 
   const [loadedTeams, setLoadedTeams] = useState([]);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -662,17 +667,45 @@ function HomeContent() {
   return (
     <div className="w-full max-w-md mx-auto pb-16 px-4 space-y-7">
 
-      {/* HEADER */}
-      <motion.div {...fadeUp(0)} className="text-center pt-10 pb-5 border-b border-red-900/8">
-        <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="text-5xl mb-4 drop-shadow-sm">
-          🥚
+      {/* HERO TRADIȚIONAL */}
+      <motion.div {...fadeUp(0)} className="text-center pt-8 pb-6 relative overflow-hidden">
+        {/* Decorative floating eggs background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04]" aria-hidden="true">
+          <div className="absolute top-2 left-[10%] text-6xl rotate-12 animate-float-v9">🥚</div>
+          <div className="absolute top-8 right-[15%] text-4xl -rotate-12" style={{animation:'float-gentle 8s ease-in-out infinite 1s'}}>🥚</div>
+          <div className="absolute bottom-4 left-[20%] text-5xl rotate-6" style={{animation:'float-gentle 7s ease-in-out infinite 0.5s'}}>🥚</div>
+          <div className="absolute bottom-2 right-[25%] text-3xl -rotate-6" style={{animation:'float-gentle 9s ease-in-out infinite 2s'}}>🥚</div>
+        </div>
+
+        <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="relative z-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-4 shadow-lg shadow-red-900/10 backdrop-blur-sm">
+            <span className="text-4xl drop-shadow-lg">🥚</span>
+          </div>
         </motion.div>
-        <h1 className="text-3xl font-black text-white tracking-tight">CIOCNIM.RO</h1>
-        <p className="text-base font-bold text-red-400/70 mt-2">Ciocnește ouă online cu prietenii sau familia 🥚</p>
-        <p className="text-[11px] font-semibold text-red-400/35 uppercase tracking-[0.4em] mt-1">Tradiția Românească · Paști 2026</p>
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-4 inline-flex items-center gap-2 border border-red-900/20 bg-red-900/20 text-red-400 px-4 py-2 rounded-full text-sm font-bold">
-          🥚 <span className="tabular-nums">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
-          <span className="font-normal text-red-400/50 text-xs">Ciocniri Naționale</span>
+
+        <h1 className="text-4xl font-black text-white tracking-tight relative z-10 drop-shadow-sm">CIOCNIM<span className="text-red-500">.</span>RO</h1>
+        <p className="text-sm font-bold text-red-400/60 mt-2 relative z-10">Ciocnește ouă online de Paște</p>
+
+        <div className="flex items-center justify-center gap-3 mt-1.5">
+          <div className="h-px w-8 bg-gradient-to-r from-transparent to-red-500/30" />
+          <p className="text-[10px] font-black text-red-500/25 uppercase tracking-[0.5em]">Paști 2026</p>
+          <div className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/30" />
+        </div>
+
+        {/* LIVE ARENA COUNTER */}
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2.5 relative z-10">
+          <div className="inline-flex items-center gap-3 bg-white/[0.06] backdrop-blur-xl border border-red-500/20 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-400">LIVE</span>
+            <span className="tabular-nums text-white text-xl">{onlineCount || 1}</span>
+            <span className="font-semibold text-white/40 text-xs">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+          </div>
+          <div className="inline-flex items-center gap-1.5 text-[11px] text-red-400/30 font-bold tabular-nums">
+            {totalGlobal?.toLocaleString("ro-RO") || "…"} ciocniri totale
+          </div>
         </motion.div>
       </motion.div>
 
@@ -731,7 +764,7 @@ function HomeContent() {
         <div className="space-y-2">
           <ActionButton icon="⚔️" title="Meci cu un Prieten" subtitle="Cameră privată" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
           <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup Privat"} subtitle="Invită prietenii în grupul tău" onClick={handleCreateTeam} loading={loadingTeam} />
-          <ActionButton icon="🌍" title="Arenă Națională" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
+          <ActionButton icon="🌍" title="Arenă Națională" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} primary />
         </div>
       </motion.div>
 
@@ -860,12 +893,17 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0c0a0a]">
+    <main className="min-h-screen bg-[#0c0a0a] relative overflow-hidden pattern-tradition">
+      {/* Ambient glows */}
+      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] bg-red-900/8 rounded-full blur-[140px] pointer-events-none" />
+      <div className="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[160px] pointer-events-none" />
+      <div className="fixed top-[40%] left-[50%] -translate-x-1/2 w-[40vw] h-[40vw] bg-red-600/3 rounded-full blur-[120px] pointer-events-none" />
+
       <Suspense fallback={
         <div className="h-screen flex items-center justify-center">
           <div className="text-center space-y-3">
             <div className="text-5xl animate-bounce">🥚</div>
-            <p className="text-xs font-bold text-red-800 animate-pulse uppercase tracking-widest">Se încarcă...</p>
+            <p className="text-xs font-bold text-red-500 animate-pulse uppercase tracking-widest">Se încarcă...</p>
           </div>
         </div>
       }>

@@ -33,44 +33,147 @@ const CITATE_SMERENIE = [
 // ==========================================================================================
 
 const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => {
+  const skinId = isGolden ? 'golden' : (skin || 'red');
+
   const skins = useMemo(() => ({
-    red: { fill: "url(#liquid-ruby)", glow: "rgba(220,38,38,0.5)" },
-    blue: { fill: "url(#liquid-sapphire)", glow: "rgba(37,99,235,0.5)" },
-    gold: { fill: "url(#liquid-imperial)", glow: "rgba(245,158,11,0.5)" },
-    diamond: { fill: "url(#liquid-emerald)", glow: "rgba(16,185,129,0.5)" },
-    cosmic: { fill: "url(#liquid-nebula)", glow: "rgba(139,92,246,0.5)" },
+    red: {
+      label: 'Roșu de Rânduială',
+      grad1: '#dc2626', grad2: '#7f1d1d',
+      glow: 'rgba(220,38,38,0.5)',
+      patternColor: 'rgba(255,255,255,0.18)',
+      patternType: 'cross-stitch',
+    },
+    white: {
+      label: 'Alb Perlat',
+      grad1: '#f5f0e8', grad2: '#d4c9b8',
+      glow: 'rgba(245,240,232,0.4)',
+      patternColor: '#dc2626',
+      patternType: 'brau',
+    },
+    black: {
+      label: 'Negru Antracit',
+      grad1: '#2d2d2d', grad2: '#0a0a0a',
+      glow: 'rgba(212,175,55,0.4)',
+      patternColor: '#d4af37',
+      patternType: 'ie-gala',
+    },
+    green: {
+      label: 'Verde de Codru',
+      grad1: '#166534', grad2: '#052e16',
+      glow: 'rgba(22,101,52,0.5)',
+      patternColor: 'rgba(255,255,255,0.2)',
+      patternType: 'brad',
+    },
+    golden: {
+      label: 'Ou de Aur',
+      grad1: '#fbbf24', grad2: '#78350f',
+      glow: 'rgba(251,191,36,0.6)',
+      patternColor: 'rgba(255,255,255,0.25)',
+      patternType: 'cross-stitch',
+    },
   }), []);
 
-  const current = skins[skin] || skins.red;
-  const finalFill = isGolden ? "url(#liquid-imperial)" : current.fill;
+  const current = skins[skinId] || skins.red;
+  const uid = useMemo(() => Math.random().toString(36).substring(2, 7), []);
+
+  const renderPattern = () => {
+    const c = current.patternColor;
+    switch (current.patternType) {
+      case 'cross-stitch':
+        return (
+          <pattern id={`pat-${uid}`} x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+            <line x1="2" y1="2" x2="6" y2="6" stroke={c} strokeWidth="1.2" />
+            <line x1="6" y1="2" x2="2" y2="6" stroke={c} strokeWidth="1.2" />
+            <line x1="10" y1="10" x2="14" y2="14" stroke={c} strokeWidth="1.2" />
+            <line x1="14" y1="10" x2="10" y2="14" stroke={c} strokeWidth="1.2" />
+            <rect x="3" y="10" width="2" height="2" fill={c} opacity="0.5" transform="rotate(45 4 11)" />
+            <rect x="11" y="2" width="2" height="2" fill={c} opacity="0.5" transform="rotate(45 12 3)" />
+          </pattern>
+        );
+      case 'brau':
+        return (
+          <pattern id={`pat-${uid}`} x="0" y="0" width="20" height="130" patternUnits="userSpaceOnUse">
+            <rect x="0" y="55" width="20" height="20" fill={c} opacity="0.2" />
+            <line x1="0" y1="57" x2="20" y2="57" stroke={c} strokeWidth="1.5" />
+            <line x1="0" y1="73" x2="20" y2="73" stroke={c} strokeWidth="1.5" />
+            <line x1="0" y1="59" x2="4" y2="65" stroke={c} strokeWidth="1" />
+            <line x1="4" y1="65" x2="0" y2="71" stroke={c} strokeWidth="1" />
+            <line x1="5" y1="59" x2="10" y2="65" stroke={c} strokeWidth="1" />
+            <line x1="10" y1="65" x2="5" y2="71" stroke={c} strokeWidth="1" />
+            <line x1="10" y1="59" x2="15" y2="65" stroke={c} strokeWidth="1" />
+            <line x1="15" y1="65" x2="10" y2="71" stroke={c} strokeWidth="1" />
+            <line x1="15" y1="59" x2="20" y2="65" stroke={c} strokeWidth="1" />
+            <line x1="20" y1="65" x2="15" y2="71" stroke={c} strokeWidth="1" />
+          </pattern>
+        );
+      case 'ie-gala':
+        return (
+          <pattern id={`pat-${uid}`} x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="3" fill="none" stroke={c} strokeWidth="0.8" />
+            <circle cx="12" cy="12" r="1" fill={c} opacity="0.6" />
+            <line x1="12" y1="0" x2="12" y2="9" stroke={c} strokeWidth="0.5" opacity="0.4" />
+            <line x1="12" y1="15" x2="12" y2="24" stroke={c} strokeWidth="0.5" opacity="0.4" />
+            <line x1="0" y1="12" x2="9" y2="12" stroke={c} strokeWidth="0.5" opacity="0.4" />
+            <line x1="15" y1="12" x2="24" y2="12" stroke={c} strokeWidth="0.5" opacity="0.4" />
+            <rect x="0" y="0" width="3" height="3" fill={c} opacity="0.15" />
+            <rect x="21" y="0" width="3" height="3" fill={c} opacity="0.15" />
+            <rect x="0" y="21" width="3" height="3" fill={c} opacity="0.15" />
+            <rect x="21" y="21" width="3" height="3" fill={c} opacity="0.15" />
+          </pattern>
+        );
+      case 'brad':
+        return (
+          <pattern id={`pat-${uid}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <line x1="10" y1="2" x2="4" y2="10" stroke={c} strokeWidth="1" />
+            <line x1="10" y1="2" x2="16" y2="10" stroke={c} strokeWidth="1" />
+            <line x1="10" y1="8" x2="2" y2="18" stroke={c} strokeWidth="1" />
+            <line x1="10" y1="8" x2="18" y2="18" stroke={c} strokeWidth="1" />
+            <line x1="10" y1="10" x2="10" y2="20" stroke={c} strokeWidth="0.8" opacity="0.5" />
+          </pattern>
+        );
+      default: return null;
+    }
+  };
+
+  const eggPath = "M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z";
+
+  const crackPath1 = "M35 25 L42 40 L38 52 L50 65 L44 78 L52 90 L47 105 L55 118 L50 130";
+  const crackPath2 = "M65 20 L58 38 L63 50 L55 62 L62 75 L57 88 L65 100 L60 115";
 
   return (
-    <div className={`relative transition-all duration-700 flex-shrink-0 ${!spart ? 'animate-float-v9' : 'scale-[0.85] opacity-70 rotate-6 filter grayscale-[30%]'}`} style={{ width: 'clamp(90px, 25vw, 160px)', height: 'auto', aspectRatio: '1 / 1.35' }}>
-      {(isGolden || !spart) && (
-        <div className="absolute inset-[-20%] rounded-full blur-[40px] md:blur-[50px] opacity-30 animate-pulse transition-all duration-1000 mix-blend-screen pointer-events-none" style={{ backgroundColor: isGolden ? '#fbbf24' : current.glow }}></div>
+    <div className={`relative transition-all duration-700 flex-shrink-0 ${!spart ? 'animate-float-v9' : 'scale-[0.85] opacity-70 rotate-6'}`} style={{ width: 'clamp(90px, 25vw, 160px)', height: 'auto', aspectRatio: '1 / 1.35' }}>
+      {!spart && (
+        <div className="absolute inset-[-20%] rounded-full blur-[40px] md:blur-[50px] opacity-30 animate-pulse transition-all duration-1000 mix-blend-screen pointer-events-none" style={{ backgroundColor: current.glow }} />
       )}
       <svg viewBox="0 0 100 130" className="w-full h-full relative z-10 drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
         <defs>
-          <linearGradient id="liquid-ruby" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#7f1d1d" /></linearGradient>
-          <linearGradient id="liquid-sapphire" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#1e3a8a" /></linearGradient>
-          <linearGradient id="liquid-imperial" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#78350f" /></linearGradient>
-          <linearGradient id="liquid-emerald" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#10b981" /><stop offset="100%" stopColor="#064e3b" /></linearGradient>
-          <linearGradient id="liquid-nebula" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#8b5cf6" /><stop offset="100%" stopColor="#2e1065" /></linearGradient>
-          <radialGradient id="highLight" cx="40%" cy="30%" r="50%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.6)" /><stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          <linearGradient id={`grad-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={current.grad1} />
+            <stop offset="100%" stopColor={current.grad2} />
+          </linearGradient>
+          <radialGradient id={`hl-${uid}`} cx="38%" cy="28%" r="50%">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.55)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
           </radialGradient>
+          <clipPath id={`clip-${uid}`}><path d={eggPath} /></clipPath>
+          {renderPattern()}
         </defs>
-        <path d="M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z" fill={finalFill} />
-        <path d="M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z" fill="url(#highLight)" opacity="0.6" />
+        <path d={eggPath} fill={`url(#grad-${uid})`} />
+        <rect x="0" y="0" width="100" height="130" fill={`url(#pat-${uid})`} clipPath={`url(#clip-${uid})`} />
+        <path d={eggPath} fill={`url(#hl-${uid})`} opacity="0.6" />
         {spart && (
-          <g stroke="rgba(0,0,0,0.95)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none" className="animate-pop">
-            <path d="M30 40 L55 65 L45 85 L75 110 L65 125" />
-            <path d="M70 45 L55 75 L85 95 L65 115" />
+          <g stroke="rgba(0,0,0,0.9)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" className="crack-animate">
+            <path d={crackPath1} className="crack-line-1" />
+            <path d={crackPath2} className="crack-line-2" />
+            <g stroke="rgba(255,255,255,0.4)" strokeWidth="1.5">
+              <path d={crackPath1} className="crack-line-1" />
+              <path d={crackPath2} className="crack-line-2" />
+            </g>
           </g>
         )}
       </svg>
       {hasStar && <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 text-4xl md:text-6xl animate-star drop-shadow-[0_0_20px_rgba(234,179,8,1)] z-20 select-none">⭐</div>}
-      {spart && <div className="absolute inset-0 flex items-center justify-center text-6xl md:text-9xl animate-pop pointer-events-none z-30 drop-shadow-[0_0_40px_rgba(220,38,38,0.8)]">💥</div>}
+      {spart && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"><div className="spark-burst" /></div>}
       {spart && <div className="absolute inset-0 particle-burst pointer-events-none" />}
     </div>
   );
