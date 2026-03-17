@@ -44,58 +44,58 @@ const FriendList = ({ isOpen, onClose, currentUser }) => {
   if (!isOpen) return null;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99999]"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[99999]"
       onClick={onClose}
     >
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white/95 backdrop-blur-md p-8 rounded-3xl border border-purple-200 w-full max-w-md shadow-2xl max-h-[80vh] overflow-hidden"
+        className="bg-[#141111] backdrop-blur-md p-8 rounded-3xl border border-red-900/20 w-full max-w-md shadow-2xl shadow-black/50 max-h-[80vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full flex items-center justify-center">
-              <span className="text-white">👥</span>
+            <div className="w-10 h-10 bg-red-900/30 rounded-full flex items-center justify-center">
+              <span>👥</span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800">Prieteni</h2>
+            <h2 className="text-2xl font-bold text-white">Prieteni</h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+          <button
+            onClick={onClose}
+            className="w-8 h-8 bg-white/[0.05] hover:bg-white/[0.1] rounded-full flex items-center justify-center transition-colors"
           >
-            <span className="text-gray-600 text-lg">×</span>
+            <span className="text-gray-400 text-lg">×</span>
           </button>
         </div>
 
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
           {friends.length > 0 ? (
             friends.map((friend) => (
-              <motion.div 
+              <motion.div
                 key={friend.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center justify-between p-4 bg-white/70 rounded-2xl border border-gray-200 hover:border-purple-300 transition-all"
+                className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/[0.06] hover:border-red-900/30 transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${getStatusColor(friend.status)} shadow-sm`}></div>
+                  <div className={`w-3 h-3 rounded-full ${getStatusColor(friend.status)}`}></div>
                   <div>
-                    <div className="font-bold text-gray-800">{friend.name}</div>
-                    <div className="text-sm text-gray-600">{getStatusText(friend)}</div>
+                    <div className="font-bold text-white">{friend.name}</div>
+                    <div className="text-sm text-gray-500">{getStatusText(friend)}</div>
                   </div>
                 </div>
-                
+
                 {friend.status === 'online' && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleInvite(friend.name)}
-                    className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:from-purple-600 hover:to-pink-700 transition-all"
+                    className="bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-600 transition-all border border-red-800"
                   >
                     Invită
                   </motion.button>
@@ -105,7 +105,7 @@ const FriendList = ({ isOpen, onClose, currentUser }) => {
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">👥</div>
-              <p className="text-gray-600 font-semibold">Niciun prieten adăugat</p>
+              <p className="text-gray-400 font-semibold">Niciun prieten adăugat</p>
               <p className="text-gray-500 text-sm mt-2">Invită prieteni să se alăture!</p>
             </div>
           )}

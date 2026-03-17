@@ -10,13 +10,13 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay, ease: "easeOut" }}
-    className="bg-white p-8 rounded-lg border-4 border-red-700 shadow-lg"
+    className="bg-white/[0.04] p-8 rounded-2xl border border-white/[0.06] shadow-lg shadow-black/20"
   >
     <div className="flex items-center gap-4 mb-6">
       <span className="text-4xl">{icon}</span>
-      <h2 className="text-2xl md:text-3xl font-black text-red-900">{title}</h2>
+      <h2 className="text-2xl md:text-3xl font-black text-white">{title}</h2>
     </div>
-    <div className="space-y-4 text-gray-700 text-sm md:text-base font-medium leading-relaxed">
+    <div className="space-y-4 text-gray-300 text-sm md:text-base font-medium leading-relaxed">
       {children}
     </div>
   </motion.article>
@@ -49,14 +49,14 @@ export default function VopsitNaturalPage() {
   return (
     <>
       <Script id="schema-vopsit-natural" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }} />
-      <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900">
+      <main className="min-h-screen bg-[#0c0a0a] text-gray-200">
 
-        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-white shadow-lg border-b-4 border-red-700">
+        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-[#141111] shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-red-900">Ciocnim<span className="text-red-600">.ro</span></span>
+            <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
           </Link>
-          <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border-2 border-red-900 hover:bg-red-800 transition-all active:scale-95">
+          <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
             Înapoi acasă
           </Link>
         </div>
@@ -64,10 +64,10 @@ export default function VopsitNaturalPage() {
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
 
           <header className="text-center space-y-4">
-            <h1 className="text-4xl md:text-6xl font-black text-red-900 leading-tight">
-              Vopsitul Natural al <span className="text-red-600">Ouălor de Paște</span>
+            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+              Vopsitul Natural al <span className="text-red-500">Ouălor de Paște</span>
             </h1>
-            <p className="text-red-700 font-bold text-sm md:text-base">
+            <p className="text-gray-400 font-bold text-sm md:text-base">
               Culori vibrante folosind doar ingrediente din natură, ca pe vremea bunicilor.
             </p>
           </header>

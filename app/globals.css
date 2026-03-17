@@ -2,42 +2,33 @@
 
 /**
  * ====================================================================================================
- * CIOCNIM.RO - CORE ENGINE VIZUAL (V31.0 - TRADIȚIE PREMIUM & MOBILE PERFECT)
+ * CIOCNIM.RO - DARK TRADITIONAL THEME (V32.0)
  * ====================================================================================================
- * Optimizat pentru: Next.js + Tailwind v4 + Mobile First Design
- * Design: Pattern tradițional românesc (IA) în culori calde roșu tradițional + chihlimbar.
- * Mobile: Viewport Fix, Touch Optimization, 100dvh support, Safe Areas.
- * UX: Smooth animations, haptic feedback ready, gesture-friendly.
+ * Design: Dark/gray minimalist cu accente roșii tradiționale.
+ * Glassmorphism, red contrasts, traditional feel, modern aesthetic.
  * ====================================================================================================
  */
 
 @layer base {
   :root {
-    --bg-ultra-dark: #050202; /* Negru cald, de vatră/lemn ars */
-    --bg-light: #fef8f3; /* Bej cald tradițional */
-    --red-primary: #dc2626; /* Roșu tradițional */
-    --red-dark: #991b1b; /* Roșu închis - ciocnim tradițional */
-    --red-glow: rgba(185, 28, 28, 0.4); /* Roșu mai așezat */
-    --gold-primary: #d97706; /* Auriu/Chihlimbar cald */
-    --gold-glow: rgba(245, 158, 11, 0.25); /* Chihlimbar soft */
-    --liquid-blur: 40px;
+    --bg-dark: #0c0a0a;
+    --bg-card: #141111;
+    --bg-card-hover: #1a1515;
+    --red-primary: #dc2626;
+    --red-dark: #991b1b;
+    --red-glow: rgba(220, 38, 38, 0.15);
+    --gold-primary: #d97706;
+    --gold-glow: rgba(245, 158, 11, 0.1);
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  @media (prefers-color-scheme: light) {
-    body {
-      background-color: #fef8f3;
-    }
-  }
-
   html {
     scroll-behavior: smooth;
-    background-color: #fef8f3;
+    background-color: var(--bg-dark);
     overflow-x: hidden !important;
     width: 100vw;
     -webkit-text-size-adjust: 100%;
-    /* Mobile viewport fix */
     height: 100%;
     min-height: 100vh;
     min-height: 100dvh;
@@ -46,64 +37,60 @@
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #1f2937;
+    color: #e5e5e5;
     margin: 0;
     padding: 0;
     min-height: 100vh;
     min-height: 100dvh;
     width: 100vw;
-    background-color: #fef8f3;
+    background-color: var(--bg-dark);
     background-attachment: fixed;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     font-family: var(--font-outfit), system-ui, sans-serif;
-    /* Touch optimization */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    /* Safe area support */
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
   }
 
-  /* Setare selecție text - roșu tradițional cu text auriu */
   ::selection {
-    background-color: rgba(153, 27, 27, 0.7); /* red-900 */
-    color: #fbbf24; /* amber-300 */
+    background-color: rgba(220, 38, 38, 0.5);
+    color: #fbbf24;
   }
   ::-moz-selection {
-    background-color: rgba(153, 27, 27, 0.7);
+    background-color: rgba(220, 38, 38, 0.5);
     color: #fbbf24;
   }
 
-  /* Focus accessibility */
   *:focus-visible {
-    outline: 3px solid var(--red-primary) !important;
+    outline: 2px solid var(--red-primary) !important;
     outline-offset: 2px !important;
   }
-  
-  *:focus {
-    outline: none !important;
-  }
+  *:focus { outline: none !important; }
 
-  /* Input styling */
   input, textarea, select {
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 2px solid var(--red-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(220, 38, 38, 0.3);
     border-radius: 1rem;
     padding: 0.75rem 1rem;
-    color: #1f2937;
+    color: #e5e5e5;
     user-select: text !important;
     touch-action: manipulation;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
     -webkit-appearance: none;
     appearance: none;
   }
 
   input:focus, textarea:focus, select:focus {
-    border-color: var(--red-dark);
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    border-color: var(--red-primary);
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.25);
   }
 
   button {
@@ -113,66 +100,58 @@
     cursor: pointer;
   }
 
-  /* Smooth tap feedback */
   button:active {
     transition: transform 0.1s;
   }
 
-  /* Prevent zoom on input focus iOS */
   @supports (-webkit-touch-callout: none) {
-    input, textarea, select {
-      font-size: 16px;
-    }
+    input, textarea, select { font-size: 16px; }
   }
 }
 
 @layer utilities {
   /* ==========================================================================
-     MOTIVE TRADIȚIONALE (IA ROMÂNEASCĂ) - PURE CSS
+     GLASSMORPHISM CARDS (DARK THEME)
+     ========================================================================== */
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.5rem;
+  }
+
+  .glass-card-strong {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(60px) saturate(180%);
+    -webkit-backdrop-filter: blur(60px) saturate(180%);
+    border: 1px solid rgba(220, 38, 38, 0.15);
+    border-radius: 1.5rem;
+  }
+
+  .glass-card-red {
+    background: rgba(220, 38, 38, 0.06);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 1.5rem;
+  }
+
+  /* ==========================================================================
+     TRADITIONAL PATTERN (subtle on dark)
      ========================================================================== */
   .pattern-tradition {
-    background-color: transparent;
     background-image:
-      radial-gradient(circle at 2px 2px, var(--red-primary) 1px, transparent 1px),
-      radial-gradient(circle at 12px 7px, var(--gold-primary) 1.5px, transparent 1.5px);
+      radial-gradient(circle at 2px 2px, rgba(220,38,38,0.06) 1px, transparent 1px),
+      radial-gradient(circle at 12px 7px, rgba(245,158,11,0.04) 1px, transparent 1px);
     background-size: 24px 24px;
     background-position: 0 0, 6px 3px;
     background-repeat: repeat;
   }
 
   /* ==========================================================================
-     LIQUID GLASS & CARDURI (MODERNIZATE)
-     ========================================================================== */
-  
-  .liquid-glass {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 2px solid rgba(220, 38, 38, 0.2);
-    box-shadow: 0 20px 40px -10px rgba(153, 27, 27, 0.15);
-    border-radius: 1.75rem;
-  }
-
-  .clan-card-liquid {
-    border-radius: 2.5rem;
-    padding: 1.5rem;
-    border-left: 5px solid var(--red-primary);
-    box-shadow: 0 10px 30px -5px rgba(220, 38, 38, 0.15);
-    background: linear-gradient(135deg, rgba(254, 248, 243, 0.95) 0%, rgba(255, 255, 255, 0.90) 100%);
-    border-top-right-radius: 3rem;
-    border-bottom-right-radius: 3rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .clan-card-liquid:hover {
-    transform: translateY(-6px) translateX(4px);
-    box-shadow: 0 15px 40px -5px rgba(220, 38, 38, 0.25);
-    border-left-color: var(--gold-primary);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 240, 0.95) 100%);
-  }
-
-  /* ==========================================================================
-     ATMOSPHERIC GLOWS (MODERNIZATE PENTRU LIGHT MODE)
+     ATMOSPHERIC GLOWS (DARK MODE)
      ========================================================================== */
 
   .ambient-glow-red {
@@ -183,11 +162,9 @@
     height: 50vw;
     z-index: -10;
     pointer-events: none;
-    background: radial-gradient(circle, var(--red-glow) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 70%);
     filter: blur(100px);
     border-radius: 9999px;
-    mix-blend-mode: multiply;
-    opacity: 0.8;
   }
 
   .ambient-glow-gold {
@@ -198,11 +175,9 @@
     height: 60vw;
     z-index: -10;
     pointer-events: none;
-    background: radial-gradient(circle, var(--gold-glow) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 60%);
     filter: blur(120px);
     border-radius: 9999px;
-    mix-blend-mode: screen;
-    opacity: 0.9;
   }
 
   /* ==========================================================================
@@ -230,21 +205,44 @@
     animation: star-twinkle 1.5s ease-in-out infinite;
   }
 
+  /* Particle burst on egg crack */
+  .particle-burst::after {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(2px 2px at 20% 30%, rgba(220,38,38,0.8) 50%, transparent 50%),
+      radial-gradient(2px 2px at 40% 70%, rgba(245,158,11,0.6) 50%, transparent 50%),
+      radial-gradient(3px 3px at 60% 20%, rgba(220,38,38,0.7) 50%, transparent 50%),
+      radial-gradient(2px 2px at 80% 60%, rgba(245,158,11,0.5) 50%, transparent 50%),
+      radial-gradient(3px 3px at 30% 80%, rgba(220,38,38,0.6) 50%, transparent 50%),
+      radial-gradient(2px 2px at 70% 40%, rgba(245,158,11,0.7) 50%, transparent 50%);
+    background-size: 100% 100%;
+    animation: particle-explode 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  @keyframes particle-explode {
+    0% { transform: scale(0.3); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
   @keyframes float-gentle {
-    0%, 100% { 
+    0%, 100% {
       transform: translateY(0) rotate(-1deg) scale(1);
-      filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.1));
+      filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.15));
     }
-    50% { 
+    50% {
       transform: translateY(-12px) rotate(2deg) scale(1.02);
-      filter: drop-shadow(0 10px 15px rgba(245, 158, 11, 0.15));
+      filter: drop-shadow(0 16px 24px rgba(220, 38, 38, 0.25));
     }
   }
 
   @keyframes impact-shake {
     0%, 100% { transform: translateX(0) translateY(0); }
-    10% { transform: translateX(-6px) translateY(-6px); }
-    20% { transform: translateX(6px) translateY(-6px); }
+    10% { transform: translateX(-8px) translateY(-8px); }
+    20% { transform: translateX(8px) translateY(-6px); }
     30% { transform: translateX(-6px) translateY(0); }
     40% { transform: translateX(6px) translateY(0); }
     50% { transform: translateX(0) translateY(-3px); }
@@ -252,28 +250,33 @@
 
   @keyframes pop-smash {
     0% { transform: scale(1); filter: brightness(1); }
-    40% { transform: scale(1.15) rotate(8deg); filter: brightness(1.6) sepia(0.3); }
+    40% { transform: scale(1.15) rotate(8deg); filter: brightness(1.6); }
     100% { transform: scale(0.95) rotate(-2deg); opacity: 0.9; }
   }
 
   @keyframes glow-pulse {
     0%, 100% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.3); }
-    50% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.6); }
+    50% { box-shadow: 0 0 50px rgba(220, 38, 38, 0.6); }
   }
 
   @keyframes star-twinkle {
-    0%, 100% { 
-      transform: scale(1) rotate(0deg);
-      opacity: 1;
-    }
-    50% { 
-      transform: scale(0.8) rotate(180deg);
-      opacity: 0.6;
-    }
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(0.8) rotate(180deg); opacity: 0.6; }
+  }
+
+  /* Power bar animation */
+  @keyframes power-sweep {
+    0% { width: 0%; }
+    50% { width: 100%; }
+    100% { width: 0%; }
+  }
+
+  .animate-power-bar {
+    animation: power-sweep 1.2s ease-in-out infinite;
   }
 
   /* ==========================================================================
-     SCROLLBARS & MOBILE RESPONSIVENESS
+     SCROLLBARS & MOBILE
      ========================================================================== */
 
   .px-mobile-fix {
@@ -285,36 +288,19 @@
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
-  /* Previne înghesuirea textului pe ecrane foarte mici (iPhone SE, foldables) */
   @media (max-width: 380px) {
-    .text-mobile-shrink {
-      font-size: 0.85rem !important;
-    }
-    .gap-mobile-shrink {
-      gap: 0.5rem !important;
-    }
+    .text-mobile-shrink { font-size: 0.85rem !important; }
+    .gap-mobile-shrink { gap: 0.5rem !important; }
   }
 
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(245, 158, 11, 0.2); /* Chihlimbar discret */
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(185, 28, 28, 0.6); /* Roșu la hover */
-  }
+  .custom-scrollbar::-webkit-scrollbar { width: 3px; height: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(220, 38, 38, 0.2); border-radius: 10px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(220, 38, 38, 0.5); }
 }

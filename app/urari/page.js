@@ -17,16 +17,16 @@ const MessageCard = ({ text }) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-lg border-2 border-red-300 hover:border-red-600 transition-colors group relative shadow-sm">
-      <p className="text-gray-800 text-sm md:text-base font-medium italic pr-14 leading-relaxed">
+    <div className="bg-white/[0.03] p-5 rounded-xl border border-white/[0.06] hover:border-red-900/30 transition-colors group relative">
+      <p className="text-gray-300 text-sm md:text-base font-medium italic pr-14 leading-relaxed">
         &ldquo;{text}&rdquo;
       </p>
       <button
         onClick={handleCopy}
         className={`absolute top-4 right-4 px-3 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
           copiat
-            ? "bg-green-100 text-green-700 border border-green-300"
-            : "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+            ? "bg-green-900/20 text-green-400 border border-green-900/30"
+            : "bg-red-900/20 text-red-400 hover:bg-red-900/30 border border-red-900/30"
         }`}
         title="Copiază Mesajul"
       >
@@ -42,11 +42,11 @@ const CategorySection = ({ title, icon, messages, delay = 0 }) => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay, ease: "easeOut" }}
-    className="bg-white p-6 md:p-8 rounded-lg border-4 border-red-700 shadow-lg"
+    className="bg-white/[0.04] p-6 md:p-8 rounded-2xl border border-white/[0.06] shadow-lg shadow-black/20"
   >
-    <div className="flex items-center gap-3 mb-6 border-b-2 border-red-100 pb-4">
+    <div className="flex items-center gap-3 mb-6 border-b border-red-900/20 pb-4">
       <span className="text-3xl">{icon}</span>
-      <h2 className="text-xl md:text-2xl font-black text-red-900">{title}</h2>
+      <h2 className="text-xl md:text-2xl font-black text-white">{title}</h2>
     </div>
     <div className="flex flex-col gap-3">
       {messages.map((msg, idx) => (
@@ -84,14 +84,14 @@ export default function UrariPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900">
+    <main className="min-h-screen bg-[#0c0a0a] text-gray-200">
 
-      <div className="w-full flex justify-between items-center p-6 md:p-8 bg-white shadow-lg border-b-4 border-red-700">
+      <div className="w-full flex justify-between items-center p-6 md:p-8 bg-[#141111] shadow-lg shadow-black/20 border-b border-red-900/20">
         <Link href="/" className="flex items-center gap-2 group">
           <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-          <span className="font-bold text-xl md:text-2xl text-red-900">Ciocnim<span className="text-red-600">.ro</span></span>
+          <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
         </Link>
-        <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border-2 border-red-900 hover:bg-red-800 transition-all active:scale-95">
+        <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
           Înapoi acasă
         </Link>
       </div>
@@ -99,10 +99,10 @@ export default function UrariPage() {
       <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
 
         <header className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-black text-red-900 leading-tight">
-            Mesaje și <span className="text-red-600">Urări de Paște</span>
+          <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+            Mesaje și <span className="text-red-500">Urări de Paște</span>
           </h1>
-          <p className="text-red-700 font-bold text-sm md:text-base">
+          <p className="text-gray-400 font-bold text-sm md:text-base">
             Copiază un mesaj și trimite vestea Învierii pe WhatsApp sau Facebook.
           </p>
         </header>
@@ -115,7 +115,7 @@ export default function UrariPage() {
         </div>
 
         <div className="text-center">
-          <Link href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-lg font-black text-lg border-4 border-red-900 hover:bg-red-800 transition-all active:scale-95 shadow-lg">
+          <Link href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
             🥚 Ciocnește ouă online
           </Link>
         </div>

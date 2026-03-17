@@ -81,15 +81,15 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-red-900/10 bg-white/70 backdrop-blur-xl shadow-sm">
+    <div className="rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.04] backdrop-blur-xl shadow-lg shadow-black/20">
       <div className="flex">
         {[["jucatori", "🏆 Jucători"], ["regiuni", "🗺️ Regiuni"]].map(([v, label]) => (
           <button
             key={v}
             onClick={() => setView(v)}
             className={`flex-1 py-3.5 text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
-              view === v ? "bg-red-800 text-white" : "text-red-900/40 hover:text-red-800 hover:bg-red-50"
-            } ${v === "regiuni" ? "border-l border-red-900/10" : ""}`}
+              view === v ? "bg-red-700 text-white" : "text-gray-400 hover:text-red-400 hover:bg-white/[0.06]"
+            } ${v === "regiuni" ? "border-l border-white/[0.06]" : ""}`}
           >
             {label}
           </button>
@@ -102,17 +102,17 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
               {topPlayers && topPlayers.length > 0 ? (
                 <>
                   {topPlayers.map((p, i) => (
-                    <div key={i} className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${p.nume === myName?.toUpperCase().trim() ? "bg-amber-50 border border-amber-200" : "hover:bg-gray-50"}`}>
+                    <div key={i} className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${p.nume === myName?.toUpperCase().trim() ? "bg-amber-900/20 border border-amber-700/30" : "hover:bg-white/[0.06]"}`}>
                       <div className="flex items-center gap-2.5">
                         <span className="text-base w-6 text-center">{medals[i] || `${i + 1}.`}</span>
-                        <span className="font-bold text-gray-800 text-sm">{p.nume}</span>
+                        <span className="font-bold text-gray-200 text-sm">{p.nume}</span>
                       </div>
-                      <span className="font-bold text-red-800 text-sm">{parseInt(p.scor) || 0} 🏆</span>
+                      <span className="font-bold text-red-400 text-sm">{parseInt(p.scor) || 0} 🏆</span>
                     </div>
                   ))}
                   {myName && (myRank !== null || targetRank !== null) && (
                     <div className="mt-3 pt-3 border-t border-red-900/8">
-                      <p className="text-center text-[11px] font-semibold text-red-800">
+                      <p className="text-center text-[11px] font-semibold text-red-400">
                         {myRank === 1
                           ? "🎉 Ești Campion Național!"
                           : myRank !== null
@@ -132,10 +132,10 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                 topRegiuni.map((reg, i) => (
                   <div key={reg.regiune} className="space-y-1.5">
                     <div className="flex justify-between text-sm">
-                      <span className="font-bold text-gray-800">{medals[i] || `${i + 1}.`} {reg.regiune}</span>
-                      <span className="font-bold text-red-800">{parseInt(reg.scor) || 0} 🏆</span>
+                      <span className="font-bold text-gray-200">{medals[i] || `${i + 1}.`} {reg.regiune}</span>
+                      <span className="font-bold text-red-400">{parseInt(reg.scor) || 0} 🏆</span>
                     </div>
-                    <div className="w-full bg-red-100/60 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-red-900/30 rounded-full h-1.5 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(parseInt(reg.scor || 0) / maxRegionScore) * 100}%` }}
@@ -163,7 +163,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                 navigator.clipboard.writeText(`${text}\nhttps://ciocnim.ro`);
               }
             }}
-            className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-700 hover:text-red-900 hover:bg-red-50 transition-all flex items-center justify-center gap-2 rounded-b-xl"
+            className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-white/[0.06] transition-all flex items-center justify-center gap-2 rounded-b-xl"
           >
             <span>📲</span> Distribuie clasamentul tău
           </button>
@@ -180,13 +180,13 @@ const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => (
     whileTap={{ scale: 0.98 }}
     onClick={onClick}
     disabled={loading}
-    className="w-full px-5 py-4 rounded-2xl border border-red-900/10 bg-white/80 backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-lg"
+    className="w-full px-5 py-4 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-lg"
   >
-    <div className="w-10 h-10 rounded-xl bg-red-50 group-hover:bg-white/20 flex items-center justify-center transition-all text-xl flex-shrink-0">
+    <div className="w-10 h-10 rounded-xl bg-red-900/20 group-hover:bg-white/20 flex items-center justify-center transition-all text-xl flex-shrink-0">
       {icon}
     </div>
     <div className="flex-1 min-w-0">
-      <div className="font-bold text-gray-800 group-hover:text-white transition-colors text-sm leading-tight">{title}</div>
+      <div className="font-bold text-gray-200 group-hover:text-white transition-colors text-sm leading-tight">{title}</div>
       {subtitle && <div className="text-xs text-gray-400 group-hover:text-red-200 transition-colors mt-0.5">{subtitle}</div>}
     </div>
     {loading
@@ -246,15 +246,15 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
-        style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)', borderRadius: '24px', border: '1px solid rgba(127,29,29,0.1)', width: '100%', maxWidth: '384px', boxShadow: '0 25px 50px rgba(0,0,0,0.15)', padding: '24px' }}
+        style={{ background: 'rgba(20,17,17,0.98)', backdropFilter: 'blur(24px)', borderRadius: '24px', border: '1px solid rgba(220,38,38,0.15)', width: '100%', maxWidth: '384px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', padding: '24px' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-lg font-black text-gray-900">Meci Privat 🥚</h2>
+            <h2 className="text-lg font-black text-white">Meci Privat 🥚</h2>
             <p className="text-xs text-gray-400 mt-0.5">Creează sau alătură-te unei camere</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors text-sm">×</button>
+          <button onClick={onClose} className="w-8 h-8 bg-white/[0.05] hover:bg-white/[0.1] rounded-full flex items-center justify-center text-gray-400 transition-colors text-sm">×</button>
         </div>
         <div className="space-y-3">
           <motion.button
@@ -267,9 +267,9 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             {isCreating ? "⏳ Se creează..." : "➕ Creează Cameră Nouă"}
           </motion.button>
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-100" />
+            <div className="flex-1 h-px bg-white/[0.1]" />
             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">sau</span>
-            <div className="flex-1 h-px bg-gray-100" />
+            <div className="flex-1 h-px bg-white/[0.1]" />
           </div>
           <input
             value={roomCode}
@@ -277,7 +277,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             onKeyDown={e => e.key === "Enter" && joinRoom()}
             placeholder="COD CAMERĂ"
             maxLength={6}
-            className={`w-full px-4 py-3 rounded-2xl border-2 font-bold text-center text-base uppercase outline-none transition-all bg-gray-50 focus:bg-white ${roomError ? "border-red-400 focus:border-red-600" : "border-gray-200 focus:border-red-800"}`}
+            className={`w-full px-4 py-3 rounded-2xl border-2 font-bold text-center text-base uppercase outline-none transition-all bg-white/[0.05] focus:bg-white/[0.08] text-white ${roomError ? "border-red-400 focus:border-red-600" : "border-white/[0.1] focus:border-red-800"}`}
           />
           {roomError && <p className="text-red-500 text-xs font-semibold text-center -mt-1">{roomError}</p>}
           <motion.button
@@ -285,7 +285,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             whileTap={{ scale: 0.98 }}
             onClick={joinRoom}
             disabled={isJoining}
-            className="w-full bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-sm transition-all"
+            className="w-full bg-white/[0.1] hover:bg-white/[0.15] disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-sm transition-all"
           >
             {isJoining ? "⏳ Se verifică..." : "🎯 Intră în Joc"}
           </motion.button>
@@ -329,9 +329,9 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-red-900/10 bg-white/70 backdrop-blur-xl shadow-sm">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-red-900/8 bg-red-50/30">
-        <span className="font-bold text-gray-900 text-sm">👥 Grupul Meu</span>
+    <div className="rounded-2xl overflow-hidden border border-red-900/20 bg-white/[0.04] backdrop-blur-xl shadow-sm">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-red-900/10 bg-red-900/20">
+        <span className="font-bold text-white text-sm">👥 Grupul Meu</span>
         {teams.length > 1 && (
           <div className="flex items-center gap-1.5">
             <button onClick={() => setActiveTeamIndex(p => (p - 1 + teams.length) % teams.length)} className="w-6 h-6 bg-red-800 text-white rounded-full text-xs hover:bg-red-900 transition-all flex items-center justify-center">◀</button>
@@ -344,35 +344,35 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
         <div className="flex items-center gap-2">
           {isEditing && isCreator ? (
             <div className="flex gap-2 flex-1">
-              <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-800 outline-none focus:border-red-800 bg-gray-50" />
+              <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 px-3 py-2 border border-white/[0.1] rounded-xl text-sm font-bold text-gray-200 outline-none focus:border-red-800 bg-white/[0.05]" />
               <button onClick={handleSave} className="px-3 py-2 bg-red-800 text-white rounded-xl text-sm font-bold hover:bg-red-900 transition-all">OK</button>
-              <button onClick={() => setIsEditing(false)} className="px-2.5 py-2 bg-gray-100 rounded-xl text-sm hover:bg-gray-200 transition-all">✕</button>
+              <button onClick={() => setIsEditing(false)} className="px-2.5 py-2 bg-white/[0.08] rounded-xl text-sm hover:bg-white/[0.12] transition-all text-gray-400">✕</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 flex-1">
-              <span className="font-bold text-gray-900 text-sm">{currentTeam.details.nume}</span>
+              <span className="font-bold text-white text-sm">{currentTeam.details.nume}</span>
               {isCreator && <button onClick={() => setIsEditing(true)} className="text-gray-300 hover:text-red-800 transition-colors text-xs">✏️</button>}
             </div>
           )}
         </div>
         <div className="flex gap-2">
           <button onClick={handleInvite} className="flex-1 py-2.5 bg-red-800 text-white rounded-xl font-bold text-xs hover:bg-red-900 transition-all active:scale-95">{copyText}</button>
-          <button onClick={() => onLeave(currentTeam.details.id)} className="px-4 py-2.5 border border-red-200 text-red-700 rounded-xl font-bold text-xs hover:bg-red-50 transition-all active:scale-95">Ieși</button>
+          <button onClick={() => onLeave(currentTeam.details.id)} className="px-4 py-2.5 border border-red-900/30 text-red-400 rounded-xl font-bold text-xs hover:bg-red-900/20 transition-all active:scale-95">Ieși</button>
         </div>
         <div className="space-y-1.5 max-h-64 overflow-y-auto">
           {currentTeam.top.map((m, i) => (
-            <div key={i} className={`flex items-center justify-between px-3 py-2.5 rounded-xl ${m.member === numePreluat?.toUpperCase().trim() ? "bg-amber-50 border border-amber-200" : "bg-gray-50/60"}`}>
+            <div key={i} className={`flex items-center justify-between px-3 py-2.5 rounded-xl ${m.member === numePreluat?.toUpperCase().trim() ? "bg-amber-900/20 border border-amber-700/30" : "bg-white/[0.03]"}`}>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-gray-400 w-4">{i + 1}.</span>
-                <span className="font-bold text-gray-800 text-sm">{m.member}</span>
+                <span className="font-bold text-gray-200 text-sm">{m.member}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-red-800 text-xs">{parseInt(m.score) || 0} 🏆</span>
+                <span className="font-bold text-red-400 text-xs">{parseInt(m.score) || 0} 🏆</span>
                 {m.member !== numePreluat?.toUpperCase().trim() && (
                   <>
                     <button onClick={() => onProvoca(m.member, currentTeam.details.id)} className="w-7 h-7 bg-red-800 text-white rounded-lg text-xs hover:bg-red-900 transition-all active:scale-95 flex items-center justify-center" title="Provoacă">⚔️</button>
                     {isCreator && (
-                      <button onClick={() => onKick(m.member, currentTeam.details.id)} className="w-7 h-7 bg-gray-200 text-gray-500 rounded-lg text-xs hover:bg-red-100 hover:text-red-700 transition-all active:scale-95 flex items-center justify-center" title="Elimină din grup">✕</button>
+                      <button onClick={() => onKick(m.member, currentTeam.details.id)} className="w-7 h-7 bg-white/[0.08] text-gray-400 rounded-lg text-xs hover:bg-red-900/30 hover:text-red-400 transition-all active:scale-95 flex items-center justify-center" title="Elimină din grup">✕</button>
                     )}
                   </>
                 )}
@@ -405,7 +405,7 @@ const ColorSelector = ({ selected, onSelect }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(c.id)}
-            className={`aspect-square rounded-xl border-2 transition-all relative flex items-center justify-center ${selected === c.id ? "border-gray-800 shadow-md" : "border-transparent opacity-55 hover:opacity-90"}`}
+            className={`aspect-square rounded-xl border-2 transition-all relative flex items-center justify-center ${selected === c.id ? "border-white shadow-md" : "border-transparent opacity-55 hover:opacity-90"}`}
             style={{ backgroundColor: c.color }}
           >
             {selected === c.id && (
@@ -427,9 +427,9 @@ const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
       <div className="relative">
         <button
           onClick={() => setIsOpen(v => !v)}
-          className="w-full px-3 py-2.5 bg-gray-50 rounded-xl border border-gray-200 font-semibold text-left flex justify-between items-center hover:border-red-800 transition-all text-sm"
+          className="w-full px-3 py-2.5 bg-white/[0.05] rounded-xl border border-white/[0.1] font-semibold text-left flex justify-between items-center hover:border-red-800 transition-all text-sm"
         >
-          <span className={selectedRegion ? "text-gray-800" : "text-gray-400 text-xs"}>{selectedRegion || "Alege..."}</span>
+          <span className={selectedRegion ? "text-gray-200" : "text-gray-400 text-xs"}>{selectedRegion || "Alege..."}</span>
           <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }} className="text-gray-400 text-xs">▾</motion.span>
         </button>
         <AnimatePresence>
@@ -439,13 +439,13 @@ const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className="absolute bottom-full left-0 w-full mb-1.5 bg-white/96 backdrop-blur-xl rounded-2xl border border-gray-200 p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/10"
+              className="absolute bottom-full left-0 w-full mb-1.5 bg-[#141111]/95 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/30"
             >
               {REGIUNI_ISTORICE.map(r => (
                 <button
                   key={r}
                   onClick={() => { onSelectRegion(r); setIsOpen(false); }}
-                  className={`px-2 py-2 text-xs font-semibold rounded-xl border transition-all ${selectedRegion === r ? "bg-red-800 text-white border-red-800" : "bg-white text-gray-700 border-gray-200 hover:border-red-800 hover:text-red-800"}`}
+                  className={`px-2 py-2 text-xs font-semibold rounded-xl border transition-all ${selectedRegion === r ? "bg-red-800 text-white border-red-800" : "bg-white/[0.05] text-gray-300 border-white/[0.08] hover:border-red-800 hover:text-red-400"}`}
                 >
                   {r}
                 </button>
@@ -459,7 +459,7 @@ const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
 };
 
 const SectionLabel = ({ children }) => (
-  <p className="text-[10px] font-bold text-red-900/30 uppercase tracking-[0.35em] mb-3 px-0.5">{children}</p>
+  <p className="text-[10px] font-bold text-red-500/40 uppercase tracking-[0.35em] mb-3 px-0.5">{children}</p>
 );
 
 // ─── Componenta Principală ──────────────────────────────────────────────────────
@@ -667,19 +667,19 @@ function HomeContent() {
         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="text-5xl mb-4 drop-shadow-sm">
           🥚
         </motion.div>
-        <h1 className="text-3xl font-black text-red-900 tracking-tight">CIOCNIM.RO</h1>
-        <p className="text-base font-bold text-red-900/70 mt-2">Ciocnește ouă online cu prietenii sau familia 🥚</p>
-        <p className="text-[11px] font-semibold text-red-800/35 uppercase tracking-[0.4em] mt-1">Tradiția Românească · Paști 2026</p>
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-4 inline-flex items-center gap-2 border border-red-900/12 bg-red-50/60 text-red-900 px-4 py-2 rounded-full text-sm font-bold">
+        <h1 className="text-3xl font-black text-white tracking-tight">CIOCNIM.RO</h1>
+        <p className="text-base font-bold text-red-400/70 mt-2">Ciocnește ouă online cu prietenii sau familia 🥚</p>
+        <p className="text-[11px] font-semibold text-red-400/35 uppercase tracking-[0.4em] mt-1">Tradiția Românească · Paști 2026</p>
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-4 inline-flex items-center gap-2 border border-red-900/20 bg-red-900/20 text-red-400 px-4 py-2 rounded-full text-sm font-bold">
           🥚 <span className="tabular-nums">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
-          <span className="font-normal text-red-900/40 text-xs">Ciocniri Naționale</span>
+          <span className="font-normal text-red-400/50 text-xs">Ciocniri Naționale</span>
         </motion.div>
       </motion.div>
 
       {/* PROFIL */}
       <motion.div {...fadeUp(0.08)}>
         <SectionLabel>Profilul Tău</SectionLabel>
-        <div className="rounded-2xl border border-red-900/10 bg-white/70 backdrop-blur-xl p-5 space-y-4 shadow-sm">
+        <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-5 space-y-4 shadow-sm">
           <div>
             <div className="flex gap-2">
               <input
@@ -688,14 +688,14 @@ function HomeContent() {
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
                 placeholder="Porecla ta..."
                 maxLength={21}
-                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl font-bold text-gray-800 outline-none focus:border-red-800 transition-all text-sm bg-gray-50 focus:bg-white"
+                className="flex-1 px-4 py-3 border border-white/[0.1] rounded-xl font-bold text-gray-200 outline-none focus:border-red-800 transition-all text-sm bg-white/[0.05] focus:bg-white/[0.08]"
               />
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSaveNume}
                 disabled={isSavingName || isNameInvalid}
-                className={`px-5 py-3 font-bold rounded-xl border transition-all text-sm ${isNameInvalid || isSavingName ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900 shadow-sm shadow-red-900/20"}`}
+                className={`px-5 py-3 font-bold rounded-xl border transition-all text-sm ${isNameInvalid || isSavingName ? "bg-white/[0.05] text-gray-500 border-white/[0.08] cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900 shadow-sm shadow-red-900/20"}`}
               >
                 {isSavingName ? "…" : "OK"}
               </motion.button>
@@ -713,12 +713,12 @@ function HomeContent() {
             <ColorSelector selected={userStats.skin || "red"} onSelect={s => setUserStats({ ...userStats, skin: s })} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="border border-green-200/70 rounded-xl p-3 text-center bg-gradient-to-br from-green-50/80 to-emerald-50/40">
-              <p className="text-2xl font-black text-green-800">{parseInt(userStats.wins) || 0}</p>
-              <p className="text-[10px] font-bold text-green-600 uppercase tracking-wide mt-0.5">Victorii 🏆</p>
+            <div className="border border-green-900/30 rounded-xl p-3 text-center bg-green-900/10">
+              <p className="text-2xl font-black text-green-400">{parseInt(userStats.wins) || 0}</p>
+              <p className="text-[10px] font-bold text-green-500 uppercase tracking-wide mt-0.5">Victorii 🏆</p>
             </div>
-            <div className="border border-red-200/70 rounded-xl p-3 text-center bg-gradient-to-br from-red-50/80 to-rose-50/40">
-              <p className="text-2xl font-black text-red-800">{parseInt(userStats.losses) || 0}</p>
+            <div className="border border-red-900/30 rounded-xl p-3 text-center bg-red-900/10">
+              <p className="text-2xl font-black text-red-400">{parseInt(userStats.losses) || 0}</p>
               <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide mt-0.5">Înfrângeri 💔</p>
             </div>
           </div>
@@ -762,9 +762,9 @@ function HomeContent() {
             { href: "/urari", icon: "🕊️", text: "Urări" },
           ].map((item, i) => (
             <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 + i * 0.05 }}>
-              <Link href={item.href} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-red-900/10 bg-white/70 backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg">
+              <Link href={item.href} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg">
                 <span className="text-2xl">{item.icon}</span>
-                <span className="font-bold text-[11px] text-gray-600 group-hover:text-white transition-colors">{item.text}</span>
+                <span className="font-bold text-[11px] text-gray-400 group-hover:text-white transition-colors">{item.text}</span>
               </Link>
             </motion.div>
           ))}
@@ -784,10 +784,10 @@ function HomeContent() {
               setTimeout(() => setToastMsg(""), 3000);
             }
           }}
-          className="w-full py-4 rounded-2xl border-2 border-dashed border-red-200 bg-red-50/50 hover:bg-red-100/60 hover:border-red-300 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+          className="w-full py-4 rounded-2xl border-2 border-dashed border-red-900/30 bg-red-900/10 hover:bg-red-900/20 hover:border-red-800/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
         >
           <span className="text-xl">📲</span>
-          <span className="font-black text-red-800 text-sm">Trimite jocul prietenilor</span>
+          <span className="font-black text-red-400 text-sm">Trimite jocul prietenilor</span>
         </button>
       </motion.div>
 
@@ -823,11 +823,11 @@ function HomeContent() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
-              style={{ background: "rgba(255,255,255,0.98)", borderRadius: "24px", border: "1px solid rgba(127,29,29,0.1)", width: "100%", maxWidth: "360px", padding: "28px", boxShadow: "0 25px 50px rgba(0,0,0,0.2)" }}
+              style={{ background: "rgba(20,17,17,0.98)", borderRadius: "24px", border: "1px solid rgba(220,38,38,0.15)", width: "100%", maxWidth: "360px", padding: "28px", boxShadow: "0 25px 50px rgba(0,0,0,0.5)" }}
             >
               <div className="text-center mb-5">
                 <div className="text-4xl mb-3">🥚</div>
-                <h2 className="text-lg font-black text-gray-900">Ai fost invitat într-un grup!</h2>
+                <h2 className="text-lg font-black text-white">Ai fost invitat într-un grup!</h2>
                 <p className="text-xs text-gray-400 mt-1">Pune-ți o poreclă ca să te alături</p>
               </div>
               <input
@@ -837,7 +837,7 @@ function HomeContent() {
                 placeholder="Porecla ta..."
                 maxLength={21}
                 autoFocus
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-gray-800 outline-none focus:border-red-800 transition-all text-sm bg-gray-50 focus:bg-white mb-3"
+                className="w-full px-4 py-3 border-2 border-white/[0.1] rounded-2xl font-bold text-gray-200 outline-none focus:border-red-800 transition-all text-sm bg-white/[0.05] focus:bg-white/[0.08] mb-3"
               />
               {joinModalNume.trim().length > 0 && joinModalNume.trim().length < 3 && (
                 <p className="text-red-500 text-xs mb-3 font-medium">Minim 3 caractere</p>
@@ -860,7 +860,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#0c0a0a]">
       <Suspense fallback={
         <div className="h-screen flex items-center justify-center">
           <div className="text-center space-y-3">

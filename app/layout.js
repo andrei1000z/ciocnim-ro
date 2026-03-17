@@ -87,10 +87,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fef8f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#050202" }
-  ],
+  themeColor: "#0c0a0a",
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,
@@ -155,8 +152,8 @@ export default function RootLayout({ children }) {
       
       <body className={`
         ${outfit.className}
-        bg-white
-        text-gray-900
+        bg-[#0c0a0a]
+        text-gray-200
         min-h-screen
         min-h-[100dvh]
         w-full
@@ -165,11 +162,11 @@ export default function RootLayout({ children }) {
         antialiased
         scrollbar-hide
       `}>
-        
-        {/* Ambient glow subtil */}
+
+        {/* Ambient glow subtil - dark mode */}
         <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none">
-          <div className="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(185,28,28,0.04),transparent_70%)] blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(217,119,6,0.03),transparent_70%)] blur-3xl"></div>
+          <div className="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(220,38,38,0.06),transparent_70%)] blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(245,158,11,0.03),transparent_70%)] blur-3xl"></div>
         </div>
 
         <ClientWrapper>
@@ -195,7 +192,7 @@ export default function RootLayout({ children }) {
             width: 100vw;
             max-width: 100%;
             position: relative;
-            background-color: #ffffff;
+            background-color: #0c0a0a;
             overscroll-behavior-y: auto;
             overflow-x: hidden;
           }

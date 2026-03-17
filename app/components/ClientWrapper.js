@@ -257,26 +257,26 @@ export default function ClientWrapper({ children }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -50, scale: 0.9 }}
                 transition={{ type: "spring", bounce: 0.5 }}
-                className="relative w-[90%] max-w-sm bg-white p-8 md:p-10 rounded-3xl border-2 border-red-200 shadow-[0_25px_60px_rgba(0,0,0,0.2)] overflow-hidden pointer-events-auto"
+                className="relative w-[90%] max-w-sm bg-[#141111] p-8 md:p-10 rounded-3xl border border-red-900/30 shadow-[0_25px_60px_rgba(0,0,0,0.6)] overflow-hidden pointer-events-auto"
               >
                 <div className="relative z-10 text-center">
-                  <div className="inline-flex items-center gap-2 bg-red-100 px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-700 rounded-full mb-4">
+                  <div className="inline-flex items-center gap-2 bg-red-900/30 px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-400 rounded-full mb-4">
                     ⚔️ Provocare
                   </div>
 
-                  <p className="font-black text-2xl md:text-3xl text-gray-900 leading-tight">
-                    <span className="text-red-700">{notificare.deLa}</span> <br/> te cheamă la duel!
+                  <p className="font-black text-2xl md:text-3xl text-white leading-tight">
+                    <span className="text-red-500">{notificare.deLa}</span> <br/> te cheamă la duel!
                   </p>
 
                   <div className="flex flex-col gap-3 pt-6 relative z-50">
                     <button
-                      className="w-full bg-red-700 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg shadow-red-900/20 active:scale-95 text-white cursor-pointer pointer-events-auto"
+                      className="w-full bg-red-700 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg shadow-red-900/30 active:scale-95 text-white cursor-pointer pointer-events-auto"
                       onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?host=false&skin=${userStats.skin}&teamId=${notificare.teamId || ''}`); }}
                     >
                       Acceptă
                     </button>
                     <button
-                      className="w-full bg-gray-100 py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-95 cursor-pointer pointer-events-auto"
+                      className="w-full bg-white/[0.05] py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-gray-500 hover:bg-white/[0.08] hover:text-gray-300 transition-all active:scale-95 cursor-pointer pointer-events-auto"
                       onClick={() => setNotificare(null)}
                     >
                       Refuză
@@ -289,10 +289,10 @@ export default function ClientWrapper({ children }) {
       </div>
 
       {!isHydrated && (
-        <div className="fixed inset-0 bg-white z-[100001] flex flex-col items-center justify-center">
+        <div className="fixed inset-0 bg-[#0c0a0a] z-[100001] flex flex-col items-center justify-center">
           <div className="flex flex-col items-center gap-5">
             <span className="text-8xl animate-bounce">🥚</span>
-            <p className="text-sm font-black text-red-800 uppercase tracking-[0.4em] animate-pulse">Se încarcă...</p>
+            <p className="text-sm font-black text-red-500 uppercase tracking-[0.4em] animate-pulse">Se încarcă...</p>
           </div>
         </div>
       )}
