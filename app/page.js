@@ -35,6 +35,21 @@ function esteNumeInterzis(name) {
   return CUVINTE_INTERZISE.some(w => n.includes(w) || nv.includes(w) || noo.includes(w));
 }
 
+// Safe clipboard — fallback for HTTP, old browsers, restricted contexts
+function safeCopy(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      safeCopy(text).catch(() => {});
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(ta);
+    }
+  } catch {}
+}
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18, filter: "blur(6px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -160,7 +175,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
               if (navigator.share) {
                 navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
               } else {
-                navigator.clipboard.writeText(`${text}\nhttps://ciocnim.ro`);
+                safeCopy(`${text}\nhttps://ciocnim.ro`);
               }
             }}
             className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-white/[0.06] transition-all flex items-center justify-center gap-2 rounded-b-xl"
@@ -174,30 +189,24 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
 };
 
 // ─── Buton Acțiune ──────────────────────────────────────────────────────────────
-const ActionButton = ({ onClick, icon, title, subtitle, loading = false, primary = false }) => (
+const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => (
   <motion.button
     whileHover={{ scale: 1.015, x: 2 }}
     whileTap={{ scale: 0.97 }}
     onClick={onClick}
     disabled={loading}
-    className={`w-full px-5 py-4.5 rounded-2xl border group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-xl backdrop-blur-xl ${
-      primary
-        ? 'bg-gradient-to-r from-red-700 to-red-800 border-red-600/30 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-900/30'
-        : 'border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.08] hover:border-red-500/20'
-    }`}
+    className="w-full px-5 py-4 rounded-2xl border border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.08] hover:border-red-500/20 group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-xl backdrop-blur-xl"
   >
-    <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all text-xl flex-shrink-0 ${
-      primary ? 'bg-white/15' : 'bg-red-900/20 group-hover:bg-red-900/30'
-    }`}>
+    <div className="w-11 h-11 rounded-xl bg-red-900/20 group-hover:bg-red-900/30 flex items-center justify-center transition-all text-xl flex-shrink-0">
       {icon}
     </div>
     <div className="flex-1 min-w-0">
-      <div className={`font-bold transition-colors text-sm leading-tight ${primary ? 'text-white' : 'text-gray-200 group-hover:text-white'}`}>{title}</div>
-      {subtitle && <div className={`text-xs transition-colors mt-0.5 ${primary ? 'text-red-200/70' : 'text-gray-500 group-hover:text-gray-400'}`}>{subtitle}</div>}
+      <div className="font-bold text-gray-200 group-hover:text-white transition-colors text-sm leading-tight">{title}</div>
+      {subtitle && <div className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors mt-0.5">{subtitle}</div>}
     </div>
     {loading
       ? <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-      : <span className={`transition-colors text-sm flex-shrink-0 ${primary ? 'text-white/40' : 'text-gray-600 group-hover:text-gray-400'}`}>→</span>
+      : <span className="text-gray-600 group-hover:text-gray-400 transition-colors text-sm flex-shrink-0">→</span>
     }
   </motion.button>
 );
@@ -328,7 +337,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
     if (navigator.share) {
       try { await navigator.share({ title: "Ciocnim.ro - Hai la ciocneală!", text: shareText, url }); } catch {}
     } else {
-      navigator.clipboard.writeText(shareText);
+      safeCopy(shareText);
       setCopyText("✅ Copiat!");
       setTimeout(() => setCopyText("🔗 Invită"), 2000);
     }
@@ -549,17 +558,20 @@ function HomeContent() {
     }
   }, [searchParams, router]);
 
+  const safeGetLS = (k) => { try { return typeof window !== 'undefined' ? localStorage.getItem(k) : null; } catch { return null; } };
+  const safeSetLS = (k, v) => { try { if (typeof window !== 'undefined') localStorage.setItem(k, v); } catch {} };
+
   const getStoredTeamIds = () => {
-    try { return JSON.parse(localStorage.getItem("c_teamIds") || "[]"); } catch { return []; }
+    try { return JSON.parse(safeGetLS("c_teamIds") || "[]"); } catch { return []; }
   };
   const addStoredTeamId = useCallback((id) => {
     const ids = getStoredTeamIds();
-    if (!ids.includes(id)) { const n = [...ids, id]; localStorage.setItem("c_teamIds", JSON.stringify(n)); return n; }
+    if (!ids.includes(id)) { const n = [...ids, id]; safeSetLS("c_teamIds", JSON.stringify(n)); return n; }
     return ids;
   }, []);
   const removeStoredTeamId = (id) => {
     const n = getStoredTeamIds().filter(t => t !== id);
-    localStorage.setItem("c_teamIds", JSON.stringify(n));
+    safeSetLS("c_teamIds", JSON.stringify(n));
   };
 
   const teamIds = loadedTeams.map(t => t.details.id).join(",");
@@ -576,7 +588,7 @@ function HomeContent() {
         wssPort: _wsPort,
         forceTLS: _forceTLS,
         disableStats: true,
-        enabledTransports: ['ws', 'wss'],
+        enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
       });
     }
 
@@ -636,7 +648,7 @@ function HomeContent() {
           if (d.success) { results.push({ details: d.details, top: d.top || [] }); valid.push(tid); }
         } catch {}
       }
-      localStorage.setItem("c_teamIds", JSON.stringify(valid));
+      safeSetLS("c_teamIds", JSON.stringify(valid));
       setLoadedTeams(results);
       if (pId) router.replace("/");
     };
@@ -871,7 +883,7 @@ function HomeContent() {
             if (navigator.share) {
               navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
             } else {
-              navigator.clipboard.writeText(`${text}\nhttps://ciocnim.ro`);
+              safeCopy(`${text}\nhttps://ciocnim.ro`);
               setToastMsg("Link copiat! Trimite-l prietenilor.");
               setTimeout(() => setToastMsg(""), 3000);
             }
@@ -887,7 +899,7 @@ function HomeContent() {
       <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
         <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
         <div className="flex items-center justify-center gap-4">
-          <button onClick={() => { navigator.clipboard.writeText("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); setTimeout(() => setToastMsg(""), 3000); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
+          <button onClick={() => { safeCopy("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); setTimeout(() => setToastMsg(""), 3000); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
           <span className="text-gray-200 text-xs">·</span>
           <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație</button>
         </div>

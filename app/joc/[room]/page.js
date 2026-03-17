@@ -13,6 +13,21 @@ import { useGlobalStats } from "../../components/ClientWrapper";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Safe clipboard — fallback for HTTP, old browsers, restricted contexts
+function safeCopy(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      safeCopy(text).catch(() => {});
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(ta);
+    }
+  } catch {}
+}
+
 // --- BAZA DE DATE CITATE ---
 const CITATE_IERTARE = [
   "Iartă, și vei fi iertat. Oul tău s-a jertfit pentru bucuria aproapelui.",
@@ -318,7 +333,7 @@ function ArenaMaster({ room }) {
       wssPort: _wsPort,
       forceTLS: _forceTLS,
       disableStats: true,
-      enabledTransports: ['ws', 'wss'],
+      enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
     });
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
@@ -462,7 +477,7 @@ function ArenaMaster({ room }) {
         rezultatRef.current = { win: amCastigat };
         setRezultat({ win: amCastigat });
         playArenaSound(amCastigat ? 'victorie' : 'esec');
-        if (amCastigat) confetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] });
+        if (amCastigat) { try { confetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] }); } catch {} }
       }, 500);
     }, 450);
   };
@@ -509,12 +524,20 @@ function ArenaMaster({ room }) {
     const handleMotion = (e) => {
       const acc = e.acceleration;
       if (!acc) return;
-      if (Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z) > 20) {
+      if (Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0) > 20) {
         window.removeEventListener("devicemotion", handleMotion);
         handleStrike();
       }
     };
-    window.addEventListener("devicemotion", handleMotion);
+    // iOS 13+ requires explicit permission for DeviceMotionEvent
+    const startListening = () => {
+      window.addEventListener("devicemotion", handleMotion);
+    };
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      DeviceMotionEvent.requestPermission().then(state => { if (state === 'granted') startListening(); }).catch(() => {});
+    } else {
+      startListening();
+    }
     return () => window.removeEventListener("devicemotion", handleMotion);
   }, [canStrike, handleStrike]);
 
@@ -559,7 +582,7 @@ function ArenaMaster({ room }) {
   };
 
   const copyRoomCode = () => {
-    navigator.clipboard.writeText(room.replace('privat-', ''));
+    safeCopy(room.replace('privat-', ''));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -571,7 +594,7 @@ function ArenaMaster({ room }) {
     if (navigator.share) {
       navigator.share({ title: "Ciocnim.ro - Hai la duel!", text, url }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(`${text} ${url}`);
+      safeCopy(`${text} ${url}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -826,7 +849,7 @@ function ArenaMaster({ room }) {
                     if (navigator.share) {
                       navigator.share({ title: 'Ciocnim.ro', text, url }).catch(() => {});
                     } else {
-                      navigator.clipboard.writeText(`${text} ${url}`);
+                      safeCopy(`${text} ${url}`);
                     }
                   }}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-gradient-to-r from-red-700 to-red-600 text-white border-red-500/30 hover:from-red-600 hover:to-red-500 shadow-lg shadow-red-900/30"

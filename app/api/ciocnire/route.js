@@ -173,14 +173,39 @@ async function getUserAchievements(jucator) {
   }));
 }
 
+// --- Input sanitization helpers ---
+function sanitizeStr(val, maxLen = 100) {
+  if (typeof val !== 'string') return '';
+  return val.slice(0, maxLen).trim();
+}
+function sanitizeId(val) {
+  if (typeof val !== 'string') return '';
+  // IDs: alphanumeric, hyphens, max 64 chars
+  return val.slice(0, 64).replace(/[^a-zA-Z0-9\-_]/g, '');
+}
+
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { 
-      actiune, roomId, jucator, skin, isGolden, hasStar, 
-      teamId, regiune, creator, text, newName, oponentNume,
-      atacant, esteCastigator, oldName, teamIds
-    } = body;
+    let body;
+    try { body = await request.json(); } catch { return NextResponse.json({ success: false, error: "JSON invalid" }, { status: 400 }); }
+    if (!body || typeof body !== 'object') return NextResponse.json({ success: false, error: "Body invalid" }, { status: 400 });
+
+    const actiune = sanitizeStr(body.actiune, 40);
+    const roomId = sanitizeId(body.roomId);
+    const jucator = sanitizeStr(body.jucator, 30);
+    const skin = sanitizeStr(body.skin, 20);
+    const isGolden = body.isGolden === true;
+    const hasStar = body.hasStar === true;
+    const teamId = sanitizeId(body.teamId);
+    const regiune = sanitizeStr(body.regiune, 40);
+    const creator = sanitizeStr(body.creator, 30);
+    const text = sanitizeStr(body.text, 500);
+    const newName = sanitizeStr(body.newName, 30);
+    const oponentNume = sanitizeStr(body.oponentNume, 30);
+    const atacant = sanitizeStr(body.atacant, 30);
+    const esteCastigator = body.esteCastigator === true;
+    const oldName = sanitizeStr(body.oldName, 30);
+    const teamIds = Array.isArray(body.teamIds) ? body.teamIds.slice(0, 20).map(id => sanitizeId(id)).filter(Boolean) : [];
 
     switch (actiune) {
       
@@ -200,24 +225,24 @@ export async function POST(request) {
         
         // Când frontend-ul trimite "jucator", înseamnă că ACEL jucător a CÂȘTIGAT meciul. Punct.
         // Serverul face doar +1, nu mai acceptă un număr precalculat din front-end care să o ia razna.
-        if (jucator && jucator.trim() !== "") {
-            const safeName = jucator.trim().toUpperCase();
-            
+        if (jucator) {
+            const safeName = jucator.toUpperCase();
+
             // +1 în clasamentul global
             pipeline.zincrby('leaderboard_jucatori', 1, safeName);
 
             // +1 în clasamentul regiunii (dacă jucătorul are regiune setată)
-            if (regiune && regiune !== "Alege regiunea..." && regiune.trim() !== "") {
-              pipeline.zincrby('leaderboard_regiuni', 1, regiune.trim());
+            if (regiune && regiune !== "Alege regiunea...") {
+              pipeline.zincrby('leaderboard_regiuni', 1, regiune);
             }
 
             // +1 DOAR în grupul în care se joacă meciul acum (dacă e cazul)
-            if (teamId && teamId !== "null" && teamId !== "") {
+            if (teamId) {
                 pipeline.zincrby(`team:${teamId}:membri`, 1, safeName);
             }
         }
-        
-        const safeName = jucator && jucator.trim() !== "" ? jucator.trim().toUpperCase() : null;
+
+        const safeName = jucator ? jucator.toUpperCase() : null;
 
         // Runda 1: pipeline (scrieri) + leaderboard reads + user stats — toate în paralel
         const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([
@@ -240,16 +265,16 @@ export async function POST(request) {
           updates ? updateUserStats(safeName, updates).then(() => checkAndAwardAchievements(safeName, { ...currentStats, ...updates }, teamId)) : Promise.resolve()
         ]);
 
-        const teamIdStr = Array.isArray(teamId) ? teamId[0] : teamId;
-        if (teamIdStr && teamIdStr !== "null" && teamIdStr !== "") {
-          await pusher.trigger(`team-${teamIdStr}`, 'team-update', { t: Date.now() });
+        if (teamId) {
+          await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
         }
 
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
       }
 
       case 'join': {
-        const cleanName = jucator.trim().toUpperCase();
+        if (!jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
+        const cleanName = jucator.toUpperCase();
         // Tracking jucători per cameră (max 2)
         if (roomId.startsWith('privat-')) {
           const playerSetKey = `room:${roomId}:players`;
@@ -278,45 +303,49 @@ export async function POST(request) {
       }
 
       case 'lovitura': {
+        if (!jucator || !atacant || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
         const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
-        // Lovitura = sincronizare pură în arenă. Contorul crește EXCLUSIV prin increment-global (o singură dată, de la câștigător sau de la cel care pierde cu bot).
         await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', {
-          jucator: jucator.trim().toUpperCase(), castigaCelCareDa, atacant: atacant.trim().toUpperCase(), t: Date.now()
+          jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now()
         });
         return NextResponse.json({ success: true });
       }
 
       case 'arena-chat': {
-        if (!text || text.trim() === "") return NextResponse.json({ success: false });
+        if (!text || !jucator || !roomId) return NextResponse.json({ success: false });
         await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', {
-          jucator: jucator.trim().toUpperCase(), text: text.trim(), t: Date.now()
+          jucator: jucator.toUpperCase(), text: text.slice(0, 200), t: Date.now()
         });
         return NextResponse.json({ success: true });
       }
 
       case 'revansa': {
-        await pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: jucator.trim().toUpperCase(), t: Date.now() });
+        if (!jucator || !roomId) return NextResponse.json({ success: false });
+        await pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: jucator.toUpperCase(), t: Date.now() });
         return NextResponse.json({ success: true });
       }
 
       case 'revansa-ok': {
+        if (!roomId) return NextResponse.json({ success: false });
         await pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { t: Date.now() });
         return NextResponse.json({ success: true });
       }
 
       case 'get-achievements': {
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" });
         const achievements = await getUserAchievements(jucator);
         return NextResponse.json({ success: true, achievements });
       }
 
       case 'update-stats': {
-        const updates = {};
-        if (text === 'message') updates.messagesSent = 1;
-        if (text === 'duel') updates.duelsSent = 1;
-        if (text === 'golden') updates.goldenUsed = true;
-        
-        if (Object.keys(updates).length > 0) {
-          await updateUserStats(jucator, updates);
+        if (!jucator) return NextResponse.json({ success: false });
+        const statUpdates = {};
+        if (text === 'message') statUpdates.messagesSent = 1;
+        if (text === 'duel') statUpdates.duelsSent = 1;
+        if (text === 'golden') statUpdates.goldenUsed = true;
+
+        if (Object.keys(statUpdates).length > 0) {
+          await updateUserStats(jucator, statUpdates);
           const stats = await getUserStats(jucator);
           await checkAndAwardAchievements(jucator, stats);
         }
@@ -327,19 +356,19 @@ export async function POST(request) {
         if (!oponentNume || !jucator || !roomId) {
           return NextResponse.json({ success: false, error: "Date incomplete" });
         }
-        await pusher.trigger(`user-notif-${oponentNume.trim().toUpperCase()}`, 'duel-request', {
-          deLa: jucator.trim().toUpperCase(), roomId: roomId, teamId: teamId || null, t: Date.now()
+        await pusher.trigger(`user-notif-${oponentNume.toUpperCase()}`, 'duel-request', {
+          deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
         });
         return NextResponse.json({ success: true });
       }
 
       case 'schimba-porecla': {
-        if (!newName || newName.trim().length < 3) {
+        if (!newName || newName.length < 3) {
             return NextResponse.json({ success: false, error: "Nume prea scurt" });
         }
 
-        const newClean = newName.trim().toUpperCase();
-        const oldClean = oldName ? oldName.trim().toUpperCase() : null;
+        const newClean = newName.toUpperCase();
+        const oldClean = oldName ? oldName.toUpperCase() : null;
 
         if (NUME_INTERZISE.includes(newClean)) {
             return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." });
@@ -398,8 +427,8 @@ export async function POST(request) {
         const teamStats = await redis.hgetall(`team:${teamId}:stats`);
         
         // Dacă jucătorul a intrat pe link-ul de grup, îi forțăm scorul pe 0 (nu aducem cel global)
-        if (jucator && jucator.trim().length >= 3) {
-          const cleanPlayer = jucator.trim().toUpperCase();
+        if (jucator && jucator.length >= 3) {
+          const cleanPlayer = jucator.toUpperCase();
           const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
           if (exists === null) {
              await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
@@ -417,9 +446,9 @@ export async function POST(request) {
       }
 
       case 'creeaza-echipa': {
-        if (!creator || creator.trim().length < 3) return NextResponse.json({ success: false });
+        if (!creator || creator.length < 3) return NextResponse.json({ success: false });
         const newId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const cleanCreator = creator.trim().toUpperCase();
+        const cleanCreator = creator.toUpperCase();
         const finalTeamName = `GRUPUL LUI ${cleanCreator}`;
         
         const pipeline = redis.pipeline();
@@ -433,25 +462,23 @@ export async function POST(request) {
       }
 
       case 'redenumeste-echipa': {
-        if (teamId && newName && newName.trim().length >= 3) {
-          const teamStats = await redis.hgetall(`team:${teamId}:stats`);
-          if (teamStats.creator && jucator && teamStats.creator !== jucator.trim().toUpperCase()) {
-            return NextResponse.json({ success: false, error: "Doar creatorul poate redenumi grupul." });
-          }
-          await redis.set(`team:${teamId}:nume`, newName.toUpperCase().trim());
-          return NextResponse.json({ success: true });
+        if (!teamId || !newName || newName.length < 3) return NextResponse.json({ success: false });
+        const renameTeamStats = await redis.hgetall(`team:${teamId}:stats`);
+        if (renameTeamStats.creator && jucator && renameTeamStats.creator !== jucator.toUpperCase()) {
+          return NextResponse.json({ success: false, error: "Doar creatorul poate redenumi grupul." });
         }
-        return NextResponse.json({ success: false });
+        await redis.set(`team:${teamId}:nume`, newName.toUpperCase().slice(0, 50));
+        return NextResponse.json({ success: true });
       }
 
       case 'kick-member': {
-        const memberToKick = body.member;
+        const memberToKick = sanitizeStr(body.member, 30);
         if (!teamId || !memberToKick) return NextResponse.json({ success: false, error: "Date incomplete" });
-        const teamStats = await redis.hgetall(`team:${teamId}:stats`);
-        if (!teamStats.creator || !jucator || teamStats.creator !== jucator.trim().toUpperCase()) {
+        const kickTeamStats = await redis.hgetall(`team:${teamId}:stats`);
+        if (!kickTeamStats.creator || !jucator || kickTeamStats.creator !== jucator.toUpperCase()) {
           return NextResponse.json({ success: false, error: "Doar creatorul poate elimina membri." });
         }
-        await redis.zrem(`team:${teamId}:membri`, memberToKick.trim().toUpperCase());
+        await redis.zrem(`team:${teamId}:membri`, memberToKick.toUpperCase());
         await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
         return NextResponse.json({ success: true });
       }

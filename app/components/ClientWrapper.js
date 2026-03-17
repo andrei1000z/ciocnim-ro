@@ -16,20 +16,26 @@ export const useGlobalStats = () => useContext(GlobalStatsContext);
 const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", teamId: null, regiune: "Muntenia" };
 const emptySubscribe = () => () => {};
 
+// Safe localStorage wrapper — fallback for private browsing, blocked storage, etc.
+const safeLS = {
+  get: (key) => { try { return typeof window !== 'undefined' ? localStorage.getItem(key) : null; } catch { return null; } },
+  set: (key, val) => { try { if (typeof window !== 'undefined') localStorage.setItem(key, val); } catch {} },
+  del: (key) => { try { if (typeof window !== 'undefined') localStorage.removeItem(key); } catch {} },
+};
+
 export default function ClientWrapper({ children }) {
   const router = useRouter();
 
   const [userStats, setUserStats] = useState(() => {
-    if (typeof window === 'undefined') return DEFAULT_STATS;
-    const savedStats = localStorage.getItem("c_stats");
-    const savedName = localStorage.getItem("c_nume");
+    const savedStats = safeLS.get("c_stats");
+    const savedName = safeLS.get("c_nume");
     if (savedStats) {
       try {
         const parsed = JSON.parse(savedStats);
         const safeStats = { ...DEFAULT_STATS, ...parsed };
         if (savedName && safeStats.nume !== savedName) {
           const healed = { ...safeStats, nume: savedName };
-          localStorage.setItem("c_stats", JSON.stringify(healed));
+          safeLS.set("c_stats", JSON.stringify(healed));
           return healed;
         }
         return safeStats;
@@ -42,8 +48,7 @@ export default function ClientWrapper({ children }) {
   const [topRegiuni, setTopRegiuni] = useState([]);
   const [topJucatori, setTopJucatori] = useState([]);
   const [nume, setNumeLocal] = useState(() => {
-    if (typeof window === 'undefined') return "";
-    return localStorage.getItem("c_nume") || "";
+    return safeLS.get("c_nume") || "";
   });
   const [notificare, setNotificare] = useState(null);
   const [onlineCount, setOnlineCount] = useState(0);
@@ -63,7 +68,7 @@ export default function ClientWrapper({ children }) {
       wssPort: wsPort,
       forceTLS: forceTLS,
       disableStats: true,
-      enabledTransports: ['ws', 'wss'],
+      enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
     });
     return () => {
       pusherRef.current?.disconnect();
@@ -82,7 +87,7 @@ export default function ClientWrapper({ children }) {
   const updateUserStats = useCallback((newStats) => {
     setUserStats(prevStats => {
       const updated = typeof newStats === 'function' ? newStats(prevStats) : newStats;
-      localStorage.setItem("c_stats", JSON.stringify(updated));
+      safeLS.set("c_stats", JSON.stringify(updated));
       return updated;
     });
   }, []);
@@ -110,8 +115,8 @@ export default function ClientWrapper({ children }) {
     }
 
     try {
-      const storedTeamIds = JSON.parse(localStorage.getItem("c_teamIds") || "[]");
-      const scorCurent = JSON.parse(localStorage.getItem("c_stats") || "{}").wins || 0;
+      const storedTeamIds = JSON.parse(safeLS.get("c_teamIds") || "[]");
+      const scorCurent = JSON.parse(safeLS.get("c_stats") || "{}").wins || 0;
 
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
@@ -132,10 +137,10 @@ export default function ClientWrapper({ children }) {
       }
 
       setNumeLocal(cleanName);
-      localStorage.setItem("c_nume", cleanName);
+      safeLS.set("c_nume", cleanName);
       setUserStats(prev => {
          const nextStats = { ...prev, nume: cleanName };
-         localStorage.setItem("c_stats", JSON.stringify(nextStats));
+         safeLS.set("c_stats", JSON.stringify(nextStats));
          return nextStats;
       });
       return true;
@@ -186,8 +191,8 @@ export default function ClientWrapper({ children }) {
   useEffect(() => {
     if (!isHydrated) return;
     if (!visitorIdRef.current) {
-      visitorIdRef.current = localStorage.getItem('c_visitorId') || `v-${Math.random().toString(36).substring(2, 10)}`;
-      localStorage.setItem('c_visitorId', visitorIdRef.current);
+      visitorIdRef.current = safeLS.get('c_visitorId') || `v-${Math.random().toString(36).substring(2, 10)}`;
+      safeLS.set('c_visitorId', visitorIdRef.current);
     }
     const sendHeartbeat = async () => {
       try {
