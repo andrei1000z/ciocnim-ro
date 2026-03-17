@@ -210,12 +210,15 @@ export async function POST(request) {
     switch (actiune) {
       
       case 'get-counter': {
-        const [totalCount, topRegiuni, topJucatori] = await Promise.all([
+        const now = Date.now();
+        const [totalCount, topRegiuni, topJucatori, , onlineCount] = await Promise.all([
           redis.get('global_ciocniri_total'),
           getClasamentRegiuni(),
-          getClasamentJucatori()
+          getClasamentJucatori(),
+          redis.zremrangebyscore('arena:online', 0, now - 20000),
+          redis.zcard('arena:online')
         ]);
-        return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori });
+        return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori, online: onlineCount });
       }
 
       case 'increment-global': {
@@ -510,11 +513,24 @@ export async function POST(request) {
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zadd('arena:online', now, visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 30000);
+        pipeline.zremrangebyscore('arena:online', 0, now - 20000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
-        // Broadcast online count to all clients in real-time
+        await pusher.trigger('global', 'online-count', { online: count });
+        return NextResponse.json({ success: true, online: count });
+      }
+
+      case 'arena-disconnect': {
+        const visitorId = sanitizeId(body.visitorId);
+        if (!visitorId) return NextResponse.json({ success: false });
+        const now = Date.now();
+        const pipeline = redis.pipeline();
+        pipeline.zrem('arena:online', visitorId);
+        pipeline.zremrangebyscore('arena:online', 0, now - 20000);
+        pipeline.zcard('arena:online');
+        const results = await pipeline.exec();
+        const count = results[2][1];
         await pusher.trigger('global', 'online-count', { online: count });
         return NextResponse.json({ success: true, online: count });
       }

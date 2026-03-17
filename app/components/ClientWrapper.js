@@ -187,7 +187,7 @@ export default function ClientWrapper({ children }) {
     } catch (e) { console.error("Eroare la incrementare bilanț."); }
   }, [userStats.regiune, nume, updateUserStats]);
 
-  // HEARTBEAT: ping la fiecare 15s pentru a număra utilizatorii activi
+  // HEARTBEAT: ping la fiecare 10s pentru a număra utilizatorii activi
   useEffect(() => {
     if (!isHydrated) return;
     if (!visitorIdRef.current) {
@@ -205,9 +205,36 @@ export default function ClientWrapper({ children }) {
         if (data.success && typeof data.online === 'number') setOnlineCount(data.online);
       } catch {}
     };
+    const sendDisconnect = () => {
+      try {
+        const payload = JSON.stringify({ actiune: 'arena-disconnect', visitorId: visitorIdRef.current });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/ciocnire', new Blob([payload], { type: 'application/json' }));
+        } else {
+          fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(() => {});
+        }
+      } catch {}
+    };
+    // Trimite heartbeat instant la montare
     sendHeartbeat();
-    const interval = setInterval(sendHeartbeat, 15000);
-    return () => clearInterval(interval);
+    const interval = setInterval(sendHeartbeat, 10000);
+
+    // Când user-ul revine pe tab → heartbeat instant (actualizare imediată)
+    const onVisibility = () => { if (document.visibilityState === 'visible') sendHeartbeat(); };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Când user-ul închide tab-ul → scoate-l din lista instant
+    window.addEventListener('beforeunload', sendDisconnect);
+    // Și pe pagehide (mobil - Safari)
+    window.addEventListener('pagehide', sendDisconnect);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('beforeunload', sendDisconnect);
+      window.removeEventListener('pagehide', sendDisconnect);
+      sendDisconnect();
+    };
   }, [isHydrated]);
 
   useEffect(() => {
@@ -219,6 +246,7 @@ export default function ClientWrapper({ children }) {
           setTotalGlobal(parseInt(data.total) || 0);
           setTopRegiuni(data.topRegiuni || []);
           setTopJucatori(data.topJucatori || []);
+          if (typeof data.online === 'number') setOnlineCount(data.online);
         }
       } catch (err) {}
     };
