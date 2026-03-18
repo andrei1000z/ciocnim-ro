@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalStats } from "./components/ClientWrapper";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 const REGIUNI_ISTORICE = ["Transilvania", "Moldova", "Muntenia", "Oltenia", "Dobrogea", "Crișana", "Banat", "Maramureș", "Bucovina", "Diaspora"];
 
@@ -729,28 +730,15 @@ function HomeContent() {
     <div className="w-full max-w-md mx-auto pb-16 px-4 space-y-7">
 
       {/* HERO TRADIȚIONAL */}
-      <motion.div {...fadeUp(0)} className="text-center pt-8 pb-6 relative overflow-hidden">
-        {/* Decorative floating eggs background */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04]" aria-hidden="true">
-          <div className="absolute top-2 left-[10%] text-6xl rotate-12 animate-float-v9">🥚</div>
-          <div className="absolute top-8 right-[15%] text-4xl -rotate-12" style={{animation:'float-gentle 8s ease-in-out infinite 1s'}}>🥚</div>
-          <div className="absolute bottom-4 left-[20%] text-5xl rotate-6" style={{animation:'float-gentle 7s ease-in-out infinite 0.5s'}}>🥚</div>
-          <div className="absolute bottom-2 right-[25%] text-3xl -rotate-6" style={{animation:'float-gentle 9s ease-in-out infinite 2s'}}>🥚</div>
-        </div>
-
-        <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="relative z-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-4 shadow-lg shadow-red-900/10 backdrop-blur-sm">
-            <span className="text-4xl drop-shadow-lg">🥚</span>
+      <motion.div {...fadeUp(0)} className="text-center pt-4 pb-6 relative overflow-hidden">
+        {/* Hero background image */}
+        <div className="relative w-full h-36 rounded-2xl overflow-hidden mb-5 border border-white/[0.06]">
+          <Image src="/pages/home-hero.webp" alt="Ciocnim.ro — Ciocnește ouă online" fill className="object-cover" sizes="(max-width: 768px) 100vw, 448px" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a0a] via-[#0c0a0a]/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+            <h1 className="text-2xl font-black text-white tracking-tight drop-shadow-lg">CIOCNIM<span className="text-red-500">.</span>RO</h1>
+            <p className="text-xs font-bold text-gray-300 drop-shadow">Ciocnește ouă online de Paște</p>
           </div>
-        </motion.div>
-
-        <h1 className="text-4xl font-black text-white tracking-tight relative z-10 drop-shadow-sm">CIOCNIM<span className="text-red-500">.</span>RO</h1>
-        <p className="text-sm font-bold text-red-400/60 mt-2 relative z-10">Ciocnește ouă online de Paște</p>
-
-        <div className="flex items-center justify-center gap-3 mt-1.5">
-          <div className="h-px w-8 bg-gradient-to-r from-transparent to-red-500/30" />
-          <p className="text-[10px] font-black text-red-500/25 uppercase tracking-[0.5em]">Paști 2026</p>
-          <div className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/30" />
         </div>
 
         {/* COUNTER CIOCNIRI + LIVE */}

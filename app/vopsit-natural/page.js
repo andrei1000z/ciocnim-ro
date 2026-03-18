@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
 
 // ─── Focus Mode Toggle ─────────────────────────────────────────────────────
@@ -147,16 +148,21 @@ export default function VopsitNaturalPage() {
           focusMode ? "max-w-3xl" : "max-w-4xl"
         }`}>
 
-          <header className="text-center space-y-4">
-            <h1 className={`font-black text-white leading-tight ${
-              focusMode ? "text-5xl md:text-7xl" : "text-4xl md:text-6xl"
-            }`}>
-              Vopsitul Natural al <span className="text-red-500">Ouălor de Paște</span>
-            </h1>
-            <p className={`text-gray-400 font-bold ${focusMode ? "text-base md:text-lg" : "text-sm md:text-base"}`}>
-              Culori vibrante folosind doar ingrediente din natură, ca pe vremea bunicilor.
-            </p>
-          </header>
+          {/* Hero banner */}
+          <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden border border-white/[0.06]">
+            <Image src="/pages/vopsit-hero.webp" alt="Vopsitul natural al ouălor de Paște" fill className="object-cover" sizes="(max-width: 768px) 100vw, 896px" priority />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a0a] via-[#0c0a0a]/50 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+              <h1 className={`font-black text-white leading-tight drop-shadow-lg ${
+                focusMode ? "text-4xl md:text-6xl" : "text-3xl md:text-5xl"
+              }`}>
+                Vopsitul Natural al <span className="text-red-500">Ouălor de Paște</span>
+              </h1>
+              <p className={`text-gray-300 font-bold mt-2 drop-shadow ${focusMode ? "text-base md:text-lg" : "text-sm md:text-base"}`}>
+                Culori vibrante folosind doar ingrediente din natură, ca pe vremea bunicilor.
+              </p>
+            </div>
+          </div>
 
           <section className="space-y-6">
 
