@@ -150,6 +150,7 @@ export default function RootLayout({ children }) {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name=" apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('c_theme')==='light')document.documentElement.classList.add('light')}catch(e){}` }} />
         <Script
           id="schema-main"
           type="application/ld+json"
@@ -201,7 +202,7 @@ export default function RootLayout({ children }) {
             width: 100vw;
             max-width: 100%;
             position: relative;
-            background-color: #0c0a0a;
+            background-color: var(--bg-main, #0c0a0a);
             overscroll-behavior-y: auto;
             overflow-x: hidden;
           }

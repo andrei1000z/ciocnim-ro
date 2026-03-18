@@ -188,12 +188,21 @@ const RecipeCard = ({ recipe, onClick, index }) => (
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: index * 0.08 }}
     onClick={onClick}
-    className="w-full text-left bg-white/[0.04] rounded-2xl border border-white/[0.06] hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98]"
+    className="w-full text-left rounded-2xl border border-white/[0.06] hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98] relative"
   >
-    <div className="p-6 space-y-4">
+    {/* Gradient accent top */}
+    <div className={`h-1.5 w-full ${
+      recipe.difficulty === "Ușor" ? "bg-gradient-to-r from-green-600 to-green-400"
+        : recipe.difficulty === "Mediu" ? "bg-gradient-to-r from-amber-600 to-yellow-400"
+        : "bg-gradient-to-r from-red-700 to-red-400"
+    }`} />
+
+    <div className="p-6 space-y-4 bg-white/[0.04]">
       <div className="flex items-start justify-between">
-        <span className="text-5xl">{recipe.icon}</span>
-        <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
+        <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+          {recipe.icon}
+        </div>
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
           recipe.difficulty === "Ușor"
             ? "bg-green-900/20 text-green-400 border-green-900/30"
             : recipe.difficulty === "Mediu"
@@ -205,18 +214,67 @@ const RecipeCard = ({ recipe, onClick, index }) => (
       </div>
 
       <div>
-        <h2 className="text-xl font-black text-white group-hover:text-red-400 transition-colors">{recipe.name}</h2>
-        <p className="text-gray-400 text-sm mt-1 line-clamp-2">{recipe.description}</p>
+        <h2 className="text-xl font-black text-white group-hover:text-red-400 transition-colors leading-snug">{recipe.name}</h2>
+        <p className="text-gray-400 text-sm mt-1.5 line-clamp-2 leading-relaxed">{recipe.description}</p>
       </div>
 
-      <div className="flex items-center gap-4 text-xs font-bold text-gray-500">
-        <span className="flex items-center gap-1">⏱️ {recipe.totalLabel}</span>
-        <span className="flex items-center gap-1">🍽️ {recipe.servings} {recipe.servingsUnit}</span>
-        <span className="flex items-center gap-1">🔥 {recipe.calories} kcal</span>
+      <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold text-gray-500">
+        <span className="flex items-center gap-1 bg-white/[0.04] px-2.5 py-1 rounded-lg">⏱️ {recipe.totalLabel}</span>
+        <span className="flex items-center gap-1 bg-white/[0.04] px-2.5 py-1 rounded-lg">🍽️ {recipe.servings} {recipe.servingsUnit}</span>
+        <span className="flex items-center gap-1 bg-white/[0.04] px-2.5 py-1 rounded-lg">🔥 {recipe.calories} kcal</span>
+      </div>
+
+      <div className="pt-2 border-t border-white/[0.04]">
+        <span className="text-xs font-bold text-red-400 group-hover:text-red-300 transition-colors flex items-center gap-1">
+          Deschide rețeta <span className="group-hover:translate-x-1 transition-transform">→</span>
+        </span>
       </div>
     </div>
   </motion.button>
 );
+
+// ─── Smart unit formatting ──────────────────────────────────────────────────
+const formatQuantity = (qty, unit, multiplier) => {
+  if (!qty) return { display: "", unit };
+  const raw = qty * multiplier;
+
+  // kg ↔ g conversion
+  if (unit === "kg") {
+    const grams = raw * 1000;
+    if (grams < 1000) return { display: Math.round(grams), unit: "g" };
+    if (grams % 1000 === 0) return { display: grams / 1000, unit: "kg" };
+    return { display: Math.round(grams), unit: "g" };
+  }
+  if (unit === "g") {
+    const grams = raw;
+    if (grams >= 1000 && grams % 100 === 0) return { display: grams / 1000, unit: "kg" };
+    return { display: Math.round(grams), unit: "g" };
+  }
+
+  // l ↔ ml conversion
+  if (unit === "l") {
+    const ml = raw * 1000;
+    if (ml < 1000) return { display: Math.round(ml), unit: "ml" };
+    if (ml % 1000 === 0) return { display: ml / 1000, unit: "l" };
+    return { display: Math.round(ml), unit: "ml" };
+  }
+  if (unit === "ml") {
+    const ml = raw;
+    if (ml >= 1000 && ml % 100 === 0) return { display: ml / 1000, unit: "l" };
+    return { display: Math.round(ml), unit: "ml" };
+  }
+
+  // linguri, buc, etc — round nicely
+  if (unit === "buc" || unit === "căței" || unit === "ramuri" || unit === "linguri" || unit === "legătură") {
+    const rounded = Math.round(raw * 2) / 2; // round to nearest 0.5
+    if (rounded === Math.floor(rounded)) return { display: rounded, unit };
+    return { display: rounded, unit };
+  }
+
+  // No unit or special units — pass through
+  const val = Math.round(raw * 10) / 10;
+  return { display: val === Math.floor(val) ? val : val, unit };
+};
 
 // ─── Interactive Ingredient List ────────────────────────────────────────────
 const IngredientList = ({ ingredients, multiplier, title }) => {
@@ -224,14 +282,17 @@ const IngredientList = ({ ingredients, multiplier, title }) => {
   return (
     <div className="space-y-3">
       {title && <h4 className="text-sm font-bold uppercase tracking-widest text-red-400">{title}</h4>}
-      {ingredients.map((ing, i) => (
-        <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
-          <span className="text-red-400 font-black text-base min-w-[60px] text-right">
-            {ing.qty ? Math.round(ing.qty * multiplier * 10) / 10 : ""} {ing.unit}
-          </span>
-          <span className="text-gray-200 text-lg font-medium">{ing.name}</span>
-        </div>
-      ))}
+      {ingredients.map((ing, i) => {
+        const fmt = formatQuantity(ing.qty, ing.unit, multiplier);
+        return (
+          <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
+            <span className="text-red-400 font-black text-base min-w-[70px] text-right">
+              {fmt.display !== "" ? `${fmt.display} ${fmt.unit}` : ""}
+            </span>
+            <span className="text-gray-200 text-lg font-medium">{ing.name}</span>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -351,12 +412,15 @@ const RecipeDetail = ({ recipe, onBack }) => {
       </button>
 
       {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <span className="text-6xl">{recipe.icon}</span>
-          <div>
+      <div className="space-y-5">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-6 md:p-8">
+          <div className="absolute top-4 right-4 text-7xl opacity-15 select-none">{recipe.icon}</div>
+          <div className="relative z-10">
+            <div className="w-16 h-16 rounded-2xl bg-white/[0.08] flex items-center justify-center text-5xl mb-4">
+              {recipe.icon}
+            </div>
             <h1 className="text-3xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
-            <p className="text-gray-400 mt-1">{recipe.description}</p>
+            <p className="text-gray-400 mt-2 max-w-xl leading-relaxed">{recipe.description}</p>
           </div>
         </div>
 
@@ -392,25 +456,29 @@ const RecipeDetail = ({ recipe, onBack }) => {
 
       {/* Servings scaler */}
       <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-black text-white">Ingrediente</h3>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-400 font-bold">Porții:</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setMultiplier(m => Math.max(0.5, m - 0.5))}
-                className="w-9 h-9 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-lg hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center"
-              >
-                −
-              </button>
-              <span className="w-16 text-center text-white font-black text-lg">{scaledServings}</span>
-              <button
-                onClick={() => setMultiplier(m => Math.min(5, m + 0.5))}
-                className="w-9 h-9 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-lg hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center"
-              >
-                +
-              </button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <h3 className="text-lg font-black text-white flex items-center gap-2">
+            🥄 Ingrediente
+          </h3>
+          <div className="flex items-center gap-2 bg-white/[0.04] rounded-xl p-1.5 border border-white/[0.06]">
+            <button
+              onClick={() => setMultiplier(m => Math.max(0.5, m - 0.5))}
+              disabled={multiplier <= 0.5}
+              className="w-10 h-10 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-xl hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              −
+            </button>
+            <div className="w-20 text-center">
+              <span className="text-white font-black text-lg block leading-none">{scaledServings}</span>
+              <span className="text-[10px] text-gray-500 font-bold">{recipe.servingsUnit}</span>
             </div>
+            <button
+              onClick={() => setMultiplier(m => Math.min(5, m + 0.5))}
+              disabled={multiplier >= 5}
+              className="w-10 h-10 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-xl hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              +
+            </button>
           </div>
         </div>
 
