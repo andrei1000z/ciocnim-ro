@@ -535,6 +535,19 @@ export async function POST(request) {
         return NextResponse.json({ success: true, online: count });
       }
 
+      case 'reset-all': {
+        // Wipe all game data from Redis
+        const secret = sanitizeStr(body.secret, 50);
+        if (secret !== process.env.ADMIN_SECRET) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
+        const allKeys = await redis.keys('*');
+        if (allKeys.length > 0) {
+          await redis.del(...allKeys);
+        }
+        return NextResponse.json({ success: true, deleted: allKeys.length });
+      }
+
       case 'creeaza-camera-privata': {
         // Generăm un cod unic - reîncercăm dacă e deja rezervat
         let cod, attempts = 0;

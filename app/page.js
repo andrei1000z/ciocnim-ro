@@ -39,7 +39,7 @@ function esteNumeInterzis(name) {
 function safeCopy(text) {
   try {
     if (navigator.clipboard && window.isSecureContext) {
-      safeCopy(text).catch(() => {});
+      navigator.clipboard.writeText(text).catch(() => {});
     } else {
       const ta = document.createElement('textarea');
       ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
@@ -117,12 +117,12 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
               {topPlayers && topPlayers.length > 0 ? (
                 <>
                   {topPlayers.map((p, i) => (
-                    <div key={i} className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${p.nume === myName?.toUpperCase().trim() ? "bg-amber-900/20 border border-amber-700/30" : "hover:bg-white/[0.06]"}`}>
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-base w-6 text-center">{medals[i] || `${i + 1}.`}</span>
-                        <span className="font-bold text-gray-200 text-sm">{p.nume}</span>
+                    <div key={i} className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl transition-all ${p.nume === myName?.toUpperCase().trim() ? "bg-amber-900/20 border border-amber-700/30" : "hover:bg-white/[0.06]"}`}>
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span className="text-base w-6 text-center flex-shrink-0">{medals[i] || `${i + 1}.`}</span>
+                        <span className="font-bold text-gray-200 text-sm truncate">{p.nume}</span>
                       </div>
-                      <span className="font-bold text-red-400 text-sm">{parseInt(p.scor) || 0} 🏆</span>
+                      <span className="font-bold text-red-400 text-sm flex-shrink-0 whitespace-nowrap">{parseInt(p.scor) || 0} 🏆</span>
                     </div>
                   ))}
                   {myName && (myRank !== null || targetRank !== null) && (
@@ -266,8 +266,8 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
       >
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-lg font-black text-white">Meci Privat 🥚</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Creează sau alătură-te unei camere</p>
+            <h2 className="text-lg font-black text-white">Ciocnește cu un Prieten 🥚</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Creezi o cameră, trimiți codul prietenului</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 bg-white/[0.05] hover:bg-white/[0.1] rounded-full flex items-center justify-center text-gray-400 transition-colors text-sm">×</button>
         </div>
@@ -279,7 +279,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             disabled={isCreating}
             className="w-full bg-red-800 hover:bg-red-900 disabled:opacity-60 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-red-900/20"
           >
-            {isCreating ? "⏳ Se creează..." : "➕ Creează Cameră Nouă"}
+            {isCreating ? "Se creează..." : "Creează Cameră Nouă"}
           </motion.button>
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-white/[0.1]" />
@@ -302,7 +302,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             disabled={isJoining}
             className="w-full bg-white/[0.1] hover:bg-white/[0.15] disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-sm transition-all"
           >
-            {isJoining ? "⏳ Se verifică..." : "🎯 Intră în Joc"}
+            {isJoining ? "Se verifică..." : "Intră cu Codul"}
           </motion.button>
         </div>
       </motion.div>
@@ -358,8 +358,8 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
       <div className="p-5 space-y-4">
         <div className="flex items-center gap-2">
           {isEditing && isCreator ? (
-            <div className="flex gap-2 flex-1">
-              <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 px-3 py-2 border border-white/[0.1] rounded-xl text-sm font-bold text-gray-200 outline-none focus:border-red-800 bg-white/[0.05]" />
+            <div className="flex gap-2 flex-1 min-w-0">
+              <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border border-white/[0.1] rounded-xl text-sm font-bold text-gray-200 outline-none focus:border-red-800 bg-white/[0.05]" />
               <button onClick={handleSave} className="px-3 py-2 bg-red-800 text-white rounded-xl text-sm font-bold hover:bg-red-900 transition-all">OK</button>
               <button onClick={() => setIsEditing(false)} className="px-2.5 py-2 bg-white/[0.08] rounded-xl text-sm hover:bg-white/[0.12] transition-all text-gray-400">✕</button>
             </div>
@@ -736,13 +736,13 @@ function HomeContent() {
     <div className="w-full max-w-md mx-auto pb-16 px-4 space-y-7">
 
       {/* HERO TRADIȚIONAL */}
-      <motion.div {...fadeUp(0)} className="text-center pt-8 pb-6 relative overflow-hidden">
-        {/* Decorative floating eggs background */}
+      <motion.div {...fadeUp(0)} className="text-center pt-8 pb-6 relative overflow-hidden w-full max-w-full">
+        {/* Decorative floating eggs background — clamped inside container */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04]" aria-hidden="true">
-          <div className="absolute top-2 left-[10%] text-6xl rotate-12 animate-float-v9">🥚</div>
-          <div className="absolute top-8 right-[15%] text-4xl -rotate-12" style={{animation:'float-gentle 8s ease-in-out infinite 1s'}}>🥚</div>
-          <div className="absolute bottom-4 left-[20%] text-5xl rotate-6" style={{animation:'float-gentle 7s ease-in-out infinite 0.5s'}}>🥚</div>
-          <div className="absolute bottom-2 right-[25%] text-3xl -rotate-6" style={{animation:'float-gentle 9s ease-in-out infinite 2s'}}>🥚</div>
+          <div className="absolute top-2 left-[10%] text-5xl rotate-12 animate-float-v9">🥚</div>
+          <div className="absolute top-8 right-[15%] text-3xl -rotate-12" style={{animation:'float-gentle 8s ease-in-out infinite 1s'}}>🥚</div>
+          <div className="absolute bottom-4 left-[20%] text-4xl rotate-6" style={{animation:'float-gentle 7s ease-in-out infinite 0.5s'}}>🥚</div>
+          <div className="absolute bottom-2 right-[25%] text-2xl -rotate-6" style={{animation:'float-gentle 9s ease-in-out infinite 2s'}}>🥚</div>
         </div>
 
         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="relative z-10">
@@ -762,10 +762,10 @@ function HomeContent() {
 
         {/* COUNTER CIOCNIRI + LIVE */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2 relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/[0.06] backdrop-blur-xl border border-red-500/15 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20">
-            <span className="text-lg">🥚</span>
-            <span className="tabular-nums text-white text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
-            <span className="font-semibold text-white/40 text-xs">Ciocniri Naționale</span>
+          <div className="inline-flex items-center gap-2 bg-white/[0.06] backdrop-blur-xl border border-red-500/15 text-white px-4 sm:px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20 max-w-full">
+            <span className="text-lg flex-shrink-0">🥚</span>
+            <span className="tabular-nums text-white text-xl sm:text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
+            <span className="font-semibold text-white/40 text-[10px] sm:text-xs">Ciocniri Naționale</span>
           </div>
           <div className="inline-flex items-center gap-2 text-[11px] text-green-400/60 font-bold">
             <span className="relative flex h-2 w-2">
@@ -780,24 +780,24 @@ function HomeContent() {
 
       {/* PROFIL */}
       <motion.div {...fadeUp(0.08)}>
-        <SectionLabel>Profilul Tău</SectionLabel>
-        <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-5 space-y-4 shadow-sm">
+        <SectionLabel>{nume ? "Profilul Tău" : "Începe Aici"}</SectionLabel>
+        <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-4 sm:p-5 space-y-4 shadow-sm w-full max-w-full overflow-hidden">
           <div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full max-w-full">
               <input
                 value={localNume}
                 onChange={e => { setLocalNume(e.target.value); setNumeError(""); }}
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
                 placeholder="Porecla ta..."
                 maxLength={21}
-                className="flex-1 px-4 py-3 border border-white/[0.1] rounded-xl font-bold text-gray-200 outline-none focus:border-red-800 transition-all text-sm bg-white/[0.05] focus:bg-white/[0.08]"
+                className="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-white/[0.1] rounded-xl font-bold text-gray-200 outline-none focus:border-red-800 transition-all text-sm bg-white/[0.05] focus:bg-white/[0.08]"
               />
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSaveNume}
                 disabled={isSavingName || isNameInvalid}
-                className={`px-5 py-3 font-bold rounded-xl border transition-all text-sm ${isNameInvalid || isSavingName ? "bg-white/[0.05] text-gray-500 border-white/[0.08] cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900 shadow-sm shadow-red-900/20"}`}
+                className={`px-4 sm:px-5 py-3 font-bold rounded-xl border transition-all text-sm flex-shrink-0 ${isNameInvalid || isSavingName ? "bg-white/[0.05] text-gray-500 border-white/[0.08] cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900 shadow-sm shadow-red-900/20"}`}
               >
                 {isSavingName ? "…" : "OK"}
               </motion.button>
@@ -807,6 +807,8 @@ function HomeContent() {
                 <motion.p key="err-rau" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-orange-500 text-xs mt-1.5 font-medium">{numeError}</motion.p>
               ) : localNume.trim().length > 0 && localNume.trim().length < 3 ? (
                 <motion.p key="err-scurt" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-xs mt-1.5 font-medium">Minim 3 caractere</motion.p>
+              ) : !nume && localNume.trim().length === 0 ? (
+                <motion.p key="hint" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-gray-400 text-xs mt-1.5 font-medium">Scrie o poreclă și apasă OK ca să poți juca</motion.p>
               ) : null}
             </AnimatePresence>
           </div>
@@ -840,9 +842,9 @@ function HomeContent() {
       <motion.div {...fadeUp(0.13)}>
         <SectionLabel>Joacă</SectionLabel>
         <div className="space-y-2">
-          <ActionButton icon="⚔️" title="Meci cu un Prieten" subtitle="Cameră privată" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
-          <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup Privat"} subtitle="Invită prietenii în grupul tău" onClick={handleCreateTeam} loading={loadingTeam} />
-          <ActionButton icon="🌍" title="Arenă Națională" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
+          <ActionButton icon="🥚" title="Ciocnește cu un Prieten" subtitle="Trimite-i codul și gata!" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
+          <ActionButton icon="🌍" title="Ciocnește cu Concetățenii" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
+          <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup de Ciocnit"} subtitle="Invită familia și prietenii" onClick={handleCreateTeam} loading={loadingTeam} />
         </div>
       </motion.div>
 
