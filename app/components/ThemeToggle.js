@@ -12,8 +12,8 @@ const emptySubscribe = () => () => {};
 export default function ThemeToggle() {
   const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "dark";
-    return safeLS.get("c_theme") || "dark";
+    if (typeof window === "undefined") return "light";
+    return safeLS.get("c_theme") || "light";
   });
 
   useEffect(() => {
