@@ -8,7 +8,6 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
@@ -42,21 +41,13 @@ export default function CalendarPage() {
 
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
           
-          {/* Hero banner */}
-          <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden border border-white/[0.06]">
-            <Image src="/pages/calendar-hero.webp" alt="Calendarul Paștelui" fill className="object-cover" sizes="(max-width: 768px) 100vw, 896px" priority />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a0a] via-[#0c0a0a]/50 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-              <h1 className="text-3xl md:text-5xl font-black text-white leading-tight drop-shadow-lg">
-                Calendarul <span className="text-red-500">Paștelui</span>
-              </h1>
-              <p className="text-gray-300 font-bold text-sm md:text-base mt-2 drop-shadow">
-                Află când pică Sărbătorile Pascale între {datePaste[0].an} și {datePaste[datePaste.length - 1].an}
-              </p>
-            </div>
-          </div>
-
-          <header className="hidden">
+          <header className="text-center space-y-4">
+            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+              Calendarul <span className="text-red-500">Paștelui</span>
+            </h1>
+            <p className="text-gray-400 font-bold text-sm md:text-base">
+              Află când pică Sărbătorile Pascale între {datePaste[0].an} și {datePaste[datePaste.length - 1].an}
+            </p>
           </header>
           
           <section className="space-y-4">

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 import Script from "next/script";
 
 // ─── Safe localStorage ──────────────────────────────────────────────────────
@@ -20,7 +19,6 @@ const retete = [
     id: "cozonac",
     name: "Cozonac Tradițional Pufos",
     icon: "🍞",
-    image: "/retete/cozonac.webp",
     description: "Cozonacul pufos, cu miez elastic și coajă aurie, este regele mesei de Paște. Rețeta clasică cu cacao și nucă.",
     prepTime: "PT40M",
     prepLabel: "40 min",
@@ -72,7 +70,6 @@ const retete = [
     id: "drob",
     name: "Drob de Miel",
     icon: "🐑",
-    image: "/retete/drob.webp",
     description: "Drobul de miel este vedeta absolută a mesei de Paște. Aromat, suculent și plin de savoare, servit rece sau călduț.",
     prepTime: "PT30M",
     prepLabel: "30 min",
@@ -118,7 +115,6 @@ const retete = [
     id: "pasca",
     name: "Pască cu Brânză Dulce",
     icon: "🧀",
-    image: "/retete/pasca.webp",
     description: "Pască tradițională cu brânză dulce de vaci, stafide și vanilie — desertul preferat alături de cozonac la masa de Paște.",
     prepTime: "PT30M",
     prepLabel: "30 min",
@@ -162,7 +158,6 @@ const retete = [
     id: "friptura-miel",
     name: "Friptură de Miel la Cuptor",
     icon: "🍖",
-    image: "/retete/friptura-miel.webp",
     description: "Friptura de miel la cuptor cu usturoi și rozmarin, fragedă și suculentă — piesa centrală a mesei festive de Paște.",
     prepTime: "PT20M",
     prepLabel: "20 min",
@@ -207,7 +202,6 @@ const retete = [
     id: "salata-boeuf",
     name: "Salată de Boeuf",
     icon: "🥗",
-    image: "/retete/salata-boeuf.webp",
     description: "Salata de boeuf este nelipsită de pe masa de Paște. Rețeta tradițională cu piept de pui, legume fierte și maioneză de casă.",
     prepTime: "PT45M",
     prepLabel: "45 min",
@@ -254,7 +248,6 @@ const retete = [
     id: "oua-rosii",
     name: "Ouă Roșii Vopsite Natural",
     icon: "🥚",
-    image: "/retete/oua-rosii.webp",
     description: "Rețeta tradițională de vopsit ouă cu coji de ceapă — culoare intensă, 100% naturală, fără chimicale.",
     prepTime: "PT15M",
     prepLabel: "15 min",
@@ -296,7 +289,6 @@ const retete = [
     id: "ciorba-miel",
     name: "Ciorbă de Miel cu Leuștean",
     icon: "🥣",
-    image: "/retete/ciorba-miel.webp",
     description: "Ciorbă tradițională de Paște, acrișoară și aromată, cu carne fragedă de miel și leuștean proaspăt.",
     prepTime: "PT20M",
     prepLabel: "20 min",
@@ -342,7 +334,6 @@ const retete = [
     id: "sarmale",
     name: "Sarmale în Foi de Varză",
     icon: "🫔",
-    image: "/retete/sarmale.webp",
     description: "Sarmalele — mândria bucătăriei românești. Rulouri de carne tocată în foi de varză murată, gătite lent la cuptor.",
     prepTime: "PT45M",
     prepLabel: "45 min",
@@ -397,37 +388,32 @@ const RecipeCard = ({ recipe, onClick, index }) => (
     onClick={onClick}
     className="w-full text-left rounded-2xl border border-white/[0.06] hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98] relative"
   >
-    {/* Recipe image */}
-    <div className="relative w-full h-44 md:h-52 bg-white/[0.02] overflow-hidden">
-      <Image
-        src={recipe.image}
-        alt={recipe.name}
-        fill
-        className="object-cover group-hover:scale-105 transition-transform duration-500"
-        sizes="(max-width: 768px) 100vw, 50vw"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a0a] via-transparent to-transparent" />
-      {/* Difficulty badge on image */}
-      <span className={`absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border backdrop-blur-md ${
-        recipe.difficulty === "Ușor"
-          ? "bg-green-900/60 text-green-300 border-green-700/40"
-          : recipe.difficulty === "Mediu"
-            ? "bg-yellow-900/60 text-yellow-300 border-yellow-700/40"
-            : "bg-red-900/60 text-red-300 border-red-700/40"
-      }`}>
-        {recipe.difficulty}
-      </span>
-    </div>
+    {/* Gradient accent top */}
+    <div className={`h-1.5 w-full ${
+      recipe.difficulty === "Ușor" ? "bg-gradient-to-r from-green-600 to-green-400"
+        : recipe.difficulty === "Mediu" ? "bg-gradient-to-r from-amber-600 to-yellow-400"
+        : "bg-gradient-to-r from-red-700 to-red-400"
+    }`} />
 
     <div className="p-5 space-y-3 bg-white/[0.04]">
-      <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-xl bg-white/[0.06] flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
+      <div className="flex items-start justify-between">
+        <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           {recipe.icon}
         </div>
-        <div className="min-w-0">
-          <h2 className="text-lg font-black text-white group-hover:text-red-400 transition-colors leading-snug">{recipe.name}</h2>
-          <p className="text-gray-400 text-sm mt-1 line-clamp-2 leading-relaxed">{recipe.description}</p>
-        </div>
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
+          recipe.difficulty === "Ușor"
+            ? "bg-green-900/20 text-green-400 border-green-900/30"
+            : recipe.difficulty === "Mediu"
+              ? "bg-yellow-900/20 text-yellow-400 border-yellow-900/30"
+              : "bg-red-900/20 text-red-400 border-red-900/30"
+        }`}>
+          {recipe.difficulty}
+        </span>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-black text-white group-hover:text-red-400 transition-colors leading-snug">{recipe.name}</h2>
+        <p className="text-gray-400 text-sm mt-1 line-clamp-2 leading-relaxed">{recipe.description}</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-gray-500">
@@ -706,34 +692,26 @@ const RecipeDetail = ({ recipe, onBack }) => {
         ← Înapoi la rețete
       </button>
 
-      {/* Hero image + header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
-        <div className="relative w-full h-56 md:h-72">
-          <Image
-            src={recipe.image}
-            alt={recipe.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 896px"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a0a] via-[#0c0a0a]/40 to-transparent" />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-4xl drop-shadow-lg">{recipe.icon}</span>
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border backdrop-blur-md ${
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-6 md:p-8">
+        <div className="absolute top-4 right-4 text-7xl opacity-15 select-none">{recipe.icon}</div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-16 h-16 rounded-2xl bg-white/[0.08] flex items-center justify-center text-5xl">
+              {recipe.icon}
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
               recipe.difficulty === "Ușor"
-                ? "bg-green-900/60 text-green-300 border-green-700/40"
+                ? "bg-green-900/20 text-green-400 border-green-900/30"
                 : recipe.difficulty === "Mediu"
-                  ? "bg-yellow-900/60 text-yellow-300 border-yellow-700/40"
-                  : "bg-red-900/60 text-red-300 border-red-700/40"
+                  ? "bg-yellow-900/20 text-yellow-400 border-yellow-900/30"
+                  : "bg-red-900/20 text-red-400 border-red-900/30"
             }`}>
               {recipe.difficulty}
             </span>
           </div>
-          <h1 className="text-2xl md:text-4xl font-black text-white leading-tight drop-shadow-lg">{recipe.name}</h1>
-          <p className="text-gray-300 mt-2 max-w-xl leading-relaxed text-sm md:text-base drop-shadow">{recipe.description}</p>
+          <h1 className="text-2xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
+          <p className="text-gray-400 mt-2 max-w-xl leading-relaxed text-sm md:text-base">{recipe.description}</p>
         </div>
       </div>
 
@@ -822,7 +800,7 @@ export default function RetetePage() {
     "@type": "Recipe",
     "name": r.name,
     "description": r.description,
-    "image": `https://ciocnim.ro${r.image}`,
+    "image": "https://ciocnim.ro/og-image.jpg",
     "author": { "@type": "Organization", "name": "Ciocnim.ro" },
     "prepTime": r.prepTime,
     "cookTime": r.cookTime,
