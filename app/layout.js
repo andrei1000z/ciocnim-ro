@@ -39,7 +39,7 @@ export const metadata = {
     "tradiții românești de paște", `obiceiuri pascale ${currentYear}`, "semnificația ciocnitului ouălor", "vopsit ouă natural",
     "ouă încondeiate modele", "tradiția oului roșu", "sărbători creștine tradiții", "motive populare românești",
     "ia românească și paștele", "obiceiuri din strămoși", "hristos a înviat tradiție", "povești de paște pentru copii",
-    "cum se ciocnesc ouăle corect", "rețete tradiționale de paște", "vopsit ouă cu foi de ceapă", "clasament național ciocnit ouă",
+    "cum se ciocnesc ouăle corect", "istoria paștelui în românia", "vopsit ouă cu foi de ceapă", "clasament național ciocnit ouă",
     "top jucători ciocnim.ro", "bătălia regiunilor românia", "provocare duel paște", "grup privat familie ciocnit",
     "cine are cel mai tare ou", "invită prietenii la duel", "scor global ciocniri", "victorii și înfrângeri ouă", 
     "dueluri tradiționale online", "ciocnit ouă transilvania", "tradiții moldova paște", "bucuria munteniei",
