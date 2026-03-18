@@ -3,6 +3,8 @@ import "./globals.css";
 import ClientWrapper from "./components/ClientWrapper";
 import Script from "next/script";
 import ScrollToTop from "./components/ScrollToTop";
+import ThemeToggle from "./components/ThemeToggle";
+import BottomNav from "./components/BottomNav";
 
 /**
  * ====================================================================================================
@@ -21,19 +23,21 @@ const outfit = Outfit({
   variable: "--font-outfit"
 });
 
+const currentYear = new Date().getFullYear();
+
 export const metadata = {
   title: {
-    default: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii",
+    default: `Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii | Paște ${currentYear}`,
     template: "%s | Ciocnim.ro"
   },
-  description: "Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național. Gratuit, fără instalare, pe orice telefon. Hristos a Înviat 2026!",
+  description: `Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național. Gratuit, fără instalare, pe orice telefon. Hristos a Înviat ${currentYear}!`,
   applicationName: "Ciocnim.ro",
   keywords: [
-    "ciocnit ouă online", "bucuria ciocnitului online", "jocul de paște 2026", "ciocnim.ro", "bătălia ouălor virtuale",
+    "ciocnit ouă online", "bucuria ciocnitului online", `jocul de paște ${currentYear}`, "ciocnim.ro", "bătălia ouălor virtuale",
     "simulare ciocnit ouă", "satul de paște virtual", "joc browser paște", "ciocnit pe telefon fără download",
     "multiplayer ciocnit ouă", "cel mai bun joc de paște", "campioni la ciocnit ouă", "ciocnit virtual gratis",
-    "gameplay tradițional românesc", "concurs de paște online", "ciocnim ouă pe mobil", "aplicație ciocnit ouă 2026",
-    "tradiții românești de paște", "obiceiuri pascale 2026", "semnificația ciocnitului ouălor", "vopsit ouă natural",
+    "gameplay tradițional românesc", "concurs de paște online", "ciocnim ouă pe mobil", `aplicație ciocnit ouă ${currentYear}`,
+    "tradiții românești de paște", `obiceiuri pascale ${currentYear}`, "semnificația ciocnitului ouălor", "vopsit ouă natural",
     "ouă încondeiate modele", "tradiția oului roșu", "sărbători creștine tradiții", "motive populare românești",
     "ia românească și paștele", "obiceiuri din strămoși", "hristos a înviat tradiție", "povești de paște pentru copii",
     "cum se ciocnesc ouăle corect", "rețete tradiționale de paște", "vopsit ouă cu foi de ceapă", "clasament național ciocnit ouă",
@@ -41,17 +45,17 @@ export const metadata = {
     "cine are cel mai tare ou", "invită prietenii la duel", "scor global ciocniri", "victorii și înfrângeri ouă", 
     "dueluri tradiționale online", "ciocnit ouă transilvania", "tradiții moldova paște", "bucuria munteniei",
     "campioni oltenia ciocnit", "jocul dobrogenilor", "bucovina tradiții vii", "banatul la masă", "maramureș ciocnit tradițional",
-    "crișana paște 2026", "clasament regiuni istorice", "mândria regiunii tale", "provocări regionale online", "mesaje de paște 2026",
+    `crișana paște ${currentYear}`, "clasament regiuni istorice", "mândria regiunii tale", "provocări regionale online", `mesaje de paște ${currentYear}`,
     "urări hristos a înviat", "felicitări virtuale paște", "cele mai frumoase mesaje de paște", "statusuri de paște facebook", "poze cu ouă roșii",
     "hristos a înviat cuvinte", "mesaje scurte de paște", "urări tradiționale românești", "spiritul paștelui online", "lumină de paște mesaj", "paște fericit tuturor",
     "joc web mobil paște", "ciocnit ouă android", "ciocnit ouă ios online", "joc fără instalare", "ciocnește oul prin mișcare",
     "vibrate on strike game", "joc tradițional modernizat", "interfață modernă paște", "grafică premium tradițională", "joc de paște securizat",
-    "experiență multiplayer fluidă", "joc românesc 2026", "ou de aur ciocnim.ro", "ou de diamant", "ou cosmic de paște", "culori ouă de paște",
-    "ouă personalizate online", "skin-uri tradiționale ouă", "ouă de lux virtuale", "colecție de ouă 2026",
+    "experiență multiplayer fluidă", `joc românesc ${currentYear}`, "ou de aur ciocnim.ro", "ou de diamant", "ou cosmic de paște", "culori ouă de paște",
+    "ouă personalizate online", "skin-uri tradiționale ouă", "ouă de lux virtuale", `colecție de ouă ${currentYear}`,
     "ouă roșii strălucitoare", "ouă albastre safir", "ouă imperiale aurii",
     "skin tradițional ou roșu", "ou albastru safir online", "ou auriu imperial",
     "ou verde de codru", "motive cross-stitch tradiționale", "ie românească pe ou",
-    "ciocnit ouă live online", "câți oameni joacă acum", "clasament live paște 2026"
+    "ciocnit ouă live online", "câți oameni joacă acum", `clasament live paște ${currentYear}`
   ],
   authors: [{ name: "Echipa Ciocnim.ro" }],
   creator: "Ciocnim.ro",
@@ -64,7 +68,7 @@ export const metadata = {
   metadataBase: new URL("https://ciocnim.ro"),
   openGraph: {
     title: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii",
-    description: "Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat 2026!",
+    description: `Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat ${currentYear}!`,
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro – Joc de Paște Online" }],
@@ -73,7 +77,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ciocnim.ro – Ciocnește Ouă Online! Hristos a Înviat 2026",
+    title: `Ciocnim.ro – Ciocnește Ouă Online! Hristos a Înviat ${currentYear}`,
     description: "Provoacă-ți familia la ciocnit ouă virtual. Gratuit, pe orice telefon, fără instalare. Hristos a Înviat!",
     images: ["/og-image.jpg"],
   },
@@ -174,11 +178,13 @@ export default function RootLayout({ children }) {
 
         <ClientWrapper>
           <ScrollToTop />
+          <ThemeToggle />
           <div className="relative z-10 w-full max-w-[100vw] overflow-x-hidden min-h-[100dvh] flex flex-col">
-            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative">
+            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative pb-20 md:pb-0">
               {children}
             </main>
           </div>
+          <BottomNav />
         </ClientWrapper>
 
         {/* CSS RUNTIME FIXES (THE TANK LOCK - Anti-crop sistem pentru iPhone/Android) */}

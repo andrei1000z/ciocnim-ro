@@ -858,10 +858,11 @@ function HomeContent() {
       {/* TRADIȚII */}
       <motion.div {...fadeUp(0.22)}>
         <SectionLabel>Tradiții & Ghiduri</SectionLabel>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {[
             { href: "/traditii", icon: "📖", text: "Reguli" },
             { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
+            { href: "/retete", icon: "🍳", text: "Rețete" },
             { href: "/calendar", icon: "📅", text: "Calendar" },
             { href: "/urari", icon: "🕊️", text: "Urări" },
           ].map((item, i) => (

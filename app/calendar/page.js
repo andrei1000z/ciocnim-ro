@@ -23,6 +23,7 @@ const datePaste = [
 ];
 
 export default function CalendarPage() {
+  const currentYear = new Date().getFullYear();
   return (
     <>
       <main className="min-h-screen bg-[#0c0a0a] text-gray-200">
@@ -45,7 +46,7 @@ export default function CalendarPage() {
               Calendarul <span className="text-red-500">Paștelui</span>
             </h1>
             <p className="text-gray-400 font-bold text-sm md:text-base">
-              Află când pică Sărbătorile Pascale între 2026 și 2030
+              Află când pică Sărbătorile Pascale între {datePaste[0].an} și {datePaste[datePaste.length - 1].an}
             </p>
           </header>
           
@@ -58,14 +59,14 @@ export default function CalendarPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className={`p-6 rounded-lg shadow-lg transition-all ${
-                  item.an === 2026
-                    ? "bg-red-900/20 border border-red-700/30 shadow-red-900/20"
+                  item.an === currentYear
+                    ? "bg-red-900/20 border border-red-700/30 shadow-red-900/20 ring-1 ring-red-700/20"
                     : "bg-white/[0.04] border border-white/[0.06] hover:border-red-900/30"
                 }`}
               >
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-4">
-                    <span className={`text-3xl md:text-4xl font-black ${item.an === 2026 ? "text-red-500" : "text-white"}`}>
+                    <span className={`text-3xl md:text-4xl font-black ${item.an === currentYear ? "text-red-500" : "text-white"}`}>
                       {item.an}
                     </span>
                     {item.special && (
@@ -73,7 +74,7 @@ export default function CalendarPage() {
                         Aceeași zi
                       </span>
                     )}
-                    {item.an === 2026 && (
+                    {item.an === currentYear && (
                       <span className="bg-red-900/30 text-red-400 text-xs font-bold px-3 py-1 rounded-full border border-red-700/30">
                         Anul curent
                       </span>
@@ -83,14 +84,14 @@ export default function CalendarPage() {
                   <div className="flex gap-6 text-center">
                     <div>
                       <div className="text-xs font-bold text-red-500 uppercase tracking-wide">Ortodox</div>
-                      <div className={`text-xl md:text-2xl font-black ${item.an === 2026 ? "text-white" : "text-gray-200"}`}>
+                      <div className={`text-xl md:text-2xl font-black ${item.an === currentYear ? "text-white" : "text-gray-200"}`}>
                         {item.ortodox}
                       </div>
                     </div>
                     <div className="w-px bg-white/10"></div>
                     <div>
                       <div className="text-xs font-bold text-red-500 uppercase tracking-wide">Catolic</div>
-                      <div className={`text-xl md:text-2xl font-black ${item.an === 2026 ? "text-white" : "text-gray-200"}`}>
+                      <div className={`text-xl md:text-2xl font-black ${item.an === currentYear ? "text-white" : "text-gray-200"}`}>
                         {item.catolic}
                       </div>
                     </div>
