@@ -1,37 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 
 const safeLS = {
   get: (key) => { try { return typeof window !== "undefined" ? localStorage.getItem(key) : null; } catch { return null; } },
   set: (key, val) => { try { if (typeof window !== "undefined") localStorage.setItem(key, val); } catch {} },
 };
 
+const emptySubscribe = () => () => {};
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState("dark");
-  const [mounted, setMounted] = useState(false);
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "dark";
+    return safeLS.get("c_theme") || "dark";
+  });
 
   useEffect(() => {
-    setMounted(true);
-    const saved = safeLS.get("c_theme");
-    if (saved === "light") {
-      setTheme("light");
+    if (theme === "light") {
       document.documentElement.classList.add("light");
+    } else {
+      document.documentElement.classList.remove("light");
     }
-  }, []);
+  }, [theme]);
 
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
     safeLS.set("c_theme", next);
-    if (next === "light") {
-      document.documentElement.classList.add("light");
-    } else {
-      document.documentElement.classList.remove("light");
-    }
   };
 
-  if (!mounted) return null;
+  if (!isClient) return null;
 
   const isLight = theme === "light";
 

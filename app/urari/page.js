@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
@@ -96,11 +96,11 @@ const GreetingGenerator = () => {
   const [currentTemplate, setCurrentTemplate] = useState(0);
   const greetingText = templates[currentTemplate](nume || "...");
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = () => {
     if (!nume.trim()) return;
     setCurrentTemplate(Math.floor(Math.random() * templates.length));
     setGenerated(true);
-  }, [nume, templates.length]);
+  };
 
   const handleShareWhatsApp = () => shareWhatsApp(greetingText);
 
