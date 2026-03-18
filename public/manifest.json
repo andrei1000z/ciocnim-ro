@@ -1,7 +1,7 @@
 {
-  "name": "Sanctuarul Ciocnirii - Ciocnim.ro",
+  "name": "Ciocnim.ro – Ciocnește Ouă Online de Paște",
   "short_name": "Ciocnim.ro",
-  "description": "Arena Națională de ciocnit ouă online. Alege-ți regiunea și domină Sanctuarul! Hristos a Înviat!",
+  "description": "Jocul tradițional de Paște, acum online! Ciocnește ouă cu prietenii, urcă în clasament și descoperă rețete tradiționale. Gratuit, pe orice telefon.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -27,9 +27,9 @@
   "shortcuts": [
     {
       "name": "Joacă Acum",
-      "short_name": "Arena",
+      "short_name": "Joacă",
       "url": "/?autoArena=true",
-      "description": "Intră direct în arena de ciocnit ouă",
+      "description": "Ciocnește ouă cu cineva din România",
       "icons": [{ "src": "/apple-touch-icon.png", "sizes": "192x192" }]
     }
   ]
