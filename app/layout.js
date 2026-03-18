@@ -4,7 +4,6 @@ import ClientWrapper from "./components/ClientWrapper";
 import Script from "next/script";
 import ScrollToTop from "./components/ScrollToTop";
 import ThemeToggle from "./components/ThemeToggle";
-import BottomNav from "./components/BottomNav";
 
 /**
  * ====================================================================================================
@@ -181,11 +180,10 @@ export default function RootLayout({ children }) {
           <ScrollToTop />
           <ThemeToggle />
           <div className="relative z-10 w-full max-w-[100vw] overflow-x-hidden min-h-[100dvh] flex flex-col">
-            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative pb-20 md:pb-0">
+            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative">
               {children}
             </main>
           </div>
-          <BottomNav />
         </ClientWrapper>
 
         {/* CSS RUNTIME FIXES (THE TANK LOCK - Anti-crop sistem pentru iPhone/Android) */}
