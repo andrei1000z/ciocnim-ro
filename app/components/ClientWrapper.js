@@ -23,8 +23,23 @@ const safeLS = {
   del: (key) => { try { if (typeof window !== 'undefined') localStorage.removeItem(key); } catch {} },
 };
 
+// Data version — bump this to wipe all localStorage on next visit
+const DATA_VERSION = "2";
+
+function checkDataReset() {
+  if (typeof window === "undefined") return;
+  try {
+    if (localStorage.getItem("c_version") !== DATA_VERSION) {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith("c_"));
+      keys.forEach(k => localStorage.removeItem(k));
+      localStorage.setItem("c_version", DATA_VERSION);
+    }
+  } catch {}
+}
+
 export default function ClientWrapper({ children }) {
   const router = useRouter();
+  checkDataReset();
 
   const [userStats, setUserStats] = useState(() => {
     const savedStats = safeLS.get("c_stats");

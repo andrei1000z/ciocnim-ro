@@ -5,15 +5,6 @@ import Script from "next/script";
 import ScrollToTop from "./components/ScrollToTop";
 import ThemeToggle from "./components/ThemeToggle";
 
-/**
- * ====================================================================================================
- * CIOCNIM.RO - FUNDAȚIA SANCTUARULUI (V30.2 - TRADIȚIE UMANIZATĂ & ULTIMATE SEO)
- * ====================================================================================================
- * Proiect: Infrastructură globală pentru ciocnit ouă virtuale.
- * Optimizări: Viewport Repair, OLED Depth Engine, SEO Organic Max, Textură Tradițională,
- * Umanizare termeni (eliminit "Arena" / "Luptă" din MetaData).
- * ====================================================================================================
- */
 
 const outfit = Outfit({ 
   subsets: ["latin", "latin-ext"], 
