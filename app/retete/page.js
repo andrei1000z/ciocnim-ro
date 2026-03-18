@@ -14,12 +14,13 @@ const safeLS = {
 // ─── Recipe Data ────────────────────────────────────────────────────────────
 // `scalable: false` → ingredient text stays the same regardless of portion
 // `textFn: (mult) => string` → custom text per multiplier for descriptive items
+// `variants` → array of { id, label, baseIngredients?, filling?, steps?, tips? } — swaps sections
 const retete = [
   {
     id: "cozonac",
-    name: "Cozonac Tradițional Pufos",
+    name: "Cozonac Tradițional",
     icon: "🍞",
-    description: "Cozonacul pufos, cu miez elastic și coajă aurie, este regele mesei de Paște. Rețeta clasică cu cacao și nucă.",
+    description: "Cozonacul pufos, cu miez elastic și coajă aurie, este regele mesei de Paște.",
     prepTime: "PT40M",
     prepLabel: "40 min",
     cookTime: "PT50M",
@@ -65,12 +66,44 @@ const retete = [
       { text: "Unge cu gălbenuș bătut cu puțin lapte. Coace la 170°C pentru 45-50 minute.", tip: "Pune tava pe raftul de jos al cuptorului." },
       { text: "Scoate din cuptor, lasă 10 minute în tavă, apoi răstoarnă pe un grătar. Acoperă cu un prosop curat.", tip: null },
     ],
+    variants: [
+      { id: "nuca-cacao", label: "Cu Nucă și Cacao" },
+      {
+        id: "rahat",
+        label: "Cu Rahat",
+        filling: [
+          { qty: 500, unit: "g", name: "rahat (tăiat fâșii)" },
+        ],
+        stepsOverride: { 4: { text: "Taie rahatul în fâșii lungi — se vor folosi ca umplutură.", tip: null } },
+      },
+      {
+        id: "mac",
+        label: "Cu Mac",
+        filling: [
+          { qty: 300, unit: "g", name: "mac măcinat" },
+          { qty: 100, unit: "g", name: "zahăr" },
+          { qty: 50, unit: "ml", name: "lapte" },
+          { qty: 1, unit: "lingurită", name: "esență de vanilie", textFn: (m) => m <= 0.5 ? "½ lingurită esență de vanilie" : m === 1 ? "1 lingurită esență de vanilie" : `${Math.round(m)} lingurițe esență de vanilie` },
+        ],
+        stepsOverride: { 4: { text: "Prepară umplutura: fierbe macul cu laptele și zahărul 5 minute, apoi adaugă vanilia.", tip: null } },
+      },
+      {
+        id: "ciocolata",
+        label: "Cu Ciocolată",
+        filling: [
+          { qty: 300, unit: "g", name: "ciocolată neagră (topită)" },
+          { qty: 100, unit: "g", name: "nucă măcinată" },
+          { qty: 50, unit: "g", name: "unt" },
+        ],
+        stepsOverride: { 4: { text: "Prepară umplutura: topește ciocolata cu untul la bain-marie, amestecă cu nuca.", tip: "Nu lăsa ciocolata pe foc direct — se arde." } },
+      },
+    ],
   },
   {
     id: "drob",
     name: "Drob de Miel",
     icon: "🐑",
-    description: "Drobul de miel este vedeta absolută a mesei de Paște. Aromat, suculent și plin de savoare, servit rece sau călduț.",
+    description: "Drobul este vedeta absolută a mesei de Paște. Aromat, suculent și plin de savoare.",
     prepTime: "PT30M",
     prepLabel: "30 min",
     cookTime: "PT60M",
@@ -101,7 +134,7 @@ const retete = [
     ],
     filling: [],
     steps: [
-      { text: "Spală bine organele de miel și fierbe-le în apă cu sare 20-25 de minute. Scurge și lasă să se răcească.", tip: "Schimbă apa o dată în timpul fierberii pentru un gust mai curat." },
+      { text: "Spală bine organele și fierbe-le în apă cu sare 20-25 de minute. Scurge și lasă să se răcească.", tip: "Schimbă apa o dată în timpul fierberii pentru un gust mai curat." },
       { text: "Taie organele în cubulețe mici sau trece-le prin mașina de tocat (textură mai fină).", tip: null },
       { text: "Călește ceapa tăiată mărunt în ulei până devine translucidă.", tip: null },
       { text: "Amestecă organele tocate cu ceapa călită, verdețurile tăiate fin, ouăle bătute, laptele, sarea și piperul.", tip: null },
@@ -110,12 +143,46 @@ const retete = [
       { text: "Coace la 180°C pentru 45-50 minute, până devine auriu deasupra.", tip: null },
       { text: "Lasă să se răcească complet în tavă înainte de a tăia felii. Se servește rece sau la temperatura camerei.", tip: null },
     ],
+    variants: [
+      { id: "miel", label: "De Miel" },
+      {
+        id: "pui",
+        label: "De Pui",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "ficat de pui" },
+          { qty: 4, unit: "buc", name: "ouă" },
+          { qty: 2, unit: "buc", name: "cepe mari" },
+          { qty: 1, unit: "legătură", name: "mărar proaspăt" },
+          { qty: 1, unit: "legătură", name: "pătrunjel proaspăt" },
+          { qty: 3, unit: "linguri", name: "ulei de măsline" },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+          { qty: 100, unit: "ml", name: "lapte" },
+          { qty: 2, unit: "linguri", name: "pesmet" },
+        ],
+      },
+      {
+        id: "porc",
+        label: "De Porc",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "ficat și rinichi de porc" },
+          { qty: 4, unit: "buc", name: "ouă" },
+          { qty: 2, unit: "buc", name: "cepe mari" },
+          { qty: 1, unit: "legătură", name: "mărar proaspăt" },
+          { qty: 1, unit: "legătură", name: "pătrunjel proaspăt" },
+          { qty: 3, unit: "linguri", name: "ulei" },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+          { qty: 100, unit: "ml", name: "lapte" },
+          { qty: 2, unit: "linguri", name: "pesmet" },
+          { qty: 100, unit: "g", name: "slănină afumată (cubulețe)" },
+        ],
+      },
+    ],
   },
   {
     id: "pasca",
     name: "Pască cu Brânză Dulce",
     icon: "🧀",
-    description: "Pască tradițională cu brânză dulce de vaci, stafide și vanilie — desertul preferat alături de cozonac la masa de Paște.",
+    description: "Pască tradițională cu brânză dulce de vaci, stafide și vanilie — desertul preferat alături de cozonac.",
     prepTime: "PT30M",
     prepLabel: "30 min",
     cookTime: "PT45M",
@@ -153,12 +220,42 @@ const retete = [
       { text: "Unge cu gălbenuș bătut. Coace la 170°C pentru 40-45 minute, până devine aurie.", tip: null },
       { text: "Lasă să se răcească complet în formă. Se servește rece, presărată cu zahăr pudră.", tip: null },
     ],
+    variants: [
+      { id: "stafide", label: "Cu Stafide" },
+      {
+        id: "fara-stafide",
+        label: "Fără Stafide",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "brânză dulce de vaci (scursă bine)" },
+          { qty: 4, unit: "buc", name: "ouă" },
+          { qty: 150, unit: "g", name: "zahăr" },
+          { qty: 100, unit: "g", name: "smântână" },
+          { qty: 1, unit: "lingurită", name: "esență de vanilie", textFn: (m) => m <= 0.5 ? "½ lingurită esență de vanilie" : m === 1 ? "1 lingurită esență de vanilie" : `${Math.round(m)} lingurițe esență de vanilie` },
+          { qty: 1, unit: "buc", name: "coajă rasă de lămâie", textFn: (m) => m < 1 ? "coajă rasă de la jumătate de lămâie" : m === 1 ? "coajă rasă de lămâie" : `coajă rasă de la ${m} lămâi` },
+          { qty: 50, unit: "g", name: "griș" },
+        ],
+      },
+      {
+        id: "ciocolata",
+        label: "Cu Ciocolată",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "brânză dulce de vaci (scursă bine)" },
+          { qty: 4, unit: "buc", name: "ouă" },
+          { qty: 150, unit: "g", name: "zahăr" },
+          { qty: 100, unit: "g", name: "smântână" },
+          { qty: 80, unit: "g", name: "cacao" },
+          { qty: 100, unit: "g", name: "ciocolată neagră (topită)" },
+          { qty: 1, unit: "lingurită", name: "esență de vanilie", textFn: (m) => m <= 0.5 ? "½ lingurită esență de vanilie" : m === 1 ? "1 lingurită esență de vanilie" : `${Math.round(m)} lingurițe esență de vanilie` },
+          { qty: 50, unit: "g", name: "griș" },
+        ],
+      },
+    ],
   },
   {
-    id: "friptura-miel",
-    name: "Friptură de Miel la Cuptor",
+    id: "friptura",
+    name: "Friptură la Cuptor",
     icon: "🍖",
-    description: "Friptura de miel la cuptor cu usturoi și rozmarin, fragedă și suculentă — piesa centrală a mesei festive de Paște.",
+    description: "Friptură fragedă la cuptor cu usturoi și rozmarin — piesa centrală a mesei festive de Paște.",
     prepTime: "PT20M",
     prepLabel: "20 min",
     cookTime: "PT2H",
@@ -188,7 +285,7 @@ const retete = [
     ],
     filling: [],
     steps: [
-      { text: "Scoate carnea de miel la temperatura camerei cu 30 minute înainte de gătit.", tip: null },
+      { text: "Scoate carnea la temperatura camerei cu 30 minute înainte de gătit.", tip: null },
       { text: "Fă tăieturi adânci în carne și introduce felii de usturoi și frunze de rozmarin în fiecare tăietură.", tip: "Fă tăieturile la 3-4 cm distanță una de alta." },
       { text: "Freacă carnea cu ulei de măsline, sare, piper și suc de lămâie.", tip: null },
       { text: "Așează ceapa și cartofii pe fundul tăvii. Pune carnea deasupra.", tip: null },
@@ -197,12 +294,45 @@ const retete = [
       { text: "Coace neacoperit încă 30 minute, ungând ocazional cu sucul din tavă, până se rumenește frumos.", tip: null },
       { text: "Lasă carnea să se odihnească 15 minute acoperită cu folie înainte de a tăia. Servește cu legumele din tavă.", tip: null },
     ],
+    variants: [
+      { id: "miel", label: "De Miel" },
+      {
+        id: "pui",
+        label: "De Pui",
+        baseIngredients: [
+          { qty: 1.5, unit: "kg", name: "pui întreg sau pulpe de pui" },
+          { qty: 6, unit: "căței", name: "usturoi" },
+          { qty: 2, unit: "ramuri", name: "rozmarin proaspăt" },
+          { qty: 2, unit: "ramuri", name: "cimbru proaspăt" },
+          { qty: 3, unit: "linguri", name: "ulei de măsline" },
+          { qty: null, unit: "", name: "sare, boia dulce și piper după gust", scalable: false },
+          { qty: 2, unit: "buc", name: "cepe mari (tăiate în sferturi)" },
+          { qty: 500, unit: "g", name: "cartofi (tăiați în sferturi)" },
+          { qty: 100, unit: "ml", name: "vin alb sec" },
+        ],
+      },
+      {
+        id: "porc",
+        label: "De Porc",
+        baseIngredients: [
+          { qty: 1.5, unit: "kg", name: "ceafă sau spată de porc" },
+          { qty: 8, unit: "căței", name: "usturoi" },
+          { qty: 2, unit: "ramuri", name: "rozmarin proaspăt" },
+          { qty: 3, unit: "linguri", name: "ulei" },
+          { qty: 2, unit: "linguri", name: "muștar" },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+          { qty: 2, unit: "buc", name: "cepe mari (tăiate în sferturi)" },
+          { qty: 500, unit: "g", name: "cartofi (tăiați în sferturi)" },
+          { qty: 200, unit: "ml", name: "bere blondă" },
+        ],
+      },
+    ],
   },
   {
     id: "salata-boeuf",
     name: "Salată de Boeuf",
     icon: "🥗",
-    description: "Salata de boeuf este nelipsită de pe masa de Paște. Rețeta tradițională cu piept de pui, legume fierte și maioneză de casă.",
+    description: "Salata de boeuf este nelipsită de pe masa de Paște. Rețeta tradițională cu legume fierte și maioneză.",
     prepTime: "PT45M",
     prepLabel: "45 min",
     cookTime: "PT40M",
@@ -243,12 +373,31 @@ const retete = [
       { text: "Potrivește de sare și piper. Egalează într-un bol sau formă.", tip: null },
       { text: "Decorează cu maioneză, felii de ou, măsline și verdețuri. Refrigerează minim 2 ore.", tip: null },
     ],
+    variants: [
+      { id: "pui", label: "Cu Pui" },
+      {
+        id: "vita",
+        label: "Cu Vită",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "carne de vită (pulpă)" },
+          { qty: 500, unit: "g", name: "cartofi" },
+          { qty: 300, unit: "g", name: "morcovi" },
+          { qty: 200, unit: "g", name: "rădăcină de pătrunjel" },
+          { qty: 200, unit: "g", name: "mazăre (conservă sau congelată)" },
+          { qty: 200, unit: "g", name: "murături asortate (castraveți, gogoșari)" },
+          { qty: 4, unit: "buc", name: "ouă fierte" },
+          { qty: 300, unit: "g", name: "maioneză" },
+          { qty: 2, unit: "linguri", name: "muștar" },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+        ],
+      },
+    ],
   },
   {
     id: "oua-rosii",
     name: "Ouă Roșii Vopsite Natural",
     icon: "🥚",
-    description: "Rețeta tradițională de vopsit ouă cu coji de ceapă — culoare intensă, 100% naturală, fără chimicale.",
+    description: "Rețeta tradițională de vopsit ouă cu coji de ceapă — culoare intensă, 100% naturală.",
     prepTime: "PT15M",
     prepLabel: "15 min",
     cookTime: "PT30M",
@@ -289,7 +438,7 @@ const retete = [
     id: "ciorba-miel",
     name: "Ciorbă de Miel cu Leuștean",
     icon: "🥣",
-    description: "Ciorbă tradițională de Paște, acrișoară și aromată, cu carne fragedă de miel și leuștean proaspăt.",
+    description: "Ciorbă tradițională de Paște, acrișoară și aromată, cu carne fragedă și leuștean proaspăt.",
     prepTime: "PT20M",
     prepLabel: "20 min",
     cookTime: "PT1H30M",
@@ -321,20 +470,57 @@ const retete = [
     ],
     filling: [],
     steps: [
-      { text: "Pune carnea de miel într-o oală cu 3 litri de apă rece. Pune pe foc.", tip: null },
-      { text: "Când începe să fiarbă, ia spuma care se formează la suprafață. Repetă de câte ori e nevoie.", tip: "Asta e cheia unei ciorbe limpezi." },
+      { text: "Pune carnea într-o oală cu 3 litri de apă rece. Pune pe foc.", tip: null },
+      { text: "Când începe să fiarbă, ia spuma care se formează la suprafață.", tip: "Asta e cheia unei ciorbe limpezi." },
       { text: "Adaugă ceapa tăiată mărunt, morcovii, păstârnacul și țelina tăiate cubulețe. Fierbe la foc mic 1 oră.", tip: null },
       { text: "Adaugă roșiile tăiate (sau 2 linguri bulion). Fierbe încă 20 minute.", tip: null },
       { text: "Încălzește borșul separat (nu-l fierbe). Adaugă-l în ciorbă și amestecă.", tip: "Borșul fiert devine amar." },
       { text: "Bate ouăle cu smântâna. Temperează cu câteva linguri de supă caldă, apoi toarnă în oală amestecând continuu.", tip: "Temperarea previne tăierea ouălor." },
       { text: "Potrivește de sare și piper. Servește cu leuștean proaspăt tăiat fin.", tip: null },
     ],
+    variants: [
+      { id: "miel", label: "De Miel" },
+      {
+        id: "pui",
+        label: "De Pui",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "carne de pui (pulpe, aripi)" },
+          { qty: 2, unit: "buc", name: "cepe" },
+          { qty: 2, unit: "buc", name: "morcovi" },
+          { qty: 1, unit: "buc", name: "păstârnac" },
+          { qty: 1, unit: "buc", name: "țelină mică" },
+          { qty: 2, unit: "buc", name: "roșii" },
+          { qty: 200, unit: "ml", name: "borș acru" },
+          { qty: 1, unit: "legătură", name: "leuștean proaspăt" },
+          { qty: 2, unit: "buc", name: "ouă (pentru dresire)" },
+          { qty: 100, unit: "ml", name: "smântână (pentru dresire)" },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+        ],
+      },
+      {
+        id: "legume",
+        label: "De Legume",
+        baseIngredients: [
+          { qty: 2, unit: "buc", name: "cepe" },
+          { qty: 2, unit: "buc", name: "morcovi" },
+          { qty: 1, unit: "buc", name: "păstârnac" },
+          { qty: 1, unit: "buc", name: "țelină mică" },
+          { qty: 2, unit: "buc", name: "roșii" },
+          { qty: 2, unit: "buc", name: "cartofi" },
+          { qty: 1, unit: "buc", name: "dovlecel" },
+          { qty: 100, unit: "g", name: "fasole verde" },
+          { qty: 200, unit: "ml", name: "borș acru" },
+          { qty: 1, unit: "legătură", name: "leuștean proaspăt" },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+        ],
+      },
+    ],
   },
   {
     id: "sarmale",
     name: "Sarmale în Foi de Varză",
     icon: "🫔",
-    description: "Sarmalele — mândria bucătăriei românești. Rulouri de carne tocată în foi de varză murată, gătite lent la cuptor.",
+    description: "Sarmalele — mândria bucătăriei românești. Rulouri de carne tocată în foi de varză, gătite lent.",
     prepTime: "PT45M",
     prepLabel: "45 min",
     cookTime: "PT3H",
@@ -366,15 +552,604 @@ const retete = [
     ],
     filling: [],
     steps: [
-      { text: "Desfă frunzele de varză murată. Taie nervura groasă de pe fiecare frunză pentru a le face flexibile.", tip: null },
+      { text: "Desfă frunzele de varză murată. Taie nervura groasă de pe fiecare frunză.", tip: null },
       { text: "Amestecă carnea tocată cu ceapa, orezul spălat, boiaua, cimbrul, sare și piper.", tip: "Orezul se pune crud — se gătește în sarma." },
       { text: "Pune o lingură de compoziție pe fiecare frunză și rulează strâns, îndoind capetele.", tip: "Sarmalele mici sunt mai gustoase decât cele mari." },
-      { text: "Într-o oală mare (sau un vas de cuptor), pune un strat de varză tăiată fâșii pe fund.", tip: null },
+      { text: "Într-o oală mare, pune un strat de varză tăiată fâșii pe fund.", tip: null },
       { text: "Aranjează sarmalele strâns, în straturi. Presară felii de afumătură și foi de dafin între straturi.", tip: null },
-      { text: "Toarnă bulionul de roșii amestecat cu apă (cât să acopere sarmalele).", tip: null },
-      { text: "Acoperă cu un strat de varză tăiată. Pune capac sau folie de aluminiu.", tip: null },
-      { text: "Gătește la 180°C în cuptor pentru 2.5-3 ore, sau pe foc mic pe aragaz. Verifică lichidul ocazional.", tip: "Nu amesteca — doar scutură ușor oala." },
-      { text: "Servește cu smântână și mămăligă caldă. Cele mai bune sunt după ce se reîncălzesc a doua zi.", tip: null },
+      { text: "Toarnă bulionul amestecat cu apă (cât să acopere sarmalele).", tip: null },
+      { text: "Acoperă cu un strat de varză tăiată. Pune capac sau folie.", tip: null },
+      { text: "Gătește la 180°C în cuptor 2.5-3 ore. Verifică lichidul ocazional.", tip: "Nu amesteca — doar scutură ușor oala." },
+      { text: "Servește cu smântână și mămăligă caldă.", tip: null },
+    ],
+    variants: [
+      { id: "porc", label: "Cu Porc" },
+      {
+        id: "porc-vita",
+        label: "Porc + Vită",
+        baseIngredients: [
+          { qty: 1, unit: "buc", name: "varză murată mare" },
+          { qty: 500, unit: "g", name: "carne tocată de porc" },
+          { qty: 500, unit: "g", name: "carne tocată de vită" },
+          { qty: 300, unit: "g", name: "ceapă (tocată mărunt)" },
+          { qty: 100, unit: "g", name: "orez (spălat)" },
+          { qty: 200, unit: "g", name: "afumătură (costiță)" },
+          { qty: 500, unit: "ml", name: "bulion de roșii" },
+          { qty: 2, unit: "linguri", name: "boia dulce" },
+          { qty: 1, unit: "lingurită", name: "cimbru uscat", textFn: (m) => m <= 0.5 ? "½ lingurită cimbru uscat" : m === 1 ? "1 lingurită cimbru uscat" : `${Math.round(m)} lingurițe cimbru uscat` },
+          { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+          { qty: 3, unit: "buc", name: "foi de dafin" },
+        ],
+      },
+    ],
+  },
+  // ──── NEW RECIPES (9-20) ────────────────────────────────────────────────
+  {
+    id: "piftie",
+    name: "Piftie de Pui",
+    icon: "🍗",
+    description: "Piftie tradițională transparentă, cu carne fragedă de pui și usturoi — aperitivul perfect rece.",
+    prepTime: "PT20M",
+    prepLabel: "20 min",
+    cookTime: "PT3H",
+    cookLabel: "3h",
+    totalTime: "PT6H",
+    totalLabel: "~6h (cu răcire)",
+    servings: 10,
+    servingsUnit: "porții",
+    calories: 150,
+    difficulty: "Mediu",
+    difficultyColor: "text-yellow-400",
+    tips: [
+      "Picioarele de pui sunt esențiale — ele dau gelatina naturală.",
+      "Fierbe la foc mic, nu clocotit — zeama trebuie să rămână limpede.",
+      "Usturoiul se adaugă doar la final, nu se fierbe.",
+    ],
+    baseIngredients: [
+      { qty: 1, unit: "kg", name: "pulpe și aripi de pui" },
+      { qty: 500, unit: "g", name: "picioare de pui (pentru gelatină)" },
+      { qty: 2, unit: "buc", name: "morcovi" },
+      { qty: 1, unit: "buc", name: "ceapă mare" },
+      { qty: 1, unit: "buc", name: "păstârnac" },
+      { qty: 6, unit: "căței", name: "usturoi" },
+      { qty: 3, unit: "buc", name: "foi de dafin" },
+      { qty: 10, unit: "buc", name: "boabe de piper" },
+      { qty: null, unit: "", name: "sare după gust", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Spală bine carnea și picioarele de pui. Pune-le într-o oală mare cu apă rece (3-4 litri).", tip: null },
+      { text: "Adaugă morcovii, ceapa, păstârnacul, foile de dafin și boabele de piper.", tip: null },
+      { text: "Fierbe la foc mic 2.5-3 ore. Ia spuma periodic. Zeama trebuie să scadă la jumătate.", tip: "Focul mic e esențial — altfel zeama devine tulbure." },
+      { text: "Scoate carnea și separă-o de oase. Rupe în bucăți mici.", tip: null },
+      { text: "Strecoară zeama printr-un tifon sau sită fină.", tip: null },
+      { text: "Pisează usturoiul cu puțină sare și adaugă-l în zeama strecurată.", tip: null },
+      { text: "Pune bucățile de carne în forme/castroane. Toarnă zeama peste.", tip: "Adaugă și rondele de morcov fiert pentru decor." },
+      { text: "Lasă la frigider minim 4-6 ore (peste noapte ideal) până se întărește.", tip: null },
+    ],
+    variants: [
+      { id: "pui", label: "De Pui" },
+      {
+        id: "porc",
+        label: "De Porc",
+        baseIngredients: [
+          { qty: 1, unit: "kg", name: "ciolan de porc (cu os)" },
+          { qty: 500, unit: "g", name: "picioare de porc" },
+          { qty: 2, unit: "buc", name: "morcovi" },
+          { qty: 1, unit: "buc", name: "ceapă mare" },
+          { qty: 1, unit: "buc", name: "păstârnac" },
+          { qty: 8, unit: "căței", name: "usturoi" },
+          { qty: 3, unit: "buc", name: "foi de dafin" },
+          { qty: 10, unit: "buc", name: "boabe de piper" },
+          { qty: null, unit: "", name: "sare după gust", scalable: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: "mamaliga",
+    name: "Mămăligă Tradițională",
+    icon: "🌽",
+    description: "Mămăliga cremoasă, perfectă alături de sarmale, friptură sau brânză cu smântână.",
+    prepTime: "PT5M",
+    prepLabel: "5 min",
+    cookTime: "PT25M",
+    cookLabel: "25 min",
+    totalTime: "PT30M",
+    totalLabel: "~30 min",
+    servings: 6,
+    servingsUnit: "porții",
+    calories: 200,
+    difficulty: "Ușor",
+    difficultyColor: "text-green-400",
+    tips: [
+      "Amestecă continuu ca să nu facă cocoloașe.",
+      "Mălai+apa=1:3 ca proporție perfectă.",
+      "Se răstoarnă pe un fundal de lemn și se taie cu ața.",
+    ],
+    baseIngredients: [
+      { qty: 400, unit: "g", name: "mălai (griș de porumb)" },
+      { qty: 1.2, unit: "l", name: "apă" },
+      { qty: 1, unit: "lingurită", name: "sare", textFn: (m) => m <= 0.5 ? "½ lingurită sare" : m === 1 ? "1 lingurită sare" : `${Math.round(m)} lingurițe sare` },
+      { qty: 30, unit: "g", name: "unt (opțional, la final)" },
+    ],
+    filling: [],
+    steps: [
+      { text: "Pune apa cu sare la fiert într-o oală cu fund gros.", tip: null },
+      { text: "Când clocotește, adaugă mălaiul în ploaie, amestecând continuu cu telul.", tip: "Toarnă mălaiul într-un fir subțire — așa eviți cocoloașele." },
+      { text: "Redu focul la minim. Amestecă cu o lingură de lemn 20-25 minute.", tip: "Mămăliga e gata când se desprinde de pereții oalei." },
+      { text: "Adaugă untul la final și amestecă. Răstoarnă pe un tocător de lemn.", tip: null },
+    ],
+  },
+  {
+    id: "cartofi-cuptor",
+    name: "Cartofi la Cuptor cu Rozmarin",
+    icon: "🥔",
+    description: "Cartofi aurii și crocanți la exterior, pufoși la interior — garnitura perfectă pentru orice friptură de Paște.",
+    prepTime: "PT10M",
+    prepLabel: "10 min",
+    cookTime: "PT45M",
+    cookLabel: "45 min",
+    totalTime: "PT1H",
+    totalLabel: "~1h",
+    servings: 6,
+    servingsUnit: "porții",
+    calories: 190,
+    difficulty: "Ușor",
+    difficultyColor: "text-green-400",
+    tips: [
+      "Cartofii tăiați mai mici se rumenesc mai repede.",
+      "Nu îi suprapune în tavă — au nevoie de spațiu.",
+      "Întoarce-i o dată la jumătatea timpului.",
+    ],
+    baseIngredients: [
+      { qty: 1, unit: "kg", name: "cartofi (tăiați în sferturi)" },
+      { qty: 4, unit: "linguri", name: "ulei de măsline" },
+      { qty: 4, unit: "căței", name: "usturoi (zdrobiți)" },
+      { qty: 3, unit: "ramuri", name: "rozmarin proaspăt" },
+      { qty: null, unit: "", name: "sare, piper și boia dulce după gust", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Preîncălzește cuptorul la 200°C. Curăță și taie cartofii în sferturi sau cuburi mari.", tip: null },
+      { text: "Amestecă cartofii cu uleiul, usturoiul zdrobit, rozmarinul, sare, piper și boia.", tip: "Amestecă bine — fiecare cartof trebuie uns cu ulei." },
+      { text: "Întinde cartofii într-un singur strat pe o tavă mare tapetată cu hârtie de copt.", tip: "Nu-i suprapune — altfel se aburesc în loc să se rumenească." },
+      { text: "Coace 40-45 minute, întorcând o dată la jumătate, până sunt aurii și crocanți.", tip: null },
+    ],
+  },
+  {
+    id: "chec",
+    name: "Chec Pufos",
+    icon: "🍰",
+    description: "Chec simplu și pufos, perfect pentru dimineața de Paște. Se poate face cu cacao, stafide sau lămâie.",
+    prepTime: "PT15M",
+    prepLabel: "15 min",
+    cookTime: "PT45M",
+    cookLabel: "45 min",
+    totalTime: "PT1H",
+    totalLabel: "~1h",
+    servings: 12,
+    servingsUnit: "felii",
+    calories: 260,
+    difficulty: "Ușor",
+    difficultyColor: "text-green-400",
+    tips: [
+      "Toate ingredientele la temperatura camerei = chec mai pufos.",
+      "Nu deschide cuptorul în primele 25 minute.",
+      "Testează cu scobitoarea — trebuie să iasă curată.",
+    ],
+    baseIngredients: [
+      { qty: 250, unit: "g", name: "făină" },
+      { qty: 200, unit: "g", name: "zahăr" },
+      { qty: 4, unit: "buc", name: "ouă" },
+      { qty: 100, unit: "ml", name: "ulei" },
+      { qty: 100, unit: "ml", name: "lapte" },
+      { qty: 1, unit: "buc", name: "praf de copt" },
+      { qty: 1, unit: "lingurită", name: "esență de vanilie", textFn: (m) => m <= 0.5 ? "½ lingurită esență de vanilie" : m === 1 ? "1 lingurită esență de vanilie" : `${Math.round(m)} lingurițe esență de vanilie` },
+      { qty: null, unit: "", name: "sare (un vârf de cuțit)", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Preîncălzește cuptorul la 170°C. Unge o formă de chec cu unt și tapetează cu făină.", tip: null },
+      { text: "Separă ouăle. Bate albușurile spumă tare cu un praf de sare.", tip: null },
+      { text: "Bate gălbenușurile cu zahărul până devin cremoase. Adaugă uleiul și laptele.", tip: null },
+      { text: "Adaugă făina cernută cu praful de copt și vanilia. Amestecă ușor.", tip: null },
+      { text: "Încorporează albușurile bătute cu mișcări de jos în sus — nu amesteca circular.", tip: "Albușurile dau aerul din chec — tratează-i cu grijă." },
+      { text: "Toarnă în formă. Coace 40-45 minute. Lasă să se răcească în formă 10 minute.", tip: null },
+    ],
+    variants: [
+      { id: "simplu", label: "Simplu" },
+      {
+        id: "cacao",
+        label: "Cu Cacao",
+        baseIngredients: [
+          { qty: 220, unit: "g", name: "făină" },
+          { qty: 200, unit: "g", name: "zahăr" },
+          { qty: 4, unit: "buc", name: "ouă" },
+          { qty: 100, unit: "ml", name: "ulei" },
+          { qty: 100, unit: "ml", name: "lapte" },
+          { qty: 1, unit: "buc", name: "praf de copt" },
+          { qty: 40, unit: "g", name: "cacao" },
+          { qty: 1, unit: "lingurită", name: "esență de vanilie", textFn: (m) => m <= 0.5 ? "½ lingurită esență de vanilie" : m === 1 ? "1 lingurită esență de vanilie" : `${Math.round(m)} lingurițe esență de vanilie` },
+          { qty: null, unit: "", name: "sare (un vârf de cuțit)", scalable: false },
+        ],
+      },
+      {
+        id: "stafide",
+        label: "Cu Stafide",
+        baseIngredients: [
+          { qty: 250, unit: "g", name: "făină" },
+          { qty: 200, unit: "g", name: "zahăr" },
+          { qty: 4, unit: "buc", name: "ouă" },
+          { qty: 100, unit: "ml", name: "ulei" },
+          { qty: 100, unit: "ml", name: "lapte" },
+          { qty: 1, unit: "buc", name: "praf de copt" },
+          { qty: 100, unit: "g", name: "stafide (înmuiate în rom)" },
+          { qty: 1, unit: "lingurită", name: "esență de vanilie", textFn: (m) => m <= 0.5 ? "½ lingurită esență de vanilie" : m === 1 ? "1 lingurită esență de vanilie" : `${Math.round(m)} lingurițe esență de vanilie` },
+          { qty: null, unit: "", name: "sare (un vârf de cuțit)", scalable: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: "placinta-branza",
+    name: "Plăcintă cu Brânză și Smântână",
+    icon: "🥧",
+    description: "Plăcintă pufoasă cu brânză sărată și smântână — gustarea ideală de Paște, caldă sau rece.",
+    prepTime: "PT30M",
+    prepLabel: "30 min",
+    cookTime: "PT35M",
+    cookLabel: "35 min",
+    totalTime: "PT1H10M",
+    totalLabel: "~1h 10min",
+    servings: 8,
+    servingsUnit: "porții",
+    calories: 310,
+    difficulty: "Mediu",
+    difficultyColor: "text-yellow-400",
+    tips: [
+      "Brânza telemea e perfectă — sărată natural.",
+      "Foile de plăcintă din comerț merg foarte bine.",
+      "Unge fiecare foaie cu unt topit pentru crustă.",
+    ],
+    baseIngredients: [
+      { qty: 500, unit: "g", name: "foi de plăcintă (sau aluat)" },
+      { qty: 400, unit: "g", name: "brânză telemea (sau urdă)" },
+      { qty: 200, unit: "g", name: "smântână" },
+      { qty: 3, unit: "buc", name: "ouă" },
+      { qty: 80, unit: "g", name: "unt (topit, pentru uns foile)" },
+      { qty: null, unit: "", name: "sare după gust (dacă brânza nu e sărată)", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Preîncălzește cuptorul la 180°C. Unge o tavă rotundă cu unt.", tip: null },
+      { text: "Zdrobește brânza cu furculița. Amestecă cu smântâna și ouăle bătute.", tip: "Gustă amestecul — dacă brânza e sărată, nu mai adăuga sare." },
+      { text: "Întinde o foaie de plăcintă, unge cu unt topit. Suprapune 2-3 foi.", tip: null },
+      { text: "Pune un strat de compoziție, apoi alt strat de foi unse cu unt. Repetă.", tip: null },
+      { text: "Termină cu un strat de foi deasupra. Unge cu unt topit și puțin ou bătut.", tip: null },
+      { text: "Coace 30-35 minute până devine aurie. Servește caldă.", tip: null },
+    ],
+    variants: [
+      { id: "telemea", label: "Cu Telemea" },
+      {
+        id: "urda",
+        label: "Cu Urdă Dulce",
+        baseIngredients: [
+          { qty: 500, unit: "g", name: "foi de plăcintă" },
+          { qty: 400, unit: "g", name: "urdă proaspătă" },
+          { qty: 200, unit: "g", name: "smântână" },
+          { qty: 3, unit: "buc", name: "ouă" },
+          { qty: 80, unit: "g", name: "unt (topit)" },
+          { qty: 50, unit: "g", name: "zahăr" },
+          { qty: 50, unit: "g", name: "stafide" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "strudel-mere",
+    name: "Strudel cu Mere",
+    icon: "🍎",
+    description: "Strudel cu mere, scorțișoară și nucă — desertul aromat și crocant perfect pentru masa de Paște.",
+    prepTime: "PT25M",
+    prepLabel: "25 min",
+    cookTime: "PT35M",
+    cookLabel: "35 min",
+    totalTime: "PT1H",
+    totalLabel: "~1h",
+    servings: 8,
+    servingsUnit: "porții",
+    calories: 250,
+    difficulty: "Mediu",
+    difficultyColor: "text-yellow-400",
+    tips: [
+      "Merele Ionatan sau Granny Smith sunt cele mai bune — acrișoare.",
+      "Pesmetul absoarbe sucul merelor — nu sări peste el.",
+      "Servește cald, cu zahăr pudră presărat deasupra.",
+    ],
+    baseIngredients: [
+      { qty: 1, unit: "buc", name: "pachet foi de plăcintă subțiri" },
+      { qty: 1, unit: "kg", name: "mere (curățate, rase pe răzătoare)" },
+      { qty: 100, unit: "g", name: "zahăr" },
+      { qty: 50, unit: "g", name: "nucă măcinată" },
+      { qty: 50, unit: "g", name: "pesmet (prăjit în unt)" },
+      { qty: 80, unit: "g", name: "unt (topit)" },
+      { qty: 1, unit: "lingurită", name: "scorțișoară", textFn: (m) => m <= 0.5 ? "½ lingurită scorțișoară" : m === 1 ? "1 lingurită scorțișoară" : `${Math.round(m)} lingurițe scorțișoară` },
+      { qty: null, unit: "", name: "zahăr pudră pentru presărat", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Preîncălzește cuptorul la 180°C. Rade merele și stoarce excesul de suc.", tip: "Merele prea ude fac strudelul moale." },
+      { text: "Amestecă merele cu zahărul, nuca, scorțișoara.", tip: null },
+      { text: "Prăjește pesmetul în 20g unt până devine auriu.", tip: null },
+      { text: "Întinde o foaie, unge cu unt topit, presară pesmet. Suprapune 2-3 foi.", tip: null },
+      { text: "Pune compoziția de mere de-a lungul unui capăt. Rulează strâns.", tip: "Îndoaie capetele ca să nu curgă sucul." },
+      { text: "Unge ruloul cu unt topit. Coace 30-35 minute până devine auriu.", tip: null },
+      { text: "Presară zahăr pudră la servire. Se servește cald sau la temperatura camerei.", tip: null },
+    ],
+  },
+  {
+    id: "prajitura-nuca",
+    name: "Prăjitură cu Nucă și Cremă",
+    icon: "🍫",
+    description: "Prăjitură festivă cu blat pufos de nucă și cremă de ciocolată — perfectă pentru masa dulce de Paște.",
+    prepTime: "PT30M",
+    prepLabel: "30 min",
+    cookTime: "PT30M",
+    cookLabel: "30 min",
+    totalTime: "PT1H30M",
+    totalLabel: "~1.5h",
+    servings: 16,
+    servingsUnit: "porții",
+    calories: 340,
+    difficulty: "Mediu",
+    difficultyColor: "text-yellow-400",
+    tips: [
+      "Nuca trebuie măcinată fin — dar nu praf.",
+      "Crema se întinde pe blatul rece — altfel se topește.",
+      "E mai bună a doua zi, după ce crema se întărește.",
+    ],
+    baseIngredients: [
+      { qty: 6, unit: "buc", name: "ouă" },
+      { qty: 200, unit: "g", name: "zahăr" },
+      { qty: 200, unit: "g", name: "nucă măcinată" },
+      { qty: 2, unit: "linguri", name: "făină" },
+      { qty: 1, unit: "buc", name: "praf de copt" },
+    ],
+    filling: [
+      { qty: 200, unit: "g", name: "ciocolată neagră" },
+      { qty: 200, unit: "g", name: "unt moale" },
+      { qty: 100, unit: "g", name: "zahăr pudră" },
+      { qty: 3, unit: "linguri", name: "cacao" },
+      { qty: 3, unit: "linguri", name: "lapte" },
+    ],
+    steps: [
+      { text: "Separă ouăle. Bate albușurile spumă tare cu zahărul.", tip: null },
+      { text: "Adaugă gălbenușurile pe rând, apoi nuca, făina și praful de copt.", tip: "Amestecă ușor, de jos în sus." },
+      { text: "Toarnă în tavă tapetată (30x40cm). Coace la 170°C, 25-30 minute.", tip: null },
+      { text: "Crema: topește ciocolata la bain-marie. Bate untul cu zahărul pudră, adaugă cacaua, laptele și ciocolata topită.", tip: null },
+      { text: "Taie blatul răcit în două pe orizontală. Întinde crema pe un blat, suprapune celălalt.", tip: null },
+      { text: "Decorează cu restul de cremă deasupra. Refrigerează 2 ore.", tip: null },
+    ],
+  },
+  {
+    id: "mici",
+    name: "Mici (Mititei)",
+    icon: "🌭",
+    description: "Mici tradiționali românești, aromatic cu usturoi și cimbru — perfecți la grătar pentru o zi de Paște.",
+    prepTime: "PT20M",
+    prepLabel: "20 min",
+    cookTime: "PT15M",
+    cookLabel: "15 min",
+    totalTime: "PT4H",
+    totalLabel: "~4h (cu odihnă)",
+    servings: 20,
+    servingsUnit: "mici",
+    calories: 200,
+    difficulty: "Mediu",
+    difficultyColor: "text-yellow-400",
+    tips: [
+      "Carnea trebuie obligatoriu lăsată la frigider minim 3 ore.",
+      "Mâinile ude cu apă rece ajută la modelat.",
+      "Nu-i apăsa pe grătar — pierd sucul.",
+    ],
+    baseIngredients: [
+      { qty: 500, unit: "g", name: "carne tocată de vită" },
+      { qty: 250, unit: "g", name: "carne tocată de porc" },
+      { qty: 250, unit: "g", name: "carne tocată de oaie (sau vită)" },
+      { qty: 6, unit: "căței", name: "usturoi (pisat)" },
+      { qty: 1, unit: "lingurită", name: "cimbru uscat", textFn: (m) => m <= 0.5 ? "½ lingurită cimbru" : m === 1 ? "1 lingurită cimbru" : `${Math.round(m)} lingurițe cimbru` },
+      { qty: 1, unit: "lingurită", name: "boia dulce", textFn: (m) => m <= 0.5 ? "½ lingurită boia" : m === 1 ? "1 lingurită boia" : `${Math.round(m)} lingurițe boia` },
+      { qty: 0.5, unit: "lingurită", name: "bicarbonat de sodiu", textFn: (m) => m <= 0.5 ? "un vârf de cuțit bicarbonat" : m === 1 ? "½ lingurită bicarbonat" : `${Math.round(m * 0.5)} lingurițe bicarbonat` },
+      { qty: 100, unit: "ml", name: "apă minerală carbogazoasă" },
+      { qty: null, unit: "", name: "sare și piper după gust", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Amestecă toate tipurile de carne tocată într-un bol mare.", tip: null },
+      { text: "Adaugă usturoiul pisat, cimbrul, boiala, bicarbonatul, sare și piper. Amestecă bine.", tip: null },
+      { text: "Adaugă apa minerală treptat, frământând energic 5-10 minute.", tip: "Carnea trebuie frământată bine — asta dă textura specifică." },
+      { text: "Acoperă cu folie și lasă la frigider minim 3 ore (ideal peste noapte).", tip: null },
+      { text: "Cu mâinile ude, modelează mici de ~8cm lungime.", tip: null },
+      { text: "Pune pe grătarul încins (sau tigaie cu puțin ulei). Gătește 3-4 minute pe fiecare parte.", tip: "Nu-i întoarce prea des — formează crustă." },
+      { text: "Servește fierbinți cu muștar și pâine proaspătă.", tip: null },
+    ],
+  },
+  {
+    id: "salata-vinete",
+    name: "Salată de Vinete",
+    icon: "🍆",
+    description: "Salată de vinete afumate, cremoasă și ușoară — aperitivul de vară perfect și pentru masa de Paște.",
+    prepTime: "PT15M",
+    prepLabel: "15 min",
+    cookTime: "PT40M",
+    cookLabel: "40 min",
+    totalTime: "PT2H",
+    totalLabel: "~2h (cu scurgere)",
+    servings: 6,
+    servingsUnit: "porții",
+    calories: 120,
+    difficulty: "Ușor",
+    difficultyColor: "text-green-400",
+    tips: [
+      "Vinetele coapte pe flacără au cel mai bun gust afumat.",
+      "Scurge-le bine — minim 1 oră — altfel salata e apoasă.",
+      "Taie cu cuțitul de lemn sau ceramic — cel de metal le oxidează.",
+      "Ceapa se pune doar la final, crudă și tocată foarte mărunt.",
+    ],
+    baseIngredients: [
+      { qty: 3, unit: "buc", name: "vinete mari" },
+      { qty: 1, unit: "buc", name: "ceapă mică (tocată fin)" },
+      { qty: 4, unit: "linguri", name: "ulei de floarea-soarelui" },
+      { qty: null, unit: "", name: "sare după gust", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Spală vinetele și înțeapă-le cu furculița. Coace-le pe flacăra aragazului sau la cuptor (200°C, 30-40 min) până coaja se carbonizează.", tip: "Pe flacără directă dau cel mai bun gust afumat." },
+      { text: "Pune vinetele fierbinți într-o strecurătoare, taie-le și lasă-le la scurs minim 1 oră.", tip: "Apăsă ușor cu o farfurie deasupra pentru mai multă scurgere." },
+      { text: "Toacă vinetele cu un cuțit de lemn (sau ceramic) — nu folosi cuțit metalic.", tip: null },
+      { text: "Adaugă uleiul treptat, amestecând ca la maioneză. Adaugă sare.", tip: null },
+      { text: "La servire, adaugă ceapa tocată mărunt deasupra. Servește cu pâine proaspătă.", tip: null },
+    ],
+    variants: [
+      { id: "simpla", label: "Simplă" },
+      {
+        id: "maioneza",
+        label: "Cu Maioneză",
+        baseIngredients: [
+          { qty: 3, unit: "buc", name: "vinete mari" },
+          { qty: 1, unit: "buc", name: "ceapă mică (tocată fin)" },
+          { qty: 3, unit: "linguri", name: "maioneză" },
+          { qty: 2, unit: "linguri", name: "ulei" },
+          { qty: null, unit: "", name: "sare după gust", scalable: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: "paine-casa",
+    name: "Pâine de Casă",
+    icon: "🍞",
+    description: "Pâine de casă cu crustă crocantă și miez pufos — perfectă alături de orice fel de la masa de Paște.",
+    prepTime: "PT20M",
+    prepLabel: "20 min",
+    cookTime: "PT40M",
+    cookLabel: "40 min",
+    totalTime: "PT3H",
+    totalLabel: "~3h (cu dospire)",
+    servings: 1,
+    servingsUnit: "pâine",
+    calories: 250,
+    difficulty: "Mediu",
+    difficultyColor: "text-yellow-400",
+    tips: [
+      "Drojdia proaspătă dă cele mai bune rezultate.",
+      "Aluatul trebuie frământat bine — minim 10 minute.",
+      "Pune un bol cu apă în cuptor — crustă perfectă.",
+    ],
+    baseIngredients: [
+      { qty: 500, unit: "g", name: "făină albă" },
+      { qty: 300, unit: "ml", name: "apă călduță" },
+      { qty: 25, unit: "g", name: "drojdie proaspătă" },
+      { qty: 1, unit: "lingurită", name: "sare", textFn: (m) => m <= 0.5 ? "½ lingurită sare" : m === 1 ? "1 lingurită sare" : `${Math.round(m)} lingurițe sare` },
+      { qty: 1, unit: "lingurită", name: "zahăr", textFn: (m) => m <= 0.5 ? "½ lingurită zahăr" : m === 1 ? "1 lingurită zahăr" : `${Math.round(m)} lingurițe zahăr` },
+      { qty: 2, unit: "linguri", name: "ulei de măsline" },
+    ],
+    filling: [],
+    steps: [
+      { text: "Dizolvă drojdia în apa călduță cu zahărul. Lasă 10 minute până face spumă.", tip: null },
+      { text: "Pune făina cu sarea într-un bol. Adaugă drojdia dizolvată și uleiul.", tip: null },
+      { text: "Frământă 10 minute până aluatul devine elastic și neted.", tip: "Aluatul e gata când nu se mai lipește de mâini." },
+      { text: "Acoperă cu prosop și lasă la dospit 1-1.5 ore (până se dublează).", tip: null },
+      { text: "Modelează o pâine rotundă. Pune pe tavă cu hârtie de copt. Crestează deasupra.", tip: null },
+      { text: "Lasă la dospit încă 30 minute. Preîncălzește cuptorul la 220°C cu un bol de apă.", tip: null },
+      { text: "Coace 35-40 minute. Pâinea e gata când sună gol la bătut pe fund.", tip: null },
+    ],
+  },
+  {
+    id: "salata-orientala",
+    name: "Salată Orientală",
+    icon: "🥚",
+    description: "Salată simplă cu cartofi, ouă fierte și ceapă — garnitura tradițională ușoară de Paște.",
+    prepTime: "PT15M",
+    prepLabel: "15 min",
+    cookTime: "PT25M",
+    cookLabel: "25 min",
+    totalTime: "PT1H",
+    totalLabel: "~1h (cu răcire)",
+    servings: 6,
+    servingsUnit: "porții",
+    calories: 180,
+    difficulty: "Ușor",
+    difficultyColor: "text-green-400",
+    tips: [
+      "Cartofii trebuie fierți al dente — nu prea moi.",
+      "Ceapa crudă se poate înmuia 10 min în apă cu oțet.",
+      "Se servește rece — lasă minim 30 minute la frigider.",
+    ],
+    baseIngredients: [
+      { qty: 600, unit: "g", name: "cartofi" },
+      { qty: 4, unit: "buc", name: "ouă fierte tari" },
+      { qty: 1, unit: "buc", name: "ceapă roșie" },
+      { qty: 100, unit: "g", name: "măsline negre" },
+      { qty: 4, unit: "linguri", name: "ulei de măsline" },
+      { qty: 2, unit: "linguri", name: "oțet de vin" },
+      { qty: null, unit: "", name: "sare, piper și boia dulce", scalable: false },
+      { qty: null, unit: "", name: "pătrunjel proaspăt", scalable: false },
+    ],
+    filling: [],
+    steps: [
+      { text: "Fierbe cartofii în coajă, în apă cu sare, până sunt al dente. Răcește-i.", tip: null },
+      { text: "Fierbe ouăle tari (10 minute). Răcește în apă rece și curăță.", tip: null },
+      { text: "Curăță cartofii și taie-i rondele. Taie ouăle felii.", tip: null },
+      { text: "Aranjează în straturi: cartofi, ouă, ceapă tăiată rondele, măsline.", tip: null },
+      { text: "Stropește cu ulei și oțet. Presară sare, piper, boia.", tip: null },
+      { text: "Decorează cu pătrunjel. Servește rece.", tip: null },
+    ],
+  },
+  {
+    id: "tort-ciocolata",
+    name: "Tort de Ciocolată",
+    icon: "🎂",
+    description: "Tort festiv de ciocolată, cu blat umed și cremă ganache — desertul spectaculos de Paște.",
+    prepTime: "PT30M",
+    prepLabel: "30 min",
+    cookTime: "PT35M",
+    cookLabel: "35 min",
+    totalTime: "PT2H",
+    totalLabel: "~2h",
+    servings: 12,
+    servingsUnit: "porții",
+    calories: 420,
+    difficulty: "Avansat",
+    difficultyColor: "text-red-400",
+    tips: [
+      "Ciocolata de calitate face diferența — minim 55% cacao.",
+      "Blatul se prepară ușor — secretul e să nu-l coci prea mult.",
+      "Crema ganache se face cu smântână fierbinte peste ciocolată — simplu!",
+    ],
+    baseIngredients: [
+      { qty: 200, unit: "g", name: "ciocolată neagră (55%+)" },
+      { qty: 200, unit: "g", name: "unt" },
+      { qty: 200, unit: "g", name: "zahăr" },
+      { qty: 4, unit: "buc", name: "ouă" },
+      { qty: 100, unit: "g", name: "făină" },
+      { qty: 30, unit: "g", name: "cacao" },
+      { qty: 1, unit: "buc", name: "praf de copt" },
+    ],
+    filling: [
+      { qty: 300, unit: "g", name: "ciocolată neagră (pentru ganache)" },
+      { qty: 300, unit: "ml", name: "smântână lichidă (33%)" },
+      { qty: 30, unit: "g", name: "unt" },
+    ],
+    steps: [
+      { text: "Topește ciocolata cu untul la bain-marie. Lasă să se tempereze.", tip: null },
+      { text: "Bate ouăle cu zahărul 5 minute. Adaugă ciocolata topită.", tip: null },
+      { text: "Adaugă făina cernută cu cacaua și praful de copt. Amestecă delicat.", tip: null },
+      { text: "Toarnă în formă rotundă (24cm) tapetată. Coace la 170°C, 30-35 minute.", tip: "Blatul trebuie să rămână ușor umed la mijloc." },
+      { text: "Ganache: încălzește smântâna. Toarnă peste ciocolata ruptă bucăți. Amestecă. Adaugă untul.", tip: null },
+      { text: "Lasă ganache-ul 1 oră la frigider. Taie blatul în 2. Întinde cremă între blaturi și pe exterior.", tip: null },
+      { text: "Decorează cu fructe, bomboane sau ciocolată rasă. Refrigerează 2 ore.", tip: null },
     ],
   },
 ];
@@ -384,11 +1159,10 @@ const RecipeCard = ({ recipe, onClick, index }) => (
   <motion.button
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: index * 0.08 }}
+    transition={{ duration: 0.4, delay: index * 0.05 }}
     onClick={onClick}
     className="w-full text-left rounded-2xl border border-white/[0.06] hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98] relative"
   >
-    {/* Gradient accent top */}
     <div className={`h-1.5 w-full ${
       recipe.difficulty === "Ușor" ? "bg-gradient-to-r from-green-600 to-green-400"
         : recipe.difficulty === "Mediu" ? "bg-gradient-to-r from-amber-600 to-yellow-400"
@@ -436,7 +1210,6 @@ const formatQuantity = (qty, unit, multiplier) => {
   if (qty === null || qty === undefined) return { display: "", unit: "" };
   const raw = qty * multiplier;
 
-  // kg ↔ g conversion
   if (unit === "kg") {
     const grams = raw * 1000;
     if (grams < 1000) return { display: Math.round(grams), unit: "g" };
@@ -448,8 +1221,6 @@ const formatQuantity = (qty, unit, multiplier) => {
     if (grams >= 1000 && grams % 100 === 0) return { display: grams / 1000, unit: "kg" };
     return { display: Math.round(grams), unit: "g" };
   }
-
-  // l ↔ ml conversion
   if (unit === "l") {
     const ml = raw * 1000;
     if (ml < 1000) return { display: Math.round(ml), unit: "ml" };
@@ -462,30 +1233,23 @@ const formatQuantity = (qty, unit, multiplier) => {
     return { display: Math.round(ml), unit: "ml" };
   }
 
-  // linguri, buc, etc — round to nearest 0.5
   if (unit === "buc" || unit === "căței" || unit === "ramuri" || unit === "linguri" || unit === "lingură" || unit === "lingurită" || unit === "legătură") {
     const rounded = Math.round(raw * 2) / 2;
     return { display: rounded, unit };
   }
 
-  // Pass through
   const val = Math.round(raw * 10) / 10;
   return { display: val, unit };
 };
 
 // ─── Render one ingredient line ────────────────────────────────────────────
 const formatIngredient = (ing, multiplier) => {
-  // Non-scalable items show as-is (sare, piper etc)
   if (ing.scalable === false && !ing.textFn) {
     return { qtyText: "", nameText: ing.name, isDescriptive: true };
   }
-
-  // Custom text function (for descriptive items like "coajă de lămâie")
   if (ing.textFn) {
     return { qtyText: "", nameText: ing.textFn(multiplier), isDescriptive: true };
   }
-
-  // Standard scalable ingredient
   const fmt = formatQuantity(ing.qty, ing.unit, multiplier);
   if (fmt.display === "") return { qtyText: "", nameText: ing.name, isDescriptive: true };
   return { qtyText: `${fmt.display} ${fmt.unit}`, nameText: ing.name, isDescriptive: false };
@@ -545,11 +1309,10 @@ const StepByStep = ({ steps, recipeId, tips }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header + progress */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-black text-white flex items-center gap-2">
-            👨‍🍳 Pași de Preparare
+            Pași de Preparare
           </h3>
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-gray-500">{checked.length}/{steps.length} pași</span>
@@ -561,7 +1324,6 @@ const StepByStep = ({ steps, recipeId, tips }) => {
           </div>
         </div>
 
-        {/* Progress bar */}
         <div className="relative h-2 bg-white/[0.06] rounded-full overflow-hidden">
           <motion.div
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-600 to-amber-500 rounded-full"
@@ -572,15 +1334,12 @@ const StepByStep = ({ steps, recipeId, tips }) => {
         </div>
       </div>
 
-      {/* Hint */}
       <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5 -mt-2">
         <span className="inline-flex w-5 h-5 rounded-full border border-white/[0.15] items-center justify-center text-[10px] text-gray-500">1</span>
         Apasă pe un pas pentru a-l bifa ca terminat
       </p>
 
-      {/* Steps timeline */}
       <div className="relative">
-        {/* Vertical line */}
         <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-white/[0.06]" />
 
         <div className="space-y-3">
@@ -598,12 +1357,9 @@ const StepByStep = ({ steps, recipeId, tips }) => {
                 <button
                   onClick={() => toggle(idx)}
                   className={`w-full text-left flex items-start gap-3 p-3 pl-1 rounded-xl transition-all ${
-                    isDone
-                      ? "bg-green-900/10"
-                      : "hover:bg-white/[0.02]"
+                    isDone ? "bg-green-900/10" : "hover:bg-white/[0.02]"
                   }`}
                 >
-                  {/* Step number circle */}
                   <span className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-black transition-all ${
                     isDone
                       ? "bg-green-600 border-green-500 text-white shadow-lg shadow-green-900/30"
@@ -619,7 +1375,6 @@ const StepByStep = ({ steps, recipeId, tips }) => {
                       {stepData.text}
                     </span>
 
-                    {/* Inline tip */}
                     {stepData.tip && !isDone && (
                       <span className="mt-1.5 flex items-start gap-1.5 text-xs md:text-sm text-amber-400/70 bg-amber-900/10 px-2.5 py-1.5 rounded-lg border border-amber-900/15">
                         <span className="flex-shrink-0">💡</span>
@@ -634,7 +1389,6 @@ const StepByStep = ({ steps, recipeId, tips }) => {
         </div>
       </div>
 
-      {/* Completion celebration */}
       {progress === 100 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -647,7 +1401,6 @@ const StepByStep = ({ steps, recipeId, tips }) => {
         </motion.div>
       )}
 
-      {/* Tips section */}
       {tips && tips.length > 0 && (
         <div className="bg-amber-900/10 border border-amber-900/15 rounded-2xl p-5 space-y-3">
           <h4 className="text-sm font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
@@ -670,8 +1423,21 @@ const StepByStep = ({ steps, recipeId, tips }) => {
 // ─── Recipe Detail View ─────────────────────────────────────────────────────
 const RecipeDetail = ({ recipe, onBack }) => {
   const [servingsInput, setServingsInput] = useState(String(recipe.servings));
+  const [activeVariant, setActiveVariant] = useState(0);
   const targetServings = Math.max(1, parseInt(servingsInput) || recipe.servings);
   const multiplier = targetServings / recipe.servings;
+
+  // Get active variant data
+  const variant = recipe.variants?.[activeVariant];
+  const isDefaultVariant = !variant || activeVariant === 0;
+  const currentIngredients = (!isDefaultVariant && variant?.baseIngredients) ? variant.baseIngredients : recipe.baseIngredients;
+  const currentFilling = (!isDefaultVariant && variant?.filling) ? variant.filling : recipe.filling;
+  const currentSteps = recipe.steps.map((step, idx) => {
+    if (!isDefaultVariant && variant?.stepsOverride?.[idx]) {
+      return variant.stepsOverride[idx];
+    }
+    return step;
+  });
 
   const handleServingsChange = (e) => {
     const val = e.target.value.replace(/[^0-9]/g, "");
@@ -723,7 +1489,26 @@ const RecipeDetail = ({ recipe, onBack }) => {
         </div>
       </div>
 
-      {/* Stats row — scrollable on mobile */}
+      {/* Variant selector */}
+      {recipe.variants && recipe.variants.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+          {recipe.variants.map((v, i) => (
+            <button
+              key={v.id}
+              onClick={() => setActiveVariant(i)}
+              className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all active:scale-95 border ${
+                activeVariant === i
+                  ? "bg-red-700 text-white border-red-700 shadow-lg shadow-red-900/30"
+                  : "bg-white/[0.04] text-gray-400 border-white/[0.06] hover:border-red-900/30 hover:text-gray-200"
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Stats row */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
         {[
           { icon: "⏱️", label: "Prep", value: recipe.prepLabel },
@@ -740,7 +1525,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
         ))}
       </div>
 
-      {/* Ingredients section with free-form servings */}
+      {/* Ingredients section */}
       <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
         <div className="flex items-center justify-between gap-3 mb-5">
           <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2 flex-shrink-0">
@@ -760,7 +1545,8 @@ const RecipeDetail = ({ recipe, onBack }) => {
                 inputMode="numeric"
                 value={servingsInput}
                 onChange={handleServingsChange}
-                className="w-8 text-center bg-transparent text-white font-black text-base outline-none"
+                className="w-10 text-center font-black text-base outline-none border-none servings-input"
+                style={{ background: 'transparent' }}
                 maxLength={3}
               />
               <span className="text-[10px] text-gray-500 font-bold whitespace-nowrap">{recipe.servingsUnit}</span>
@@ -780,17 +1566,17 @@ const RecipeDetail = ({ recipe, onBack }) => {
           </p>
         )}
 
-        <IngredientList ingredients={recipe.baseIngredients} multiplier={multiplier} />
-        {recipe.filling.length > 0 && (
+        <IngredientList ingredients={currentIngredients} multiplier={multiplier} />
+        {currentFilling && currentFilling.length > 0 && (
           <div className="mt-6 pt-6 border-t border-white/[0.06]">
-            <IngredientList ingredients={recipe.filling} multiplier={multiplier} title="Umplutură" />
+            <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" />
           </div>
         )}
       </div>
 
       {/* Steps */}
       <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
-        <StepByStep steps={recipe.steps} recipeId={recipe.id} tips={recipe.tips} />
+        <StepByStep steps={currentSteps} recipeId={`${recipe.id}-${recipe.variants?.[activeVariant]?.id || 'default'}`} tips={recipe.tips} />
       </div>
     </motion.div>
   );
@@ -802,7 +1588,6 @@ export default function RetetePage() {
 
   const year = new Date().getFullYear();
 
-  // Recipe Schema for all recipes
   const recipeSchemas = retete.map(r => ({
     "@context": "https://schema.org",
     "@type": "Recipe",
@@ -822,7 +1607,7 @@ export default function RetetePage() {
     },
     "recipeIngredient": [
       ...r.baseIngredients.map(i => i.textFn ? i.textFn(1) : `${i.qty || ""} ${i.unit} ${i.name}`.trim()),
-      ...r.filling.map(i => `${i.qty} ${i.unit} ${i.name}`.trim()),
+      ...(r.filling || []).map(i => `${i.qty} ${i.unit} ${i.name}`.trim()),
     ],
     "recipeInstructions": r.steps.map((step, idx) => ({
       "@type": "HowToStep",
@@ -856,7 +1641,7 @@ export default function RetetePage() {
               <RecipeDetail
                 key={selectedRecipe.id}
                 recipe={selectedRecipe}
-                onBack={() => setSelectedRecipe(null)}
+                onBack={() => { setSelectedRecipe(null); window.scrollTo({ top: 0, behavior: 'instant' }); }}
               />
             ) : (
               <motion.div
@@ -871,7 +1656,7 @@ export default function RetetePage() {
                     Rețete de <span className="text-red-500">Paște {year}</span>
                   </h1>
                   <p className="text-gray-400 font-bold text-sm md:text-base max-w-lg mx-auto">
-                    8 rețete tradiționale ale mesei festive. Pas cu pas, cu sfaturi și cantități ajustabile.
+                    {retete.length} rețete tradiționale cu variante, pas cu pas, cu sfaturi și cantități ajustabile.
                   </p>
                 </header>
 
@@ -881,7 +1666,7 @@ export default function RetetePage() {
                       key={recipe.id}
                       recipe={recipe}
                       index={i}
-                      onClick={() => setSelectedRecipe(recipe)}
+                      onClick={() => { setSelectedRecipe(recipe); window.scrollTo({ top: 0, behavior: 'instant' }); }}
                     />
                   ))}
                 </div>

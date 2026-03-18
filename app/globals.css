@@ -576,6 +576,12 @@
     border-color: rgba(0, 0, 0, 0.12) !important;
     color: #1a1111 !important;
   }
+  html.light input.servings-input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #1a1111 !important;
+  }
   html.light input::placeholder,
   html.light textarea::placeholder {
     color: rgba(0, 0, 0, 0.35) !important;
