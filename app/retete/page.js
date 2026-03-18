@@ -475,39 +475,41 @@ const formatQuantity = (qty, unit, multiplier) => {
 
 // ─── Render one ingredient line ────────────────────────────────────────────
 const formatIngredient = (ing, multiplier) => {
-  // Non-scalable items show as-is
+  // Non-scalable items show as-is (sare, piper etc)
   if (ing.scalable === false && !ing.textFn) {
-    return { qtyText: "", nameText: ing.name };
+    return { qtyText: "", nameText: ing.name, isDescriptive: true };
   }
 
   // Custom text function (for descriptive items like "coajă de lămâie")
   if (ing.textFn) {
-    return { qtyText: "", nameText: ing.textFn(multiplier) };
+    return { qtyText: "", nameText: ing.textFn(multiplier), isDescriptive: true };
   }
 
   // Standard scalable ingredient
   const fmt = formatQuantity(ing.qty, ing.unit, multiplier);
-  if (fmt.display === "") return { qtyText: "", nameText: ing.name };
-  return { qtyText: `${fmt.display} ${fmt.unit}`, nameText: ing.name };
+  if (fmt.display === "") return { qtyText: "", nameText: ing.name, isDescriptive: true };
+  return { qtyText: `${fmt.display} ${fmt.unit}`, nameText: ing.name, isDescriptive: false };
 };
 
 // ─── Interactive Ingredient List ────────────────────────────────────────────
 const IngredientList = ({ ingredients, multiplier, title }) => {
   if (!ingredients || ingredients.length === 0) return null;
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       {title && <h4 className="text-sm font-bold uppercase tracking-widest text-red-400 mb-3">{title}</h4>}
       {ingredients.map((ing, i) => {
-        const { qtyText, nameText } = formatIngredient(ing, multiplier);
+        const { qtyText, nameText, isDescriptive } = formatIngredient(ing, multiplier);
         return (
-          <div key={i} className="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0 group/ing hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
-            <span className="w-2 h-2 rounded-full bg-red-500/40 flex-shrink-0" />
-            {qtyText && (
-              <span className="text-red-400 font-black text-sm min-w-[80px] text-right tabular-nums">
-                {qtyText}
-              </span>
+          <div key={i} className="flex items-baseline gap-2 py-2 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500/40 flex-shrink-0 relative top-[-1px]" />
+            {isDescriptive ? (
+              <span className="text-gray-200 text-sm md:text-base font-medium">{nameText}</span>
+            ) : (
+              <>
+                <span className="text-red-400 font-black text-sm tabular-nums whitespace-nowrap">{qtyText}</span>
+                <span className="text-gray-200 text-sm md:text-base font-medium">{nameText}</span>
+              </>
             )}
-            <span className="text-gray-200 text-base font-medium">{nameText}</span>
           </div>
         );
       })}
@@ -570,10 +572,16 @@ const StepByStep = ({ steps, recipeId, tips }) => {
         </div>
       </div>
 
+      {/* Hint */}
+      <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5 -mt-2">
+        <span className="inline-flex w-5 h-5 rounded-full border border-white/[0.15] items-center justify-center text-[10px] text-gray-500">1</span>
+        Apasă pe un pas pentru a-l bifa ca terminat
+      </p>
+
       {/* Steps timeline */}
       <div className="relative">
         {/* Vertical line */}
-        <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-white/[0.06]" />
+        <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-white/[0.06]" />
 
         <div className="space-y-3">
           {steps.map((step, idx) => {
@@ -589,23 +597,23 @@ const StepByStep = ({ steps, recipeId, tips }) => {
               >
                 <button
                   onClick={() => toggle(idx)}
-                  className={`w-full text-left flex items-start gap-4 p-4 pl-2 rounded-xl transition-all ${
+                  className={`w-full text-left flex items-start gap-3 p-3 pl-1 rounded-xl transition-all ${
                     isDone
                       ? "bg-green-900/10"
                       : "hover:bg-white/[0.02]"
                   }`}
                 >
                   {/* Step number circle */}
-                  <span className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-black transition-all ${
+                  <span className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-black transition-all ${
                     isDone
                       ? "bg-green-600 border-green-500 text-white shadow-lg shadow-green-900/30"
-                      : "bg-[#141111] border-white/[0.15] text-gray-400 group-hover:border-red-900/30"
+                      : "bg-[#141111] border-white/[0.15] text-gray-400"
                   }`}>
                     {isDone ? "✓" : idx + 1}
                   </span>
 
-                  <div className="flex-1 min-w-0 pt-1.5">
-                    <span className={`text-base font-medium leading-relaxed block transition-all ${
+                  <div className="flex-1 min-w-0 pt-1">
+                    <span className={`text-sm md:text-base font-medium leading-relaxed block transition-all ${
                       isDone ? "text-gray-500 line-through decoration-green-600/50" : "text-gray-200"
                     }`}>
                       {stepData.text}
@@ -613,8 +621,8 @@ const StepByStep = ({ steps, recipeId, tips }) => {
 
                     {/* Inline tip */}
                     {stepData.tip && !isDone && (
-                      <span className="mt-2 flex items-start gap-2 text-sm text-amber-400/70 bg-amber-900/10 px-3 py-2 rounded-lg border border-amber-900/15">
-                        <span className="flex-shrink-0 mt-0.5">💡</span>
+                      <span className="mt-1.5 flex items-start gap-1.5 text-xs md:text-sm text-amber-400/70 bg-amber-900/10 px-2.5 py-1.5 rounded-lg border border-amber-900/15">
+                        <span className="flex-shrink-0">💡</span>
                         <span>{stepData.tip}</span>
                       </span>
                     )}
@@ -693,14 +701,14 @@ const RecipeDetail = ({ recipe, onBack }) => {
       </button>
 
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-6 md:p-8">
-        <div className="absolute top-4 right-4 text-7xl opacity-15 select-none">{recipe.icon}</div>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-5 md:p-8">
+        <div className="absolute top-3 right-3 text-6xl md:text-7xl opacity-15 select-none">{recipe.icon}</div>
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-16 h-16 rounded-2xl bg-white/[0.08] flex items-center justify-center text-5xl">
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/[0.08] flex items-center justify-center text-3xl md:text-5xl">
               {recipe.icon}
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
               recipe.difficulty === "Ușor"
                 ? "bg-green-900/20 text-green-400 border-green-900/30"
                 : recipe.difficulty === "Mediu"
@@ -710,56 +718,56 @@ const RecipeDetail = ({ recipe, onBack }) => {
               {recipe.difficulty}
             </span>
           </div>
-          <h1 className="text-2xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
-          <p className="text-gray-400 mt-2 max-w-xl leading-relaxed text-sm md:text-base">{recipe.description}</p>
+          <h1 className="text-xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
+          <p className="text-gray-400 mt-1.5 leading-relaxed text-sm">{recipe.description}</p>
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+      {/* Stats row — scrollable on mobile */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
         {[
-          { icon: "⏱️", label: "Preparare", value: recipe.prepLabel },
+          { icon: "⏱️", label: "Prep", value: recipe.prepLabel },
           { icon: "🔥", label: "Gătire", value: recipe.cookLabel },
           { icon: "⏳", label: "Total", value: recipe.totalLabel },
           { icon: "🍽️", label: "Porții", value: `${targetServings} ${recipe.servingsUnit}` },
           { icon: "💪", label: "Calorii", value: `${recipe.calories} kcal` },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-3 text-center">
-            <span className="text-lg block">{stat.icon}</span>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">{stat.label}</p>
-            <p className="text-sm font-bold text-white">{stat.value}</p>
+          <div key={stat.label} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-center flex-shrink-0 min-w-[80px]">
+            <span className="text-base block">{stat.icon}</span>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-500 mt-0.5">{stat.label}</p>
+            <p className="text-xs font-bold text-white whitespace-nowrap">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Ingredients section with free-form servings */}
-      <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h3 className="text-lg font-black text-white flex items-center gap-2">
+      <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2 flex-shrink-0">
             🥄 Ingrediente
           </h3>
-          <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
+          <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06] flex-shrink-0">
             <button
               onClick={() => adjustServings(-1)}
               disabled={targetServings <= 1}
-              className="w-9 h-9 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-lg hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-8 h-8 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-base hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
             >
               −
             </button>
-            <div className="flex items-center gap-1 px-1">
+            <div className="flex items-center gap-0.5 px-0.5">
               <input
                 type="text"
                 inputMode="numeric"
                 value={servingsInput}
                 onChange={handleServingsChange}
-                className="w-10 text-center bg-transparent text-white font-black text-lg outline-none"
+                className="w-8 text-center bg-transparent text-white font-black text-base outline-none"
                 maxLength={3}
               />
-              <span className="text-[11px] text-gray-500 font-bold whitespace-nowrap">{recipe.servingsUnit}</span>
+              <span className="text-[10px] text-gray-500 font-bold whitespace-nowrap">{recipe.servingsUnit}</span>
             </div>
             <button
               onClick={() => adjustServings(1)}
-              className="w-9 h-9 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-lg hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center"
+              className="w-8 h-8 rounded-lg bg-red-900/20 border border-red-900/30 text-red-400 font-black text-base hover:bg-red-900/40 transition-all active:scale-90 flex items-center justify-center"
             >
               +
             </button>
@@ -781,7 +789,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
       </div>
 
       {/* Steps */}
-      <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-6">
+      <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
         <StepByStep steps={recipe.steps} recipeId={recipe.id} tips={recipe.tips} />
       </div>
     </motion.div>

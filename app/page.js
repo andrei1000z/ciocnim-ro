@@ -549,6 +549,13 @@ function HomeContent() {
     if (nume && !hasInitializedName) { setLocalNume(nume); setHasInitializedName(true); }
   }, [nume, hasInitializedName]);
 
+  // PWA install prompt
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); window.deferredPrompt = e; };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
   useEffect(() => {
     if (searchParams.get("error") === "ocupata") {
       setToastMsg("Camera este ocupată! Încearcă alt cod.");
@@ -893,6 +900,25 @@ function HomeContent() {
         >
           <span className="text-xl">📲</span>
           <span className="font-black text-red-400 text-sm">Trimite jocul prietenilor</span>
+        </button>
+      </motion.div>
+
+      {/* INSTALEAZĂ */}
+      <motion.div {...fadeUp(0.27)}>
+        <button
+          onClick={() => {
+            if (window.deferredPrompt) {
+              window.deferredPrompt.prompt();
+              window.deferredPrompt.userChoice.then(() => { window.deferredPrompt = null; });
+            } else {
+              setToastMsg("Meniu browser → Adaugă pe ecranul principal");
+              setTimeout(() => setToastMsg(""), 4000);
+            }
+          }}
+          className="w-full py-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
+        >
+          <span className="text-lg">📲</span>
+          <span className="font-bold text-gray-300 text-sm">Instalează aplicația</span>
         </button>
       </motion.div>
 
