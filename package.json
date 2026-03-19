@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@upstash/redis": "^1.36.3",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.34.4",
     "ioredis": "^5.10.0",

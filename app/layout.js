@@ -125,11 +125,7 @@ export default function RootLayout({ children }) {
       "price": "0",
       "priceCurrency": "RON"
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "1000"
-    }
+    "inLanguage": "ro"
   };
 
   return (
@@ -140,7 +136,7 @@ export default function RootLayout({ children }) {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name=" apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('c_theme')==='dark')document.documentElement.classList.remove('light');else document.documentElement.classList.add('light')}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('c_theme')==='dark')document.documentElement.classList.remove('light');else document.documentElement.classList.add('light')}catch(e){};if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}` }} />
         <Script
           id="schema-main"
           type="application/ld+json"

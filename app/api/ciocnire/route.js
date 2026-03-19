@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Pusher from 'pusher';
 import redis from '@/app/lib/redis';
+import { esteNumeInterzis as esteNumeInterzisShared } from '@/app/lib/profanityFilter';
 
 /**
  * ====================================================================================================
@@ -13,8 +14,8 @@ const pusher = new Pusher({
   key: process.env.NEXT_PUBLIC_PUSHER_KEY,
   secret: process.env.PUSHER_SECRET,
   host: process.env.PUSHER_HOST || '161.35.201.178',
-  port: parseInt(process.env.PUSHER_PORT || '6001'),
-  useTLS: false,
+  port: parseInt(process.env.PUSHER_PORT || '6443'),
+  useTLS: true,
 });
 
 async function getClasamentRegiuni() {
@@ -42,10 +43,8 @@ async function getClasamentJucatori() {
 // Protejăm numele sistemului
 const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
 
-// Filtru poreclă
-const CUVINTE_INTERZISE_SERVER = ['pula','pule','pulica','pulete','pulamea','pularie','pizda','pizdi','pizdica','muie','muist','muista','sugi','sugipula','sugio','fut','fute','futut','fututi','futuma','coaie','coaiele','cur','curu','curul','morti','mortii','cacat','labagiu'];
-function _norm(s) { return s.toLowerCase().replace(/@/g,'a').replace(/0/g,'o').replace(/1/g,'i').replace(/7/g,'t').replace(/9/g,'g').replace(/[_\-\s\.]/g,''); }
-function esteNumeInterzisServer(name) { const n=_norm(name); const nv=n.replace(/v/g,'u'); const noo=nv.replace(/oo/g,'u'); return CUVINTE_INTERZISE_SERVER.some(w=>n.includes(w)||nv.includes(w)||noo.includes(w)); }
+// Filtru poreclă (shared)
+const esteNumeInterzisServer = esteNumeInterzisShared;
 
 // SISTEM DE ACHIEVEMENT-URI
 const ACHIEVEMENTS = {
@@ -215,19 +214,25 @@ export async function POST(request) {
           redis.get('global_ciocniri_total'),
           getClasamentRegiuni(),
           getClasamentJucatori(),
-          redis.zremrangebyscore('arena:online', 0, now - 20000),
+          redis.zremrangebyscore('arena:online', 0, now - 35000),
           redis.zcard('arena:online')
         ]);
         return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori, online: onlineCount });
       }
 
       case 'increment-global': {
+        // Rate limit: max 1 request per 2s per player
+        if (jucator) {
+          const rlKey = `ratelimit:${jucator.toUpperCase()}`;
+          const rlSet = await redis.set(rlKey, '1', 'EX', 2, 'NX');
+          if (!rlSet) {
+            return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
+          }
+        }
+
         const pipeline = redis.pipeline();
-        // Aici se contorizează DOAR faptul că a avut loc o lovitură globală pe site
         pipeline.incr('global_ciocniri_total');
-        
-        // Când frontend-ul trimite "jucator", înseamnă că ACEL jucător a CÂȘTIGAT meciul. Punct.
-        // Serverul face doar +1, nu mai acceptă un număr precalculat din front-end care să o ia razna.
+
         if (jucator) {
             const safeName = jucator.toUpperCase();
 
@@ -246,6 +251,9 @@ export async function POST(request) {
         }
 
         const safeName = jucator ? jucator.toUpperCase() : null;
+
+        // Trim leaderboard to max 100 entries (remove everything below rank 100)
+        pipeline.zremrangebyrank('leaderboard_jucatori', 0, -101);
 
         // Runda 1: pipeline (scrieri) + leaderboard reads + user stats — toate în paralel
         const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([
@@ -426,7 +434,15 @@ export async function POST(request) {
         if (!teamId) return NextResponse.json({ success: false, error: "Lipsește ID" });
         const teamName = await redis.get(`team:${teamId}:nume`);
         if (!teamName) return NextResponse.json({ success: false, error: "Grup inexistent" });
-        
+
+        // Refresh TTL on access (30 days)
+        const TEAM_TTL_REFRESH = 60 * 60 * 24 * 30;
+        await Promise.all([
+          redis.expire(`team:${teamId}:nume`, TEAM_TTL_REFRESH),
+          redis.expire(`team:${teamId}:stats`, TEAM_TTL_REFRESH),
+          redis.expire(`team:${teamId}:membri`, TEAM_TTL_REFRESH),
+        ]);
+
         const teamStats = await redis.hgetall(`team:${teamId}:stats`);
         
         // Dacă jucătorul a intrat pe link-ul de grup, îi forțăm scorul pe 0 (nu aducem cel global)
@@ -453,14 +469,17 @@ export async function POST(request) {
         const newId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const cleanCreator = creator.toUpperCase();
         const finalTeamName = `GRUPUL LUI ${cleanCreator}`;
-        
+        const TEAM_TTL = 60 * 60 * 24 * 30; // 30 days
+
         const pipeline = redis.pipeline();
         pipeline.set(`team:${newId}:nume`, finalTeamName);
+        pipeline.expire(`team:${newId}:nume`, TEAM_TTL);
         pipeline.hset(`team:${newId}:stats`, { creator: cleanCreator, victorii: 0, creat_la: Date.now() });
-        // Scorul pornește de la ZERO curat
-        pipeline.zadd(`team:${newId}:membri`, 0, cleanCreator); 
+        pipeline.expire(`team:${newId}:stats`, TEAM_TTL);
+        pipeline.zadd(`team:${newId}:membri`, 0, cleanCreator);
+        pipeline.expire(`team:${newId}:membri`, TEAM_TTL);
         await pipeline.exec();
-        
+
         return NextResponse.json({ success: true, teamId: newId });
       }
 
@@ -488,17 +507,21 @@ export async function POST(request) {
 
       case 'arena-matchmaking': {
         const now = Date.now();
-        // Curăță intrările vechi (>12s) din coadă
-        await redis.zremrangebyscore('arena:queue', 0, now - 12000);
-        // Încearcă să găsească o cameră care așteaptă
-        const waiting = await redis.zpopmin('arena:queue', 1);
-        if (waiting && waiting.length >= 1) {
-          const foundRoom = waiting[0];
-          return NextResponse.json({ success: true, roomId: foundRoom, isHost: false });
-        }
-        // Nu e nimeni — creăm camera și așteptăm
         const newRoomId = `arena-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-        await redis.zadd('arena:queue', now, newRoomId);
+        // Atomic matchmaking via Lua script — prevents race conditions
+        const luaScript = `
+          redis.call('zremrangebyscore', KEYS[1], 0, ARGV[1])
+          local waiting = redis.call('zpopmin', KEYS[1], 1)
+          if waiting and #waiting >= 2 then
+            return waiting[1]
+          end
+          redis.call('zadd', KEYS[1], ARGV[2], ARGV[3])
+          return nil
+        `;
+        const result = await redis.eval(luaScript, 1, 'arena:queue', now - 12000, now, newRoomId);
+        if (result) {
+          return NextResponse.json({ success: true, roomId: result, isHost: false });
+        }
         return NextResponse.json({ success: true, roomId: newRoomId, isHost: true });
       }
 
@@ -513,7 +536,7 @@ export async function POST(request) {
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zadd('arena:online', now, visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 20000);
+        pipeline.zremrangebyscore('arena:online', 0, now - 35000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
@@ -527,7 +550,7 @@ export async function POST(request) {
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zrem('arena:online', visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 20000);
+        pipeline.zremrangebyscore('arena:online', 0, now - 35000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
@@ -536,16 +559,35 @@ export async function POST(request) {
       }
 
       case 'reset-all': {
-        // Wipe all game data from Redis
+        // Two-step confirmation: first call returns a token, second call with token executes
         const secret = sanitizeStr(body.secret, 50);
         if (secret !== process.env.ADMIN_SECRET) {
           return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
         }
-        const allKeys = await redis.keys('*');
-        if (allKeys.length > 0) {
-          await redis.del(...allKeys);
+        const confirmToken = sanitizeStr(body.confirmToken, 64);
+        if (!confirmToken) {
+          // Step 1: generate a one-time confirmation token (expires in 30s)
+          const token = Math.random().toString(36).substring(2, 18);
+          await redis.setex('admin:reset-token', 30, token);
+          return NextResponse.json({ success: true, step: 'confirm', confirmToken: token, message: 'Send this token back as confirmToken to proceed.' });
         }
-        return NextResponse.json({ success: true, deleted: allKeys.length });
+        // Step 2: verify token and execute
+        const storedToken = await redis.get('admin:reset-token');
+        if (!storedToken || storedToken !== confirmToken) {
+          return NextResponse.json({ success: false, error: "Token invalid or expired. Start over." }, { status: 400 });
+        }
+        await redis.del('admin:reset-token');
+        // Only delete game-related keys, not everything
+        const prefixes = ['global_ciocniri_total', 'leaderboard_*', 'team:*', 'user:*', 'arena:*', 'room:*', 'nume_rezervat:*'];
+        let deleted = 0;
+        for (const prefix of prefixes) {
+          const keys = await redis.keys(prefix);
+          if (keys.length > 0) {
+            await redis.del(...keys);
+            deleted += keys.length;
+          }
+        }
+        return NextResponse.json({ success: true, deleted });
       }
 
       case 'creeaza-camera-privata': {

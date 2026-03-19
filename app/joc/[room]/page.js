@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 function safeCopy(text) {
   try {
     if (navigator.clipboard && window.isSecureContext) {
-      safeCopy(text).catch(() => {});
+      navigator.clipboard.writeText(text).catch(() => {});
     } else {
       const ta = document.createElement('textarea');
       ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
@@ -89,7 +89,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
   }), []);
 
   const current = skins[skinId] || skins.red;
-  const uid = useMemo(() => Math.random().toString(36).substring(2, 7), []);
+  const uid = React.useId().replace(/:/g, '');
 
   const renderPattern = () => {
     const c = current.patternColor;
@@ -841,11 +841,46 @@ function ArenaMaster({ room }) {
               >
                 {/* Share Result Button */}
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     const text = rezultat.win
                       ? `Am câștigat la ciocnit ouă pe Ciocnim.ro! 🏆🥚 Am ${userStats.wins || 0} victorii. Hai să ne ciocnim!`
                       : `M-am luptat cinstit la ciocnit ouă pe Ciocnim.ro! 🥚💥 Hai la revanșă!`;
                     const url = 'https://ciocnim.ro';
+                    // Try to generate and share an image card
+                    try {
+                      const canvas = document.createElement('canvas');
+                      const ctx = canvas.getContext('2d');
+                      canvas.width = 1080; canvas.height = 1080;
+                      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                      if (rezultat.win) {
+                        grad.addColorStop(0, '#002810'); grad.addColorStop(1, '#0c0a0a');
+                      } else {
+                        grad.addColorStop(0, '#280808'); grad.addColorStop(1, '#0c0a0a');
+                      }
+                      ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                      ctx.strokeStyle = rezultat.win ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)';
+                      ctx.lineWidth = 3; ctx.strokeRect(40, 40, 1000, 1000);
+                      ctx.font = '120px serif'; ctx.textAlign = 'center';
+                      ctx.fillText(rezultat.win ? '👑' : '🥚', 540, 300);
+                      ctx.fillStyle = rezultat.win ? '#22c55e' : '#ef4444';
+                      ctx.font = 'bold 72px sans-serif';
+                      ctx.fillText(rezultat.win ? 'VICTORIE!' : 'Oul s-a spart', 540, 450);
+                      ctx.fillStyle = '#e5e5e5'; ctx.font = '36px sans-serif';
+                      ctx.fillText(nume || 'Jucător', 540, 550);
+                      ctx.fillStyle = '#9ca3af'; ctx.font = '28px sans-serif';
+                      ctx.fillText(`${userStats.wins || 0} victorii`, 540, 620);
+                      ctx.fillStyle = 'rgba(220,38,38,0.6)'; ctx.font = 'bold 32px sans-serif';
+                      ctx.fillText('ciocnim.ro', 540, 950);
+                      const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+                      if (blob && navigator.share && navigator.canShare) {
+                        const file = new File([blob], 'rezultat-ciocnim.png', { type: 'image/png' });
+                        if (navigator.canShare({ files: [file] })) {
+                          await navigator.share({ files: [file], title: 'Ciocnim.ro', text });
+                          return;
+                        }
+                      }
+                    } catch {}
+                    // Fallback to text share
                     if (navigator.share) {
                       navigator.share({ title: 'Ciocnim.ro', text, url }).catch(() => {});
                     } else {

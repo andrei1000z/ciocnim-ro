@@ -232,7 +232,7 @@ export default function ClientWrapper({ children }) {
     };
     // Trimite heartbeat instant la montare
     sendHeartbeat();
-    const interval = setInterval(sendHeartbeat, 10000);
+    const interval = setInterval(sendHeartbeat, 25000);
 
     // Când user-ul revine pe tab → heartbeat instant (actualizare imediată)
     const onVisibility = () => { if (document.visibilityState === 'visible') sendHeartbeat(); };
@@ -296,7 +296,7 @@ export default function ClientWrapper({ children }) {
     channel.bind('duel-request', (data) => {
       setNotificare({ deLa: data.deLa, roomId: data.roomId, teamId: data.teamId || null });
       triggerVibrate([100, 50, 100, 50, 200]);
-      playSound('hit');
+      playSound('esec');
       if (notifTimer) clearTimeout(notifTimer);
       notifTimer = setTimeout(() => setNotificare(null), 20000);
     });
