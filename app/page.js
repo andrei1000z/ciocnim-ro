@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { createPortal } from "react-dom";
-import Pusher from "pusher-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalStats } from "./components/ClientWrapper";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,7 +51,7 @@ const SectionLabel = ({ children }) => (
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, onlineCount } = useGlobalStats();
+  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, onlineCount, pusherRef } = useGlobalStats();
 
   const [loadedTeams, setLoadedTeams] = useState([]);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -63,14 +62,32 @@ function HomeContent() {
   const [hasInitializedName, setHasInitializedName] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinModalNume, setJoinModalNume] = useState("");
-  const [toastMsg, setToastMsg] = useState("");
+  const [toastMsg, setToastMsgRaw] = useState("");
+  const toastTimer = useRef(null);
+  const setToastMsg = useCallback((msg) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastMsgRaw(msg);
+    if (msg) toastTimer.current = setTimeout(() => setToastMsgRaw(""), 3500);
+  }, []);
   const [numeError, setNumeError] = useState("");
   const [isJoiningArena, setIsJoiningArena] = useState(false);
-  const teamPusherRef = useRef(null);
+  const [confirmDialog, setConfirmDialog] = useState(null);
+  const [achievements, setAchievements] = useState([]);
 
   useEffect(() => {
     if (nume && !hasInitializedName) { setLocalNume(nume); setHasInitializedName(true); }
   }, [nume, hasInitializedName]);
+
+  useEffect(() => {
+    if (!nume || nume.length < 3) { setAchievements([]); return; }
+    (async () => {
+      try {
+        const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-achievements", jucator: nume }) });
+        const d = await r.json();
+        if (d.success) setAchievements(d.achievements || []);
+      } catch {}
+    })();
+  }, [nume]);
 
   // PWA install prompt
   useEffect(() => {
@@ -83,10 +100,8 @@ function HomeContent() {
     if (searchParams.get("error") === "ocupata") {
       setToastMsg("Camera este ocupată! Încearcă alt cod.");
       router.replace("/");
-      const t = setTimeout(() => setToastMsg(""), 4000);
-      return () => clearTimeout(t);
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, setToastMsg]);
 
   const safeGetLS = (k) => { try { return typeof window !== 'undefined' ? localStorage.getItem(k) : null; } catch { return null; } };
   const safeSetLS = (k, v) => { try { if (typeof window !== 'undefined') localStorage.setItem(k, v); } catch {} };
@@ -106,24 +121,11 @@ function HomeContent() {
 
   const teamIds = loadedTeams.map(t => t.details.id).join(",");
   useEffect(() => {
-    if (!isHydrated || !teamIds) return;
-
-    if (!teamPusherRef.current) {
-      const _forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
-      const _wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
-      teamPusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-        cluster: 'eu',
-        wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
-        wsPort: _wsPort,
-        wssPort: _wsPort,
-        forceTLS: _forceTLS,
-        disableStats: true,
-        enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
-      });
-    }
+    if (!isHydrated || !teamIds || !pusherRef?.current) return;
+    const pusher = pusherRef.current;
 
     const channels = teamIds.split(",").map(tid => {
-      const ch = teamPusherRef.current.subscribe(`team-${tid}`);
+      const ch = pusher.subscribe(`team-${tid}`);
       ch.bind("team-update", async () => {
         try {
           const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) });
@@ -139,12 +141,10 @@ function HomeContent() {
     return () => {
       channels.forEach(({ tid, ch }) => {
         ch.unbind_all();
-        teamPusherRef.current?.unsubscribe(`team-${tid}`);
+        pusher.unsubscribe(`team-${tid}`);
       });
-      teamPusherRef.current?.disconnect();
-      teamPusherRef.current = null;
     };
-  }, [isHydrated, teamIds, nume]);
+  }, [isHydrated, teamIds, nume, pusherRef]);
 
   const handleSaveNume = async () => {
     const final = localNume.trim().toUpperCase();
@@ -188,6 +188,7 @@ function HomeContent() {
   const handleJoinModalSubmit = async () => {
     const final = joinModalNume.trim().toUpperCase();
     if (final.length < 3) return;
+    if (esteNumeInterzis(final)) { setToastMsg("Ai chef de glume? Alege alt nume"); return; }
     setIsSavingName(true);
     const ok = await setNume(final);
     setIsSavingName(false);
@@ -195,18 +196,18 @@ function HomeContent() {
   };
 
   const handleArena = async () => {
-    if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!");
+    if (!nume || nume.length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; }
     triggerVibrate(); setIsJoiningArena(true);
     try {
       const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-matchmaking' }) });
       const data = await res.json();
       if (data.success) router.push(`/joc/${data.roomId}?host=${data.isHost}&skin=${userStats.skin || 'red'}`);
-    } catch { alert("Eroare de rețea!"); }
+    } catch { setToastMsg("Eroare de rețea!"); }
     finally { setIsJoiningArena(false); }
   };
 
   const handleCreateTeam = async () => {
-    if (!nume || nume.trim().length < 3) return alert("Pune-ți o poreclă mai întâi!");
+    if (!nume || nume.trim().length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; }
     setLoadingTeam(true); triggerVibrate();
     try {
       const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "creeaza-echipa", creator: nume }) });
@@ -216,32 +217,35 @@ function HomeContent() {
         setLoadedTeams(prev => [...prev, { details: { id: d.teamId, nume: `GRUPUL LUI ${nume.toUpperCase().trim()}` }, top: [{ member: nume.toUpperCase().trim(), score: 0 }] }]);
         setActiveTeamIndex(loadedTeams.length);
       }
-    } catch { alert("Eroare la creare grup."); }
+    } catch { setToastMsg("Eroare la creare grup."); }
     finally { setLoadingTeam(false); }
   };
 
   const handleRenameTeam = async (teamId, nouNume) => {
-    if (nouNume.length < 3) return alert("Nume prea scurt.");
+    if (nouNume.length < 3) { setToastMsg("Nume prea scurt."); return; }
     triggerVibrate();
     setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, details: { ...t.details, nume: nouNume.toUpperCase().trim() } } : t));
     fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "redenumeste-echipa", teamId, newName: nouNume, jucator: nume }) });
   };
 
+  const showConfirm = (message, onYes) => setConfirmDialog({ message, onYes });
+
   const handleLeaveTeam = (teamId) => {
-    if (confirm("Ești sigur că vrei să părăsești grupul?")) {
+    showConfirm("Ești sigur că vrei să părăsești grupul?", () => {
       removeStoredTeamId(teamId);
       setLoadedTeams(prev => prev.filter(t => t.details.id !== teamId));
       setActiveTeamIndex(0);
-    }
+    });
   };
 
   const handleKickMember = async (member, teamId) => {
-    if (!confirm(`Ești sigur că vrei să-l elimini pe ${member} din grup?`)) return;
-    triggerVibrate();
-    try {
-      await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume }) });
-      setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, top: t.top.filter(m => m.member !== member) } : t));
-    } catch { alert("Eroare la eliminare."); }
+    showConfirm(`Ești sigur că vrei să-l elimini pe ${member} din grup?`, async () => {
+      triggerVibrate();
+      try {
+        await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume }) });
+        setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, top: t.top.filter(m => m.member !== member) } : t));
+      } catch { setToastMsg("Eroare la eliminare."); }
+    });
   };
 
   const handleProvocare = async (oponent, teamId) => {
@@ -365,11 +369,31 @@ function HomeContent() {
         </div>
       </motion.div>
 
+      {/* ACHIEVEMENTS */}
+      {achievements.length > 0 && (
+        <motion.div {...fadeUp(0.11)}>
+          <SectionLabel>Achievement-uri</SectionLabel>
+          <div className="rounded-2xl border border-amber-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
+            <div className="flex flex-wrap gap-2">
+              {achievements.map(a => (
+                <div key={a.key} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-900/15 border border-amber-700/20" title={a.desc}>
+                  <span className="text-base">{a.icon}</span>
+                  <span className="text-[11px] font-bold text-amber-300">{a.name}</span>
+                </div>
+              ))}
+            </div>
+            <Link href="/profil" className="block text-center text-[10px] font-bold text-amber-500/50 hover:text-amber-400 mt-3 transition-colors">
+              Vezi toate achievement-urile →
+            </Link>
+          </div>
+        </motion.div>
+      )}
+
       {/* JOACĂ */}
       <motion.div {...fadeUp(0.13)}>
         <SectionLabel>Joacă</SectionLabel>
         <div className="space-y-2">
-          <ActionButton icon="🥚" title="Ciocnește cu un Prieten" subtitle="Trimite-i codul și gata!" onClick={() => { if (!nume || nume.length < 3) return alert("Pune-ți o poreclă mai întâi!"); triggerVibrate(); setIsPlayModalOpen(true); }} />
+          <ActionButton icon="🥚" title="Ciocnește cu un Prieten" subtitle="Trimite-i codul și gata!" onClick={() => { if (!nume || nume.length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; } triggerVibrate(); setIsPlayModalOpen(true); }} />
           <ActionButton icon="🌍" title="Ciocnește cu Concetățenii" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
           <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup de Ciocnit"} subtitle="Invită familia și prietenii" onClick={handleCreateTeam} loading={loadingTeam} />
         </div>
@@ -422,7 +446,6 @@ function HomeContent() {
             } else {
               safeCopy(`${text}\nhttps://ciocnim.ro`);
               setToastMsg("Link copiat! Trimite-l prietenilor.");
-              setTimeout(() => setToastMsg(""), 3000);
             }
           }}
           className="w-full py-4 rounded-2xl border-2 border-dashed border-red-900/30 bg-red-900/10 hover:bg-red-900/20 hover:border-red-800/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
@@ -441,12 +464,11 @@ function HomeContent() {
               window.deferredPrompt.userChoice.then(() => { window.deferredPrompt = null; });
             } else {
               setToastMsg("Meniu browser → Adaugă pe ecranul principal");
-              setTimeout(() => setToastMsg(""), 4000);
             }
           }}
           className="w-full py-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
         >
-          <span className="text-lg">📲</span>
+          <span className="text-lg">📥</span>
           <span className="font-bold text-gray-300 text-sm">Instalează aplicația</span>
         </button>
       </motion.div>
@@ -455,7 +477,7 @@ function HomeContent() {
       <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
         <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
         <div className="flex items-center justify-center gap-4">
-          <button onClick={() => { safeCopy("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); setTimeout(() => setToastMsg(""), 3000); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
+          <button onClick={() => { safeCopy("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
           <span className="text-gray-200 text-xs">·</span>
           <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație</button>
         </div>
@@ -470,6 +492,28 @@ function HomeContent() {
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-red-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl whitespace-nowrap"
           >
             {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {confirmDialog && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99998] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setConfirmDialog(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#141111] rounded-2xl border border-red-900/20 p-6 max-w-xs w-full shadow-2xl text-center"
+              onClick={e => e.stopPropagation()}
+            >
+              <p className="text-sm font-bold text-gray-200 mb-5">{confirmDialog.message}</p>
+              <div className="flex gap-3">
+                <button onClick={() => setConfirmDialog(null)} className="flex-1 py-3 rounded-xl bg-white/[0.06] text-gray-400 font-bold text-sm hover:bg-white/[0.1] transition-all">Nu</button>
+                <button onClick={() => { setConfirmDialog(null); confirmDialog.onYes(); }} className="flex-1 py-3 rounded-xl bg-red-700 text-white font-bold text-sm hover:bg-red-800 transition-all">Da</button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -382,7 +382,8 @@ export default function ClientWrapper({ children }) {
     playSound, triggerVibrate, incrementGlobal, isHydrated,
     updateStats,
     onlineCount,
-    toastMsg, setToastMsg
+    toastMsg, setToastMsg,
+    pusherRef
   };
 
   return (
