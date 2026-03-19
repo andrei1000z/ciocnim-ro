@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
-
-// ─── Safe localStorage ──────────────────────────────────────────────────────
-const safeLS = {
-  get: (key) => { try { return typeof window !== "undefined" ? localStorage.getItem(key) : null; } catch { return null; } },
-  set: (key, val) => { try { if (typeof window !== "undefined") localStorage.setItem(key, val); } catch {} },
-};
+import { safeLS, safeCopy } from "@/app/lib/utils";
 
 // ─── Recipe Data ────────────────────────────────────────────────────────────
 // `scalable: false` → ingredient text stays the same regardless of portion
@@ -1282,7 +1278,7 @@ const IngredientList = ({ ingredients, multiplier, title }) => {
 };
 
 // ─── Step-by-Step with Beautiful Design ─────────────────────────────────────
-const StepByStep = ({ steps, recipeId, tips }) => {
+const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
   const storageKey = `c_recipe_${recipeId}`;
   const [checked, setChecked] = useState(() => {
     const saved = safeLS.get(storageKey);
@@ -1311,27 +1307,18 @@ const StepByStep = ({ steps, recipeId, tips }) => {
     <div className="space-y-6">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-black text-white flex items-center gap-2">
-            Pași de Preparare
-          </h3>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-500">{checked.length}/{steps.length} pași</span>
-            {checked.length > 0 && (
-              <button onClick={resetAll} className="text-xs text-gray-500 hover:text-red-400 transition-colors font-bold underline underline-offset-2">
-                Resetează
-              </button>
-            )}
+            <h3 className={`font-black text-white flex items-center gap-2 ${kitchenMode ? "text-3xl md:text-4xl" : "text-lg"}`}>
+              Pași de Preparare
+            </h3>
+            <div className="flex items-center gap-3">
+              <span className={`font-bold text-gray-500 ${kitchenMode ? "text-lg" : "text-xs"}`}>{checked.length}/{steps.length} pași</span>
+              {checked.length > 0 && (
+                <button onClick={resetAll} className={`text-gray-500 hover:text-red-400 transition-colors font-bold underline underline-offset-2 ${kitchenMode ? "text-lg" : "text-xs"}`}>
+                  Resetează
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="relative h-2 bg-white/[0.06] rounded-full overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-600 to-amber-500 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          />
-        </div>
       </div>
 
       <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5 -mt-2">
@@ -1369,14 +1356,14 @@ const StepByStep = ({ steps, recipeId, tips }) => {
                   </span>
 
                   <div className="flex-1 min-w-0 pt-1">
-                    <span className={`text-sm md:text-base font-medium leading-relaxed block transition-all ${
+                    <span className={`font-medium leading-relaxed block transition-all ${
                       isDone ? "text-gray-500 line-through decoration-green-600/50" : "text-gray-200"
-                    }`}>
+                    } ${kitchenMode ? "text-xl md:text-2xl" : "text-sm md:text-base"}`}>
                       {stepData.text}
                     </span>
 
                     {stepData.tip && !isDone && (
-                      <span className="mt-1.5 flex items-start gap-1.5 text-xs md:text-sm text-amber-400/70 bg-amber-900/10 px-2.5 py-1.5 rounded-lg border border-amber-900/15">
+                      <span className={`mt-1.5 flex items-start gap-1.5 text-amber-400/70 bg-amber-900/10 px-2.5 py-1.5 rounded-lg border border-amber-900/15 ${kitchenMode ? "text-lg md:text-lg" : "text-xs md:text-sm"}`}>
                         <span className="flex-shrink-0">💡</span>
                         <span>{stepData.tip}</span>
                       </span>
@@ -1424,6 +1411,8 @@ const StepByStep = ({ steps, recipeId, tips }) => {
 const RecipeDetail = ({ recipe, onBack }) => {
   const [servingsInput, setServingsInput] = useState(String(recipe.servings));
   const [activeVariant, setActiveVariant] = useState(0);
+  const [kitchenMode, setKitchenMode] = useState(false);
+  const [copiedFeedback, setCopiedFeedback] = useState("");
   const targetServings = Math.max(1, parseInt(servingsInput) || recipe.servings);
   const multiplier = targetServings / recipe.servings;
 
@@ -1438,6 +1427,54 @@ const RecipeDetail = ({ recipe, onBack }) => {
     }
     return step;
   });
+
+  const handleCopyIngredients = () => {
+    const formatIngredient = (ing) => {
+      if (ing.scalable === false) {
+        return { qtyText: "", nameText: ing.name };
+      }
+      const mult = multiplier;
+      let qtyText = "";
+      if (ing.qty !== null && ing.qty !== undefined) {
+        const scaled = ing.qty * mult;
+        qtyText = scaled % 1 === 0 ? String(scaled) : scaled.toFixed(2);
+      }
+      const nameText = ing.textFn ? ing.textFn(mult) : ing.name;
+      return { qtyText, nameText };
+    };
+
+    const all = [...currentIngredients, ...(currentFilling || [])];
+    const ingredientsList = all
+      .map(ing => {
+        const { qtyText, nameText } = formatIngredient(ing);
+        return qtyText ? `• ${qtyText} ${ing.unit} ${nameText}` : `• ${nameText}`;
+      })
+      .join("\n");
+
+    const text = `*Ingrediente pentru ${targetServings} ${recipe.servingsUnit} — ${recipe.name}*\n\n${ingredientsList}`;
+    safeCopy(text);
+    setCopiedFeedback("✅ Copiat!");
+    setTimeout(() => setCopiedFeedback(""), 2000);
+  };
+
+  const handleShareRecipe = () => {
+    const text = `${recipe.name}\n${recipe.description}\nhttps://ciocnim.ro/retete?r=${recipe.id}`;
+    if (navigator.share) {
+      navigator.share({
+        title: recipe.name,
+        text: recipe.description,
+        url: `https://ciocnim.ro/retete?r=${recipe.id}`,
+      }).catch(() => {
+        safeCopy(text);
+        setCopiedFeedback("Linkul rețetei a fost copiat!");
+        setTimeout(() => setCopiedFeedback(""), 2000);
+      });
+    } else {
+      safeCopy(text);
+      setCopiedFeedback("Linkul rețetei a fost copiat!");
+      setTimeout(() => setCopiedFeedback(""), 2000);
+    }
+  };
 
   const handleServingsChange = (e) => {
     const val = e.target.value.replace(/[^0-9]/g, "");
@@ -1456,37 +1493,57 @@ const RecipeDetail = ({ recipe, onBack }) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className={`space-y-6 rounded-2xl transition-colors duration-300 ${kitchenMode ? "bg-[#1a1515] p-4 md:p-6" : ""}`}
     >
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors font-bold text-sm active:scale-95"
-      >
-        ← Înapoi la rețete
-      </button>
+      {/* Back button and Share button */}
+      <div className="flex gap-3 items-center flex-wrap">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors font-bold text-sm active:scale-95"
+        >
+          ← Înapoi la rețete
+        </button>
+        <button
+          onClick={handleShareRecipe}
+          className="flex items-center gap-2 text-gray-400 hover:text-amber-400 transition-colors font-bold text-sm active:scale-95"
+        >
+          📲 Distribuie rețeta
+        </button>
+      </div>
 
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-5 md:p-8">
-        <div className="absolute top-3 right-3 text-6xl md:text-7xl opacity-15 select-none">{recipe.icon}</div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5 mb-2">
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/[0.08] flex items-center justify-center text-3xl md:text-5xl">
-              {recipe.icon}
+      {/* Header with Kitchen Mode Toggle */}
+      <div className="flex justify-between items-start gap-4">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-5 md:p-8 flex-1">
+          <div className="absolute top-3 right-3 text-6xl md:text-7xl opacity-15 select-none">{recipe.icon}</div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/[0.08] flex items-center justify-center text-3xl md:text-5xl">
+                {recipe.icon}
+              </div>
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+                recipe.difficulty === "Ușor"
+                  ? "bg-green-900/20 text-green-400 border-green-900/30"
+                  : recipe.difficulty === "Mediu"
+                    ? "bg-yellow-900/20 text-yellow-400 border-yellow-900/30"
+                    : "bg-red-900/20 text-red-400 border-red-900/30"
+              }`}>
+                {recipe.difficulty}
+              </span>
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-              recipe.difficulty === "Ușor"
-                ? "bg-green-900/20 text-green-400 border-green-900/30"
-                : recipe.difficulty === "Mediu"
-                  ? "bg-yellow-900/20 text-yellow-400 border-yellow-900/30"
-                  : "bg-red-900/20 text-red-400 border-red-900/30"
-            }`}>
-              {recipe.difficulty}
-            </span>
+            <h1 className="text-xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
+            <p className="text-gray-400 mt-1.5 leading-relaxed text-sm">{recipe.description}</p>
           </div>
-          <h1 className="text-xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
-          <p className="text-gray-400 mt-1.5 leading-relaxed text-sm">{recipe.description}</p>
         </div>
+        <button
+          onClick={() => setKitchenMode(!kitchenMode)}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap flex-shrink-0 ${
+            kitchenMode
+              ? "bg-amber-900/30 text-amber-400 border-amber-700/40 shadow-lg shadow-amber-900/20"
+              : "bg-white/[0.05] text-gray-400 border-white/[0.1] hover:bg-white/[0.08] hover:text-gray-300"
+          }`}
+        >
+          {kitchenMode ? "👨‍🍳" : "👁️"} Bucătărie
+        </button>
       </div>
 
       {/* Variant selector */}
@@ -1515,7 +1572,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
           { icon: "🔥", label: "Gătire", value: recipe.cookLabel },
           { icon: "⏳", label: "Total", value: recipe.totalLabel },
           { icon: "🍽️", label: "Porții", value: `${targetServings} ${recipe.servingsUnit}` },
-          { icon: "💪", label: "Calorii", value: `${recipe.calories} kcal` },
+          { icon: "💪", label: "Calorii", value: `${Math.round(recipe.calories * multiplier)} kcal` },
         ].map((stat) => (
           <div key={stat.label} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-center flex-shrink-0 min-w-[80px]">
             <span className="text-base block">{stat.icon}</span>
@@ -1528,9 +1585,21 @@ const RecipeDetail = ({ recipe, onBack }) => {
       {/* Ingredients section */}
       <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
         <div className="flex items-center justify-between gap-3 mb-5">
-          <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2 flex-shrink-0">
-            🥄 Ingrediente
-          </h3>
+          <div className="flex-1">
+            <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2 mb-2">
+              🥄 Ingrediente
+            </h3>
+            <button
+              onClick={handleCopyIngredients}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 ${
+                copiedFeedback === "✅ Copiat!"
+                  ? "bg-green-900/30 text-green-400 border border-green-700/40"
+                  : "bg-red-900/20 text-red-400 border border-red-900/30 hover:bg-red-900/30"
+              }`}
+            >
+              {copiedFeedback || "📋 Copiază lista"}
+            </button>
+          </div>
           <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06] flex-shrink-0">
             <button
               onClick={() => adjustServings(-1)}
@@ -1576,17 +1645,29 @@ const RecipeDetail = ({ recipe, onBack }) => {
 
       {/* Steps */}
       <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
-        <StepByStep steps={currentSteps} recipeId={`${recipe.id}-${recipe.variants?.[activeVariant]?.id || 'default'}`} tips={recipe.tips} />
+        <StepByStep steps={currentSteps} recipeId={`${recipe.id}-${recipe.variants?.[activeVariant]?.id || 'default'}`} tips={recipe.tips} kitchenMode={kitchenMode} />
       </div>
     </motion.div>
   );
 };
 
 // ─── Main Retete Page ───────────────────────────────────────────────────────
-export default function RetetePage() {
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
+function RetePageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedId = searchParams.get("r");
+  const selectedRecipe = retete.find(r => r.id === selectedId) || null;
+  
+  const [filterDiff, setFilterDiff] = useState("toate");
+  const [search, setSearch] = useState("");
 
   const year = new Date().getFullYear();
+
+  const filteredRetete = retete.filter(r => {
+    const matchDiff = filterDiff === "toate" || r.difficulty === filterDiff;
+    const matchSearch = search === "" || r.name.toLowerCase().includes(search.toLowerCase()) || r.description.toLowerCase().includes(search.toLowerCase());
+    return matchDiff && matchSearch;
+  });
 
   const recipeSchemas = retete.map(r => ({
     "@context": "https://schema.org",
@@ -1641,7 +1722,10 @@ export default function RetetePage() {
               <RecipeDetail
                 key={selectedRecipe.id}
                 recipe={selectedRecipe}
-                onBack={() => { setSelectedRecipe(null); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+                onBack={() => { 
+                  router.push('/retete', { scroll: false }); 
+                  window.scrollTo({ top: 0, behavior: 'instant' }); 
+                }}
               />
             ) : (
               <motion.div
@@ -1660,15 +1744,56 @@ export default function RetetePage() {
                   </p>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {retete.map((recipe, i) => (
-                    <RecipeCard
-                      key={recipe.id}
-                      recipe={recipe}
-                      index={i}
-                      onClick={() => { setSelectedRecipe(recipe); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                    />
+                {/* Search input */}
+                <div className="max-w-md mx-auto w-full">
+                  <input
+                    type="text"
+                    placeholder="Caută rețetă..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-white/[0.1] bg-white/[0.04] text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.08] transition-all text-sm"
+                  />
+                </div>
+
+                {/* Difficulty filters */}
+                <div className="flex gap-2 justify-center flex-wrap">
+                  {["toate", "Ușor", "Mediu", "Avansat"].map((diff) => (
+                    <button
+                      key={diff}
+                      onClick={() => setFilterDiff(diff)}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all active:scale-95 border ${
+                        filterDiff === diff
+                          ? "bg-red-700 text-white border-red-700 shadow-lg shadow-red-900/30"
+                          : "bg-white/[0.04] text-gray-400 border-white/[0.06] hover:border-red-900/30 hover:text-gray-200"
+                      }`}
+                    >
+                      {diff === "toate" ? "Toate" : diff}
+                    </button>
                   ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredRetete.length > 0 ? (
+                    filteredRetete.map((recipe, i) => (
+                      <RecipeCard
+                        key={recipe.id}
+                        recipe={recipe}
+                        index={i}
+                        onClick={() => { 
+                          router.push(`/retete?r=${recipe.id}`, { scroll: false }); 
+                          window.scrollTo({ top: 0, behavior: 'instant' }); 
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="col-span-full text-center py-12"
+                    >
+                      <p className="text-gray-400 font-bold text-lg">Niciuna rețetă găsită. Încearcă alt termen de căutare.</p>
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="text-center">
@@ -1682,5 +1807,13 @@ export default function RetetePage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function RetetePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0c0a0a]" />}>
+      <RetePageContent />
+    </Suspense>
   );
 }

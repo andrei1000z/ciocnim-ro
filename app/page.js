@@ -13,6 +13,7 @@ import { ColorSelector, RegionSelector } from "./components/ProfileSection";
 import PlayModal from "./components/PlayModal";
 import EasterCountdown from "./components/EasterCountdown";
 import { safeCopy } from "./lib/utils";
+import { getNextEaster } from "./lib/easterUtils";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18, filter: "blur(6px)" },
@@ -288,7 +289,7 @@ function HomeContent() {
 
         <div className="flex items-center justify-center gap-3 mt-1.5">
           <div className="h-px w-8 bg-gradient-to-r from-transparent to-red-500/30" />
-          <p className="text-[10px] font-black text-red-500/25 uppercase tracking-[0.5em]">Paști 2026</p>
+          <p className="text-[10px] font-black text-red-500/25 uppercase tracking-[0.5em]">Paști {getNextEaster().getFullYear()}</p>
           <div className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/30" />
         </div>
 
@@ -424,7 +425,7 @@ function HomeContent() {
       {/* TRADIȚII (includes /retete link - issue #12) */}
       <motion.div {...fadeUp(0.22)}>
         <SectionLabel>Tradiții & Ghiduri</SectionLabel>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-1.5 xs:gap-2">
           {[
             { href: "/traditii", icon: "📖", text: "Reguli" },
             { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
@@ -433,9 +434,9 @@ function HomeContent() {
             { href: "/urari", icon: "🕊️", text: "Urări" },
           ].map((item, i) => (
             <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 + i * 0.05 }}>
-              <Link href={item.href} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg">
-                <span className="text-2xl">{item.icon}</span>
-                <span className="font-bold text-[11px] text-gray-400 group-hover:text-white transition-colors">{item.text}</span>
+              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg">
+                <span className="text-lg sm:text-2xl">{item.icon}</span>
+                <span className="font-bold text-[9px] sm:text-[11px] text-gray-400 group-hover:text-white transition-colors text-center">{item.text}</span>
               </Link>
             </motion.div>
           ))}

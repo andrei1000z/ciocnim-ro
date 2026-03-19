@@ -225,7 +225,8 @@ export default function ClientWrapper({ children }) {
         actiune: 'increment-global', 
         jucator: amCastigat ? nume : null, // Dacă nu a câștigat, nu trimitem numele ca să nu i se pună victorie
         regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
-        teamId: amCastigat ? teamIdToUpdate : null // Trimitem ID-ul grupului curent ca să îi crească scorul acolo
+        teamId: amCastigat ? teamIdToUpdate : null, // Trimitem ID-ul grupului curent ca să îi crească scorul acolo
+        esteCastigator: amCastigat
       };
 
       const res = await fetch('/api/ciocnire', {
