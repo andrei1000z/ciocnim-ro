@@ -519,8 +519,7 @@
     background-color: rgba(245, 158, 11, 0.06) !important;
   }
 
-  /* Text colors */
-  html.light :not(.bg-red-700):not(.bg-red-800):not(.bg-red-600):not(.bg-green-600):not(.bg-green-700) > [class="text-white"],
+  /* Text colors — [class~=] matches word-boundary so catches "text-white" in multi-class attrs */
   html.light [class~="text-white"]:not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-amber"]) {
     color: #111111 !important;
   }
@@ -583,9 +582,6 @@
   html.light [class*="bg-white/[0.05]"],
   html.light [class*="bg-white/[0.08]"] {
     background-color: rgba(0, 0, 0, 0.04) !important;
-  }
-  html.light [class*="hover\\:bg-white/"] {
-    background-color: rgba(0, 0, 0, 0.06) !important;
   }
 
   /* Inputs */
@@ -660,6 +656,25 @@
   html.light [class*="bg-[#141111]"][class*="rounded-3xl"] {
     background-color: #ffffff !important;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Toast & achievement toast — need visible bg in light mode */
+  html.light [class*="bg-[#1a1515]"][class*="z-[1100]"] {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    color: #1a1111 !important;
+  }
+  html.light [class*="from-amber-900/90"][class*="to-red-900/90"] {
+    background: linear-gradient(to bottom right, rgba(245, 158, 11, 0.12), rgba(220, 38, 38, 0.10)) !important;
+    border-color: rgba(220, 38, 38, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.1) !important;
+  }
+
+  /* Arena victory modal — keep dark overlay, lighten card */
+  html.light [class*="bg-[#111]"][class*="rounded-[2.5rem]"] {
+    background-color: #ffffff !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2) !important;
   }
 
   /* ==========================================================================

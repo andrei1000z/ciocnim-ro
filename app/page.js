@@ -377,10 +377,10 @@ function HomeContent() {
       </motion.div>
 
       {/* ACHIEVEMENTS */}
-      {achievements.length > 0 && (
-        <motion.div {...fadeUp(0.11)}>
-          <SectionLabel>Achievement-uri</SectionLabel>
-          <div className="rounded-2xl border border-amber-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
+      <motion.div {...fadeUp(0.11)}>
+        <SectionLabel>Achievement-uri</SectionLabel>
+        <div className="rounded-2xl border border-amber-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
+          {achievements.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {achievements.map(a => (
                 <div key={a.key} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-900/15 border border-amber-700/20" title={a.desc}>
@@ -389,12 +389,14 @@ function HomeContent() {
                 </div>
               ))}
             </div>
-            <Link href="/profil" className="block text-center text-[10px] font-bold text-amber-500/50 hover:text-amber-400 mt-3 transition-colors">
-              Vezi toate achievement-urile →
-            </Link>
-          </div>
-        </motion.div>
-      )}
+          ) : (
+            <p className="text-[11px] text-gray-500 text-center">Niciun achievement încă. Joacă pentru a debloca!</p>
+          )}
+          <Link href="/profil" className="block text-center text-[10px] font-bold text-amber-500/50 hover:text-amber-400 mt-3 transition-colors">
+            Vezi toate achievement-urile →
+          </Link>
+        </div>
+      </motion.div>
 
       {/* JOACĂ */}
       <motion.div {...fadeUp(0.13)}>
@@ -425,7 +427,7 @@ function HomeContent() {
       {/* TRADIȚII (includes /retete link - issue #12) */}
       <motion.div {...fadeUp(0.22)}>
         <SectionLabel>Tradiții & Ghiduri</SectionLabel>
-        <div className="grid grid-cols-5 gap-1.5 xs:gap-2">
+        <div className="flex gap-1.5 xs:gap-2 overflow-x-auto scrollbar-hide">
           {[
             { href: "/traditii", icon: "📖", text: "Reguli" },
             { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
@@ -434,7 +436,7 @@ function HomeContent() {
             { href: "/urari", icon: "🕊️", text: "Urări" },
           ].map((item, i) => (
             <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 + i * 0.05 }}>
-              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg">
+              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[56px] flex-1">
                 <span className="text-lg sm:text-2xl">{item.icon}</span>
                 <span className="font-bold text-[9px] sm:text-[11px] text-gray-400 group-hover:text-white transition-colors text-center">{item.text}</span>
               </Link>
