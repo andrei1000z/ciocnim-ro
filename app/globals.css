@@ -481,11 +481,28 @@
     border-color: rgba(0, 0, 0, 0.06) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
   }
+  html.light [class*="bg-[#0c0a0a]"],
+  html.light [class*="bg-[#0e0c0c]"],
+  html.light [class*="bg-[#111]"],
+  html.light [class*="bg-[#1a1515]"] {
+    background-color: #faf8f5 !important;
+  }
+  html.light [class*="bg-[#141111]"][class*="rounded"] {
+    background-color: #ffffff !important;
+  }
 
   /* Cards & surfaces with dark bg */
   html.light [class*="bg-white/[0.0"] {
     background-color: rgba(255, 255, 255, 0.85) !important;
     border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+  html.light [class*="bg-white/[0.1"],
+  html.light [class*="bg-white/[0.2"],
+  html.light [class*="bg-white/[0.3"],
+  html.light [class*="bg-white/[0.4"],
+  html.light [class*="bg-white/[0.5"] {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 0, 0, 0.10) !important;
   }
 
   /* Red accent surfaces */
@@ -503,21 +520,27 @@
   }
 
   /* Text colors */
-  html.light [class*="text-white"] {
+  html.light :not(.bg-red-700):not(.bg-red-800):not(.bg-red-600):not(.bg-green-600):not(.bg-green-700) > [class="text-white"],
+  html.light [class~="text-white"]:not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-amber"]) {
+    color: #111111 !important;
+  }
+  html.light h1, html.light h2, html.light h3 {
+    color: #111111 !important;
+  }
+  html.light [class*="font-black"]:not([class*="text-red"]):not([class*="text-green"]):not([class*="text-amber"]) {
     color: #1a1111 !important;
   }
-  html.light [class*="text-gray-200"] {
-    color: #2a2020 !important;
-  }
-  html.light [class*="text-gray-300"] {
-    color: #3d3030 !important;
-  }
-  html.light [class*="text-gray-400"] {
-    color: #6b5c52 !important;
-  }
-  html.light [class*="text-gray-500"] {
-    color: #8a7a6e !important;
-  }
+  html.light [class*="text-white/3"] { color: rgba(26,17,17,0.30) !important; }
+  html.light [class*="text-white/4"] { color: rgba(26,17,17,0.40) !important; }
+  html.light [class*="text-white/5"] { color: rgba(26,17,17,0.50) !important; }
+  html.light [class*="text-white/6"] { color: rgba(26,17,17,0.60) !important; }
+  html.light [class*="text-white/7"] { color: rgba(26,17,17,0.70) !important; }
+  html.light [class*="text-white/8"] { color: rgba(26,17,17,0.80) !important; }
+  html.light [class*="text-gray-200"] { color: #2d1f1f !important; }
+  html.light [class*="text-gray-300"] { color: #4a3838 !important; }
+  html.light [class*="text-gray-400"] { color: #6e5a50 !important; }
+  html.light [class*="text-gray-500"] { color: #8c7870 !important; }
+  html.light [class*="text-gray-600"] { color: #6e5a50 !important; }
 
   /* Keep accent colors vibrant in light */
   html.light [class*="text-red-400"] {
@@ -538,7 +561,10 @@
 
   /* Border overrides */
   html.light [class*="border-white/"] {
-    border-color: rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(0, 0, 0, 0.13) !important;
+  }
+  html.light [class*="border-white/[0.0"] {
+    border-color: rgba(0, 0, 0, 0.13) !important;
   }
   html.light [class*="border-red-900/"],
   html.light [class*="border-red-700/"] {
@@ -576,6 +602,14 @@
     box-shadow: none !important;
     color: #1a1111 !important;
   }
+  html.light input[class*="bg-transparent"] {
+    background-color: transparent !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #1a1111 !important;
+  }
+  html.light input[class*="bg-transparent"]::placeholder {
+    color: rgba(0, 0, 0, 0.35) !important;
+  }
   html.light input::placeholder,
   html.light textarea::placeholder {
     color: rgba(0, 0, 0, 0.35) !important;
@@ -590,9 +624,11 @@
   html.light [class*="shadow-black/"] {
     --tw-shadow-color: rgba(0, 0, 0, 0.06) !important;
   }
-  html.light [class*="shadow-lg"] {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+  html.light .shadow-lg:not([class*="shadow-["]) {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
   }
+  html.light [class*="shadow-black/2"] { --tw-shadow-color: rgba(0,0,0,0.07) !important; }
+  html.light [class*="shadow-black/3"] { --tw-shadow-color: rgba(0,0,0,0.09) !important; }
 
   /* Bottom nav */
   html.light nav[class*="fixed"][class*="bottom-0"] {
