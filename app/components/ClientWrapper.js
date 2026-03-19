@@ -13,6 +13,50 @@ import { motion, AnimatePresence } from "framer-motion";
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
+// Toast component for inline notifications (replaces alert())
+function ToastBar({ msg, onDone }) {
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(onDone, 3500);
+    return () => clearTimeout(t);
+  }, [msg, onDone]);
+  if (!msg) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -30 }}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[2147483646] px-5 py-3 rounded-2xl bg-[#1a1515] border border-red-900/30 shadow-xl shadow-black/40 text-sm font-bold text-gray-200 max-w-[90vw] text-center pointer-events-auto"
+    >
+      {msg}
+    </motion.div>
+  );
+}
+
+// Achievement toast — shows when a new achievement is unlocked
+function AchievementToast({ achievement, onDone }) {
+  useEffect(() => {
+    if (!achievement) return;
+    const t = setTimeout(onDone, 5000);
+    return () => clearTimeout(t);
+  }, [achievement, onDone]);
+  if (!achievement) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, y: -40 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: -40 }}
+      transition={{ type: "spring", bounce: 0.5 }}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[2147483646] px-6 py-4 rounded-2xl bg-gradient-to-br from-amber-900/90 to-red-900/90 border border-amber-500/30 shadow-2xl shadow-amber-900/30 text-center pointer-events-auto backdrop-blur-xl max-w-[90vw]"
+    >
+      <div className="text-3xl mb-1">{achievement.icon}</div>
+      <div className="text-xs font-black uppercase tracking-widest text-amber-400 mb-0.5">Achievement deblocat!</div>
+      <div className="font-bold text-white text-sm">{achievement.name}</div>
+      <div className="text-[11px] text-amber-200/60 mt-0.5">{achievement.desc}</div>
+    </motion.div>
+  );
+}
+
 const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", teamId: null, regiune: "Muntenia" };
 const emptySubscribe = () => () => {};
 
@@ -67,6 +111,8 @@ export default function ClientWrapper({ children }) {
   });
   const [notificare, setNotificare] = useState(null);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [toastMsg, setToastMsg] = useState(null);
+  const [achievementToast, setAchievementToast] = useState(null);
   const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   const pusherRef = useRef(null);
@@ -125,7 +171,7 @@ export default function ClientWrapper({ children }) {
     const cleanName = nouNume.toUpperCase().trim();
     if (cleanName === nume) return true; 
     if (cleanName.length < 3) {
-      alert("Numele trebuie să aibă minim 3 litere.");
+      setToastMsg("Numele trebuie să aibă minim 3 litere.");
       return false;
     }
 
@@ -147,7 +193,7 @@ export default function ClientWrapper({ children }) {
       const data = await res.json();
       
       if (!data.success) {
-        alert(data.error || "Acel nume este deja luat! Alege altul.");
+        setToastMsg(data.error || "Acel nume este deja luat! Alege altul.");
         return false;
       }
 
@@ -162,7 +208,7 @@ export default function ClientWrapper({ children }) {
 
     } catch (e) {
       console.error("Eroare la validare nume", e);
-      alert("Eroare la rețea. Încearcă din nou.");
+      setToastMsg("Eroare la rețea. Încearcă din nou.");
       return false;
     }
   };
@@ -301,8 +347,25 @@ export default function ClientWrapper({ children }) {
       notifTimer = setTimeout(() => setNotificare(null), 20000);
     });
 
+    let achQueue = [];
+    let achShowing = false;
+    const showNextAch = () => {
+      if (achQueue.length === 0) { achShowing = false; return; }
+      achShowing = true;
+      setAchievementToast(achQueue.shift());
+      setTimeout(showNextAch, 5500);
+    };
+    channel.bind('achievement-unlocked', (data) => {
+      if (!data.achievements || !Array.isArray(data.achievements)) return;
+      achQueue.push(...data.achievements);
+      playSound('victorie');
+      triggerVibrate([50, 30, 50, 30, 100]);
+      if (!achShowing) showNextAch();
+    });
+
     return () => {
       if (notifTimer) clearTimeout(notifTimer);
+      achQueue = [];
       channel.unbind_all();
       pusherRef.current?.unsubscribe(channelName);
     };
@@ -318,13 +381,20 @@ export default function ClientWrapper({ children }) {
     setUserStats: updateUserStats,
     playSound, triggerVibrate, incrementGlobal, isHydrated,
     updateStats,
-    onlineCount
+    onlineCount,
+    toastMsg, setToastMsg
   };
 
   return (
     <GlobalStatsContext.Provider value={contextValue}>
       {children}
       
+      {/* Toast notifications */}
+      <AnimatePresence>
+        {toastMsg && <ToastBar msg={toastMsg} onDone={() => setToastMsg(null)} />}
+        {achievementToast && <AchievementToast achievement={achievementToast} onDone={() => setAchievementToast(null)} />}
+      </AnimatePresence>
+
       {/* Container izolat pentru notificări */}
       <div className="fixed inset-0 z-[2147483647] pointer-events-none flex justify-center items-start pt-6 md:pt-10">
           <AnimatePresence>

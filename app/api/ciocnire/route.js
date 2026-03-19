@@ -214,7 +214,7 @@ export async function POST(request) {
           redis.get('global_ciocniri_total'),
           getClasamentRegiuni(),
           getClasamentJucatori(),
-          redis.zremrangebyscore('arena:online', 0, now - 35000),
+          redis.zremrangebyscore('arena:online', 0, now - 45000),
           redis.zcard('arena:online')
         ]);
         return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori, online: onlineCount });
@@ -536,7 +536,7 @@ export async function POST(request) {
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zadd('arena:online', now, visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 35000);
+        pipeline.zremrangebyscore('arena:online', 0, now - 45000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
@@ -550,7 +550,7 @@ export async function POST(request) {
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zrem('arena:online', visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 35000);
+        pipeline.zremrangebyscore('arena:online', 0, now - 45000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];

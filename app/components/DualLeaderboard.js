@@ -2,20 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-function safeCopy(text) {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).catch(() => {});
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch {}
-      document.body.removeChild(ta);
-    }
-  } catch {}
-}
+import { safeCopy } from "../lib/utils";
 
 const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   const [view, setView] = useState("jucatori");
@@ -123,12 +110,14 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
             </motion.div>
           )}
         </AnimatePresence>
-        {myName && myRank !== null && (
+        {myName && (
           <button
             onClick={() => {
               const text = myRank === 1
                 ? `Sunt Campionul Național la ciocnit ouă pe ciocnim.ro! Îndrăznește să mă provoci? 🥚🏆`
-                : `Sunt pe locul ${myRank} în clasamentul național de ciocnit ouă! Hai și tu la o ciocneală pe ciocnim.ro 🥚⚔️`;
+                : myRank !== null
+                  ? `Sunt pe locul ${myRank} în clasamentul național de ciocnit ouă! Hai și tu la o ciocneală pe ciocnim.ro 🥚⚔️`
+                  : `Hai la o ciocneală de ouă pe ciocnim.ro! 🥚⚔️`;
               if (navigator.share) {
                 navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
               } else {

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'ciocnim-v1';
+const CACHE_VERSION = '2';
+const CACHE_NAME = `ciocnim-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/traditii',
