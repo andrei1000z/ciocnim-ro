@@ -28,6 +28,13 @@ const retete = [
     calories: 320,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "zahăr", swap: "200g miere de salcâm (reduce cu 20%)" },
+      { match: "făină albă tip 000", swap: "800g făină spelt + 200g făină albă" },
+      { match: "unt moale", swap: "120g ulei de cocos topit" },
+    ],
+    healthyCalories: 265,
+    healthyNote: "Mierea și spelt-ul reduc indicele glicemic cu ~25%. Uleiul de cocos înlocuiește grăsimile saturate din unt.",
     tips: [
       "Toate ingredientele trebuie să fie la temperatura camerei.",
       "Frământă aluatul minim 15 minute — cu cât frământi mai mult, cu atât e mai pufos.",
@@ -111,6 +118,13 @@ const retete = [
     calories: 280,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "lapte", swap: "lapte de migdale neîndulcit" },
+      { match: "ulei de măsline", swap: "2 linguri ulei de măsline (redus la jumătate)" },
+      { match: "pesmet", swap: "pesmet din pâine integrală" },
+    ],
+    healthyCalories: 235,
+    healthyNote: "Drobul e deja bogat în proteine și fier. Reducerile aduc cu ~15% mai puține calorii.",
     tips: [
       "Organele se pot trece prin mașina de tocat pentru textură mai fină.",
       "Drobul e mai gustos a doua zi, servit rece.",
@@ -190,6 +204,13 @@ const retete = [
     calories: 290,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "zahăr", swap: "100g eritritol (zero calorii)" },
+      { match: "smântână", swap: "100g iaurt grecesc 0% grăsime" },
+      { match: "griș", swap: "50g fulgi de ovăz fin măcinați" },
+    ],
+    healthyCalories: 195,
+    healthyNote: "Eritritolul nu afectează glicemia. Iaurtul grec adaugă proteine și reduce grăsimile cu 60%.",
     tips: [
       "Brânza de vaci trebuie scursă foarte bine — pune-o într-un tifon și lasă 2-3 ore.",
       "Stafidele se înmoaie în rom sau apă caldă 15 minute înainte.",
@@ -263,6 +284,12 @@ const retete = [
     calories: 350,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "vin alb sec", swap: "150ml supă de legume + suc de lămâie" },
+      { match: "ulei de măsline", swap: "2 linguri ulei de măsline (redus)" },
+    ],
+    healthyCalories: 295,
+    healthyNote: "Friptura de miel e excelentă proteic. Fără vin elimini zahărurile fermentate.",
     tips: [
       "Scoate carnea din frigider cu 30 min înainte — se gătește mai uniform.",
       "Unge carnea cu sucul din tavă la fiecare 30 de minute.",
@@ -340,6 +367,11 @@ const retete = [
     calories: 240,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "maioneză", swap: "150g maioneză light + 150g iaurt grecesc" },
+    ],
+    healthyCalories: 170,
+    healthyNote: "Jumătate maioneză + iaurt = aceeași cremozitate cu 40% mai puțin grăsime.",
     tips: [
       "Fierbe legumele separat — fiecare are alt timp de gătire.",
       "Taie totul în cubulețe mici și egale — textura contează.",
@@ -405,6 +437,9 @@ const retete = [
     calories: 70,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [],
+    healthyCalories: 70,
+    healthyNote: "Rețeta e deja 100% naturală! Ouăle sunt sursă excelentă de proteine complete și vitamine B.",
     tips: [
       "Cu cât lași mai multe coji, cu atât roșul e mai intens.",
       "Ouăle trebuie scoase din frigider cu 2 ore înainte — altfel crapă.",
@@ -446,6 +481,11 @@ const retete = [
     calories: 210,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "smântână (pentru dresire)", swap: "iaurt grecesc 2% pentru dresire" },
+    ],
+    healthyCalories: 175,
+    healthyNote: "Ciorbă de Paște e ușoară și hrănitoare. Iaurtul înlocuiește smântâna cu mai puține grăsimi.",
     tips: [
       "Spuma care se formează la fierbere trebuie luată — dă un gust neplăcut.",
       "Borșul se adaugă doar la final și nu se mai fierbe mult după.",
@@ -528,6 +568,13 @@ const retete = [
     calories: 180,
     difficulty: "Avansat",
     difficultyColor: "text-red-400",
+    healthySwaps: [
+      { match: "carne tocată de porc", swap: "700g carne tocată de curcan + 300g porc" },
+      { match: "afumătură", swap: "100g afumătură slabă (redusă la jumătate)" },
+      { match: "orez (spălat)", swap: "80g orez brun + 20g orez alb" },
+    ],
+    healthyCalories: 145,
+    healthyNote: "Curcanul în loc de porc pur reduce grăsimile saturate cu ~35%. Orezul brun triplează fibra.",
     tips: [
       "Sarmalele sunt și mai bune a doua zi, reîncălzite.",
       "Foile de varză prea sărate se spală în apă caldă.",
@@ -596,6 +643,9 @@ const retete = [
     calories: 150,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [],
+    healthyCalories: 150,
+    healthyNote: "Piftia e în mod natural săracă în calorii și bogată în colagen. Nicio modificare necesară.",
     tips: [
       "Picioarele de pui sunt esențiale — ele dau gelatina naturală.",
       "Fierbe la foc mic, nu clocotit — zeama trebuie să rămână limpede.",
@@ -658,6 +708,11 @@ const retete = [
     calories: 200,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "unt (opțional, la final)", swap: "1 lingură ulei de măsline extra-virgin" },
+    ],
+    healthyCalories: 185,
+    healthyNote: "Mămăliga e un carbohidrat complex, fără gluten. Uleiul de măsline în loc de unt = grăsimi mai sănătoase.",
     tips: [
       "Amestecă continuu ca să nu facă cocoloașe.",
       "Mălai+apa=1:3 ca proporție perfectă.",
@@ -693,6 +748,11 @@ const retete = [
     calories: 190,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "ulei de măsline", swap: "2 linguri ulei de măsline (redus la jumătate)" },
+    ],
+    healthyCalories: 155,
+    healthyNote: "Cartofii la cuptor cu mai puțin ulei sunt la fel de crocanți dacă sunt tăiați subțiri.",
     tips: [
       "Cartofii tăiați mai mici se rumenesc mai repede.",
       "Nu îi suprapune în tavă — au nevoie de spațiu.",
@@ -729,6 +789,13 @@ const retete = [
     calories: 260,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "zahăr", swap: "150g eritritol + 50g miere" },
+      { match: "făină", swap: "200g făină integrală + 50g făină de migdale" },
+      { match: "ulei", swap: "80ml ulei + 20ml iaurt grecesc" },
+    ],
+    healthyCalories: 195,
+    healthyNote: "Înlocuirile reduc caloriile cu ~25% și adaugă fibră și proteine.",
     tips: [
       "Toate ingredientele la temperatura camerei = chec mai pufos.",
       "Nu deschide cuptorul în primele 25 minute.",
@@ -803,6 +870,12 @@ const retete = [
     calories: 310,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "smântână", swap: "iaurt grecesc gras (10%)" },
+      { match: "unt (topit, pentru uns foile)", swap: "ulei de măsline pentru uns foile" },
+    ],
+    healthyCalories: 255,
+    healthyNote: "Iaurtul grec are același gust cremos ca smântâna cu 50% mai puțin grăsime.",
     tips: [
       "Brânza telemea e perfectă — sărată natural.",
       "Foile de plăcintă din comerț merg foarte bine.",
@@ -858,6 +931,13 @@ const retete = [
     calories: 250,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "zahăr", swap: "60g eritritol + mere mai dulci (Fuji/Gala)" },
+      { match: "unt (topit)", swap: "50g unt topit + 30g ulei de cocos" },
+      { match: "pesmet (prăjit în unt)", swap: "pesmet din biscuiți integrali prăjiți fără unt" },
+    ],
+    healthyCalories: 195,
+    healthyNote: "Merele dulci reduc nevoia de zahăr adăugat. Varianta cu eritritol e prietenoasă cu diabeticii.",
     tips: [
       "Merele Ionatan sau Granny Smith sunt cele mai bune — acrișoare.",
       "Pesmetul absoarbe sucul merelor — nu sări peste el.",
@@ -900,6 +980,13 @@ const retete = [
     calories: 340,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "zahăr", swap: "150g eritritol" },
+      { match: "unt moale", swap: "150g unt + 50g iaurt grecesc" },
+      { match: "zahăr pudră", swap: "70g eritritol pudră" },
+    ],
+    healthyCalories: 265,
+    healthyNote: "Eritritolul păstrează textura cremei. Reducere de ~22% calorii față de original.",
     tips: [
       "Nuca trebuie măcinată fin — dar nu praf.",
       "Crema se întinde pe blatul rece — altfel se topește.",
@@ -944,6 +1031,12 @@ const retete = [
     calories: 200,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "carne tocată de porc", swap: "250g carne tocată de curcan" },
+      { match: "carne tocată de oaie (sau vită)", swap: "250g carne tocată de vită slabă (5% grăsime)" },
+    ],
+    healthyCalories: 155,
+    healthyNote: "Curcanul în loc de porc și vița slabă reduc grăsimile totale cu ~40% fără a pierde din savoare.",
     tips: [
       "Carnea trebuie obligatoriu lăsată la frigider minim 3 ore.",
       "Mâinile ude cu apă rece ajută la modelat.",
@@ -987,6 +1080,11 @@ const retete = [
     calories: 120,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "ulei de floarea-soarelui", swap: "3 linguri ulei de măsline extra-virgin" },
+    ],
+    healthyCalories: 105,
+    healthyNote: "Salata de vinete e deja una din cele mai sănătoase rețete! Uleiul de măsline adaugă omega-9.",
     tips: [
       "Vinetele coapte pe flacără au cel mai bun gust afumat.",
       "Scurge-le bine — minim 1 oră — altfel salata e apoasă.",
@@ -1038,6 +1136,12 @@ const retete = [
     calories: 250,
     difficulty: "Mediu",
     difficultyColor: "text-yellow-400",
+    healthySwaps: [
+      { match: "făină albă", swap: "350g făină integrală + 150g făină albă" },
+      { match: "ulei de măsline", swap: "1 lingură ulei de măsline (redus)" },
+    ],
+    healthyCalories: 210,
+    healthyNote: "Făina integrală triplează fibra și reduce indicele glicemic. Crusta rămâne la fel de crocantă.",
     tips: [
       "Drojdia proaspătă dă cele mai bune rezultate.",
       "Aluatul trebuie frământat bine — minim 10 minute.",
@@ -1078,6 +1182,12 @@ const retete = [
     calories: 180,
     difficulty: "Ușor",
     difficultyColor: "text-green-400",
+    healthySwaps: [
+      { match: "ulei de măsline", swap: "2 linguri ulei de măsline (redus)" },
+      { match: "oțet de vin", swap: "suc de lămâie proaspăt" },
+    ],
+    healthyCalories: 155,
+    healthyNote: "Salata orientală e deja ușoară. Sucul de lămâie în loc de oțet = mai multă vitamina C.",
     tips: [
       "Cartofii trebuie fierți al dente — nu prea moi.",
       "Ceapa crudă se poate înmuia 10 min în apă cu oțet.",
@@ -1119,6 +1229,13 @@ const retete = [
     calories: 420,
     difficulty: "Avansat",
     difficultyColor: "text-red-400",
+    healthySwaps: [
+      { match: "zahăr", swap: "150g eritritol" },
+      { match: "unt", swap: "150g unt + 50g piure de avocado" },
+      { match: "smântână lichidă (33%)", swap: "200ml smântână lichidă 30% + 100ml lapte de cocos" },
+    ],
+    healthyCalories: 340,
+    healthyNote: "Chiar și cu eritritol, tortul de ciocolată e o răsfățare ocazională. Avocado adaugă grăsimi mono-nesaturate.",
     tips: [
       "Ciocolata de calitate face diferența — minim 55% cacao.",
       "Blatul se prepară ușor — secretul e să nu-l coci prea mult.",
@@ -1252,23 +1369,32 @@ const formatIngredient = (ing, multiplier) => {
 };
 
 // ─── Interactive Ingredient List ────────────────────────────────────────────
-const IngredientList = ({ ingredients, multiplier, title }) => {
+const IngredientList = ({ ingredients, multiplier, title, healthyMode = false, healthySwaps = [] }) => {
   if (!ingredients || ingredients.length === 0) return null;
   return (
     <div className="space-y-0.5">
       {title && <h4 className="text-sm font-bold uppercase tracking-widest text-red-400 mb-3">{title}</h4>}
       {ingredients.map((ing, i) => {
         const { qtyText, nameText, isDescriptive } = formatIngredient(ing, multiplier);
+        const swap = healthyMode
+          ? healthySwaps.find(s => nameText.toLowerCase().includes(s.match.toLowerCase()))
+          : null;
         return (
-          <div key={i} className="flex items-baseline gap-2 py-2 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500/40 flex-shrink-0 relative top-[-1px]" />
+          <div key={i} className={`flex items-baseline gap-2 py-2 border-b border-white/[0.04] last:border-0 px-2 -mx-2 rounded-lg transition-colors ${swap ? 'bg-green-900/10' : 'hover:bg-white/[0.02]'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 relative top-[-1px] ${swap ? 'bg-green-500/60' : 'bg-red-500/40'}`} />
             {isDescriptive ? (
-              <span className="text-gray-200 text-sm md:text-base font-medium">{nameText}</span>
+              <div className="flex-1">
+                <span className={`text-sm md:text-base font-medium ${swap ? 'line-through text-gray-500' : 'text-gray-200'}`}>{nameText}</span>
+                {swap && <span className="block text-sm text-green-300 font-medium mt-0.5">→ {swap.swap}</span>}
+              </div>
             ) : (
-              <>
-                <span className="text-red-400 font-black text-sm tabular-nums whitespace-nowrap">{qtyText}</span>
-                <span className="text-gray-200 text-sm md:text-base font-medium">{nameText}</span>
-              </>
+              <div className="flex-1 flex items-baseline gap-2 flex-wrap">
+                <span className={`font-black text-sm tabular-nums whitespace-nowrap ${swap ? 'text-green-400' : 'text-red-400'}`}>{qtyText}</span>
+                <div className="flex-1">
+                  <span className={`text-sm md:text-base font-medium ${swap ? 'line-through text-gray-500' : 'text-gray-200'}`}>{nameText}</span>
+                  {swap && <span className="block text-sm text-green-300 font-medium mt-0.5">→ {swap.swap}</span>}
+                </div>
+              </div>
             )}
           </div>
         );
@@ -1412,6 +1538,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
   const [servingsInput, setServingsInput] = useState(String(recipe.servings));
   const [activeVariant, setActiveVariant] = useState(0);
   const [kitchenMode, setKitchenMode] = useState(false);
+  const [healthyMode, setHealthyMode] = useState(false);
   const [copiedFeedback, setCopiedFeedback] = useState("");
   const targetServings = Math.max(1, parseInt(servingsInput) || recipe.servings);
   const multiplier = targetServings / recipe.servings;
@@ -1534,17 +1661,45 @@ const RecipeDetail = ({ recipe, onBack }) => {
             <p className="text-gray-400 mt-1.5 leading-relaxed text-sm">{recipe.description}</p>
           </div>
         </div>
-        <button
-          onClick={() => setKitchenMode(!kitchenMode)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap flex-shrink-0 ${
-            kitchenMode
-              ? "bg-amber-900/30 text-amber-400 border-amber-700/40 shadow-lg shadow-amber-900/20"
-              : "bg-white/[0.05] text-gray-400 border-white/[0.1] hover:bg-white/[0.08] hover:text-gray-300"
-          }`}
-        >
-          {kitchenMode ? "👨‍🍳" : "👁️"} Bucătărie
-        </button>
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          <button
+            onClick={() => setKitchenMode(!kitchenMode)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
+              kitchenMode
+                ? "bg-amber-900/30 text-amber-400 border-amber-700/40 shadow-lg shadow-amber-900/20"
+                : "bg-white/[0.05] text-gray-400 border-white/[0.1] hover:bg-white/[0.08] hover:text-gray-300"
+            }`}
+          >
+            {kitchenMode ? "👨‍🍳" : "👁️"} Bucătărie
+          </button>
+          <button
+            onClick={() => setHealthyMode(m => !m)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
+              healthyMode
+                ? "bg-green-900/25 text-green-300 border-green-700/40 shadow-lg shadow-green-900/15"
+                : "bg-white/[0.04] text-gray-400 border-white/[0.08] hover:border-green-700/30 hover:text-green-400"
+            }`}
+          >
+            🥗 {healthyMode ? "Sănătos ON" : "Sănătos"}
+          </button>
+        </div>
       </div>
+
+      {healthyMode && recipe.healthySwaps && recipe.healthySwaps.length > 0 && (
+        <div className="rounded-xl bg-green-900/15 border border-green-700/25 px-4 py-3 flex items-start gap-2.5">
+          <span className="text-lg flex-shrink-0">🥗</span>
+          <div>
+            <p className="text-sm font-bold text-green-300 mb-1">Mod Sănătos activ</p>
+            <p className="text-xs text-green-400/70 leading-relaxed">{recipe.healthyNote}</p>
+          </div>
+        </div>
+      )}
+      {healthyMode && recipe.healthySwaps && recipe.healthySwaps.length === 0 && (
+        <div className="rounded-xl bg-green-900/15 border border-green-700/25 px-4 py-3 flex items-start gap-2.5">
+          <span className="text-lg flex-shrink-0">✅</span>
+          <p className="text-xs text-green-400/70 leading-relaxed">{recipe.healthyNote}</p>
+        </div>
+      )}
 
       {/* Variant selector */}
       {recipe.variants && recipe.variants.length > 1 && (
@@ -1572,7 +1727,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
           { icon: "🔥", label: "Gătire", value: recipe.cookLabel },
           { icon: "⏳", label: "Total", value: recipe.totalLabel },
           { icon: "🍽️", label: "Porții", value: `${targetServings} ${recipe.servingsUnit}` },
-          { icon: "💪", label: "Calorii", value: `${Math.round(recipe.calories * multiplier)} kcal` },
+          { icon: "💪", label: "Calorii", value: `${Math.round((healthyMode && recipe.healthyCalories ? recipe.healthyCalories : recipe.calories) * multiplier)} kcal${healthyMode && recipe.healthyCalories && recipe.healthyCalories < recipe.calories ? ' 🥗' : ''}` },
         ].map((stat) => (
           <div key={stat.label} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-center flex-shrink-0 min-w-[80px]">
             <span className="text-base block">{stat.icon}</span>
@@ -1635,10 +1790,10 @@ const RecipeDetail = ({ recipe, onBack }) => {
           </p>
         )}
 
-        <IngredientList ingredients={currentIngredients} multiplier={multiplier} />
+        <IngredientList ingredients={currentIngredients} multiplier={multiplier} healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} />
         {currentFilling && currentFilling.length > 0 && (
           <div className="mt-6 pt-6 border-t border-white/[0.06]">
-            <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" />
+            <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} />
           </div>
         )}
       </div>
