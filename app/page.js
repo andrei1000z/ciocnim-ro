@@ -255,7 +255,13 @@ function HomeContent() {
     router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true&teamId=${teamId}`);
   };
 
-  if (!isHydrated) return null;
+  if (!isHydrated) return (
+    <div className="w-full max-w-md mx-auto pb-16 px-4 pt-8 text-center">
+      <h1 className="text-4xl font-black text-white tracking-tight">CIOCNIM<span className="text-red-500">.</span>RO</h1>
+      <p className="text-sm font-bold text-red-400/60 mt-2">Ciocnește ouă online de Paște</p>
+      <p className="text-gray-400 text-sm mt-6">Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național.</p>
+    </div>
+  );
 
   const isNameInvalid = localNume.trim().length < 3 || localNume.trim().toUpperCase() === (nume || "").trim().toUpperCase();
 
@@ -477,6 +483,8 @@ function HomeContent() {
       <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
         <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
         <div className="flex items-center justify-center gap-4">
+          {nume && <Link href="/profil" className="text-[11px] text-gray-400 hover:text-amber-400 transition-colors">Profilul meu</Link>}
+          {nume && <span className="text-gray-200 text-xs">·</span>}
           <button onClick={() => { safeCopy("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
           <span className="text-gray-200 text-xs">·</span>
           <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație</button>
@@ -489,7 +497,7 @@ function HomeContent() {
         {toastMsg && (
           <motion.div
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-red-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl whitespace-nowrap"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1100] bg-red-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl whitespace-nowrap"
           >
             {toastMsg}
           </motion.div>
@@ -500,7 +508,7 @@ function HomeContent() {
         {confirmDialog && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99998] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
             onClick={() => setConfirmDialog(null)}
           >
             <motion.div
@@ -522,7 +530,7 @@ function HomeContent() {
         {showJoinModal && typeof document !== "undefined" && createPortal(
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", zIndex: 99999 }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", zIndex: 1000 }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -582,3 +590,4 @@ export default function Home() {
     </main>
   );
 }
+                                                          

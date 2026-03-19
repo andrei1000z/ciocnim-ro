@@ -22,6 +22,12 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 
+    /* Z-index system */
+    --z-theme-toggle: 900;
+    --z-modal: 1000;
+    --z-toast: 1100;
+    --z-notification: 1200;
+
     /* Dark mode (default) */
     --bg-main: #0c0a0a;
     --bg-surface: #141111;
@@ -81,10 +87,7 @@
     background-attachment: fixed;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
-    user-select: none;
     font-family: var(--font-outfit), system-ui, sans-serif;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -106,26 +109,11 @@
   *:focus { outline: none !important; }
 
   input, textarea, select {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(220, 38, 38, 0.3);
-    border-radius: 1rem;
-    padding: 0.75rem 1rem;
-    color: #e5e5e5;
     user-select: text !important;
     touch-action: manipulation;
     font-size: 16px;
     -webkit-appearance: none;
     appearance: none;
-  }
-
-  input:focus, textarea:focus, select:focus {
-    border-color: var(--red-primary);
-    background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
-  }
-
-  input::placeholder, textarea::placeholder {
-    color: rgba(255, 255, 255, 0.25);
   }
 
   button {
@@ -148,6 +136,12 @@
   /* ==========================================================================
      GLASSMORPHISM CARDS (DARK THEME)
      ========================================================================== */
+
+  .game-arena {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
 
   .glass-card {
     background: rgba(255, 255, 255, 0.04);

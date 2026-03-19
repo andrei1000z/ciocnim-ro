@@ -26,7 +26,7 @@ function ToastBar({ msg, onDone }) {
       initial={{ opacity: 0, y: -30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -30 }}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-[2147483646] px-5 py-3 rounded-2xl bg-[#1a1515] border border-red-900/30 shadow-xl shadow-black/40 text-sm font-bold text-gray-200 max-w-[90vw] text-center pointer-events-auto"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-5 py-3 rounded-2xl bg-[#1a1515] border border-red-900/30 shadow-xl shadow-black/40 text-sm font-bold text-gray-200 max-w-[90vw] text-center pointer-events-auto"
     >
       {msg}
     </motion.div>
@@ -47,7 +47,7 @@ function AchievementToast({ achievement, onDone }) {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: -40 }}
       transition={{ type: "spring", bounce: 0.5 }}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-[2147483646] px-6 py-4 rounded-2xl bg-gradient-to-br from-amber-900/90 to-red-900/90 border border-amber-500/30 shadow-2xl shadow-amber-900/30 text-center pointer-events-auto backdrop-blur-xl max-w-[90vw]"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-6 py-4 rounded-2xl bg-gradient-to-br from-amber-900/90 to-red-900/90 border border-amber-500/30 shadow-2xl shadow-amber-900/30 text-center pointer-events-auto backdrop-blur-xl max-w-[90vw]"
     >
       <div className="text-3xl mb-1">{achievement.icon}</div>
       <div className="text-xs font-black uppercase tracking-widest text-amber-400 mb-0.5">Achievement deblocat!</div>
@@ -120,7 +120,7 @@ export default function ClientWrapper({ children }) {
 
   // Inițializare Pusher o singură dată — disconnect la unmount
   useEffect(() => {
-    const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
+    const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS !== 'false';
     const wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
     pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
@@ -397,7 +397,7 @@ export default function ClientWrapper({ children }) {
       </AnimatePresence>
 
       {/* Container izolat pentru notificări */}
-      <div className="fixed inset-0 z-[2147483647] pointer-events-none flex justify-center items-start pt-6 md:pt-10">
+      <div className="fixed inset-0 z-[1200] pointer-events-none flex justify-center items-start pt-6 md:pt-10">
           <AnimatePresence>
             {notificare && (
               <motion.div

@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
-import Pusher from "pusher-js";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import confetti from "canvas-confetti";
@@ -187,7 +186,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount } = useGlobalStats();
+  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef } = useGlobalStats();
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -309,18 +308,8 @@ function ArenaMaster({ room }) {
 
   // PUSHER SYNC
   useEffect(() => {
-    if (isBotMatch) return;
-    const _forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS === 'true';
-    const _wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-      cluster: 'eu',
-      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
-      wsPort: _wsPort,
-      wssPort: _wsPort,
-      forceTLS: _forceTLS,
-      disableStats: true,
-      enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
-    });
+    if (isBotMatch || !pusherRef?.current) return;
+    const pusher = pusherRef.current;
     const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
 
     arenaChannel.bind("pusher:subscription_succeeded", () => {
@@ -400,10 +389,10 @@ function ArenaMaster({ room }) {
        }
     });
 
-    return () => { pusher.unsubscribe(`arena-v22-${room}`); pusher.disconnect(); };
+    return () => { pusher.unsubscribe(`arena-v22-${room}`); };
   // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, nume, isBotMatch, broadcastJoin, isHost, isPrivate, isProvocare, teamIdPreluat]);
+  }, [room, nume, isBotMatch, broadcastJoin, isHost, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -912,7 +901,7 @@ function ArenaMaster({ room }) {
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
-    <main className="min-h-[100dvh] w-full bg-[#0c0a0a] text-gray-200 flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
+    <main className="game-arena min-h-[100dvh] w-full bg-[#0c0a0a] text-gray-200 flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[150px] pointer-events-none" />
 

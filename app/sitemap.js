@@ -1,13 +1,12 @@
 export default function sitemap() {
   const baseUrl = 'https://ciocnim.ro';
-  const now = new Date().toISOString();
+  const lastBuild = '2026-03-19';
   return [
-    { url: baseUrl,                          lastModified: now, changeFrequency: 'daily',   priority: 1.0 },
-    { url: `${baseUrl}/traditii`,            lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/urari`,               lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/retete`,              lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/vopsit-natural`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/calendar`,            lastModified: now, changeFrequency: 'yearly',  priority: 0.7 },
-    { url: `${baseUrl}/profil`,              lastModified: now, changeFrequency: 'daily',   priority: 0.6 },
+    { url: baseUrl,                          lastModified: lastBuild, changeFrequency: 'daily',   priority: 1.0 },
+    { url: `${baseUrl}/traditii`,            lastModified: lastBuild, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${baseUrl}/urari`,               lastModified: lastBuild, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${baseUrl}/retete`,              lastModified: lastBuild, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${baseUrl}/vopsit-natural`,      lastModified: lastBuild, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/calendar`,            lastModified: lastBuild, changeFrequency: 'yearly',  priority: 0.7 },
   ];
 }
