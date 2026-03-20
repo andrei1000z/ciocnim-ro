@@ -604,7 +604,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0c0a0a] relative overflow-hidden pattern-tradition">
+    <main className="min-h-screen bg-[#0c0a0a] relative overflow-x-hidden pattern-tradition">
       <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] bg-red-900/8 rounded-full blur-[140px] pointer-events-none" />
       <div className="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[160px] pointer-events-none" />
       <div className="fixed top-[40%] left-[50%] -translate-x-1/2 w-[40vw] h-[40vw] bg-red-600/3 rounded-full blur-[120px] pointer-events-none" />
