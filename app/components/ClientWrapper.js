@@ -182,14 +182,16 @@ export default function ClientWrapper({ children }) {
   useEffect(() => {
     const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS !== 'false';
     const wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
+    const customHost = process.env.NEXT_PUBLIC_PUSHER_HOST || undefined;
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
-      wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
+      wsHost: customHost,
+      httpHost: customHost,
       wsPort: wsPort,
       wssPort: wsPort,
       forceTLS: forceTLS,
       disableStats: true,
-      enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
+      enabledTransports: ['ws', 'wss'],
       activityTimeout: 30000,
       pongTimeout: 15000,
     });
