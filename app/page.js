@@ -45,7 +45,7 @@ const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => (
 );
 
 const SectionLabel = ({ children }) => (
-  <p className="text-[10px] font-bold text-red-500/40 uppercase tracking-[0.35em] mb-3 px-0.5">{children}</p>
+  <p className="text-[10px] font-bold text-red-500/60 uppercase tracking-[0.35em] mb-3 px-0.5">{children}</p>
 );
 
 // ─── Componenta Principală ──────────────────────────────────────────────────────
@@ -381,8 +381,34 @@ function HomeContent() {
         </div>
       </motion.div>
 
-      {/* ACHIEVEMENTS */}
+      {/* JOACĂ */}
       <motion.div {...fadeUp(0.11)}>
+        <SectionLabel>Joacă</SectionLabel>
+        <div className="space-y-2">
+          <ActionButton icon="🥚" title="Ciocnește cu un Prieten" subtitle="Trimite-i codul și gata!" onClick={() => { if (!nume || nume.length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; } triggerVibrate(); setIsPlayModalOpen(true); }} />
+          <ActionButton icon="🌍" title="Ciocnește cu Concetățenii" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
+          <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup de Ciocnit"} subtitle="Invită familia și prietenii" onClick={handleCreateTeam} loading={loadingTeam} />
+        </div>
+      </motion.div>
+
+      {/* GRUPURI */}
+      <AnimatePresence>
+        {loadedTeams.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+            <SectionLabel>Grupurile Mele</SectionLabel>
+            <GroupHub teams={loadedTeams} activeTeamIndex={activeTeamIndex} setActiveTeamIndex={setActiveTeamIndex} numePreluat={nume} onRename={handleRenameTeam} onProvoca={handleProvocare} onLeave={handleLeaveTeam} onKick={handleKickMember} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* CLASAMENT */}
+      <motion.div {...fadeUp(0.15)}>
+        <SectionLabel>Clasament</SectionLabel>
+        <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
+      </motion.div>
+
+      {/* ACHIEVEMENTS */}
+      <motion.div {...fadeUp(0.18)}>
         <SectionLabel>Achievement-uri</SectionLabel>
         <div className="rounded-2xl border border-amber-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
           {achievements.length > 0 ? (
@@ -403,36 +429,10 @@ function HomeContent() {
         </div>
       </motion.div>
 
-      {/* JOACĂ */}
-      <motion.div {...fadeUp(0.13)}>
-        <SectionLabel>Joacă</SectionLabel>
-        <div className="space-y-2">
-          <ActionButton icon="🥚" title="Ciocnește cu un Prieten" subtitle="Trimite-i codul și gata!" onClick={() => { if (!nume || nume.length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; } triggerVibrate(); setIsPlayModalOpen(true); }} />
-          <ActionButton icon="🌍" title="Ciocnește cu Concetățenii" subtitle={isJoiningArena ? "Se caută adversar..." : "Joacă cu cineva din România"} onClick={handleArena} loading={isJoiningArena} />
-          <ActionButton icon="👥" title={loadedTeams.length > 0 ? "Grup Nou" : "Creează Grup de Ciocnit"} subtitle="Invită familia și prietenii" onClick={handleCreateTeam} loading={loadingTeam} />
-        </div>
-      </motion.div>
-
-      {/* GRUPURI */}
-      <AnimatePresence>
-        {loadedTeams.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
-            <SectionLabel>Grupurile Mele</SectionLabel>
-            <GroupHub teams={loadedTeams} activeTeamIndex={activeTeamIndex} setActiveTeamIndex={setActiveTeamIndex} numePreluat={nume} onRename={handleRenameTeam} onProvoca={handleProvocare} onLeave={handleLeaveTeam} onKick={handleKickMember} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* CLASAMENT */}
-      <motion.div {...fadeUp(0.18)}>
-        <SectionLabel>Clasament</SectionLabel>
-        <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
-      </motion.div>
-
       {/* TRADIȚII (includes /retete link - issue #12) */}
       <motion.div {...fadeUp(0.22)}>
         <SectionLabel>Tradiții & Ghiduri</SectionLabel>
-        <div className="flex gap-1.5 xs:gap-2 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 justify-center flex-wrap">
           {[
             { href: "/traditii", icon: "📖", text: "Reguli" },
             { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
@@ -469,23 +469,25 @@ function HomeContent() {
         </button>
       </motion.div>
 
-      {/* INSTALEAZĂ */}
-      <motion.div {...fadeUp(0.27)}>
-        <button
-          onClick={() => {
-            if (window.deferredPrompt) {
-              window.deferredPrompt.prompt();
-              window.deferredPrompt.userChoice.then(() => { window.deferredPrompt = null; });
-            } else {
-              setToastMsg("Meniu browser → Adaugă pe ecranul principal");
-            }
-          }}
-          className="w-full py-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
-        >
-          <span className="text-lg">📥</span>
-          <span className="font-bold text-gray-300 text-sm">Instalează aplicația</span>
-        </button>
-      </motion.div>
+      {/* INSTALEAZĂ — hide if already running as PWA */}
+      {typeof window !== 'undefined' && !window.matchMedia('(display-mode: standalone)').matches && (
+        <motion.div {...fadeUp(0.27)}>
+          <button
+            onClick={() => {
+              if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                window.deferredPrompt.userChoice.then(() => { window.deferredPrompt = null; });
+              } else {
+                setToastMsg("Meniu browser → Adaugă pe ecranul principal");
+              }
+            }}
+            className="w-full py-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
+          >
+            <span className="text-lg">📥</span>
+            <span className="font-bold text-gray-300 text-sm">Instalează aplicația</span>
+          </button>
+        </motion.div>
+      )}
 
       {/* FOOTER */}
       <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">

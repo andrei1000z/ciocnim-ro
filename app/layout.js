@@ -34,7 +34,7 @@ export const metadata = {
     description: "Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat!",
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro – Joc de Paște Online" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro – Joc de Paște Online", type: "image/jpeg" }],
     locale: "ro_RO",
     type: "website",
   },
@@ -57,7 +57,10 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#0c0a0a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0a0a" },
+  ],
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,
@@ -65,8 +68,6 @@ export const viewport = {
   userScalable: true,
   viewportFit: "cover",
   colorScheme: "light dark",
-  /** @type {string} */
-  viewportMetaTags: true,
 };
 
 export default function RootLayout({ children }) {
@@ -129,6 +130,7 @@ export default function RootLayout({ children }) {
         antialiased
         scrollbar-hide
       `}>
+        <a href="#main-content" className="skip-to-content">Salt la conținut</a>
 
         {/* Ambient glow subtil - dark mode */}
         <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none">
@@ -139,8 +141,8 @@ export default function RootLayout({ children }) {
         <ClientWrapper>
           <ScrollToTop />
           <ThemeToggle />
-          <div className="relative z-10 w-full max-w-[100vw] overflow-x-hidden min-h-[100dvh] flex flex-col">
-            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden px-mobile-fix relative">
+          <div className="relative z-10 w-full max-w-[100vw] min-h-[100dvh] flex flex-col">
+            <main id="main-content" className="flex-1 w-full max-w-[100vw] px-mobile-fix relative">
               {children}
             </main>
           </div>

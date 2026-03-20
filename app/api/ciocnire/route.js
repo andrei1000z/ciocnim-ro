@@ -4,11 +4,6 @@ import redis from '@/app/lib/redis';
 import { esteNumeInterzis as esteNumeInterzisShared } from '@/app/lib/profanityFilter';
 import { ACHIEVEMENTS } from '@/app/lib/achievements';
 
-/**
- * ====================================================================================================
- * CIOCNIM.RO - API ENDPOINT (V30.5 - SEPARARE GRUPURI & INCREMENTARE SINGULARĂ)
- * ====================================================================================================
- */
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -299,7 +294,7 @@ export async function POST(request) {
 
       case 'lovitura': {
         if (!jucator || !atacant || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
-        const castigaCelCareDa = body.castigaCelCareDa !== undefined ? body.castigaCelCareDa : Math.random() < 0.5;
+        const castigaCelCareDa = Math.random() < 0.5;
         await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', {
           jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now()
         });
@@ -324,8 +319,8 @@ export async function POST(request) {
       }
 
       case 'revansa-ok': {
-        if (!roomId) return NextResponse.json({ success: false });
-        await pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { t: Date.now() });
+        if (!roomId || !jucator) return NextResponse.json({ success: false });
+        await pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { jucator: jucator.toUpperCase(), t: Date.now() });
         return NextResponse.json({ success: true });
       }
 

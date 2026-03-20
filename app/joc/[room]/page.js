@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * ========================================================================================================================
- * CIOCNIM.RO - ARENA DE LUPTĂ (V30.5 - FIX VICTORII DUBLE, CHAT ACTIV & MOBILE LAYOUT)
- * ========================================================================================================================
- */
 
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -145,7 +140,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
       {!spart && (
         <div className="absolute inset-[-20%] rounded-full blur-[40px] md:blur-[50px] opacity-30 animate-pulse transition-all duration-1000 mix-blend-screen pointer-events-none" style={{ backgroundColor: current.glow }} />
       )}
-      <svg viewBox="0 0 100 130" className="w-full h-full relative z-10 drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
+      <svg viewBox="0 0 100 130" role="img" aria-label={`Ou ${current.label}${spart ? ' — spart' : ''}`} className="w-full h-full relative z-10 drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
         <defs>
           <linearGradient id={`grad-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={current.grad1} />
@@ -205,6 +200,7 @@ function ArenaMaster({ room }) {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const chatContainerRef = useRef(null);
   const [revansaRequests, setRevansaRequests] = useState({});
   const opponentRef = useRef(null);
@@ -232,6 +228,7 @@ function ArenaMaster({ room }) {
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
 
   const playArenaSound = (name) => {
+    if (isMuted) return;
     try {
       const audio = new Audio(`/${name}.mp3`);
       audio.volume = 0.35 + Math.random() * 0.3;
@@ -516,12 +513,22 @@ function ArenaMaster({ room }) {
     return () => window.removeEventListener("devicemotion", handleMotion);
   }, [canStrike, handleStrike]);
 
+  const BOT_CHAT_REPLIES = [
+    "Hristos a Înviat! 🥚", "Hai noroc! 💪", "Bine lovit!", "Ouă tari avem noi!",
+    "Așa da! 🎯", "Hai la ciocnit!", "Nu mă bat cu oricine 😎", "Frumos jucăm!",
+    "Paste fericit! 🐣", "Ești bun, dar eu-s mai bun!", "Oul meu e de oțel 🛡️",
+  ];
+
   const handleChat = () => {
     if (!chatInput.trim()) return;
     if (isBotMatch) {
-      // For bot matches, add message locally
       setMessages(prev => [{ autor: nume, text: chatInput.trim() }, ...prev].slice(0, 20));
       setChatInput("");
+      // Bot replies after a short delay
+      setTimeout(() => {
+        const reply = BOT_CHAT_REPLIES[Math.floor(Math.random() * BOT_CHAT_REPLIES.length)];
+        setMessages(prev => [{ autor: "🤖 BOT", text: reply }, ...prev].slice(0, 20));
+      }, 800 + Math.random() * 1200);
     } else {
       fetch('/api/ciocnire', { 
           method: 'POST', 
@@ -581,7 +588,7 @@ function ArenaMaster({ room }) {
       <div className={`w-full max-w-4xl flex flex-col items-center justify-start md:justify-center flex-1 py-4 md:py-6 px-4 md:px-0 transition-all z-10 ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
         
         {/* Buton Cod Cameră + Share */}
-        {isPrivate && !isProvocare && !teamIdPreluat && (
+        {isPrivate && !teamIdPreluat && (
           <div className="flex items-center gap-2 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
             <button onClick={copyRoomCode} className="group relative bg-white/[0.05] backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/30 shadow-lg shadow-black/30 hover:bg-white/[0.08] hover:border-red-700/50 transition-all active:scale-95">
               <div className="flex items-center gap-2 md:gap-3 relative z-10">
@@ -597,13 +604,14 @@ function ArenaMaster({ room }) {
           </div>
         )}
 
-        {/* LIVE Indicator */}
+        {/* LIVE Indicator + Mute */}
         <div className="flex flex-col items-center gap-1 mb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
             <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-green-400">LIVE</span>
             <span className="text-[11px] md:text-xs font-black text-white tabular-nums">{onlineCount || 1}</span>
             <span className="text-[9px] md:text-[10px] font-semibold text-white/30">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+            <button onClick={() => setIsMuted(m => !m)} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
           <span className="text-[9px] md:text-[10px] font-bold text-gray-600 tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
         </div>
@@ -680,7 +688,7 @@ function ArenaMaster({ room }) {
               onClick={canStrike ? handleStrike : undefined}
               whileTap={canStrike ? { scale: 0.94 } : {}}
               animate={canStrike ? { scale: [1, 1.03, 1] } : {}}
-              transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+              transition={{ repeat: Infinity, repeatDelay: 0.4, duration: 1.6, ease: "easeInOut" }}
               className={`w-full py-5 md:py-6 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
                 canStrike
                   ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.3)] border border-red-500/40 hover:bg-red-600 cursor-pointer pointer-events-auto'
@@ -733,10 +741,10 @@ function ArenaMaster({ room }) {
           <div className="flex gap-2 bg-white/[0.03] p-1.5 rounded-full border border-red-900/20 focus-within:border-red-700/40 focus-within:bg-white/[0.05] transition-all relative z-10">
             <input 
                value={chatInput} 
-               onChange={e => setChatInput(e.target.value.toUpperCase())} 
-               onKeyDown={e => e.key === 'Enter' && handleChat()} 
-               placeholder="SCRIE UN MESAJ..." 
-               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30" 
+               onChange={e => setChatInput(e.target.value)}
+               onKeyDown={e => e.key === 'Enter' && handleChat()}
+               placeholder="SCRIE UN MESAJ..."
+               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30 uppercase" 
             />
             <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/30 text-sm md:text-xs active:scale-95 flex items-center justify-center cursor-pointer">🕊️</button>
           </div>
