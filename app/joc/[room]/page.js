@@ -184,7 +184,7 @@ function ArenaMaster({ room }) {
   const searchParams = useSearchParams();
   const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef, connectionState } = useGlobalStats();
 
-  const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
+  const [me] = useState({ skin: userStats.skin || 'red', isGolden: false, hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
   
   const [isStriking, setIsStriking] = useState(false);
@@ -208,9 +208,16 @@ function ArenaMaster({ room }) {
   const matchmakingCancelledRef = useRef(false);
   const lastStrikeRef = useRef(0); // debounce: max 1 lovitură la 150ms
   const teamIdPreluat = searchParams.get("teamId");
-  const isHost = searchParams.get("host") === "true";
+  const [isHost, setIsHost] = useState(() => {
+    // Initialize from sessionStorage for arena rooms (set by matchmaking)
+    try {
+      const token = sessionStorage.getItem('room-host-token');
+      return token === 'arena-host' || token === 'provocare-host';
+    } catch { return false; }
+  });
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
+  const isHostRef = useRef(isHost);
 
   // Refs stabile — rezolvă stale closure-uri din Pusher handlers
   const regiuneRef = useRef(userStats.regiune);
@@ -241,13 +248,15 @@ function ArenaMaster({ room }) {
   const broadcastJoin = useCallback(async () => {
     if (!nume) return;
     try {
+      let hostToken = '';
+      try { hostToken = sessionStorage.getItem('room-host-token') || ''; } catch {}
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           roomId: room, actiune: 'join', jucator: nume,
           skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar,
-          isHost: isHost, regiune: regiuneRef.current
+          hostToken, regiune: regiuneRef.current
         })
       });
       const data = await res.json();
@@ -255,10 +264,14 @@ function ArenaMaster({ room }) {
         router.replace('/?error=ocupata');
         return;
       }
+      // Server determines host status
+      if (data.isHost !== undefined) {
+        isHostRef.current = data.isHost;
+        setIsHost(data.isHost);
+      }
     } catch {}
-    if (me.isGolden) updateStats('golden');
     if (me.hasStar) updateStats('star');
-  }, [room, nume, me, isHost, updateStats, router]);
+  }, [room, nume, me, updateStats, router]);
 
   // LOGICĂ BOT
   useEffect(() => {
@@ -325,7 +338,7 @@ function ArenaMaster({ room }) {
         opponentRef.current = data;
 
         // Scoate camera din coada de matchmaking (o singură dată, doar host-ul)
-        if (isHost && room.startsWith('arena-') && !matchmakingCancelledRef.current) {
+        if (isHostRef.current && room.startsWith('arena-') && !matchmakingCancelledRef.current) {
           matchmakingCancelledRef.current = true;
           fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
         }
@@ -338,7 +351,8 @@ function ArenaMaster({ room }) {
           if (!isPrivate && !isProvocare) return [n, data.jucator].sort()[0];
           const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
           const hostAttacks = roomSum % 2 === 0;
-          return hostAttacks ? (isHost ? n : data.jucator) : (isHost ? data.jucator : n);
+          const myHost = isHostRef.current;
+          return hostAttacks ? (myHost ? n : data.jucator) : (myHost ? data.jucator : n);
         });
 
         // Răspundem cu join-ul nostru DOAR prima dată — previne loop infinit
@@ -390,7 +404,7 @@ function ArenaMaster({ room }) {
     return () => { pusher.unsubscribe(`arena-v22-${room}`); };
   // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, nume, isBotMatch, broadcastJoin, isHost, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
+  }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
 
   // Warn before leaving during active game
   useEffect(() => {
@@ -584,10 +598,15 @@ function ArenaMaster({ room }) {
 
   const shareRoom = () => {
     const code = room.replace('privat-', '');
-    const url = `${window.location.origin}/joc/${room}?host=false`;
+    const url = `${window.location.origin}/joc/${room}`;
     const text = `Hai la o ciocneală de ouă! Codul camerei: ${code} sau intră direct pe`;
     if (navigator.share) {
-      navigator.share({ title: "Ciocnim.ro - Hai la duel!", text, url }).catch(() => {});
+      navigator.share({ title: "Ciocnim.ro - Hai la duel!", text, url }).then(() => {}).catch(() => {
+        // Fallback if share was dismissed
+        safeCopy(`${text} ${url}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
     } else {
       safeCopy(`${text} ${url}`);
       setCopied(true);
@@ -597,7 +616,7 @@ function ArenaMaster({ room }) {
 
   const shareWhatsApp = () => {
     const code = room.replace('privat-', '');
-    const url = `${window.location.origin}/joc/${room}?host=false`;
+    const url = `${window.location.origin}/joc/${room}`;
     const text = `Hai la o ciocneală de ouă pe Ciocnim.ro! 🥚⚔️ Codul camerei: ${code} sau intră direct: ${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -873,14 +892,15 @@ function ArenaMaster({ room }) {
                       ctx.lineWidth = 3; ctx.strokeRect(40, 40, 1000, 1000);
                       ctx.font = '120px serif'; ctx.textAlign = 'center';
                       ctx.fillText(rezultat.win ? '👑' : '🥚', 540, 300);
+                      const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                       ctx.fillStyle = rezultat.win ? '#22c55e' : '#ef4444';
-                      ctx.font = 'bold 72px sans-serif';
+                      ctx.font = `bold 72px ${fontFamily}`;
                       ctx.fillText(rezultat.win ? 'VICTORIE!' : 'Oul s-a spart', 540, 450);
-                      ctx.fillStyle = '#e5e5e5'; ctx.font = '36px sans-serif';
+                      ctx.fillStyle = '#e5e5e5'; ctx.font = `36px ${fontFamily}`;
                       ctx.fillText(nume || 'Jucător', 540, 550);
-                      ctx.fillStyle = '#9ca3af'; ctx.font = '28px sans-serif';
+                      ctx.fillStyle = '#9ca3af'; ctx.font = `28px ${fontFamily}`;
                       ctx.fillText(`${userStats.wins || 0} victorii`, 540, 620);
-                      ctx.fillStyle = 'rgba(220,38,38,0.6)'; ctx.font = 'bold 32px sans-serif';
+                      ctx.fillStyle = 'rgba(220,38,38,0.6)'; ctx.font = `bold 32px ${fontFamily}`;
                       ctx.fillText('ciocnim.ro', 540, 950);
                       const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
                       if (blob && navigator.share && navigator.canShare) {
@@ -893,7 +913,9 @@ function ArenaMaster({ room }) {
                     } catch {}
                     // Fallback to text share
                     if (navigator.share) {
-                      navigator.share({ title: 'Ciocnim.ro', text, url }).catch(() => {});
+                      navigator.share({ title: 'Ciocnim.ro', text, url }).catch(() => {
+                        safeCopy(`${text} ${url}`);
+                      });
                     } else {
                       safeCopy(`${text} ${url}`);
                     }
@@ -948,7 +970,7 @@ function ArenaMaster({ room }) {
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
-    <main className="game-arena min-h-[100dvh] w-full bg-[#0c0a0a] text-gray-200 flex flex-col items-center justify-start md:justify-center relative overflow-x-hidden pattern-tradition">
+    <main className="game-arena min-h-[100dvh] w-full bg-[#0c0a0a] text-gray-200 flex flex-col items-center justify-start md:justify-center relative pattern-tradition" style={{ overflowX: 'clip' }}>
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[150px] pointer-events-none" />
 

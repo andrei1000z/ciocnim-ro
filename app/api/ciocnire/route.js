@@ -231,8 +231,9 @@ export async function POST(request) {
 
         const safeName = jucator ? jucator.toUpperCase() : null;
 
-        // Trim leaderboard to max 100 entries (remove everything below rank 100)
-        pipeline.zremrangebyrank('leaderboard_jucatori', 0, -101);
+        // Trim leaderboards to prevent unbounded growth
+        pipeline.zremrangebyrank('leaderboard_jucatori', 0, -101); // max 100
+        pipeline.zremrangebyrank('leaderboard_regiuni', 0, -21); // max 20
 
         // Runda 1: pipeline (scrieri) + leaderboard reads + user stats — toate în paralel
         const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([
@@ -271,6 +272,7 @@ export async function POST(request) {
         if (joinCount === 1) await redis.expire(joinRlKey, 60);
         if (joinCount > 10) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
         const cleanName = jucator.toUpperCase();
+        let serverIsHost = false;
         // Tracking jucători per cameră (max 2)
         if (roomId.startsWith('privat-')) {
           const playerSetKey = `room:${roomId}:players`;
@@ -283,16 +285,39 @@ export async function POST(request) {
               return NextResponse.json({ success: false, error: "Camera este ocupată!" });
             }
           }
+          // Determine host server-side: validate hostToken from room data
+          const hostToken = sanitizeStr(body.hostToken, 64);
+          if (hostToken) {
+            const roomData = await redis.get(`room:${roomId}`);
+            if (roomData) {
+              try {
+                const parsed = JSON.parse(roomData);
+                serverIsHost = parsed.hostToken === hostToken;
+              } catch {}
+            }
+          }
+          // Fallback: first player in set is host
+          if (!serverIsHost) {
+            const members = await redis.smembers(playerSetKey);
+            serverIsHost = members.length <= 1 || members[0] === cleanName;
+          }
+        }
+        // Store skin per room+player in Redis (prevents spoofing via URL)
+        if (roomId.startsWith('privat-')) {
+          await redis.setex(`room:${roomId}:skin:${cleanName}`, 7200, JSON.stringify({ skin, isGolden, hasStar }));
         }
         await pusher.trigger(`arena-v22-${roomId}`, 'join', {
-          jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: body.isHost, t: Date.now()
+          jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now()
         });
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, isHost: serverIsHost });
       }
 
       case 'check-room': {
         const cod = sanitizeId(body.cod);
-        if (!cod) return NextResponse.json({ success: false, error: "Cod lipsă" });
+        if (!cod || cod.length < 4) return NextResponse.json({ success: false, error: "Cod invalid" });
+        // Atomic check: verify room exists AND has space (prevents race condition)
+        const roomExists = await redis.exists(`room:privat-${cod}`);
+        if (!roomExists) return NextResponse.json({ success: false, error: "Camera nu există. Verifică codul." });
         const count = await redis.scard(`room:privat-${cod}:players`);
         if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." });
         return NextResponse.json({ success: true });
@@ -558,7 +583,12 @@ export async function POST(request) {
       }
 
       case 'reset-all': {
-        // Two-step confirmation: first call returns a token, second call with token executes
+        // Protected: requires ADMIN_SECRET + optional IP whitelist
+        const resetIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+        const allowedIps = (process.env.ADMIN_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
+        if (allowedIps.length > 0 && !allowedIps.includes(resetIp)) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+        }
         const secret = sanitizeStr(body.secret, 50);
         if (secret !== process.env.ADMIN_SECRET) {
           return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -576,15 +606,26 @@ export async function POST(request) {
           return NextResponse.json({ success: false, error: "Token invalid or expired. Start over." }, { status: 400 });
         }
         await redis.del('admin:reset-token');
-        // Only delete game-related keys, not everything
-        const prefixes = ['global_ciocniri_total', 'leaderboard_*', 'team:*', 'user:*', 'arena:*', 'room:*', 'nume_rezervat:*'];
+        // Only delete game-related keys using SCAN (non-blocking)
+        const patterns = ['global_ciocniri_total', 'leaderboard_*', 'team:*', 'user:*', 'arena:*', 'room:*', 'nume_rezervat:*', 'ratelimit:*'];
         let deleted = 0;
-        for (const prefix of prefixes) {
-          const keys = await redis.keys(prefix);
-          if (keys.length > 0) {
-            await redis.del(...keys);
-            deleted += keys.length;
+        for (const pattern of patterns) {
+          if (!pattern.includes('*')) {
+            // Exact key — delete directly
+            const del = await redis.del(pattern);
+            deleted += del;
+            continue;
           }
+          // Use SCAN to avoid blocking
+          let cursor = '0';
+          do {
+            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+            cursor = nextCursor;
+            if (keys.length > 0) {
+              await redis.del(...keys);
+              deleted += keys.length;
+            }
+          } while (cursor !== '0');
         }
         return NextResponse.json({ success: true, deleted });
       }
@@ -599,11 +640,12 @@ export async function POST(request) {
         // Generăm un cod unic - reîncercăm dacă e deja rezervat
         let cod, attempts = 0;
         do {
-          cod = Math.random().toString(36).substring(2, 6).toUpperCase();
+          cod = Math.random().toString(36).substring(2, 8).toUpperCase();
           attempts++;
         } while (attempts < 20 && await redis.exists(`room:privat-${cod}`));
-        await redis.setex(`room:privat-${cod}`, 7200, JSON.stringify({ status: 'waiting', t: Date.now() }));
-        return NextResponse.json({ success: true, cod });
+        const hostToken = Math.random().toString(36).substring(2, 18);
+        await redis.setex(`room:privat-${cod}`, 7200, JSON.stringify({ status: 'waiting', t: Date.now(), hostToken }));
+        return NextResponse.json({ success: true, cod, hostToken });
       }
 
       default:

@@ -205,7 +205,10 @@ function HomeContent() {
     try {
       const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-matchmaking' }) });
       const data = await res.json();
-      if (data.success) router.push(`/joc/${data.roomId}?host=${data.isHost}&skin=${userStats.skin || 'red'}`);
+      if (data.success) {
+        try { sessionStorage.setItem('room-host-token', data.isHost ? 'arena-host' : ''); } catch {}
+        router.push(`/joc/${data.roomId}`);
+      }
     } catch { setToastMsg("Eroare de rețea!"); }
     finally { setIsJoiningArena(false); }
   };
@@ -254,11 +257,12 @@ function HomeContent() {
 
   const handleProvocare = async (oponent, teamId) => {
     triggerVibrate([50, 50, 50]);
-    const roomCode = `privat-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const roomCode = `privat-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     try {
       const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId }) });
       if (!res.ok) { setToastMsg("Eroare la trimiterea provocării."); return; }
-      router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true&teamId=${teamId}`);
+      try { sessionStorage.setItem('room-host-token', 'provocare-host'); } catch {}
+      router.push(`/joc/${roomCode}?provocare=true&teamId=${teamId}`);
     } catch { setToastMsg("Eroare de rețea. Încearcă din nou."); }
   };
 
