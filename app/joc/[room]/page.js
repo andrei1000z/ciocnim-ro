@@ -208,16 +208,21 @@ function ArenaMaster({ room }) {
   const matchmakingCancelledRef = useRef(false);
   const lastStrikeRef = useRef(0); // debounce: max 1 lovitură la 150ms
   const teamIdPreluat = searchParams.get("teamId");
-  const [isHost, setIsHost] = useState(() => {
-    // Initialize from sessionStorage for arena rooms (set by matchmaking)
-    try {
-      const token = sessionStorage.getItem('room-host-token');
-      return token === 'arena-host' || token === 'provocare-host';
-    } catch { return false; }
-  });
+  const [isHost, setIsHost] = useState(false);
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
-  const isHostRef = useRef(isHost);
+  const isHostRef = useRef(false);
+
+  // Read host token from sessionStorage after hydration (SSR-safe)
+  useEffect(() => {
+    try {
+      const token = sessionStorage.getItem('room-host-token');
+      if (token === 'arena-host' || token === 'provocare-host') {
+        setIsHost(true);
+        isHostRef.current = true;
+      }
+    } catch {}
+  }, []);
 
   // Refs stabile — rezolvă stale closure-uri din Pusher handlers
   const regiuneRef = useRef(userStats.regiune);
