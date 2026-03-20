@@ -1,5 +1,5 @@
 /**
- * Shared profanity filter — used by both client (page.js) and server (route.js)
+ * Shared profanity filter & username validation — used by both client (page.js) and server (route.js)
  */
 
 export const CUVINTE_INTERZISE = [
@@ -26,4 +26,21 @@ export function esteNumeInterzis(name) {
   const nv = n.replace(/v/g, 'u');
   const noo = nv.replace(/oo/g, 'u');
   return CUVINTE_INTERZISE.some(w => n.includes(w) || nv.includes(w) || noo.includes(w));
+}
+
+/**
+ * Validates username: length 2-20, only safe characters, no profanity.
+ * Returns { valid: boolean, error?: string }
+ */
+export function valideazaNume(name) {
+  if (!name || typeof name !== 'string') return { valid: false, error: 'Numele este obligatoriu.' };
+  const trimmed = name.trim();
+  if (trimmed.length < 2) return { valid: false, error: 'Minim 2 caractere.' };
+  if (trimmed.length > 20) return { valid: false, error: 'Maxim 20 de caractere.' };
+  // Allow letters (including diacritics), numbers, spaces, hyphens, underscores
+  if (!/^[a-zA-ZÀ-ÿĂăÂâÎîȘșȚț0-9 _-]+$/.test(trimmed)) {
+    return { valid: false, error: 'Doar litere, cifre, spații și cratime.' };
+  }
+  if (esteNumeInterzis(trimmed)) return { valid: false, error: 'Ai chef de glume? Alege alt nume.' };
+  return { valid: true };
 }

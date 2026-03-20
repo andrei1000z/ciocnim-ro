@@ -170,6 +170,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
       {hasStar && <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 text-4xl md:text-6xl animate-star drop-shadow-[0_0_20px_rgba(234,179,8,1)] z-20 select-none">⭐</div>}
       {spart && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"><div className="spark-burst" /></div>}
       {spart && <div className="absolute inset-0 particle-burst pointer-events-none" />}
+      {spart && <div className="absolute inset-0 shell-fragments pointer-events-none" />}
     </div>
   );
 };
@@ -181,7 +182,7 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef } = useGlobalStats();
+  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef, connectionState } = useGlobalStats();
 
   const [me] = useState({ skin: searchParams.get("skin") || 'red', isGolden: searchParams.get("golden") === "true", hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -391,6 +392,18 @@ function ArenaMaster({ room }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, nume, isBotMatch, broadcastJoin, isHost, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
 
+  // Warn before leaving during active game
+  useEffect(() => {
+    if (!opponent || rezultat) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = 'Ești sigur că vrei să ieși din meci?';
+      return e.returnValue;
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [opponent, rezultat]);
+
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -582,6 +595,13 @@ function ArenaMaster({ room }) {
     }
   };
 
+  const shareWhatsApp = () => {
+    const code = room.replace('privat-', '');
+    const url = `${window.location.origin}/joc/${room}?host=false`;
+    const text = `Hai la o ciocneală de ouă pe Ciocnim.ro! 🥚⚔️ Codul camerei: ${code} sau intră direct: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   return (
     <>
       {/* Wrapper principal: Modificat pentru anti-suprapunere. Folosim flex-col cu overflow safe */}
@@ -598,17 +618,25 @@ function ArenaMaster({ room }) {
               </div>
               {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-green-400 tracking-widest">COPIAT!</span>}
             </button>
-            <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite prietenului">
+            <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite prietenului" aria-label="Distribuie link-ul camerei">
               <span className="text-base md:text-lg">📲</span>
+            </button>
+            <button onClick={shareWhatsApp} className="bg-green-700 hover:bg-green-600 text-white p-3 md:p-4 rounded-full border border-green-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite pe WhatsApp" aria-label="Trimite pe WhatsApp">
+              <span className="text-base md:text-lg">💬</span>
             </button>
           </div>
         )}
 
-        {/* LIVE Indicator + Mute */}
+        {/* LIVE Indicator + Connection Status + Mute */}
         <div className="flex flex-col items-center gap-1 mb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
-            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-green-400">LIVE</span>
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
+            </span>
+            <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] ${connectionState === 'connected' ? 'text-green-400' : connectionState === 'connecting' ? 'text-yellow-400' : 'text-red-400'}`}>
+              {connectionState === 'connected' ? 'LIVE' : connectionState === 'connecting' ? 'SE CONECTEAZĂ...' : 'DECONECTAT'}
+            </span>
             <span className="text-[11px] md:text-xs font-black text-white tabular-nums">{onlineCount || 1}</span>
             <span className="text-[9px] md:text-[10px] font-semibold text-white/30">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
             <button onClick={() => setIsMuted(m => !m)} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
@@ -873,6 +901,17 @@ function ArenaMaster({ room }) {
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-gradient-to-r from-red-700 to-red-600 text-white border-red-500/30 hover:from-red-600 hover:to-red-500 shadow-lg shadow-red-900/30"
                 >
                   📲 Distribuie Rezultatul
+                </button>
+                <button
+                  onClick={() => {
+                    const text = rezultat.win
+                      ? `Am câștigat la ciocnit ouă pe Ciocnim.ro! 🏆🥚 Am ${userStats.wins || 0} victorii. Hai să ne ciocnim!`
+                      : `M-am luptat cinstit la ciocnit ouă pe Ciocnim.ro! 🥚💥 Hai la revanșă!`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(`${text} https://ciocnim.ro`)}`, '_blank');
+                  }}
+                  className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-green-700 text-white border-green-600/30 hover:bg-green-600 shadow-lg shadow-green-900/30"
+                >
+                  💬 Trimite pe WhatsApp
                 </button>
                 <button
                   onClick={handleRevansa}

@@ -410,6 +410,45 @@
     z-index: 50;
   }
 
+  /* Enhanced impact flash overlay */
+  .impact-flash-overlay {
+    animation: impact-flash-glow 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes impact-flash-glow {
+    0% { background: radial-gradient(circle at 50% 50%, rgba(255,100,0,0.4), transparent 70%); }
+    50% { background: radial-gradient(circle at 50% 50%, rgba(255,50,0,0.2), transparent 60%); }
+    100% { background: transparent; }
+  }
+
+  /* Shell fragment particles on crack */
+  .shell-fragments::after {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    background:
+      radial-gradient(3px 3px at 15% 25%, rgba(220,38,38,0.9) 50%, transparent 50%),
+      radial-gradient(4px 4px at 35% 65%, rgba(245,158,11,0.8) 50%, transparent 50%),
+      radial-gradient(3px 3px at 55% 15%, rgba(255,255,255,0.7) 50%, transparent 50%),
+      radial-gradient(5px 5px at 75% 55%, rgba(220,38,38,0.6) 50%, transparent 50%),
+      radial-gradient(3px 3px at 25% 75%, rgba(251,191,36,0.8) 50%, transparent 50%),
+      radial-gradient(4px 4px at 65% 35%, rgba(255,255,255,0.5) 50%, transparent 50%),
+      radial-gradient(3px 3px at 85% 80%, rgba(220,38,38,0.7) 50%, transparent 50%),
+      radial-gradient(5px 5px at 45% 45%, rgba(245,158,11,0.9) 50%, transparent 50%),
+      radial-gradient(2px 2px at 10% 50%, rgba(255,255,255,0.6) 50%, transparent 50%),
+      radial-gradient(4px 4px at 90% 20%, rgba(220,38,38,0.8) 50%, transparent 50%);
+    animation: shell-explode 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    pointer-events: none;
+    z-index: 60;
+  }
+
+  @keyframes shell-explode {
+    0% { transform: scale(0.2) rotate(0deg); opacity: 1; }
+    40% { opacity: 0.9; }
+    100% { transform: scale(3.5) rotate(45deg); opacity: 0; }
+  }
+
   /* Power bar animation */
   @keyframes power-sweep {
     0% { width: 0%; }

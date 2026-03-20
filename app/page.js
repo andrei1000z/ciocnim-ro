@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalStats } from "./components/ClientWrapper";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { esteNumeInterzis } from "./lib/profanityFilter";
+import { esteNumeInterzis, valideazaNume } from "./lib/profanityFilter";
 import DualLeaderboard from "./components/DualLeaderboard";
 import GroupHub from "./components/GroupHub";
 import { ColorSelector, RegionSelector } from "./components/ProfileSection";
@@ -149,8 +149,9 @@ function HomeContent() {
 
   const handleSaveNume = async () => {
     const final = localNume.trim().toUpperCase();
-    if (final.length < 3 || final === (nume || "").trim().toUpperCase()) return;
-    if (esteNumeInterzis(final)) { setNumeError("Ai chef de glume? Alege alt nume"); return; }
+    if (final === (nume || "").trim().toUpperCase()) return;
+    const validation = valideazaNume(final);
+    if (!validation.valid) { setNumeError(validation.error); return; }
     setNumeError("");
     triggerVibrate(); setIsSavingName(true);
     const ok = await setNume(final);
@@ -262,14 +263,26 @@ function HomeContent() {
   };
 
   if (!isHydrated) return (
-    <div className="w-full max-w-md mx-auto pb-16 px-4 pt-8 text-center">
-      <h1 className="text-4xl font-black text-white tracking-tight">CIOCNIM<span className="text-red-500">.</span>RO</h1>
-      <p className="text-sm font-bold text-red-400/60 mt-2">Ciocnește ouă online de Paște</p>
-      <p className="text-gray-400 text-sm mt-6">Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național.</p>
+    <div className="w-full max-w-md mx-auto pb-16 px-4 pt-8 space-y-6">
+      <div className="text-center">
+        <h1 className="text-4xl font-black text-white tracking-tight">CIOCNIM<span className="text-red-500">.</span>RO</h1>
+        <p className="text-sm font-bold text-red-400/60 mt-2">Ciocnește ouă online de Paște</p>
+      </div>
+      {/* Skeleton placeholders */}
+      <div className="space-y-4 animate-pulse">
+        <div className="h-20 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+        <div className="h-14 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+        <div className="space-y-2">
+          <div className="h-16 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+          <div className="h-16 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+          <div className="h-16 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+        </div>
+        <div className="h-32 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+      </div>
     </div>
   );
 
-  const isNameInvalid = localNume.trim().length < 3 || localNume.trim().toUpperCase() === (nume || "").trim().toUpperCase();
+  const isNameInvalid = localNume.trim().length < 2 || localNume.trim().toUpperCase() === (nume || "").trim().toUpperCase();
 
   return (
     <div className="w-full max-w-md mx-auto pb-16 px-4 space-y-7">
@@ -285,7 +298,7 @@ function HomeContent() {
 
         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="relative z-10">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-4 shadow-lg shadow-red-900/10 backdrop-blur-sm">
-            <span className="text-4xl drop-shadow-lg">🥚</span>
+            <span className="text-4xl drop-shadow-lg" role="img" aria-label="Ou de Paște">🥚</span>
           </div>
         </motion.div>
 
@@ -301,7 +314,7 @@ function HomeContent() {
         {/* COUNTER CIOCNIRI + LIVE */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2 relative z-10">
           <div className="inline-flex items-center gap-2 bg-white/[0.06] backdrop-blur-xl border border-red-500/15 text-white px-4 sm:px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20 max-w-full">
-            <span className="text-lg flex-shrink-0">🥚</span>
+            <span className="text-lg flex-shrink-0" role="img" aria-label="Ou de Paște">🥚</span>
             <span className="tabular-nums text-white text-xl sm:text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
             <span className="font-semibold text-white/40 text-[10px] sm:text-xs">Ciocniri Naționale</span>
           </div>
@@ -348,8 +361,8 @@ function HomeContent() {
             <AnimatePresence>
               {numeError ? (
                 <motion.p key="err-rau" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-orange-500 text-xs mt-1.5 font-medium">{numeError}</motion.p>
-              ) : localNume.trim().length > 0 && localNume.trim().length < 3 ? (
-                <motion.p key="err-scurt" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-xs mt-1.5 font-medium">Minim 3 caractere</motion.p>
+              ) : localNume.trim().length > 0 && localNume.trim().length < 2 ? (
+                <motion.p key="err-scurt" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-xs mt-1.5 font-medium">Minim 2 caractere</motion.p>
               ) : !nume && localNume.trim().length === 0 ? (
                 <motion.p key="hint" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-gray-400 text-xs mt-1.5 font-medium">Scrie o poreclă și apasă OK ca să poți juca</motion.p>
               ) : null}
@@ -492,13 +505,18 @@ function HomeContent() {
       {/* FOOTER */}
       <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
         <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-3 flex-wrap">
           {nume && <Link href="/profil" className="text-[11px] text-gray-400 hover:text-amber-400 transition-colors">Profilul meu</Link>}
           {nume && <span className="text-gray-200 text-xs">·</span>}
           <button onClick={() => { safeCopy("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
           <span className="text-gray-200 text-xs">·</span>
+          <Link href="/privacy" className="text-[11px] text-gray-400 hover:text-red-400 transition-colors">Confidențialitate</Link>
+          <span className="text-gray-200 text-xs">·</span>
+          <Link href="/terms" className="text-[11px] text-gray-400 hover:text-red-400 transition-colors">Termeni</Link>
+          <span className="text-gray-200 text-xs">·</span>
           <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație</button>
         </div>
+        <p className="text-[9px] text-gray-600">© {new Date().getFullYear()} Ciocnim.ro. Toate drepturile rezervate.</p>
       </motion.div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
@@ -590,7 +608,7 @@ export default function Home() {
       <Suspense fallback={
         <div className="h-screen flex items-center justify-center">
           <div className="text-center space-y-3">
-            <div className="text-5xl animate-bounce">🥚</div>
+            <div className="text-5xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</div>
             <p className="text-xs font-bold text-red-500 animate-pulse uppercase tracking-widest">Se încarcă...</p>
           </div>
         </div>

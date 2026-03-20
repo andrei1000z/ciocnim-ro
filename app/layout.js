@@ -15,10 +15,21 @@ const outfit = Outfit({
 
 export const metadata = {
   title: {
-    default: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii | Paște",
+    default: "Ciocnim.ro – Ciocnește Ouă Online de Paște",
     template: "%s | Ciocnim.ro"
   },
-  description: "Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național. Gratuit, fără instalare, pe orice telefon. Hristos a Înviat!",
+  description: "Jocul tradițional de Paște, acum online! Ciocnește ouă cu familia, personalizează-ți oul și urcă în clasamentul național. Gratuit, pe orice telefon.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   applicationName: "Ciocnim.ro",
   authors: [{ name: "Echipa Ciocnim.ro" }],
   creator: "Ciocnim.ro",

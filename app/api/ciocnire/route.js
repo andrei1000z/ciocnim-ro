@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Pusher from 'pusher';
 import redis from '@/app/lib/redis';
-import { esteNumeInterzis as esteNumeInterzisShared } from '@/app/lib/profanityFilter';
+import { esteNumeInterzis as esteNumeInterzisShared, valideazaNume } from '@/app/lib/profanityFilter';
 import { ACHIEVEMENTS } from '@/app/lib/achievements';
 
 
@@ -264,6 +264,12 @@ export async function POST(request) {
 
       case 'join': {
         if (!jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
+        // Rate limit: max 10 req/min per IP
+        const joinIp = request.headers.get('x-forwarded-for') || 'anon';
+        const joinRlKey = `ratelimit:join:${joinIp}`;
+        const joinCount = await redis.incr(joinRlKey);
+        if (joinCount === 1) await redis.expire(joinRlKey, 60);
+        if (joinCount > 10) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
         const cleanName = jucator.toUpperCase();
         // Tracking jucători per cameră (max 2)
         if (roomId.startsWith('privat-')) {
@@ -359,8 +365,9 @@ export async function POST(request) {
       }
 
       case 'schimba-porecla': {
-        if (!newName || newName.length < 3) {
-            return NextResponse.json({ success: false, error: "Nume prea scurt" });
+        const numeValidation = valideazaNume(newName);
+        if (!numeValidation.valid) {
+            return NextResponse.json({ success: false, error: numeValidation.error });
         }
         const nameRlIp = request.headers.get('x-forwarded-for') || 'anon';
         const nameRlKey = `ratelimit:name:${nameRlIp}`;
@@ -372,10 +379,6 @@ export async function POST(request) {
 
         if (NUME_INTERZISE.includes(newClean)) {
             return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." });
-        }
-
-        if (esteNumeInterzisServer(newClean) || newClean.length > 21) {
-            return NextResponse.json({ success: false, error: "Ai chef de glume? Alege alt nume 😅" });
         }
 
         const isTaken = await redis.get(`nume_rezervat:${newClean}`);
@@ -587,6 +590,12 @@ export async function POST(request) {
       }
 
       case 'creeaza-camera-privata': {
+        // Rate limit: max 10 req/min per IP
+        const createIp = request.headers.get('x-forwarded-for') || 'anon';
+        const createRlKey = `ratelimit:create:${createIp}`;
+        const createCount = await redis.incr(createRlKey);
+        if (createCount === 1) await redis.expire(createRlKey, 60);
+        if (createCount > 10) return NextResponse.json({ success: false, error: "Prea multe camere create. Așteaptă un minut." }, { status: 429 });
         // Generăm un cod unic - reîncercăm dacă e deja rezervat
         let cod, attempts = 0;
         do {

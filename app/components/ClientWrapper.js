@@ -59,6 +59,69 @@ function AchievementToast({ achievement, onDone }) {
   );
 }
 
+function CookieBanner() {
+  const [visible, setVisible] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && !localStorage.getItem('c_cookie_consent');
+    } catch { return false; }
+  });
+  if (!visible) return null;
+  const accept = () => {
+    try { localStorage.setItem('c_cookie_consent', '1'); } catch {}
+    setVisible(false);
+  };
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      className="fixed bottom-4 left-4 right-4 z-[1300] max-w-md mx-auto bg-[#1a1515] border border-red-900/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex flex-col gap-3"
+    >
+      <p className="text-xs text-gray-300 leading-relaxed">
+        Ciocnim.ro folosește <strong className="text-white">localStorage</strong> pentru a-ți salva preferințele (poreclă, temă, statistici).
+        Nu folosim cookies de tracking.{' '}
+        <a href="/privacy" className="text-red-400 hover:text-red-300 underline">Politica de confidențialitate</a>.
+      </p>
+      <button
+        onClick={accept}
+        className="self-end px-5 py-2 bg-red-700 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 border border-red-600"
+      >
+        Am înțeles
+      </button>
+    </motion.div>
+  );
+}
+
+function LoadingScreen() {
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 10000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="fixed inset-0 bg-[#0c0a0a] z-[100001] flex flex-col items-center justify-center">
+      {!timedOut ? (
+        <div className="flex flex-col items-center gap-5">
+          <span className="text-8xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</span>
+          <p className="text-sm font-black text-red-500 uppercase tracking-[0.4em] animate-pulse">Se încarcă...</p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-5 text-center px-6 max-w-sm">
+          <span className="text-6xl" role="img" aria-label="Eroare">⚠️</span>
+          <p className="text-base font-black text-red-400">Ceva nu a mers bine</p>
+          <p className="text-sm text-gray-400">Pagina nu s-a putut încărca. Verifică conexiunea la internet și încearcă din nou.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-8 py-3 bg-red-700 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 border border-red-600"
+          >
+            Reîncearcă
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", regiune: "Muntenia" };
 const emptySubscribe = () => () => {};
 
@@ -113,12 +176,13 @@ export default function ClientWrapper({ children }) {
 
   const pusherRef = useRef(null);
   const visitorIdRef = useRef(null);
+  const [connectionState, setConnectionState] = useState('connecting');
 
   // Inițializare Pusher o singură dată — disconnect la unmount
   useEffect(() => {
     const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS !== 'false';
     const wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
-    pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
       cluster: 'eu',
       wsHost: process.env.NEXT_PUBLIC_PUSHER_HOST || undefined,
       wsPort: wsPort,
@@ -126,9 +190,20 @@ export default function ClientWrapper({ children }) {
       forceTLS: forceTLS,
       disableStats: true,
       enabledTransports: ['ws', 'wss', 'xhr_streaming', 'xhr_polling'],
+      activityTimeout: 30000,
+      pongTimeout: 15000,
     });
+    pusherRef.current = pusher;
+
+    // Track connection state for visual indicator
+    pusher.connection.bind('state_change', ({ current }) => {
+      setConnectionState(current);
+    });
+    pusher.connection.bind('connected', () => setConnectionState('connected'));
+    pusher.connection.bind('disconnected', () => setConnectionState('disconnected'));
+
     return () => {
-      pusherRef.current?.disconnect();
+      pusher.disconnect();
       pusherRef.current = null;
     };
   }, []);
@@ -166,8 +241,8 @@ export default function ClientWrapper({ children }) {
   const setNume = useCallback(async (nouNume) => {
     const cleanName = nouNume.toUpperCase().trim();
     if (cleanName === nume) return true; 
-    if (cleanName.length < 3) {
-      setToastMsg("Numele trebuie să aibă minim 3 litere.");
+    if (cleanName.length < 2) {
+      setToastMsg("Numele trebuie să aibă minim 2 caractere.");
       return false;
     }
 
@@ -380,7 +455,8 @@ export default function ClientWrapper({ children }) {
     updateStats,
     onlineCount,
     toastMsg, setToastMsg,
-    pusherRef
+    pusherRef,
+    connectionState,
   };
 
   return (
@@ -433,14 +509,8 @@ export default function ClientWrapper({ children }) {
           </AnimatePresence>
       </div>
 
-      {!isHydrated && (
-        <div className="fixed inset-0 bg-[#0c0a0a] z-[100001] flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center gap-5">
-            <span className="text-8xl animate-bounce">🥚</span>
-            <p className="text-sm font-black text-red-500 uppercase tracking-[0.4em] animate-pulse">Se încarcă...</p>
-          </div>
-        </div>
-      )}
+      {!isHydrated && <LoadingScreen />}
+      <CookieBanner />
     </GlobalStatsContext.Provider>
   );
 }
