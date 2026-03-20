@@ -13,40 +13,13 @@ const outfit = Outfit({
   variable: "--font-outfit"
 });
 
-const currentYear = new Date().getFullYear();
-
 export const metadata = {
   title: {
-    default: `Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii | Paște ${currentYear}`,
+    default: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii | Paște",
     template: "%s | Ciocnim.ro"
   },
-  description: `Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național. Gratuit, fără instalare, pe orice telefon. Hristos a Înviat ${currentYear}!`,
+  description: "Jocul tradițional de Paște, acum online! Provoacă-ți familia la ciocnit ouă virtuale, personalizează-ți oul și urcă în clasamentul național. Gratuit, fără instalare, pe orice telefon. Hristos a Înviat!",
   applicationName: "Ciocnim.ro",
-  keywords: [
-    "ciocnit ouă online", "bucuria ciocnitului online", `jocul de paște ${currentYear}`, "ciocnim.ro", "bătălia ouălor virtuale",
-    "simulare ciocnit ouă", "satul de paște virtual", "joc browser paște", "ciocnit pe telefon fără download",
-    "multiplayer ciocnit ouă", "cel mai bun joc de paște", "campioni la ciocnit ouă", "ciocnit virtual gratis",
-    "gameplay tradițional românesc", "concurs de paște online", "ciocnim ouă pe mobil", `aplicație ciocnit ouă ${currentYear}`,
-    "tradiții românești de paște", `obiceiuri pascale ${currentYear}`, "semnificația ciocnitului ouălor", "vopsit ouă natural",
-    "ouă încondeiate modele", "tradiția oului roșu", "sărbători creștine tradiții", "motive populare românești",
-    "ia românească și paștele", "obiceiuri din strămoși", "hristos a înviat tradiție", "povești de paște pentru copii",
-    "cum se ciocnesc ouăle corect", "rețete tradiționale de paște", "vopsit ouă cu foi de ceapă", "clasament național ciocnit ouă",
-    "top jucători ciocnim.ro", "bătălia regiunilor românia", "provocare duel paște", "grup privat familie ciocnit",
-    "cine are cel mai tare ou", "invită prietenii la duel", "scor global ciocniri", "victorii și înfrângeri ouă", 
-    "dueluri tradiționale online", "ciocnit ouă transilvania", "tradiții moldova paște", "bucuria munteniei",
-    "campioni oltenia ciocnit", "jocul dobrogenilor", "bucovina tradiții vii", "banatul la masă", "maramureș ciocnit tradițional",
-    `crișana paște ${currentYear}`, "clasament regiuni istorice", "mândria regiunii tale", "provocări regionale online", `mesaje de paște ${currentYear}`,
-    "urări hristos a înviat", "felicitări virtuale paște", "cele mai frumoase mesaje de paște", "statusuri de paște facebook", "poze cu ouă roșii",
-    "hristos a înviat cuvinte", "mesaje scurte de paște", "urări tradiționale românești", "spiritul paștelui online", "lumină de paște mesaj", "paște fericit tuturor",
-    "joc web mobil paște", "ciocnit ouă android", "ciocnit ouă ios online", "joc fără instalare", "ciocnește oul prin mișcare",
-    "vibrate on strike game", "joc tradițional modernizat", "interfață modernă paște", "grafică premium tradițională", "joc de paște securizat",
-    "experiență multiplayer fluidă", `joc românesc ${currentYear}`, "ou de aur ciocnim.ro", "ou de diamant", "ou cosmic de paște", "culori ouă de paște",
-    "ouă personalizate online", "skin-uri tradiționale ouă", "ouă de lux virtuale", `colecție de ouă ${currentYear}`,
-    "ouă roșii strălucitoare", "ouă albastre safir", "ouă imperiale aurii",
-    "skin tradițional ou roșu", "ou albastru safir online", "ou auriu imperial",
-    "ou verde de codru", "motive cross-stitch tradiționale", "ie românească pe ou",
-    "ciocnit ouă live online", "câți oameni joacă acum", `clasament live paște ${currentYear}`
-  ],
   authors: [{ name: "Echipa Ciocnim.ro" }],
   creator: "Ciocnim.ro",
   publisher: "Ciocnim.ro",
@@ -58,7 +31,7 @@ export const metadata = {
   metadataBase: new URL("https://ciocnim.ro"),
   openGraph: {
     title: "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii",
-    description: `Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat ${currentYear}!`,
+    description: "Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat!",
     url: "https://ciocnim.ro",
     siteName: "Ciocnim.ro",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ciocnim.ro – Joc de Paște Online" }],
@@ -67,7 +40,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `Ciocnim.ro – Ciocnește Ouă Online! Hristos a Înviat ${currentYear}`,
+    title: "Ciocnim.ro – Ciocnește Ouă Online! Hristos a Înviat!",
     description: "Provoacă-ți familia la ciocnit ouă virtual. Gratuit, pe orice telefon, fără instalare. Hristos a Înviat!",
     images: ["/og-image.jpg"],
   },
@@ -134,9 +107,9 @@ export default function RootLayout({ children }) {
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name=" apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('c_theme')==='dark')document.documentElement.classList.remove('light');else document.documentElement.classList.add('light')}catch(e){};if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('c_theme');if(t==='dark')document.documentElement.classList.remove('light');else if(t==='light')document.documentElement.classList.add('light');else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.remove('light');else document.documentElement.classList.add('light')}catch(e){};if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}` }} />
         <Script
           id="schema-main"
           type="application/ld+json"
@@ -188,7 +161,7 @@ export default function RootLayout({ children }) {
             max-width: 100%;
             position: relative;
             background-color: var(--bg-main, #0c0a0a);
-            overscroll-behavior-y: auto;
+            overscroll-behavior: none;
             overflow-x: hidden;
           }
 
@@ -209,7 +182,7 @@ export default function RootLayout({ children }) {
           }
 
           main {
-            animation: page-fade-in 0.6s ease-out forwards;
+            animation: page-fade-in 0.3s ease-out forwards;
           }
 
           @keyframes page-fade-in {

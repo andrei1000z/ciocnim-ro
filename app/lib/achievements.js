@@ -1,0 +1,18 @@
+export const ACHIEVEMENTS = {
+  'first_win': { name: 'Prima Victorie', desc: 'Câștigă primul meci', icon: '🏆', rarity: 'common' },
+  'wins_10': { name: 'Ciocnitor Amator', desc: 'Câștigă 10 meciuri', icon: '🥇', rarity: 'common' },
+  'wins_50': { name: 'Ciocnitor Experimentat', desc: 'Câștigă 50 meciuri', icon: '🥈', rarity: 'uncommon' },
+  'wins_100': { name: 'Maestru al Ouălor', desc: 'Câștigă 100 meciuri', icon: '🥉', rarity: 'rare' },
+  'wins_500': { name: 'Legendă Vie', desc: 'Câștigă 500 meciuri', icon: '👑', rarity: 'epic' },
+  'wins_1000': { name: 'Zeul Ciocnitului', desc: 'Câștigă 1000 meciuri', icon: '⚡', rarity: 'legendary' },
+  'first_group': { name: 'Prieten Bun', desc: 'Joacă primul meci în grup', icon: '👥', rarity: 'common' },
+  'group_wins_25': { name: 'Eroul Grupului', desc: 'Câștigă 25 meciuri în grup', icon: '🛡️', rarity: 'uncommon' },
+  'regional_champion': { name: 'Campion Regional', desc: 'Ajunge pe primul loc în regiunea ta', icon: '🏅', rarity: 'rare' },
+  'golden_egg': { name: 'Ou de Aur', desc: 'Folosește un ou auriu în meci', icon: '🥚', rarity: 'rare' },
+  'chat_master': { name: 'Maestru al Vorbei', desc: 'Trimite 100 de mesaje în chat', icon: '💬', rarity: 'uncommon' },
+  'streak_5': { name: 'Fără Pauză', desc: 'Câștigă 5 meciuri consecutive', icon: '🔥', rarity: 'uncommon' },
+  'streak_10': { name: 'Flamă Vie', desc: 'Câștigă 10 meciuri consecutive', icon: '🌟', rarity: 'rare' },
+  'provocator': { name: 'Provocatorul', desc: 'Provoacă 50 de jucători la duel', icon: '⚔️', rarity: 'uncommon' },
+  'tradition_keeper': { name: 'Păstrător al Tradiției', desc: 'Vizitează toate paginile educaționale', icon: '📚', rarity: 'rare' },
+  'social_butterfly': { name: 'Fluture Social', desc: 'Adaugă 10 prieteni', icon: '🦋', rarity: 'uncommon' },
+};

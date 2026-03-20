@@ -277,7 +277,7 @@ function ArenaMaster({ room }) {
       }
       setIsBotMatch(true);
       const botName = "🤖 BOT";
-      const culoriDisponibile = ['red', 'blue', 'gold', 'diamond', 'cosmic'];
+      const culoriDisponibile = ['red', 'blue', 'gold', 'green'];
       const randomSkin = culoriDisponibile[Math.floor(Math.random() * culoriDisponibile.length)];
       setOpponent({ jucator: botName, skin: randomSkin, isGolden: false, hasStar: false, regiune: "România" });
       const botLoveseste = Math.random() > 0.5;
@@ -397,7 +397,7 @@ function ArenaMaster({ room }) {
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = 0;
     }
   }, [messages]);
 

@@ -535,6 +535,9 @@
   html.light [class*="text-white/6"] { color: rgba(26,17,17,0.60) !important; }
   html.light [class*="text-white/7"] { color: rgba(26,17,17,0.70) !important; }
   html.light [class*="text-white/8"] { color: rgba(26,17,17,0.80) !important; }
+  html.light [class*="text-white/[0.0"] { color: rgba(26,17,17,0.10) !important; }
+  html.light [class*="text-white/[0.1"] { color: rgba(26,17,17,0.15) !important; }
+  html.light [class*="text-white/[0.2"] { color: rgba(26,17,17,0.20) !important; }
   html.light [class*="text-gray-200"] { color: #2d1f1f !important; }
   html.light [class*="text-gray-300"] { color: #4a3838 !important; }
   html.light [class*="text-gray-400"] { color: #6e5a50 !important; }

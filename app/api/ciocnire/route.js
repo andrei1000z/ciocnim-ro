@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Pusher from 'pusher';
 import redis from '@/app/lib/redis';
 import { esteNumeInterzis as esteNumeInterzisShared } from '@/app/lib/profanityFilter';
+import { ACHIEVEMENTS } from '@/app/lib/achievements';
 
 /**
  * ====================================================================================================
@@ -13,7 +14,7 @@ const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
   key: process.env.NEXT_PUBLIC_PUSHER_KEY,
   secret: process.env.PUSHER_SECRET,
-  host: process.env.PUSHER_HOST || '161.35.201.178',
+  host: process.env.PUSHER_HOST,
   port: parseInt(process.env.PUSHER_PORT || '6443'),
   useTLS: true,
 });
@@ -46,25 +47,7 @@ const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
 // Filtru poreclă (shared)
 const esteNumeInterzisServer = esteNumeInterzisShared;
 
-// SISTEM DE ACHIEVEMENT-URI
-const ACHIEVEMENTS = {
-  'first_win': { name: 'Prima Victorie', desc: 'Câștigă primul meci', icon: '🏆', rarity: 'common' },
-  'wins_10': { name: 'Ciocnitor Amator', desc: 'Câștigă 10 meciuri', icon: '🥇', rarity: 'common' },
-  'wins_50': { name: 'Ciocnitor Experimentat', desc: 'Câștigă 50 meciuri', icon: '🥈', rarity: 'uncommon' },
-  'wins_100': { name: 'Maestru al Ouălor', desc: 'Câștigă 100 meciuri', icon: '🥉', rarity: 'rare' },
-  'wins_500': { name: 'Legendă Vie', desc: 'Câștigă 500 meciuri', icon: '👑', rarity: 'epic' },
-  'wins_1000': { name: 'Zeul Ciocnitului', desc: 'Câștigă 1000 meciuri', icon: '⚡', rarity: 'legendary' },
-  'first_group': { name: 'Prieten Bun', desc: 'Joacă primul meci în grup', icon: '👥', rarity: 'common' },
-  'group_wins_25': { name: 'Eroul Grupului', desc: 'Câștigă 25 meciuri în grup', icon: '🛡️', rarity: 'uncommon' },
-  'regional_champion': { name: 'Campion Regional', desc: 'Ajunge pe primul loc în regiunea ta', icon: '🏅', rarity: 'rare' },
-  'golden_egg': { name: 'Ou de Aur', desc: 'Folosește un ou auriu în meci', icon: '🥚', rarity: 'rare' },
-  'chat_master': { name: 'Maestru al Vorbei', desc: 'Trimite 100 de mesaje în chat', icon: '💬', rarity: 'uncommon' },
-  'streak_5': { name: 'Fără Pauză', desc: 'Câștigă 5 meciuri consecutive', icon: '🔥', rarity: 'uncommon' },
-  'streak_10': { name: 'Flamă Vie', desc: 'Câștigă 10 meciuri consecutive', icon: '🌟', rarity: 'rare' },
-  'provocator': { name: 'Provocatorul', desc: 'Provoacă 50 de jucători la duel', icon: '⚔️', rarity: 'uncommon' },
-  'tradition_keeper': { name: 'Păstrător al Tradiției', desc: 'Vizitează toate paginile educaționale', icon: '📚', rarity: 'rare' },
-  'social_butterfly': { name: 'Fluture Social', desc: 'Adaugă 10 prieteni', icon: '🦋', rarity: 'uncommon' }
-};
+// ACHIEVEMENTS imported from @/app/lib/achievements
 
 async function checkAndAwardAchievements(jucator, stats, teamId = null) {
   const achievementsToAward = [];
@@ -221,9 +204,10 @@ export async function POST(request) {
       }
 
       case 'increment-global': {
-        // Rate limit: max 1 request per 2s per player
-        if (jucator) {
-          const rlKey = `ratelimit:${jucator.toUpperCase()}`;
+        // Rate limit: max 1 request per 2s per player (or per IP if anonymous)
+        {
+          const rlIdentifier = jucator ? jucator.toUpperCase() : (request.headers.get('x-forwarded-for') || 'anon');
+          const rlKey = `ratelimit:inc:${rlIdentifier}`;
           const rlSet = await redis.set(rlKey, '1', 'EX', 2, 'NX');
           if (!rlSet) {
             return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
@@ -324,6 +308,9 @@ export async function POST(request) {
 
       case 'arena-chat': {
         if (!text || !jucator || !roomId) return NextResponse.json({ success: false });
+        const chatRlKey = `ratelimit:chat:${jucator.toUpperCase()}`;
+        const chatRl = await redis.set(chatRlKey, '1', 'EX', 1, 'NX');
+        if (!chatRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
         await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', {
           jucator: jucator.toUpperCase(), text: text.slice(0, 200), t: Date.now()
         });
@@ -367,6 +354,9 @@ export async function POST(request) {
         if (!oponentNume || !jucator || !roomId) {
           return NextResponse.json({ success: false, error: "Date incomplete" });
         }
+        const duelRlKey = `ratelimit:duel:${jucator.toUpperCase()}`;
+        const duelRl = await redis.set(duelRlKey, '1', 'EX', 5, 'NX');
+        if (!duelRl) return NextResponse.json({ success: false, error: "Așteaptă puțin între provocări." }, { status: 429 });
         await pusher.trigger(`user-notif-${oponentNume.toUpperCase()}`, 'duel-request', {
           deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
         });
@@ -377,6 +367,10 @@ export async function POST(request) {
         if (!newName || newName.length < 3) {
             return NextResponse.json({ success: false, error: "Nume prea scurt" });
         }
+        const nameRlIp = request.headers.get('x-forwarded-for') || 'anon';
+        const nameRlKey = `ratelimit:name:${nameRlIp}`;
+        const nameRl = await redis.set(nameRlKey, '1', 'EX', 5, 'NX');
+        if (!nameRl) return NextResponse.json({ success: false, error: "Așteaptă puțin înainte de a schimba iar." }, { status: 429 });
 
         const newClean = newName.toUpperCase();
         const oldClean = oldName ? oldName.toUpperCase() : null;
@@ -466,6 +460,9 @@ export async function POST(request) {
 
       case 'creeaza-echipa': {
         if (!creator || creator.length < 3) return NextResponse.json({ success: false });
+        const teamRlKey = `ratelimit:team:${creator.toUpperCase()}`;
+        const teamRl = await redis.set(teamRlKey, '1', 'EX', 10, 'NX');
+        if (!teamRl) return NextResponse.json({ success: false, error: "Așteaptă puțin înainte de a crea alt grup." }, { status: 429 });
         const newId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const cleanCreator = creator.toUpperCase();
         const finalTeamName = `GRUPUL LUI ${cleanCreator}`;
@@ -506,6 +503,10 @@ export async function POST(request) {
       }
 
       case 'arena-matchmaking': {
+        const mmIp = request.headers.get('x-forwarded-for') || 'anon';
+        const mmRlKey = `ratelimit:mm:${mmIp}`;
+        const mmRl = await redis.set(mmRlKey, '1', 'EX', 3, 'NX');
+        if (!mmRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
         const now = Date.now();
         const newRoomId = `arena-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
         // Atomic matchmaking via Lua script — prevents race conditions

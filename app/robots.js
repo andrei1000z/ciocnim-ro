@@ -4,7 +4,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/joc/'],
+        disallow: ['/api/', '/joc/', '/profil'],
       },
     ],
     sitemap: 'https://ciocnim.ro/sitemap.xml',

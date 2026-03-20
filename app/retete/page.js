@@ -296,25 +296,11 @@ const RecipeDetail = ({ recipe, onBack }) => {
   });
 
   const handleCopyIngredients = () => {
-    const formatIngredient = (ing) => {
-      if (ing.scalable === false) {
-        return { qtyText: "", nameText: ing.name };
-      }
-      const mult = multiplier;
-      let qtyText = "";
-      if (ing.qty !== null && ing.qty !== undefined) {
-        const scaled = ing.qty * mult;
-        qtyText = scaled % 1 === 0 ? String(scaled) : scaled.toFixed(2);
-      }
-      const nameText = ing.textFn ? ing.textFn(mult) : ing.name;
-      return { qtyText, nameText };
-    };
-
     const all = [...currentIngredients, ...(currentFilling || [])];
     const ingredientsList = all
       .map(ing => {
-        const { qtyText, nameText } = formatIngredient(ing);
-        return qtyText ? `• ${qtyText} ${ing.unit} ${nameText}` : `• ${nameText}`;
+        const { qtyText, nameText } = formatIngredient(ing, multiplier);
+        return qtyText ? `• ${qtyText} ${nameText}` : `• ${nameText}`;
       })
       .join("\n");
 
@@ -586,7 +572,7 @@ function RetePageContent() {
                 recipe={selectedRecipe}
                 onBack={() => { 
                   router.push('/retete', { scroll: false }); 
-                  window.scrollTo({ top: 0, behavior: 'instant' }); 
+                  window.scrollTo(0, 0); 
                 }}
               />
             ) : (
@@ -643,7 +629,7 @@ function RetePageContent() {
                         index={i}
                         onClick={() => { 
                           router.push(`/retete?r=${recipe.id}`, { scroll: false }); 
-                          window.scrollTo({ top: 0, behavior: 'instant' }); 
+                          window.scrollTo(0, 0); 
                         }}
                       />
                     ))

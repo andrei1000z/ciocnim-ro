@@ -172,12 +172,14 @@ function HomeContent() {
       if (pId && !ids.includes(pId)) { ids.push(pId); addStoredTeamId(pId); }
       if (!ids.length) { setLoadedTeams([]); return; }
       const results = [], valid = [];
-      for (const tid of ids) {
-        try {
-          const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) });
-          const d = await r.json();
-          if (d.success) { results.push({ details: d.details, top: d.top || [] }); valid.push(tid); }
-        } catch {}
+      const fetches = await Promise.allSettled(
+        ids.map(tid => fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) }).then(r => r.json()).then(d => ({ tid, d })))
+      );
+      for (const f of fetches) {
+        if (f.status === 'fulfilled' && f.value.d.success) {
+          results.push({ details: f.value.d.details, top: f.value.d.top || [] });
+          valid.push(f.value.tid);
+        }
       }
       safeSetLS("c_teamIds", JSON.stringify(valid));
       setLoadedTeams(results);
@@ -252,8 +254,11 @@ function HomeContent() {
   const handleProvocare = async (oponent, teamId) => {
     triggerVibrate([50, 50, 50]);
     const roomCode = `privat-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId }) });
-    router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true&teamId=${teamId}`);
+    try {
+      const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId }) });
+      if (!res.ok) { setToastMsg("Eroare la trimiterea provocării."); return; }
+      router.push(`/joc/${roomCode}?host=true&skin=${userStats.skin}&provocare=true&teamId=${teamId}`);
+    } catch { setToastMsg("Eroare de rețea. Încearcă din nou."); }
   };
 
   if (!isHydrated) return (

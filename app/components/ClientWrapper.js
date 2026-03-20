@@ -10,6 +10,8 @@ import { useEffect, useState, useSyncExternalStore, createContext, useContext, u
 import Pusher from "pusher-js";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { safeLS } from "@/app/lib/utils";
+
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
 
@@ -57,15 +59,8 @@ function AchievementToast({ achievement, onDone }) {
   );
 }
 
-const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", teamId: null, regiune: "Muntenia" };
+const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", regiune: "Muntenia" };
 const emptySubscribe = () => () => {};
-
-// Safe localStorage wrapper — fallback for private browsing, blocked storage, etc.
-const safeLS = {
-  get: (key) => { try { return typeof window !== 'undefined' ? localStorage.getItem(key) : null; } catch { return null; } },
-  set: (key, val) => { try { if (typeof window !== 'undefined') localStorage.setItem(key, val); } catch {} },
-  del: (key) => { try { if (typeof window !== 'undefined') localStorage.removeItem(key); } catch {} },
-};
 
 // Data version — bump this to wipe all localStorage on next visit
 const DATA_VERSION = "2";
@@ -83,7 +78,8 @@ function checkDataReset() {
 
 export default function ClientWrapper({ children }) {
   const router = useRouter();
-  checkDataReset();
+
+  useEffect(() => { checkDataReset(); }, []);
 
   const [userStats, setUserStats] = useState(() => {
     const savedStats = safeLS.get("c_stats");
@@ -110,7 +106,7 @@ export default function ClientWrapper({ children }) {
     return safeLS.get("c_nume") || "";
   });
   const [notificare, setNotificare] = useState(null);
-  const [onlineCount, setOnlineCount] = useState(0);
+  const [onlineCount, setOnlineCount] = useState(1);
   const [toastMsg, setToastMsg] = useState(null);
   const [achievementToast, setAchievementToast] = useState(null);
   const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
@@ -167,7 +163,7 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
   // SCHIMBARE NUME (FIX PENTRU DUPLICATE ÎN GRUP)
   // ==========================================================================
-  const setNume = async (nouNume) => {
+  const setNume = useCallback(async (nouNume) => {
     const cleanName = nouNume.toUpperCase().trim();
     if (cleanName === nume) return true; 
     if (cleanName.length < 3) {
@@ -211,7 +207,7 @@ export default function ClientWrapper({ children }) {
       setToastMsg("Eroare la rețea. Încearcă din nou.");
       return false;
     }
-  };
+  }, [nume, setToastMsg]);
 
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)
@@ -279,7 +275,7 @@ export default function ClientWrapper({ children }) {
     };
     // Trimite heartbeat instant la montare
     sendHeartbeat();
-    const interval = setInterval(sendHeartbeat, 25000);
+    const interval = setInterval(sendHeartbeat, 30000);
 
     // Când user-ul revine pe tab → heartbeat instant (actualizare imediată)
     const onVisibility = () => { if (document.visibilityState === 'visible') sendHeartbeat(); };
