@@ -101,10 +101,12 @@ async function checkAndAwardAchievements(jucator, stats, teamId = null) {
     await redis.sadd(userKey, ...achievementsToAward);
     
     // Trimite notificare în timp real
-    await pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
-      achievements: achievementsToAward.map(key => ACHIEVEMENTS[key]),
-      t: Date.now()
-    });
+    try {
+      await pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
+        achievements: achievementsToAward.map(key => ACHIEVEMENTS[key]),
+        t: Date.now()
+      });
+    } catch {}
   }
   
   return achievementsToAward;
@@ -252,12 +254,12 @@ export async function POST(request) {
         } : null;
 
         await Promise.all([
-          pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }),
+          pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {}),
           updates ? updateUserStats(safeName, updates).then(() => checkAndAwardAchievements(safeName, { ...currentStats, ...updates }, teamId)) : Promise.resolve()
         ]);
 
         if (teamId) {
-          await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
+          try { await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }); } catch {}
         }
 
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
@@ -383,9 +385,11 @@ export async function POST(request) {
         const duelRlKey = `ratelimit:duel:${jucator.toUpperCase()}`;
         const duelRl = await redis.set(duelRlKey, '1', 'EX', 5, 'NX');
         if (!duelRl) return NextResponse.json({ success: false, error: "Așteaptă puțin între provocări." }, { status: 429 });
-        await pusher.trigger(`user-notif-${oponentNume.toUpperCase()}`, 'duel-request', {
-          deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
-        });
+        try {
+          await pusher.trigger(`user-notif-${oponentNume.toUpperCase()}`, 'duel-request', {
+            deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
+          });
+        } catch {}
         return NextResponse.json({ success: true });
       }
 
@@ -441,8 +445,10 @@ export async function POST(request) {
 
         await pipeline.exec();
 
-        const topJucatoriActualizat = await getClasamentJucatori();
-        await pusher.trigger('global', 'update-complet', { topJucatori: topJucatoriActualizat });
+        try {
+          const topJucatoriActualizat = await getClasamentJucatori();
+          await pusher.trigger('global', 'update-complet', { topJucatori: topJucatoriActualizat });
+        } catch (e) { console.error("[schimba-porecla] broadcast failed:", e.message); }
 
         return NextResponse.json({ success: true });
       }
@@ -468,7 +474,7 @@ export async function POST(request) {
           const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
           if (exists === null) {
              await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
-             await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
+             try { await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }); } catch {}
           }
         }
         
@@ -521,7 +527,7 @@ export async function POST(request) {
           return NextResponse.json({ success: false, error: "Doar creatorul poate elimina membri." });
         }
         await redis.zrem(`team:${teamId}:membri`, memberToKick.toUpperCase());
-        await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() });
+        try { await pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }); } catch {}
         return NextResponse.json({ success: true });
       }
 
@@ -564,7 +570,7 @@ export async function POST(request) {
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
-        await pusher.trigger('global', 'online-count', { online: count });
+        try { await pusher.trigger('global', 'online-count', { online: count }); } catch {}
         return NextResponse.json({ success: true, online: count });
       }
 
@@ -578,7 +584,7 @@ export async function POST(request) {
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
         const count = results[2][1];
-        await pusher.trigger('global', 'online-count', { online: count });
+        try { await pusher.trigger('global', 'online-count', { online: count }); } catch {}
         return NextResponse.json({ success: true, online: count });
       }
 
