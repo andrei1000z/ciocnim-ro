@@ -60,11 +60,12 @@ function AchievementToast({ achievement, onDone }) {
 }
 
 function CookieBanner() {
-  const [visible, setVisible] = useState(() => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
     try {
-      return typeof window !== 'undefined' && !localStorage.getItem('c_cookie_consent');
-    } catch { return false; }
-  });
+      if (!localStorage.getItem('c_cookie_consent')) setVisible(true);
+    } catch {}
+  }, []);
   if (!visible) return null;
   const accept = () => {
     try { localStorage.setItem('c_cookie_consent', '1'); } catch {}
