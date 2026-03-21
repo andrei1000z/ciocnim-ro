@@ -168,7 +168,7 @@ export default function RootLayout({ children }) {
             --safe-area-bottom: env(safe-area-inset-bottom, 0px);
           }
 
-          html, body {
+          body {
             min-height: 100dvh;
             width: 100vw;
             max-width: 100%;
