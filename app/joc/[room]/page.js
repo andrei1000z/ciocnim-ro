@@ -208,6 +208,7 @@ function ArenaMaster({ room }) {
   const matchmakingCancelledRef = useRef(false);
   const lastStrikeRef = useRef(0); // debounce: max 1 lovitură la 150ms
   const strikePendingRef = useRef(false);
+  const resetForRevansaRef = useRef(null);
   const teamIdPreluat = searchParams.get("teamId");
   const [isHost, setIsHost] = useState(false);
   const isPrivate = room.includes("privat-");
@@ -333,6 +334,33 @@ function ArenaMaster({ room }) {
     return () => clearInterval(interval);
   }, [opponent, rezultat, isBotMatch, atacantName, nume, room]);
 
+  // REVANSA POLLING — discover opponent's revansa request when Pusher fails
+  useEffect(() => {
+    if (!rezultat || isBotMatch || !opponent) return;
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actiune: 'get-room-revansa', roomId: room })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (data.revansaOk) {
+            resetForRevansaRef.current?.();
+          } else if (data.players && data.players.length > 0) {
+            setRevansaRequests(prev => {
+              const next = { ...prev };
+              data.players.forEach(p => { next[p] = true; });
+              return next;
+            });
+          }
+        }
+      } catch {}
+    };
+    const interval = setInterval(poll, 3000);
+    return () => clearInterval(interval);
+  }, [rezultat, isBotMatch, opponent, room]);
+
   // LOGICĂ BOT — fallback to bot if no opponent found after timeout
   useEffect(() => {
     if (opponent || rezultat || isStriking || isBotMatch) return;
@@ -421,22 +449,7 @@ function ArenaMaster({ room }) {
     });
 
     arenaChannel.bind("revansa-ok", () => {
-      // Reset refs ÎNAINTE de state — previne race conditions
-      rezultatRef.current = null;
-      isStrikingRef.current = false;
-      strikePendingRef.current = false;
-      setRezultat(null);
-      setIsStriking(false);
-      setCollisionAnim(false);
-      setRevansaRequests({});
-      // Swap attacker each round for fairness — folosim numeRef pt fresh value
-      const currentNume = numeRef.current;
-      if (isPrivate || isBotMatch) {
-        setAtacantName(prev => {
-          if (!prev || !opponentRef.current) return prev;
-          return prev === currentNume ? opponentRef.current.jucator : currentNume;
-        });
-      }
+      resetForRevansaRef.current?.();
     });
 
     arenaChannel.bind("lovitura", (data) => {
@@ -532,6 +545,25 @@ function ArenaMaster({ room }) {
   // Ref actualizat la fiecare render — Pusher handler-ul apelează mereu versiunea curentă
   executeBattleRef.current = executeBattle;
 
+  const resetForRevansa = () => {
+    if (!rezultatRef.current) return; // already reset
+    rezultatRef.current = null;
+    isStrikingRef.current = false;
+    strikePendingRef.current = false;
+    setRezultat(null);
+    setIsStriking(false);
+    setCollisionAnim(false);
+    setRevansaRequests({});
+    const currentNume = numeRef.current;
+    if (isPrivate || isBotMatch) {
+      setAtacantName(prev => {
+        if (!prev || !opponentRef.current) return prev;
+        return prev === currentNume ? opponentRef.current.jucator : currentNume;
+      });
+    }
+  };
+  resetForRevansaRef.current = resetForRevansa;
+
   const handleStrike = useCallback(async () => {
     if (!canStrike || strikePendingRef.current) return;
     if (rezultatRef.current || isStrikingRef.current) return;
@@ -616,24 +648,14 @@ function ArenaMaster({ room }) {
   const handleRevansa = () => {
     if (isBotMatch) { window.location.reload(); return; }
     if (revansaRequests[nume]) return;
-
-    const opAlreadyRequested = opponent && revansaRequests[opponent.jucator];
-
     setRevansaRequests(prev => ({ ...prev, [nume]: true }));
-
-    if (opAlreadyRequested) {
-      // Eu sunt al doilea — confirm revanșa → ambii primesc 'revansa-ok' și resetează
-      fetch('/api/ciocnire', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room, actiune: 'revansa-ok' })
-      });
-    } else {
-      // Eu sunt primul — anunț că vreau revanșă
-      fetch('/api/ciocnire', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume })
-      });
-    }
+    // Server stores request in Redis + auto-detects when both players want revansa
+    fetch('/api/ciocnire', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume })
+    }).then(r => r.json()).then(data => {
+      if (data.revansaOk) resetForRevansaRef.current?.();
+    }).catch(() => {});
   };
 
   const copyRoomCode = () => {

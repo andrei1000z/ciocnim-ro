@@ -367,15 +367,39 @@ export async function POST(request) {
 
       case 'revansa': {
         if (!jucator || !roomId) return NextResponse.json({ success: false });
-        pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: jucator.toUpperCase(), t: Date.now() }).catch(() => {});
-        return NextResponse.json({ success: true });
+        const revClean = jucator.toUpperCase();
+        // Store request in Redis (source of truth when Pusher is unreliable)
+        await redis.sadd(`room:${roomId}:revansa`, revClean);
+        await redis.expire(`room:${roomId}:revansa`, 300);
+        const revCount = await redis.scard(`room:${roomId}:revansa`);
+        // Pusher notification (bonus — may not arrive)
+        pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: revClean, t: Date.now() }).catch(() => {});
+        if (revCount >= 2) {
+          // Both requested — auto-trigger revansa-ok
+          redis.del(`room:${roomId}:revansa`).catch(() => {});
+          redis.del(`room:${roomId}:lovitura`).catch(() => {});
+          redis.setex(`room:${roomId}:revansa-ok`, 60, '1').catch(() => {});
+          pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { t: Date.now() }).catch(() => {});
+          return NextResponse.json({ success: true, revansaOk: true });
+        }
+        return NextResponse.json({ success: true, revansaOk: false, count: revCount });
       }
 
       case 'revansa-ok': {
         if (!roomId || !jucator) return NextResponse.json({ success: false });
-        redis.del(`room:${roomId}:lovitura`).catch(() => {});
+        redis.del(`room:${roomId}:revansa`, `room:${roomId}:lovitura`).catch(() => {});
+        redis.setex(`room:${roomId}:revansa-ok`, 60, '1').catch(() => {});
         pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { jucator: jucator.toUpperCase(), t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true });
+      }
+
+      case 'get-room-revansa': {
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" });
+        const [revPlayers, revOkFlag] = await Promise.all([
+          redis.smembers(`room:${roomId}:revansa`),
+          redis.get(`room:${roomId}:revansa-ok`)
+        ]);
+        return NextResponse.json({ success: true, players: revPlayers, revansaOk: !!revOkFlag });
       }
 
       case 'get-achievements': {
