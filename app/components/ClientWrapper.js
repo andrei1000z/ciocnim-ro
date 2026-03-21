@@ -133,8 +133,17 @@ function checkDataReset() {
   if (typeof window === "undefined") return;
   try {
     if (localStorage.getItem("c_version") !== DATA_VERSION) {
+      // Preserve critical data across version bumps
+      const preserve = {};
+      for (const key of ['c_nume', 'c_teamIds', 'c_visitorId']) {
+        const val = localStorage.getItem(key);
+        if (val) preserve[key] = val;
+      }
       const keys = Object.keys(localStorage).filter(k => k.startsWith("c_"));
       keys.forEach(k => localStorage.removeItem(k));
+      for (const [k, v] of Object.entries(preserve)) {
+        localStorage.setItem(k, v);
+      }
       localStorage.setItem("c_version", DATA_VERSION);
     }
   } catch {}
@@ -294,12 +303,11 @@ export default function ClientWrapper({ children }) {
     try {
       if (!nume || nume.trim() === "") return;
 
-      // Serverul va număra automat lovitura totală, dar va da +1 la victorie DOAR dacă îi dăm jucătorul
-      const payload = { 
-        actiune: 'increment-global', 
-        jucator: amCastigat ? nume : null, // Dacă nu a câștigat, nu trimitem numele ca să nu i se pună victorie
+      const payload = {
+        actiune: 'increment-global',
+        jucator: nume,
         regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
-        teamId: amCastigat ? teamIdToUpdate : null, // Trimitem ID-ul grupului curent ca să îi crească scorul acolo
+        teamId: amCastigat ? teamIdToUpdate : null,
         esteCastigator: amCastigat
       };
 
@@ -315,20 +323,30 @@ export default function ClientWrapper({ children }) {
         if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
         if (data.topJucatori) setTopJucatori(data.topJucatori);
 
-        // UI Update: Creștem instant victoria în interfață ca să nu existe delay
         if (amCastigat) {
             updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1}));
+        } else {
+            updateUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
         }
       }
-    } catch (e) { console.error("Eroare la incrementare bilanț."); }
+    } catch (e) {
+      console.error("Eroare la incrementare bilanț:", e);
+      setToastMsg("Conexiune instabilă — ciocnirea s-ar putea să nu se fi salvat.");
+    }
   }, [userStats.regiune, nume, updateUserStats]);
 
   // HEARTBEAT: ping la fiecare 10s pentru a număra utilizatorii activi
   useEffect(() => {
     if (!isHydrated) return;
     if (!visitorIdRef.current) {
-      visitorIdRef.current = safeLS.get('c_visitorId') || `v-${Math.random().toString(36).substring(2, 10)}`;
-      safeLS.set('c_visitorId', visitorIdRef.current);
+      let vid = safeLS.get('c_visitorId');
+      if (!vid) {
+        try { vid = sessionStorage.getItem('c_visitorId'); } catch {}
+      }
+      if (!vid) vid = `v-${Math.random().toString(36).substring(2, 10)}`;
+      visitorIdRef.current = vid;
+      safeLS.set('c_visitorId', vid);
+      try { sessionStorage.setItem('c_visitorId', vid); } catch {}
     }
     const sendHeartbeat = async () => {
       try {
@@ -388,6 +406,29 @@ export default function ClientWrapper({ children }) {
     };
     getInitialData();
   }, []);
+
+  // Sync stats from server when user has a name (handles new device / cleared localStorage)
+  useEffect(() => {
+    if (!isHydrated || !nume || nume.length < 2) return;
+    (async () => {
+      try {
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actiune: 'get-user-stats', jucator: nume })
+        });
+        const data = await res.json();
+        if (data.success && data.stats) {
+          const server = data.stats;
+          updateUserStats(prev => ({
+            ...prev,
+            wins: Math.max(prev.wins || 0, server.wins || 0),
+            losses: Math.max(prev.losses || 0, server.losses || 0),
+            regiune: prev.regiune || server.regiune || 'Muntenia'
+          }));
+        }
+      } catch {}
+    })();
+  }, [isHydrated, nume, updateUserStats]);
 
   useEffect(() => {
     if (!isHydrated || !pusherRef.current) return;

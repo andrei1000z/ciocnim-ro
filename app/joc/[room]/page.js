@@ -314,8 +314,7 @@ function ArenaMaster({ room }) {
               if (!castigaCelCareDaRandom) {
                  incrementGlobalRef.current(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
               } else {
-                 setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
-                 incrementGlobalRef.current(false); // contorul crește și la înfrângere
+                 incrementGlobalRef.current(false);
               }
           }, 1500 + Math.random() * 1500);
           return () => clearTimeout(timeout);
@@ -401,7 +400,7 @@ function ArenaMaster({ room }) {
            if (amCastigatDefense) {
                incrementGlobalRef.current(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
            } else {
-               setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+               incrementGlobalRef.current(false);
            }
        }
     });
@@ -501,8 +500,7 @@ function ArenaMaster({ room }) {
     if (castigaCelCareDaRandom) {
        incrementGlobalRef.current(true, (isProvocare && teamIdPreluat) ? [teamIdPreluat] : []);
     } else {
-       setUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
-       if (isBotMatch) incrementGlobalRef.current(false); // contorul crește și la înfrângere cu bot
+       incrementGlobalRef.current(false);
     }
 
     if (isBotMatch) {

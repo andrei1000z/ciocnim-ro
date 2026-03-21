@@ -90,6 +90,11 @@ function HomeContent() {
     })();
   }, [nume]);
 
+  // Cleanup toast timer on unmount
+  useEffect(() => {
+    return () => { if (toastTimer.current) clearTimeout(toastTimer.current); };
+  }, []);
+
   // PWA install prompt
   useEffect(() => {
     const handler = (e) => { e.preventDefault(); window.deferredPrompt = e; };

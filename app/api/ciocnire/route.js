@@ -212,27 +212,21 @@ export async function POST(request) {
         const pipeline = redis.pipeline();
         pipeline.incr('global_ciocniri_total');
 
-        if (jucator) {
-            const safeName = jucator.toUpperCase();
+        const safeName = jucator ? jucator.toUpperCase() : null;
 
-            // +1 în clasamentul global
+        if (safeName && esteCastigator) {
+            // Winner: +1 leaderboard, +1 region, +1 team
             pipeline.zincrby('leaderboard_jucatori', 1, safeName);
-
-            // +1 în clasamentul regiunii (dacă jucătorul are regiune setată)
             if (regiune && regiune !== "Alege regiunea...") {
               pipeline.zincrby('leaderboard_regiuni', 1, regiune);
             }
-
-            // +1 DOAR în grupul în care se joacă meciul acum (dacă e cazul)
             if (teamId) {
                 pipeline.zincrby(`team:${teamId}:membri`, 1, safeName);
             }
         }
 
-        const safeName = jucator ? jucator.toUpperCase() : null;
-
         // Trim leaderboards to prevent unbounded growth
-        pipeline.zremrangebyrank('leaderboard_jucatori', 0, -101); // max 100
+        pipeline.zremrangebyrank('leaderboard_jucatori', 0, -21); // max 20
         pipeline.zremrangebyrank('leaderboard_regiuni', 0, -21); // max 20
 
         // Runda 1: pipeline (scrieri) + leaderboard reads + user stats — toate în paralel
@@ -245,11 +239,14 @@ export async function POST(request) {
         const noulTotal = results[0][1];
 
         // Runda 2: scrieri stats + pusher — în paralel între ele
-        const updates = safeName && currentStats ? {
+        const updates = safeName && currentStats ? (esteCastigator ? {
           wins: 1,
-          currentStreak: esteCastigator ? currentStats.currentStreak + 1 : 0,
+          currentStreak: currentStats.currentStreak + 1,
           ...(teamId ? { teamWins: 1 } : {})
-        } : null;
+        } : {
+          losses: 1,
+          currentStreak: 0
+        }) : null;
 
         // Fire-and-forget broadcasts
         pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
@@ -360,6 +357,19 @@ export async function POST(request) {
         if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" });
         const achievements = await getUserAchievements(jucator);
         return NextResponse.json({ success: true, achievements });
+      }
+
+      case 'get-user-stats': {
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" });
+        const cleanPlayer = jucator.toUpperCase();
+        const [stats, globalScore] = await Promise.all([
+          getUserStats(cleanPlayer),
+          redis.zscore('leaderboard_jucatori', cleanPlayer)
+        ]);
+        return NextResponse.json({
+          success: true,
+          stats: { ...stats, globalScore: parseInt(globalScore) || 0 }
+        });
       }
 
       case 'update-stats': {
@@ -540,7 +550,12 @@ export async function POST(request) {
           redis.call('zremrangebyscore', KEYS[1], 0, ARGV[1])
           local waiting = redis.call('zpopmin', KEYS[1], 1)
           if waiting and #waiting >= 2 then
-            return waiting[1]
+            local matchedRoom = waiting[1]
+            local playerCount = redis.call('scard', 'room:' .. matchedRoom .. ':players')
+            if playerCount < 2 then
+              return matchedRoom
+            end
+            -- Room already full, put self in queue instead
           end
           redis.call('zadd', KEYS[1], ARGV[2], ARGV[3])
           return nil
@@ -560,6 +575,9 @@ export async function POST(request) {
       case 'arena-heartbeat': {
         const visitorId = sanitizeId(body.visitorId);
         if (!visitorId) return NextResponse.json({ success: false });
+        const hbRlKey = `ratelimit:hb:${visitorId}`;
+        const hbRl = await redis.set(hbRlKey, '1', 'EX', 8, 'NX');
+        if (!hbRl) return NextResponse.json({ success: true, online: 0 });
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zadd('arena:online', now, visitorId);
