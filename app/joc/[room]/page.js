@@ -278,16 +278,49 @@ function ArenaMaster({ room }) {
     if (me.hasStar) updateStats('star');
   }, [room, nume, me, updateStats, router]);
 
-  // LOGICĂ BOT
+  // POLLING FALLBACK — discover opponents via Redis when WebSocket is unreliable
+  useEffect(() => {
+    if (!nume || opponent || isBotMatch) return;
+    const pollRoom = async () => {
+      try {
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actiune: 'get-room-players', roomId: room })
+        });
+        const data = await res.json();
+        if (data.success && data.players) {
+          const otherPlayer = data.players.find(p => p !== nume.toUpperCase());
+          if (otherPlayer && !opponentRef.current) {
+            const sd = data.skinData?.[otherPlayer] || {};
+            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', isGolden: sd.isGolden || false, hasStar: sd.hasStar || false, regiune: sd.regiune || 'România' };
+            setOpponent(oppData);
+            opponentRef.current = oppData;
+            setAtacantName(prev => {
+              if (prev !== null && prev !== "") return prev;
+              const n = numeRef.current;
+              if (!n) return null;
+              if (!isPrivate && !isProvocare) return [n, otherPlayer].sort()[0];
+              const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+              return (roomSum % 2 === 0) ? (isHostRef.current ? n : otherPlayer) : (isHostRef.current ? otherPlayer : n);
+            });
+          }
+        }
+      } catch {}
+    };
+    const interval = setInterval(pollRoom, 3000);
+    pollRoom(); // poll immediately
+    return () => clearInterval(interval);
+  }, [nume, opponent, isBotMatch, room, isPrivate, isProvocare]);
+
+  // LOGICĂ BOT — fallback to bot if no opponent found after timeout
   useEffect(() => {
     if (opponent || rezultat || isStriking || isBotMatch) return;
     if (isPrivate && !isProvocare) return;
 
     const isArenaRoom = room.startsWith('arena-');
-    const waitTime = isArenaRoom ? 7000 : (isProvocare ? 11000 : 5000);
+    const waitTime = isArenaRoom ? 10000 : (isProvocare ? 15000 : 8000);
 
     const botTimeout = setTimeout(() => {
-      // Scoate camera din coada de matchmaking (dacă e arenă)
       if (isArenaRoom) {
         fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
       }

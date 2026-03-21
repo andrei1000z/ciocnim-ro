@@ -34,7 +34,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   };
 
   const joinRoom = async () => {
-    if (roomCode.length < 4) { setRoomError("Codul trebuie să aibă minim 4 caractere!"); return; }
+    if (roomCode.length !== 4) { setRoomError("Codul are exact 4 caractere!"); return; }
     setIsJoining(true); setRoomError("");
     try {
       const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'check-room', cod: roomCode }) });
@@ -89,7 +89,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             onChange={e => { setRoomCode(e.target.value.toUpperCase().trim()); setRoomError(""); }}
             onKeyDown={e => e.key === "Enter" && joinRoom()}
             placeholder="COD CAMERĂ"
-            maxLength={6}
+            maxLength={4}
             style={{ color: '#fff' }}
             className={`w-full px-4 py-3 rounded-2xl border-2 font-bold text-center text-base uppercase outline-none transition-all bg-white/[0.05] focus:bg-white/[0.08] ${roomError ? "border-red-400 focus:border-red-600" : "border-white/[0.1] focus:border-red-800"}`}
           />

@@ -271,18 +271,20 @@ export async function POST(request) {
         if (joinCount > 10) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
         const cleanName = jucator.toUpperCase();
         let serverIsHost = false;
-        // Tracking jucători per cameră (max 2)
-        if (roomId.startsWith('privat-')) {
-          const playerSetKey = `room:${roomId}:players`;
-          const added = await redis.sadd(playerSetKey, cleanName);
-          await redis.expire(playerSetKey, 7200);
-          if (added === 1) {
-            const count = await redis.scard(playerSetKey);
-            if (count > 2) {
-              await redis.srem(playerSetKey, cleanName);
-              return NextResponse.json({ success: false, error: "Camera este ocupată!" });
-            }
+        const playerSetKey = `room:${roomId}:players`;
+        // Track players per room (max 2) — for all room types
+        const added = await redis.sadd(playerSetKey, cleanName);
+        await redis.expire(playerSetKey, 7200);
+        if (added === 1) {
+          const count = await redis.scard(playerSetKey);
+          if (count > 2) {
+            await redis.srem(playerSetKey, cleanName);
+            return NextResponse.json({ success: false, error: "Camera este ocupată!" });
           }
+        }
+        // Store skin per room+player in Redis (for polling fallback)
+        await redis.setex(`room:${roomId}:skin:${cleanName}`, 7200, JSON.stringify({ skin, isGolden, hasStar, regiune }));
+        if (roomId.startsWith('privat-')) {
           // Determine host server-side: validate hostToken from room data
           const hostToken = sanitizeStr(body.hostToken, 64);
           if (hostToken) {
@@ -300,10 +302,6 @@ export async function POST(request) {
             serverIsHost = members.length <= 1 || members[0] === cleanName;
           }
         }
-        // Store skin per room+player in Redis (prevents spoofing via URL)
-        if (roomId.startsWith('privat-')) {
-          await redis.setex(`room:${roomId}:skin:${cleanName}`, 7200, JSON.stringify({ skin, isGolden, hasStar }));
-        }
         await pusher.trigger(`arena-v22-${roomId}`, 'join', {
           jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now()
         });
@@ -312,13 +310,28 @@ export async function POST(request) {
 
       case 'check-room': {
         const cod = sanitizeId(body.cod);
-        if (!cod || cod.length < 4) return NextResponse.json({ success: false, error: "Cod invalid" });
+        if (!cod || cod.length < 4 || cod.length > 6) return NextResponse.json({ success: false, error: "Cod invalid" });
         // Atomic check: verify room exists AND has space (prevents race condition)
         const roomExists = await redis.exists(`room:privat-${cod}`);
         if (!roomExists) return NextResponse.json({ success: false, error: "Camera nu există. Verifică codul." });
         const count = await redis.scard(`room:privat-${cod}:players`);
         if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." });
         return NextResponse.json({ success: true });
+      }
+
+      case 'get-room-players': {
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" });
+        const players = await redis.smembers(`room:${roomId}:players`);
+        // Also return skin data for each player
+        const skinData = {};
+        if (players.length > 0) {
+          const skinPromises = players.map(async (p) => {
+            const raw = await redis.get(`room:${roomId}:skin:${p}`);
+            if (raw) { try { skinData[p] = JSON.parse(raw); } catch {} }
+          });
+          await Promise.all(skinPromises);
+        }
+        return NextResponse.json({ success: true, players, skinData });
       }
 
       case 'lovitura': {
@@ -658,10 +671,12 @@ export async function POST(request) {
         const createCount = await redis.incr(createRlKey);
         if (createCount === 1) await redis.expire(createRlKey, 60);
         if (createCount > 10) return NextResponse.json({ success: false, error: "Prea multe camere create. Așteaptă un minut." }, { status: 429 });
-        // Generăm un cod unic - reîncercăm dacă e deja rezervat
+        // Generăm un cod unic de 4 caractere (A-Z, 0-9) — ușor de citit și dictat
+        const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // fără 0/O/1/I (confuzii vizuale)
         let cod, attempts = 0;
         do {
-          cod = Math.random().toString(36).substring(2, 8).toUpperCase();
+          cod = '';
+          for (let i = 0; i < 4; i++) cod += CHARS[Math.floor(Math.random() * CHARS.length)];
           attempts++;
         } while (attempts < 20 && await redis.exists(`room:privat-${cod}`));
         const hostToken = Math.random().toString(36).substring(2, 18);
