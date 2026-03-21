@@ -192,7 +192,7 @@ export async function POST(request) {
           redis.get('global_ciocniri_total'),
           getClasamentRegiuni(),
           getClasamentJucatori(),
-          redis.zremrangebyscore('arena:online', 0, now - 45000),
+          redis.zremrangebyscore('arena:online', 0, now - 300000),
           redis.zcard('arena:online')
         ]);
         return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori, online: onlineCount });
@@ -302,9 +302,9 @@ export async function POST(request) {
             serverIsHost = members.length <= 1 || members[0] === cleanName;
           }
         }
-        await pusher.trigger(`arena-v22-${roomId}`, 'join', {
+        pusher.trigger(`arena-v22-${roomId}`, 'join', {
           jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now()
-        });
+        }).catch(() => {});
         return NextResponse.json({ success: true, isHost: serverIsHost });
       }
 
@@ -334,13 +334,24 @@ export async function POST(request) {
         return NextResponse.json({ success: true, players, skinData });
       }
 
+      case 'get-room-lovitura': {
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" });
+        const raw = await redis.get(`room:${roomId}:lovitura`);
+        if (!raw) return NextResponse.json({ success: true, lovitura: null });
+        try { return NextResponse.json({ success: true, lovitura: JSON.parse(raw) }); }
+        catch { return NextResponse.json({ success: true, lovitura: null }); }
+      }
+
       case 'lovitura': {
         if (!jucator || !atacant || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
         const castigaCelCareDa = Math.random() < 0.5;
-        await pusher.trigger(`arena-v22-${roomId}`, 'lovitura', {
-          jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now()
-        });
-        return NextResponse.json({ success: true });
+        const lovituraData = { jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now() };
+        // Store in Redis for polling fallback (defender) — 120s TTL
+        redis.setex(`room:${roomId}:lovitura`, 120, JSON.stringify(lovituraData)).catch(() => {});
+        // Fire-and-forget Pusher broadcast
+        pusher.trigger(`arena-v22-${roomId}`, 'lovitura', lovituraData).catch(() => {});
+        // Return result to attacker immediately
+        return NextResponse.json({ success: true, castigaCelCareDa });
       }
 
       case 'arena-chat': {
@@ -348,21 +359,22 @@ export async function POST(request) {
         const chatRlKey = `ratelimit:chat:${jucator.toUpperCase()}`;
         const chatRl = await redis.set(chatRlKey, '1', 'EX', 1, 'NX');
         if (!chatRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
-        await pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', {
+        pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', {
           jucator: jucator.toUpperCase(), text: text.slice(0, 200), t: Date.now()
-        });
+        }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
       case 'revansa': {
         if (!jucator || !roomId) return NextResponse.json({ success: false });
-        await pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: jucator.toUpperCase(), t: Date.now() });
+        pusher.trigger(`arena-v22-${roomId}`, 'revansa', { jucator: jucator.toUpperCase(), t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
       case 'revansa-ok': {
         if (!roomId || !jucator) return NextResponse.json({ success: false });
-        await pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { jucator: jucator.toUpperCase(), t: Date.now() });
+        redis.del(`room:${roomId}:lovitura`).catch(() => {});
+        pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { jucator: jucator.toUpperCase(), t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
@@ -588,30 +600,27 @@ export async function POST(request) {
       case 'arena-heartbeat': {
         const visitorId = sanitizeId(body.visitorId);
         if (!visitorId) return NextResponse.json({ success: false });
-        const hbRlKey = `ratelimit:hb:${visitorId}`;
-        const hbRl = await redis.set(hbRlKey, '1', 'EX', 8, 'NX');
-        if (!hbRl) return NextResponse.json({ success: true, online: 0 });
         const now = Date.now();
+        // Minimal pipeline: zadd + zcard = 2 Redis ops (no rate limit key, no cleanup)
         const pipeline = redis.pipeline();
         pipeline.zadd('arena:online', now, visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 45000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
-        const count = results[2][1];
-        pusher.trigger('global', 'online-count', { online: count }).catch(() => {});
+        const isNew = results[0][1] === 1;
+        const count = results[1][1];
+        // Broadcast only when a NEW user appears — saves ~96k Pusher msgs/day
+        if (isNew) pusher.trigger('global', 'online-count', { online: count }).catch(() => {});
         return NextResponse.json({ success: true, online: count });
       }
 
       case 'arena-disconnect': {
         const visitorId = sanitizeId(body.visitorId);
         if (!visitorId) return NextResponse.json({ success: false });
-        const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zrem('arena:online', visitorId);
-        pipeline.zremrangebyscore('arena:online', 0, now - 45000);
         pipeline.zcard('arena:online');
         const results = await pipeline.exec();
-        const count = results[2][1];
+        const count = results[1][1];
         pusher.trigger('global', 'online-count', { online: count }).catch(() => {});
         return NextResponse.json({ success: true, online: count });
       }
