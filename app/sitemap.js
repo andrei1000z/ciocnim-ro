@@ -9,6 +9,6 @@ export default function sitemap() {
     { url: `${baseUrl}/vopsit-natural`,      lastModified: lastBuild, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/calendar`,            lastModified: lastBuild, changeFrequency: 'yearly',  priority: 0.7 },
     { url: `${baseUrl}/privacy`,             lastModified: lastBuild, changeFrequency: 'yearly',  priority: 0.3 },
-    { url: `${baseUrl}/terms`,               lastModified: lastBuild, changeFrequency: 'yearly',  priority: 0.3 },
+    { url: `${baseUrl}/terms`,              lastModified: lastBuild, changeFrequency: 'yearly',  priority: 0.3 },
   ];
 }

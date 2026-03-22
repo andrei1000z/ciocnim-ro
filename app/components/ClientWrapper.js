@@ -1,11 +1,5 @@
 "use client";
 
-/**
- * ====================================================================================================
- * CIOCNIM.RO - NUCLEUL LOGIC (V30.5 - SYNC MASTER & SCOR CENTRALIZAT SERVER-SIDE)
- * ====================================================================================================
- */
-
 import { useEffect, useState, useSyncExternalStore, createContext, useContext, useCallback, useRef } from "react";
 import Pusher from "pusher-js";
 import { useRouter } from "next/navigation";
@@ -252,7 +246,7 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
   const setNume = useCallback(async (nouNume) => {
     const cleanName = nouNume.toUpperCase().trim();
-    if (cleanName === nume) return true; 
+    if (cleanName === nume) return true;
     if (cleanName.length < 2) {
       setToastMsg("Numele trebuie să aibă minim 2 caractere.");
       return false;
@@ -260,21 +254,19 @@ export default function ClientWrapper({ children }) {
 
     try {
       const storedTeamIds = JSON.parse(safeLS.get("c_teamIds") || "[]");
-      const scorCurent = JSON.parse(safeLS.get("c_stats") || "{}").wins || 0;
 
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           actiune: 'schimba-porecla',
-          oldName: nume, 
+          oldName: nume,
           newName: cleanName,
-          teamIds: storedTeamIds, 
-          scor: scorCurent // Aici păstrăm scorul curent local doar pentru migrarea pe noul nume
+          teamIds: storedTeamIds
         })
       });
       const data = await res.json();
-      
+
       if (!data.success) {
         setToastMsg(data.error || "Acel nume este deja luat! Alege altul.");
         return false;
@@ -317,7 +309,7 @@ export default function ClientWrapper({ children }) {
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      
+
       if (data.success) {
         setTotalGlobal(data.total);
         if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
@@ -506,7 +498,7 @@ export default function ClientWrapper({ children }) {
   return (
     <GlobalStatsContext.Provider value={contextValue}>
       {children}
-      
+
       {/* Toast notifications */}
       <AnimatePresence>
         {toastMsg && <ToastBar msg={toastMsg} onDone={() => setToastMsg(null)} />}

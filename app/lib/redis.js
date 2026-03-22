@@ -1,10 +1,5 @@
 import Redis from 'ioredis';
 
-/**
- * ====================================================================================================
- * CIOCNIM.RO - REDIS NEURAL LINK (V28.3 - AUTO-PIPELINING ACTIVE)
- * ====================================================================================================
- */
 
 const redisClientSingleton = () => {
   if (!process.env.REDIS_URL) {
@@ -14,7 +9,7 @@ const redisClientSingleton = () => {
   const client = new Redis(process.env.REDIS_URL, {
     maxRetriesPerRequest: 3,
     connectTimeout: 10000,
-    enableAutoPipelining: false, // incompatibil cu serverless (Vercel) — cauzează deadlock
+    enableAutoPipelining: true,
     retryStrategy(times) {
       if (times > 3) return null;
       return Math.min(times * 100, 1000);

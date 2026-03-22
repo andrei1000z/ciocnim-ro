@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalStats } from "./components/ClientWrapper";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { esteNumeInterzis, valideazaNume } from "./lib/profanityFilter";
 import DualLeaderboard from "./components/DualLeaderboard";
@@ -15,7 +15,7 @@ import EasterCountdown from "./components/EasterCountdown";
 import { safeCopy } from "./lib/utils";
 import { getNextEaster } from "./lib/easterUtils";
 
-const fadeUp = (delay = 0) => ({
+const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
   initial: { opacity: 0, y: 18, filter: "blur(6px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
   transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
@@ -52,7 +52,8 @@ const SectionLabel = ({ children }) => (
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, onlineCount, pusherRef } = useGlobalStats();
+  const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, onlineCount, pusherRef: globalPusherRef } = useGlobalStats();
+  const prefersReducedMotion = useReducedMotion();
 
   const [loadedTeams, setLoadedTeams] = useState([]);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -127,8 +128,8 @@ function HomeContent() {
 
   const teamIds = loadedTeams.map(t => t.details.id).join(",");
   useEffect(() => {
-    if (!isHydrated || !teamIds || !pusherRef?.current) return;
-    const pusher = pusherRef.current;
+    if (!isHydrated || !teamIds || !globalPusherRef?.current) return;
+    const pusher = globalPusherRef.current;
 
     const channels = teamIds.split(",").map(tid => {
       const ch = pusher.subscribe(`team-${tid}`);
@@ -150,7 +151,7 @@ function HomeContent() {
         pusher.unsubscribe(`team-${tid}`);
       });
     };
-  }, [isHydrated, teamIds, nume, pusherRef]);
+  }, [isHydrated, teamIds, nume, globalPusherRef]);
 
   const handleSaveNume = async () => {
     const final = localNume.trim().toUpperCase();
@@ -297,7 +298,7 @@ function HomeContent() {
     <div className="w-full max-w-md mx-auto pb-16 px-4 space-y-7">
 
       {/* HERO TRADIȚIONAL */}
-      <motion.div {...fadeUp(0)} className="text-center pt-8 pb-6 relative overflow-hidden w-full max-w-full">
+      <motion.div {...fadeUp(0, prefersReducedMotion)} className="text-center pt-8 pb-6 relative overflow-hidden w-full max-w-full">
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04]" aria-hidden="true">
           <div className="absolute top-2 left-[10%] text-5xl rotate-12 animate-float-v9">🥚</div>
           <div className="absolute top-8 right-[15%] text-3xl -rotate-12" style={{animation:'float-gentle 8s ease-in-out infinite 1s'}}>🥚</div>
@@ -339,12 +340,12 @@ function HomeContent() {
       </motion.div>
 
       {/* COUNTDOWN PAȘTE */}
-      <motion.div {...fadeUp(0.05)}>
+      <motion.div {...fadeUp(0.05, prefersReducedMotion)}>
         <EasterCountdown />
       </motion.div>
 
       {/* PROFIL */}
-      <motion.div {...fadeUp(0.08)}>
+      <motion.div {...fadeUp(0.08, prefersReducedMotion)}>
         <SectionLabel>{nume ? "Profilul Tău" : "Începe Aici"}</SectionLabel>
         <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-4 sm:p-5 space-y-4 shadow-sm w-full max-w-full overflow-hidden">
           <div>
@@ -404,7 +405,7 @@ function HomeContent() {
       </motion.div>
 
       {/* JOACĂ */}
-      <motion.div {...fadeUp(0.11)}>
+      <motion.div {...fadeUp(0.11, prefersReducedMotion)}>
         <SectionLabel>Joacă</SectionLabel>
         <div className="space-y-2">
           <ActionButton icon="🥚" title="Ciocnește cu un Prieten" subtitle="Trimite-i codul și gata!" onClick={() => { if (!nume || nume.length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; } triggerVibrate(); setIsPlayModalOpen(true); }} />
@@ -424,13 +425,13 @@ function HomeContent() {
       </AnimatePresence>
 
       {/* CLASAMENT */}
-      <motion.div {...fadeUp(0.15)}>
+      <motion.div {...fadeUp(0.15, prefersReducedMotion)}>
         <SectionLabel>Clasament</SectionLabel>
         <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
       </motion.div>
 
       {/* ACHIEVEMENTS */}
-      <motion.div {...fadeUp(0.18)}>
+      <motion.div {...fadeUp(0.18, prefersReducedMotion)}>
         <SectionLabel>Achievement-uri</SectionLabel>
         <div className="rounded-2xl border border-amber-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
           {achievements.length > 0 ? (
@@ -452,7 +453,7 @@ function HomeContent() {
       </motion.div>
 
       {/* TRADIȚII (includes /retete link - issue #12) */}
-      <motion.div {...fadeUp(0.22)}>
+      <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
         <SectionLabel>Tradiții & Ghiduri</SectionLabel>
         <div className="flex gap-2 justify-center flex-wrap">
           {[
@@ -473,7 +474,7 @@ function HomeContent() {
       </motion.div>
 
       {/* SHARE SITE */}
-      <motion.div {...fadeUp(0.26)}>
+      <motion.div {...fadeUp(0.26, prefersReducedMotion)}>
         <button
           onClick={() => {
             const text = `Am descoperit cel mai tare joc de Paște! Hai la o ciocneală de ouă pe ciocnim.ro 🥚⚔️`;
@@ -493,7 +494,7 @@ function HomeContent() {
 
       {/* INSTALEAZĂ — hide if already running as PWA */}
       {typeof window !== 'undefined' && !window.matchMedia('(display-mode: standalone)').matches && (
-        <motion.div {...fadeUp(0.27)}>
+        <motion.div {...fadeUp(0.27, prefersReducedMotion)}>
           <button
             onClick={() => {
               if (window.deferredPrompt) {
@@ -512,7 +513,7 @@ function HomeContent() {
       )}
 
       {/* FOOTER */}
-      <motion.div {...fadeUp(0.28)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
+      <motion.div {...fadeUp(0.28, prefersReducedMotion)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
         <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
         <div className="flex items-center justify-center gap-3 flex-wrap">
           {nume && <Link href="/profil" className="text-[11px] text-gray-400 hover:text-amber-400 transition-colors">Profilul meu</Link>}
@@ -536,7 +537,7 @@ function HomeContent() {
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1100] bg-red-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl whitespace-nowrap"
           >
-            {toastMsg}
+            {toastMsg.includes("copiat") || toastMsg.includes("Copiat") || toastMsg.includes("succes") ? "✅" : "🚫"} {toastMsg}
           </motion.div>
         )}
       </AnimatePresence>
@@ -627,4 +628,3 @@ export default function Home() {
     </main>
   );
 }
-                                                          

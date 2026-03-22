@@ -1,21 +1,15 @@
 import Link from "next/link";
+import PageHeader from "./components/PageHeader";
 
 export const metadata = {
-  title: "Pagină Negăsită",
+  title: "404 – Pagina nu există | Ciocnim.ro",
+  description: "Oul pe care îl cauți s-a spart la ciocnit. Întoarce-te acasă și încearcă din nou!",
 };
 
 export default function NotFound() {
   return (
     <main className="min-h-screen bg-[#0c0a0a] text-gray-200 flex flex-col">
-      <div className="w-full flex justify-between items-center p-6 md:p-8 bg-[#141111] shadow-lg shadow-black/20 border-b border-red-900/20">
-        <Link href="/" className="flex items-center gap-2 group">
-          <span className="text-3xl group-hover:scale-110 transition-all" role="img" aria-label="Ou de Paște">🥚</span>
-          <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
-        </Link>
-        <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
-          Înapoi acasă
-        </Link>
-      </div>
+      <PageHeader />
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center space-y-8">
         <div className="space-y-4">

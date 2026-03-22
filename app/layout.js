@@ -76,7 +76,7 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  colorScheme: "light dark",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }) {
@@ -108,7 +108,8 @@ export default function RootLayout({ children }) {
       "price": "0",
       "priceCurrency": "RON"
     },
-    "inLanguage": "ro"
+    "inLanguage": "ro",
+    "image": "/og-image.jpg"
   };
 
   return (

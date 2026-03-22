@@ -16,7 +16,7 @@ const pusher = new Pusher({
 
 async function getClasamentRegiuni() {
   try {
-    const raw = await redis.zrevrange('leaderboard_regiuni', 0, -1, 'WITHSCORES');
+    const raw = await redis.zrevrange('leaderboard_regiuni', 0, 19, 'WITHSCORES');
     const lista = [];
     for (let i = 0; i < raw.length; i += 2) {
       lista.push({ regiune: raw[i], scor: parseInt(raw[i + 1]) || 0 });
@@ -48,12 +48,12 @@ async function checkAndAwardAchievements(jucator, stats, teamId = null) {
   const achievementsToAward = [];
   const userKey = `user:${jucator}:achievements`;
   const existingAchievements = await redis.smembers(userKey);
-  
+
   // Prima victorie
   if (stats.wins >= 1 && !existingAchievements.includes('first_win')) {
     achievementsToAward.push('first_win');
   }
-  
+
   // Victoriile cumulative
   const winMilestones = [10, 50, 100, 500, 1000];
   for (const milestone of winMilestones) {
@@ -62,27 +62,27 @@ async function checkAndAwardAchievements(jucator, stats, teamId = null) {
       achievementsToAward.push(achKey);
     }
   }
-  
+
   // Primul meci în grup
   if (teamId && !existingAchievements.includes('first_group')) {
     achievementsToAward.push('first_group');
   }
-  
+
   // Victoriile în grup
   if (teamId && stats.teamWins >= 25 && !existingAchievements.includes('group_wins_25')) {
     achievementsToAward.push('group_wins_25');
   }
-  
+
   // Ou auriu
   if (stats.goldenUsed && !existingAchievements.includes('golden_egg')) {
     achievementsToAward.push('golden_egg');
   }
-  
+
   // Chat master
   if (stats.messagesSent >= 100 && !existingAchievements.includes('chat_master')) {
     achievementsToAward.push('chat_master');
   }
-  
+
   // Streak
   if (stats.currentStreak >= 5 && !existingAchievements.includes('streak_5')) {
     achievementsToAward.push('streak_5');
@@ -90,30 +90,30 @@ async function checkAndAwardAchievements(jucator, stats, teamId = null) {
   if (stats.currentStreak >= 10 && !existingAchievements.includes('streak_10')) {
     achievementsToAward.push('streak_10');
   }
-  
+
   // Provocator
   if (stats.duelsSent >= 50 && !existingAchievements.includes('provocator')) {
     achievementsToAward.push('provocator');
   }
-  
+
   // Adaugă achievement-urile noi
   if (achievementsToAward.length > 0) {
     await redis.sadd(userKey, ...achievementsToAward);
-    
+
     // Fire-and-forget notification
     pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
       achievements: achievementsToAward.map(key => ACHIEVEMENTS[key]),
       t: Date.now()
     }).catch(() => {});
   }
-  
+
   return achievementsToAward;
 }
 
 async function updateUserStats(jucator, updates) {
   const userStatsKey = `user:${jucator}:stats`;
   const pipeline = redis.pipeline();
-  
+
   for (const [field, value] of Object.entries(updates)) {
     if (typeof value === 'number') {
       pipeline.hincrby(userStatsKey, field, value);
@@ -121,7 +121,7 @@ async function updateUserStats(jucator, updates) {
       pipeline.hset(userStatsKey, field, value);
     }
   }
-  
+
   await pipeline.exec();
 }
 
@@ -161,6 +161,16 @@ function sanitizeId(val) {
   return clean || '';
 }
 
+async function checkRateLimit(ip, actiune) {
+  const isWrite = ['increment-global', 'lovitura', 'provocare-duel', 'creeaza-echipa'].includes(actiune);
+  const maxRequests = isWrite ? 10 : 60;
+  const windowSec = 60;
+  const key = `ratelimit:${ip}:${isWrite ? 'write' : 'read'}`;
+  const current = await redis.incr(key);
+  if (current === 1) await redis.expire(key, windowSec);
+  return current <= maxRequests;
+}
+
 export async function POST(request) {
   try {
     let body;
@@ -184,8 +194,16 @@ export async function POST(request) {
     const oldName = sanitizeStr(body.oldName, 30);
     const teamIds = Array.isArray(body.teamIds) ? body.teamIds.slice(0, 20).map(id => sanitizeId(id)).filter(Boolean) : [];
 
+    // Rate limiting
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+    const allowed = await checkRateLimit(ip, actiune);
+    if (!allowed) {
+      return NextResponse.json({ success: false, error: "Prea multe cereri. Așteaptă puțin." }, { status: 429 });
+    }
+
     switch (actiune) {
-      
+
       case 'get-counter': {
         const now = Date.now();
         const [totalCount, topRegiuni, topJucatori, , onlineCount] = await Promise.all([
@@ -311,10 +329,12 @@ export async function POST(request) {
       case 'check-room': {
         const cod = sanitizeId(body.cod);
         if (!cod || cod.length < 4 || cod.length > 6) return NextResponse.json({ success: false, error: "Cod invalid" });
-        // Atomic check: verify room exists AND has space (prevents race condition)
-        const roomExists = await redis.exists(`room:privat-${cod}`);
-        if (!roomExists) return NextResponse.json({ success: false, error: "Camera nu există. Verifică codul." });
-        const count = await redis.scard(`room:privat-${cod}:players`);
+        // Check both the room key and player set
+        const [roomExists, count] = await Promise.all([
+          redis.exists(`room:privat-${cod}`),
+          redis.scard(`room:privat-${cod}:players`)
+        ]);
+        if (!roomExists && count === 0) return NextResponse.json({ success: false, error: "Camera nu există. Verifică codul." });
         if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." });
         return NextResponse.json({ success: true });
       }
@@ -359,8 +379,9 @@ export async function POST(request) {
         const chatRlKey = `ratelimit:chat:${jucator.toUpperCase()}`;
         const chatRl = await redis.set(chatRlKey, '1', 'EX', 1, 'NX');
         if (!chatRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
+        const safeText = text.trim().slice(0, 200);
         pusher.trigger(`arena-v22-${roomId}`, 'arena-chat', {
-          jucator: jucator.toUpperCase(), text: text.slice(0, 200), t: Date.now()
+          jucator: jucator.toUpperCase(), text: safeText, t: Date.now()
         }).catch(() => {});
         return NextResponse.json({ success: true });
       }
@@ -523,7 +544,7 @@ export async function POST(request) {
         ]);
 
         const teamStats = await redis.hgetall(`team:${teamId}:stats`);
-        
+
         // Dacă jucătorul a intrat pe link-ul de grup, îi forțăm scorul pe 0 (nu aducem cel global)
         if (jucator && jucator.length >= 3) {
           const cleanPlayer = jucator.toUpperCase();
@@ -533,13 +554,13 @@ export async function POST(request) {
              pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(() => {})
           }
         }
-        
+
         const membriRaw = await redis.zrevrange(`team:${teamId}:membri`, 0, 14, 'WITHSCORES');
         const formattedTop = [];
         for (let i = 0; i < membriRaw.length; i += 2) {
           formattedTop.push({ member: membriRaw[i], score: parseInt(membriRaw[i+1]) || 0 });
         }
-        
+
         return NextResponse.json({ success: true, details: { id: teamId, nume: teamName, ...teamStats }, top: formattedTop });
       }
 

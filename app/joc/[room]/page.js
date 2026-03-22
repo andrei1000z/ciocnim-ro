@@ -4,7 +4,11 @@
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../components/ClientWrapper";
-import confetti from "canvas-confetti";
+// Dynamic import — only loads canvas-confetti when needed (victory)
+const fireConfetti = async (opts) => {
+  const confetti = (await import("canvas-confetti")).default;
+  confetti(opts);
+};
 import { motion, AnimatePresence } from "framer-motion";
 import { safeCopy } from "../../lib/utils";
 
@@ -493,6 +497,15 @@ function ArenaMaster({ room }) {
     return () => clearInterval(interval);
   }, [opponent, rezultat, isStriking, isBotMatch, nume, broadcastJoin]);
 
+  // Auto-return to home after 45s of inactivity post-result
+  useEffect(() => {
+    if (!rezultat) return;
+    const timeout = setTimeout(() => {
+      router.replace('/');
+    }, 45000);
+    return () => clearTimeout(timeout);
+  }, [rezultat, router]);
+
   const executeBattle = (data) => {
     // Guard cu refs — funcționează chiar și în stale closures din Pusher
     if (rezultatRef.current || isStrikingRef.current) return;
@@ -537,7 +550,7 @@ function ArenaMaster({ room }) {
         rezultatRef.current = { win: amCastigat };
         setRezultat({ win: amCastigat });
         playArenaSound(amCastigat ? 'victorie' : 'esec');
-        if (amCastigat) { try { confetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] }); } catch {} }
+        if (amCastigat) fireConfetti({ particleCount: 200, spread: 90, origin: { y: 0.55 }, colors: ['#dc2626', '#fbbf24', '#f97316', '#ef4444'] });
       }, 500);
     }, 450);
   };
@@ -625,9 +638,10 @@ function ArenaMaster({ room }) {
   ];
 
   const handleChat = () => {
-    if (!chatInput.trim()) return;
+    const msg = chatInput.trim().slice(0, 200);
+    if (!msg) return;
     if (isBotMatch) {
-      setMessages(prev => [{ autor: nume, text: chatInput.trim() }, ...prev].slice(0, 20));
+      setMessages(prev => [{ autor: nume, text: msg }, ...prev].slice(0, 20));
       setChatInput("");
       // Bot replies after a short delay
       setTimeout(() => {
@@ -635,10 +649,10 @@ function ArenaMaster({ room }) {
         setMessages(prev => [{ autor: "🤖 BOT", text: reply }, ...prev].slice(0, 20));
       }, 800 + Math.random() * 1200);
     } else {
-      fetch('/api/ciocnire', { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: chatInput }) 
+      fetch('/api/ciocnire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: msg })
       });
       setChatInput("");
       updateStats('message');
@@ -859,7 +873,7 @@ function ArenaMaster({ room }) {
                onChange={e => setChatInput(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && handleChat()}
                placeholder="SCRIE UN MESAJ..."
-               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30 uppercase" 
+               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30"
             />
             <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/30 text-sm md:text-xs active:scale-95 flex items-center justify-center cursor-pointer">🕊️</button>
           </div>

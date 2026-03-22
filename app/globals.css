@@ -1,14 +1,5 @@
 @import "tailwindcss";
 
-/**
- * ====================================================================================================
- * CIOCNIM.RO - DARK TRADITIONAL THEME (V32.0)
- * ====================================================================================================
- * Design: Dark/gray minimalist cu accente roșii tradiționale.
- * Glassmorphism, red contrasts, traditional feel, modern aesthetic.
- * ====================================================================================================
- */
-
 @layer base {
   :root {
     --bg-dark: #0c0a0a;
@@ -104,7 +95,9 @@
     outline: 2px solid var(--red-primary) !important;
     outline-offset: 2px !important;
   }
-  *:focus { outline: none !important; }
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
 
   input, textarea, select {
     user-select: text !important;
