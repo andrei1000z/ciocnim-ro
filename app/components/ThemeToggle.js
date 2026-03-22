@@ -35,10 +35,10 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className={`fixed bottom-4 left-4 md:top-4 md:left-auto md:right-4 md:bottom-auto z-[900] w-10 h-10 flex items-center justify-center rounded-full text-lg transition-all active:scale-90 backdrop-blur-sm shadow-lg border ${
+      className={`fixed bottom-4 left-4 md:top-4 md:left-auto md:right-4 md:bottom-auto z-[900] w-10 h-10 flex items-center justify-center rounded-full text-lg transition-all active:scale-90 backdrop-blur-sm shadow-lg border border-edge-strong ${
         isLight
-          ? "bg-gray-100/80 hover:bg-gray-200/90 border-gray-300/50 shadow-gray-400/20"
-          : "bg-white/[0.08] hover:bg-white/[0.15] border-white/[0.1]"
+          ? "bg-surface hover:bg-surface-hover"
+          : "bg-elevated hover:bg-elevated-hover"
       }`}
       aria-label={isLight ? "Activează modul întunecat" : "Activează modul luminos"}
       title={isLight ? "Mod întunecat" : "Mod luminos"}

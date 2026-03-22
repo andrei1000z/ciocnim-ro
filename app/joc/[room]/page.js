@@ -190,7 +190,7 @@ function ArenaMaster({ room }) {
 
   const [me] = useState({ skin: userStats.skin || 'red', isGolden: false, hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
-  
+
   const [isStriking, setIsStriking] = useState(false);
 
   const [rezultat, setRezultat] = useState(null);
@@ -707,17 +707,17 @@ function ArenaMaster({ room }) {
     <>
       {/* Wrapper principal: Modificat pentru anti-suprapunere. Folosim flex-col cu overflow safe */}
       <div className={`w-full max-w-4xl flex flex-col items-center justify-start md:justify-center flex-1 py-4 md:py-6 px-4 md:px-0 transition-all z-10 ${impactFlash ? 'animate-impact scale-[1.02] blur-[1px]' : ''}`}>
-        
+
         {/* Buton Cod Cameră + Share */}
         {isPrivate && !teamIdPreluat && (
           <div className="flex items-center gap-2 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
-            <button onClick={copyRoomCode} className="group relative bg-white/[0.05] backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/30 shadow-lg shadow-black/30 hover:bg-white/[0.08] hover:border-red-700/50 transition-all active:scale-95">
+            <button onClick={copyRoomCode} className="group relative bg-elevated backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/30 shadow-lg shadow-black/30 hover:bg-elevated-hover hover:border-red-700/50 transition-all active:scale-95">
               <div className="flex items-center gap-2 md:gap-3 relative z-10">
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-500/60 group-hover:text-red-400 transition-colors hidden sm:inline">Cod Cameră: </span>
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-500/60 group-hover:text-accent-red transition-colors hidden sm:inline">Cod Cameră: </span>
                 <span className="text-red-500 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]">{room.replace('privat-', '')}</span>
                 <span className="bg-red-900/30 p-1.5 md:p-2 rounded-xl text-[10px] md:text-xs ml-1 md:ml-2 group-hover:bg-red-900/40 transition-all border border-red-900/30">{copied ? '✅' : '📋'}</span>
               </div>
-              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-green-400 tracking-widest">COPIAT!</span>}
+              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-accent-green tracking-widest">COPIAT!</span>}
             </button>
             <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite prietenului" aria-label="Distribuie link-ul camerei">
               <span className="text-base md:text-lg">📲</span>
@@ -735,14 +735,14 @@ function ArenaMaster({ room }) {
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
             </span>
-            <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] ${connectionState === 'connected' ? 'text-green-400' : connectionState === 'connecting' ? 'text-yellow-400' : 'text-red-400'}`}>
+            <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] ${connectionState === 'connected' ? 'text-accent-green' : connectionState === 'connecting' ? 'text-yellow-400' : 'text-accent-red'}`}>
               {connectionState === 'connected' ? 'LIVE' : connectionState === 'connecting' ? 'SE CONECTEAZĂ...' : 'DECONECTAT'}
             </span>
-            <span className="text-[11px] md:text-xs font-black text-white tabular-nums">{onlineCount || 1}</span>
-            <span className="text-[9px] md:text-[10px] font-semibold text-white/30">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+            <span className="text-[11px] md:text-xs font-black text-heading tabular-nums">{onlineCount || 1}</span>
+            <span className="text-[9px] md:text-[10px] font-semibold text-faint">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
             <button onClick={() => setIsMuted(m => !m)} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
-          <span className="text-[9px] md:text-[10px] font-bold text-gray-600 tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
+          <span className="text-[9px] md:text-[10px] font-bold text-muted tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
         </div>
 
         {/* Zona de Duel */}
@@ -755,9 +755,9 @@ function ArenaMaster({ room }) {
             transition={{ duration: 0.45, ease: [0.55, 0, 1, 0.45] }}
           >
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
-            <div className="bg-white/[0.05] backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/30 border-l-2 border-l-green-500/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
+            <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/30 border-l-2 border-l-green-500/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
-              <span className="text-sm md:text-xl font-black text-white italic relative z-10 truncate block">{nume}</span>
+              <span className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{nume}</span>
             </div>
           </motion.div>
 
@@ -797,13 +797,13 @@ function ArenaMaster({ room }) {
             {opponent ? (
               <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 w-full">
                 <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
-                <div className="bg-white/[0.05] backdrop-blur-md p-3 md:p-4 rounded-2xl border border-red-900/30 border-r-2 border-r-red-600/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
+                <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl border border-red-900/30 border-r-2 border-r-red-600/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
                   <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
-                  <span className="text-sm md:text-xl font-black text-white italic relative z-10 truncate block">{opponent.jucator}</span>
+                  <span className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{opponent.jucator}</span>
                 </div>
               </motion.div>
             ) : (
-              <div className="w-full aspect-[1/1.35] bg-white/[0.03] rounded-[2rem] border border-dashed border-red-900/30 animate-pulse flex items-center justify-center text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-red-500/40 text-center px-2 backdrop-blur-sm relative overflow-hidden">
+              <div className="w-full aspect-[1/1.35] bg-card rounded-[2rem] border border-dashed border-red-900/30 animate-pulse flex items-center justify-center text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-red-500/40 text-center px-2 backdrop-blur-sm relative overflow-hidden">
                 <span className="relative z-10">Așteptăm...</span>
               </div>
             )}
@@ -821,7 +821,7 @@ function ArenaMaster({ room }) {
               className={`w-full py-5 md:py-6 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
                 canStrike
                   ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.3)] border border-red-500/40 hover:bg-red-600 cursor-pointer pointer-events-auto'
-                  : 'bg-white/[0.03] text-white/30 border border-red-900/20 backdrop-blur-md cursor-not-allowed pointer-events-none'
+                  : 'bg-card text-faint border border-red-900/20 backdrop-blur-md cursor-not-allowed pointer-events-none'
               }`}
             >
               <span className="relative z-10 text-center flex flex-col items-center justify-center gap-1">
@@ -840,7 +840,7 @@ function ArenaMaster({ room }) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="w-full py-5 md:py-6 rounded-[2rem] bg-white/[0.03] text-white/60 border border-red-900/20 backdrop-blur-md text-center flex items-center justify-center shadow-lg"
+              className="w-full py-5 md:py-6 rounded-[2rem] bg-card text-muted border border-red-900/20 backdrop-blur-md text-center flex items-center justify-center shadow-lg"
             >
               <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base animate-pulse">⚡ CIOCNIRE...</span>
             </motion.div>
@@ -848,13 +848,13 @@ function ArenaMaster({ room }) {
         </div>
 
         {/* CHAT REDESIGN: Z-index separat suprem (70) pentru a fi mereu accesibil */}
-        <div className="w-full max-w-sm bg-white/[0.03] border border-red-900/20 p-4 md:p-6 rounded-[2rem] shadow-lg shadow-black/30 relative overflow-hidden z-[70] flex-shrink-0 pointer-events-auto backdrop-blur-sm">
-          
+        <div className="w-full max-w-sm bg-card border border-red-900/20 p-4 md:p-6 rounded-[2rem] shadow-lg shadow-black/30 relative overflow-hidden z-[70] flex-shrink-0 pointer-events-auto backdrop-blur-sm">
+
           <div className="h-28 md:h-36 overflow-y-auto flex flex-col-reverse gap-2 mb-3 custom-scrollbar pr-2 relative z-10" ref={chatContainerRef}>
             {messages.map((m, i) => (
               <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start'}`}>
                 <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-amber-500/50 px-2 mb-1">{m.autor}</span>
-                <div className={`px-3 py-2 md:px-4 md:py-2.5 rounded-2xl text-xs md:text-sm font-bold border ${m.autor === nume ? 'bg-red-700 text-white rounded-tr-sm border-red-600/30' : 'bg-white/[0.05] text-white/80 rounded-tl-sm border-white/[0.06]'}`}>
+                <div className={`px-3 py-2 md:px-4 md:py-2.5 rounded-2xl text-xs md:text-sm font-bold border ${m.autor === nume ? 'bg-red-700 text-white rounded-tr-sm border-red-600/30' : 'bg-elevated text-dim rounded-tl-sm border-edge'}`}>
                    {m.text}
                 </div>
               </div>
@@ -866,14 +866,14 @@ function ArenaMaster({ room }) {
                 </div>
             )}
           </div>
-          
-          <div className="flex gap-2 bg-white/[0.03] p-1.5 rounded-full border border-red-900/20 focus-within:border-red-700/40 focus-within:bg-white/[0.05] transition-all relative z-10">
-            <input 
-               value={chatInput} 
+
+          <div className="flex gap-2 bg-card p-1.5 rounded-full border border-red-900/20 focus-within:border-red-700/40 focus-within:bg-elevated transition-all relative z-10">
+            <input
+               value={chatInput}
                onChange={e => setChatInput(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && handleChat()}
                placeholder="SCRIE UN MESAJ..."
-               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-white tracking-widest placeholder:text-amber-500/30"
+               className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-heading tracking-widest placeholder:text-amber-500/30"
             />
             <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/30 text-sm md:text-xs active:scale-95 flex items-center justify-center cursor-pointer">🕊️</button>
           </div>
@@ -897,7 +897,7 @@ function ArenaMaster({ room }) {
               initial={{ scale: 0.7, y: 60, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               transition={{ type: "spring", bounce: 0.45, duration: 0.7 }}
-              className={`max-w-sm w-full bg-[#111] rounded-[2.5rem] border shadow-[0_60px_120px_rgba(0,0,0,0.95)] relative overflow-hidden pointer-events-auto ${rezultat.win ? 'border-green-700/30' : 'border-red-800/30'}`}
+              className={`max-w-sm w-full bg-surface rounded-[2.5rem] border shadow-[0_60px_120px_rgba(0,0,0,0.95)] relative overflow-hidden pointer-events-auto ${rezultat.win ? 'border-green-700/30' : 'border-red-800/30'}`}
             >
 
               {/* Header colorat */}
@@ -919,7 +919,7 @@ function ArenaMaster({ room }) {
                   <p className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1 ${rezultat.win ? 'text-green-400/70' : 'text-red-400/70'}`}>
                     {rezultat.win ? 'Hristos a Înviat!' : 'Adevărat a Înviat!'}
                   </p>
-                  <h2 className={`text-3xl md:text-4xl font-black italic tracking-tight ${rezultat.win ? 'text-green-400' : 'text-red-400'}`}>
+                  <h2 className={`text-3xl md:text-4xl font-black italic tracking-tight ${rezultat.win ? 'text-accent-green' : 'text-accent-red'}`}>
                     {rezultat.win ? 'Victorie!' : 'Oul s-a spart'}
                   </h2>
                   {/* Scor */}
@@ -936,7 +936,7 @@ function ArenaMaster({ room }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
-                className="mx-5 mb-5 bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 relative"
+                className="mx-5 mb-5 bg-card border border-edge rounded-2xl p-4 relative"
               >
                 <span className="absolute top-1 left-3 text-3xl text-amber-500/10 font-serif leading-none">&ldquo;</span>
                 <p className="text-[11px] md:text-sm font-medium text-amber-400/70 italic leading-relaxed px-2 mt-1">
@@ -1022,7 +1022,7 @@ function ArenaMaster({ room }) {
                   disabled={!isBotMatch && revansaRequests[nume]}
                   className={`w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto
                     ${!isBotMatch && revansaRequests[nume]
-                      ? 'bg-white/5 text-white/30 border-white/10 cursor-default'
+                      ? 'bg-white/5 text-faint border-edge-strong cursor-default'
                       : 'bg-white text-red-800 border-white/80 hover:bg-red-50 shadow-[0_10px_30px_rgba(255,255,255,0.08)]'
                     }`}
                 >
@@ -1035,7 +1035,7 @@ function ArenaMaster({ room }) {
                 </button>
                 <button
                   onClick={() => router.push('/')}
-                  className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto text-white/50 bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] hover:text-white/70"
+                  className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto text-muted bg-card border-edge hover:bg-card-hover hover:text-dim"
                 >
                   ← Înapoi acasă
                 </button>
@@ -1052,7 +1052,7 @@ function ArenaMaster({ room }) {
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
-    <main className="game-arena min-h-[100dvh] w-full bg-[#0c0a0a] text-gray-200 flex flex-col items-center justify-start md:justify-center relative pattern-tradition" style={{ overflowX: 'clip' }}>
+    <main className="game-arena min-h-[100dvh] w-full bg-main text-body flex flex-col items-center justify-start md:justify-center relative pattern-tradition" style={{ overflowX: 'clip' }}>
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[150px] pointer-events-none" />
 

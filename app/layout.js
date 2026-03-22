@@ -76,7 +76,7 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  colorScheme: "dark",
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({ children }) {
@@ -130,8 +130,8 @@ export default function RootLayout({ children }) {
       
       <body className={`
         ${outfit.className}
-        bg-[#0c0a0a]
-        text-gray-200
+        bg-main
+        text-body
         min-h-screen
         min-h-[100dvh]
         w-full
