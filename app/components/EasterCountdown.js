@@ -3,22 +3,22 @@
 import { useState, useEffect } from "react";
 import { getOrthodoxEaster, getNextEaster } from "@/app/lib/easterUtils";
 
-const EASTER_DATE = getNextEaster();
-const EASTER_YEAR = EASTER_DATE.getFullYear();
-
 function getState() {
+  // Calculat la runtime, nu la build time — se auto-actualizează după Paște
+  const easterDate = getNextEaster();
   const now = new Date();
-  const easterStart = new Date(EASTER_DATE);
+  const easterStart = new Date(easterDate);
   easterStart.setHours(0, 0, 0, 0);
   const easterEnd = new Date(easterStart);
   easterEnd.setDate(easterEnd.getDate() + 1);
 
-  if (now >= easterStart && now < easterEnd) return { type: "risen" };
+  if (now >= easterStart && now < easterEnd) return { type: "risen", year: easterDate.getFullYear() };
 
   const diff = easterStart - now;
   if (diff <= 0) return null;
   return {
     type: "countdown",
+    year: easterDate.getFullYear(),
     zile: Math.floor(diff / (1000 * 60 * 60 * 24)),
     ore: Math.floor((diff / (1000 * 60 * 60)) % 24),
     min: Math.floor((diff / (1000 * 60)) % 60),
@@ -55,7 +55,7 @@ export default function EasterCountdown() {
   return (
     <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
       <p className="text-[10px] font-bold text-red-500/60 uppercase tracking-[0.3em] text-center mb-3">
-        Până la Paștele Ortodox {EASTER_YEAR}
+        Până la Paștele Ortodox {state.year}
       </p>
       <div className="grid grid-cols-4 gap-2">
         {units.map(u => (
