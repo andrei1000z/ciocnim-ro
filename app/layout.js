@@ -138,10 +138,10 @@ export default function RootLayout({ children }) {
       `}>
         <a href="#main-content" className="skip-to-content">Salt la conținut</a>
 
-        {/* Ambient glow subtil - dark mode */}
-        <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none">
-          <div className="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(220,38,38,0.06),transparent_70%)] blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(245,158,11,0.03),transparent_70%)] blur-3xl"></div>
+        {/* Ambient glow subtil */}
+        <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none opacity-60" aria-hidden="true">
+          <div className="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(220,38,38,0.06),transparent_70%)] blur-3xl will-change-transform"></div>
+          <div className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(245,158,11,0.03),transparent_70%)] blur-3xl will-change-transform"></div>
         </div>
 
         <ClientWrapper>
@@ -169,7 +169,7 @@ export default function RootLayout({ children }) {
             width: 100vw;
             max-width: 100%;
             position: relative;
-            background-color: var(--bg-main, #0c0a0a);
+            background-color: var(--t-bg-main, #0c0a0a);
             overscroll-behavior: none;
             overflow-x: hidden;
           }
@@ -206,9 +206,6 @@ export default function RootLayout({ children }) {
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
           .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.2); border-radius: 10px; }
 
-          @media (prefers-reduced-motion: no-preference) {
-            * { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
-          }
         `}} />
 
       </body>

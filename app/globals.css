@@ -132,7 +132,6 @@
     min-height: 100dvh;
     width: 100vw;
     background-color: var(--t-bg-main);
-    background-attachment: fixed;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     font-family: var(--font-outfit), system-ui, sans-serif;
@@ -315,11 +314,9 @@
   @keyframes float-gentle {
     0%, 100% {
       transform: translateY(0) rotate(-1deg) scale(1);
-      filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.15));
     }
     50% {
       transform: translateY(-12px) rotate(2deg) scale(1.02);
-      filter: drop-shadow(0 16px 24px rgba(220, 38, 38, 0.25));
     }
   }
 

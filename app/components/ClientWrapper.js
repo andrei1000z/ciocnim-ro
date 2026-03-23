@@ -22,7 +22,7 @@ function ToastBar({ msg, onDone }) {
       initial={{ opacity: 0, y: -30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -30 }}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-5 py-3 rounded-2xl bg-[#1a1515] border border-red-900/30 shadow-xl shadow-black/40 text-sm font-bold text-gray-200 max-w-[90vw] text-center pointer-events-auto"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-5 py-3 rounded-2xl bg-surface-hover border border-red-900/30 shadow-xl shadow-black/40 text-sm font-bold text-body max-w-[90vw] text-center pointer-events-auto"
     >
       {msg}
     </motion.div>
@@ -73,9 +73,9 @@ function CookieBanner() {
       role="dialog"
       aria-label="Informații despre stocarea datelor"
       aria-live="polite"
-      className="fixed bottom-4 left-4 right-4 z-[1300] max-w-md mx-auto bg-[#1a1515] border border-red-900/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex flex-col gap-3"
+      className="fixed bottom-4 left-4 right-4 z-[1300] max-w-md mx-auto bg-surface-hover border border-red-900/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex flex-col gap-3"
     >
-      <p className="text-xs text-gray-300 leading-relaxed">
+      <p className="text-xs text-body leading-relaxed">
         Salvăm preferințele tale (poreclă, temă, statistici) doar în browserul tău — nu trimitem date către terți și nu folosim cookies de tracking.{' '}
         <a href="/privacy" className="text-red-400 hover:text-red-300 underline">Politica de confidențialitate</a>.
       </p>
@@ -96,7 +96,7 @@ function LoadingScreen() {
     return () => clearTimeout(t);
   }, []);
   return (
-    <div className="fixed inset-0 bg-[#0c0a0a] z-[100001] flex flex-col items-center justify-center">
+    <div className="fixed inset-0 bg-main z-[100001] flex flex-col items-center justify-center">
       {!timedOut ? (
         <div className="flex flex-col items-center gap-5">
           <span className="text-8xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</span>
@@ -106,7 +106,7 @@ function LoadingScreen() {
         <div className="flex flex-col items-center gap-5 text-center px-6 max-w-sm">
           <span className="text-6xl" role="img" aria-label="Eroare">⚠️</span>
           <p className="text-base font-black text-red-400">Ceva nu a mers bine</p>
-          <p className="text-sm text-gray-400">Pagina nu s-a putut încărca. Verifică conexiunea la internet și încearcă din nou.</p>
+          <p className="text-sm text-dim">Pagina nu s-a putut încărca. Verifică conexiunea la internet și încearcă din nou.</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-2 px-8 py-3 bg-red-700 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 border border-red-600"
@@ -516,14 +516,14 @@ export default function ClientWrapper({ children }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -50, scale: 0.9 }}
                 transition={{ type: "spring", bounce: 0.5 }}
-                className="relative w-[90%] max-w-sm bg-[#141111] p-8 md:p-10 rounded-3xl border border-red-900/30 shadow-[0_25px_60px_rgba(0,0,0,0.6)] overflow-hidden pointer-events-auto"
+                className="relative w-[90%] max-w-sm bg-surface p-8 md:p-10 rounded-3xl border border-red-900/30 shadow-[0_25px_60px_rgba(0,0,0,0.6)] overflow-hidden pointer-events-auto"
               >
                 <div className="relative z-10 text-center">
                   <div className="inline-flex items-center gap-2 bg-red-900/30 px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-400 rounded-full mb-4">
                     ⚔️ Provocare
                   </div>
 
-                  <p className="font-black text-2xl md:text-3xl text-white leading-tight">
+                  <p className="font-black text-2xl md:text-3xl text-heading leading-tight">
                     <span className="text-red-500">{notificare.deLa}</span> <br/> te cheamă la duel!
                   </p>
 
@@ -535,7 +535,7 @@ export default function ClientWrapper({ children }) {
                       Acceptă
                     </button>
                     <button
-                      className="w-full bg-white/[0.05] py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-gray-500 hover:bg-white/[0.08] hover:text-gray-300 transition-all active:scale-95 cursor-pointer pointer-events-auto"
+                      className="w-full bg-elevated py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-muted hover:bg-elevated-hover hover:text-dim transition-all active:scale-95 cursor-pointer pointer-events-auto"
                       onClick={() => setNotificare(null)}
                     >
                       Refuză

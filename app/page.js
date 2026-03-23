@@ -12,12 +12,12 @@ import GroupHub from "./components/GroupHub";
 import { ColorSelector, RegionSelector } from "./components/ProfileSection";
 import PlayModal from "./components/PlayModal";
 import EasterCountdown from "./components/EasterCountdown";
-import { safeCopy } from "./lib/utils";
+import { safeLS, safeCopy } from "./lib/utils";
 import { getNextEaster } from "./lib/easterUtils";
 
 const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
-  initial: { opacity: 0, y: 18, filter: "blur(6px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
   transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
 });
 
@@ -28,18 +28,18 @@ const ActionButton = ({ onClick, icon, title, subtitle, loading = false }) => (
     whileTap={{ scale: 0.97 }}
     onClick={onClick}
     disabled={loading}
-    className="w-full px-5 py-4 rounded-2xl border border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.08] hover:border-red-500/20 group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-xl backdrop-blur-xl"
+    className="w-full px-5 py-4 rounded-2xl border border-edge bg-card hover:bg-card-hover hover:border-red-500/20 group transition-all duration-200 flex items-center gap-4 text-left disabled:opacity-50 shadow-sm hover:shadow-xl"
   >
     <div className="w-11 h-11 rounded-xl bg-red-900/20 group-hover:bg-red-900/30 flex items-center justify-center transition-all text-xl flex-shrink-0">
       {icon}
     </div>
     <div className="flex-1 min-w-0">
-      <div className="font-bold text-gray-200 group-hover:text-white transition-colors text-sm leading-tight">{title}</div>
-      {subtitle && <div className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors mt-0.5">{subtitle}</div>}
+      <div className="font-bold text-body group-hover:text-heading transition-colors text-sm leading-tight">{title}</div>
+      {subtitle && <div className="text-xs text-muted group-hover:text-dim transition-colors mt-0.5">{subtitle}</div>}
     </div>
     {loading
       ? <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-      : <span className="text-gray-600 group-hover:text-gray-400 transition-colors text-sm flex-shrink-0">→</span>
+      : <span className="text-faint group-hover:text-dim transition-colors text-sm flex-shrink-0">→</span>
     }
   </motion.button>
 );
@@ -275,19 +275,19 @@ function HomeContent() {
   if (!isHydrated) return (
     <div className="w-full max-w-md mx-auto pb-16 px-4 pt-8 space-y-6">
       <div className="text-center">
-        <h1 className="text-4xl font-black text-white tracking-tight">CIOCNIM<span className="text-red-500">.</span>RO</h1>
+        <h1 className="text-4xl font-black text-heading tracking-tight">CIOCNIM<span className="text-red-500">.</span>RO</h1>
         <p className="text-sm font-bold text-red-400/60 mt-2">Ciocnește ouă online de Paște</p>
       </div>
       {/* Skeleton placeholders */}
       <div className="space-y-4 animate-pulse">
-        <div className="h-20 rounded-2xl bg-white/[0.04] border border-red-900/10" />
-        <div className="h-14 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+        <div className="h-20 rounded-2xl bg-card border border-red-900/10" />
+        <div className="h-14 rounded-2xl bg-card border border-red-900/10" />
         <div className="space-y-2">
-          <div className="h-16 rounded-2xl bg-white/[0.04] border border-red-900/10" />
-          <div className="h-16 rounded-2xl bg-white/[0.04] border border-red-900/10" />
-          <div className="h-16 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+          <div className="h-16 rounded-2xl bg-card border border-red-900/10" />
+          <div className="h-16 rounded-2xl bg-card border border-red-900/10" />
+          <div className="h-16 rounded-2xl bg-card border border-red-900/10" />
         </div>
-        <div className="h-32 rounded-2xl bg-white/[0.04] border border-red-900/10" />
+        <div className="h-32 rounded-2xl bg-card border border-red-900/10" />
       </div>
     </div>
   );
@@ -312,7 +312,7 @@ function HomeContent() {
           </div>
         </motion.div>
 
-        <h1 className="text-4xl font-black text-white tracking-tight relative z-10 drop-shadow-sm">CIOCNIM<span className="text-red-500">.</span>RO</h1>
+        <h1 className="text-4xl font-black text-heading tracking-tight relative z-10 drop-shadow-sm">CIOCNIM<span className="text-red-500">.</span>RO</h1>
         <p className="text-sm font-bold text-red-400/60 mt-2 relative z-10">Ciocnește ouă online de Paște</p>
 
         <div className="flex items-center justify-center gap-3 mt-1.5">
@@ -323,10 +323,10 @@ function HomeContent() {
 
         {/* COUNTER CIOCNIRI + LIVE */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2 relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/[0.06] backdrop-blur-xl border border-red-500/15 text-white px-4 sm:px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20 max-w-full">
+          <div className="inline-flex items-center gap-2 bg-card backdrop-blur-xl border border-red-500/15 text-heading px-4 sm:px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20 max-w-full">
             <span className="text-lg flex-shrink-0" role="img" aria-label="Ou de Paște">🥚</span>
-            <span className="tabular-nums text-white text-xl sm:text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
-            <span className="font-semibold text-white/40 text-[10px] sm:text-xs">Ciocniri Naționale</span>
+            <span className="tabular-nums text-heading text-xl sm:text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
+            <span className="font-semibold text-muted text-[10px] sm:text-xs">Ciocniri Naționale</span>
           </div>
           <div className="inline-flex items-center gap-2 text-[11px] text-green-400/60 font-bold">
             <span className="relative flex h-2 w-2">
@@ -347,7 +347,7 @@ function HomeContent() {
       {/* PROFIL */}
       <motion.div {...fadeUp(0.08, prefersReducedMotion)}>
         <SectionLabel>{nume ? "Profilul Tău" : "Începe Aici"}</SectionLabel>
-        <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-4 sm:p-5 space-y-4 shadow-sm w-full max-w-full overflow-hidden">
+        <div className="rounded-2xl border border-red-900/20 bg-card backdrop-blur-xl p-4 sm:p-5 space-y-4 shadow-sm w-full max-w-full overflow-hidden">
           <div>
             <div className="flex gap-2 w-full max-w-full">
               <input
@@ -356,14 +356,14 @@ function HomeContent() {
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
                 placeholder="Porecla ta..."
                 maxLength={21}
-                className="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-white/[0.1] rounded-xl font-bold text-gray-200 outline-none focus:border-red-800 transition-all text-sm bg-white/[0.05] focus:bg-white/[0.08]"
+                className="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-edge-strong rounded-xl font-bold text-body outline-none focus:border-red-800 transition-all text-sm bg-elevated focus:bg-elevated-hover"
               />
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSaveNume}
                 disabled={isSavingName || isNameInvalid}
-                className={`px-4 sm:px-5 py-3 font-bold rounded-xl border transition-all text-sm flex-shrink-0 ${isNameInvalid || isSavingName ? "bg-white/[0.05] text-gray-500 border-white/[0.08] cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900 shadow-sm shadow-red-900/20"}`}
+                className={`px-4 sm:px-5 py-3 font-bold rounded-xl border transition-all text-sm flex-shrink-0 ${isNameInvalid || isSavingName ? "bg-elevated text-muted border-edge cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900 shadow-sm shadow-red-900/20"}`}
               >
                 {isSavingName ? "…" : "OK"}
               </motion.button>
@@ -374,7 +374,7 @@ function HomeContent() {
               ) : localNume.trim().length > 0 && localNume.trim().length < 2 ? (
                 <motion.p key="err-scurt" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-red-500 text-xs mt-1.5 font-medium">Minim 2 caractere</motion.p>
               ) : !nume && localNume.trim().length === 0 ? (
-                <motion.p key="hint" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-gray-400 text-xs mt-1.5 font-medium">Scrie o poreclă și apasă OK ca să poți juca</motion.p>
+                <motion.p key="hint" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-dim text-xs mt-1.5 font-medium">Scrie o poreclă și apasă OK ca să poți juca</motion.p>
               ) : null}
             </AnimatePresence>
           </div>
@@ -433,7 +433,7 @@ function HomeContent() {
       {/* ACHIEVEMENTS */}
       <motion.div {...fadeUp(0.18, prefersReducedMotion)}>
         <SectionLabel>Achievement-uri</SectionLabel>
-        <div className="rounded-2xl border border-amber-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
+        <div className="rounded-2xl border border-amber-900/20 bg-card backdrop-blur-xl p-4 shadow-sm">
           {achievements.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {achievements.map(a => (
@@ -444,7 +444,7 @@ function HomeContent() {
               ))}
             </div>
           ) : (
-            <p className="text-[11px] text-gray-500 text-center">Niciun achievement încă. Joacă pentru a debloca!</p>
+            <p className="text-[11px] text-muted text-center">Niciun achievement încă. Joacă pentru a debloca!</p>
           )}
           <Link href="/profil" className="block text-center text-[10px] font-bold text-amber-500/50 hover:text-amber-400 mt-3 transition-colors">
             Vezi toate achievement-urile →
@@ -464,9 +464,9 @@ function HomeContent() {
             { href: "/urari", icon: "🕊️", text: "Urări" },
           ].map((item, i) => (
             <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 + i * 0.05 }}>
-              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[56px] flex-1">
+              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-card backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[56px] flex-1">
                 <span className="text-lg sm:text-2xl">{item.icon}</span>
-                <span className="font-bold text-[9px] sm:text-[11px] text-gray-400 group-hover:text-white transition-colors text-center">{item.text}</span>
+                <span className="font-bold text-[9px] sm:text-[11px] text-dim group-hover:text-white transition-colors text-center">{item.text}</span>
               </Link>
             </motion.div>
           ))}
@@ -504,30 +504,15 @@ function HomeContent() {
                 setToastMsg("Meniu browser → Adaugă pe ecranul principal");
               }
             }}
-            className="w-full py-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
+            className="w-full py-3.5 rounded-2xl border border-edge bg-card hover:bg-card-hover transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
           >
             <span className="text-lg">📥</span>
-            <span className="font-bold text-gray-300 text-sm">Instalează aplicația</span>
+            <span className="font-bold text-dim text-sm">Instalează aplicația</span>
           </button>
         </motion.div>
       )}
 
-      {/* FOOTER */}
-      <motion.div {...fadeUp(0.28, prefersReducedMotion)} className="text-center pt-1 pb-2 border-t border-red-900/6 space-y-2">
-        <p className="text-[10px] text-gray-300 font-bold tracking-[0.35em] uppercase">Ciocnim.ro · Păstrăm Tradiția</p>
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          {nume && <Link href="/profil" className="text-[11px] text-gray-400 hover:text-amber-400 transition-colors">Profilul meu</Link>}
-          {nume && <span className="text-gray-200 text-xs">·</span>}
-          <button onClick={() => { safeCopy("ciocnim@mail.com"); setToastMsg("Email copiat: ciocnim@mail.com"); }} className="text-[11px] text-gray-400 hover:text-red-800 transition-colors">Contact</button>
-          <span className="text-gray-200 text-xs">·</span>
-          <Link href="/privacy" className="text-[11px] text-gray-400 hover:text-red-400 transition-colors">Confidențialitate</Link>
-          <span className="text-gray-200 text-xs">·</span>
-          <Link href="/terms" className="text-[11px] text-gray-400 hover:text-red-400 transition-colors">Termeni</Link>
-          <span className="text-gray-200 text-xs">·</span>
-          <button onClick={() => window.open("https://buymeacoffee.com/ciocnim", "_blank")} className="text-[11px] text-gray-400 hover:text-amber-700 transition-colors">Donație</button>
-        </div>
-        <p className="text-[9px] text-gray-600">© {new Date().getFullYear()} Ciocnim.ro. Toate drepturile rezervate.</p>
-      </motion.div>
+      {/* Footer is in layout.js */}
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
 
@@ -551,12 +536,12 @@ function HomeContent() {
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#141111] rounded-2xl border border-red-900/20 p-6 max-w-xs w-full shadow-2xl text-center"
+              className="bg-surface rounded-2xl border border-red-900/20 p-6 max-w-xs w-full shadow-2xl text-center"
               onClick={e => e.stopPropagation()}
             >
-              <p className="text-sm font-bold text-gray-200 mb-5">{confirmDialog.message}</p>
+              <p className="text-sm font-bold text-body mb-5">{confirmDialog.message}</p>
               <div className="flex gap-3">
-                <button onClick={() => setConfirmDialog(null)} className="flex-1 py-3 rounded-xl bg-white/[0.06] text-gray-400 font-bold text-sm hover:bg-white/[0.1] transition-all">Nu</button>
+                <button onClick={() => setConfirmDialog(null)} className="flex-1 py-3 rounded-xl bg-elevated text-dim font-bold text-sm hover:bg-overlay transition-all">Nu</button>
                 <button onClick={() => { setConfirmDialog(null); confirmDialog.onYes(); }} className="flex-1 py-3 rounded-xl bg-red-700 text-white font-bold text-sm hover:bg-red-800 transition-all">Da</button>
               </div>
             </motion.div>
@@ -573,12 +558,12 @@ function HomeContent() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
-              style={{ background: "rgba(20,17,17,0.98)", borderRadius: "24px", border: "1px solid rgba(220,38,38,0.15)", width: "100%", maxWidth: "360px", padding: "28px", boxShadow: "0 25px 50px rgba(0,0,0,0.5)" }}
+              className="bg-surface rounded-3xl border border-red-900/15 w-full max-w-[360px] p-7 shadow-2xl"
             >
               <div className="text-center mb-5">
                 <div className="text-4xl mb-3">🥚</div>
-                <h2 className="text-lg font-black text-white">Ai fost invitat într-un grup!</h2>
-                <p className="text-xs text-gray-400 mt-1">Pune-ți o poreclă ca să te alături</p>
+                <h2 className="text-lg font-black text-heading">Ai fost invitat într-un grup!</h2>
+                <p className="text-xs text-dim mt-1">Pune-ți o poreclă ca să te alături</p>
               </div>
               <input
                 value={joinModalNume}
@@ -587,7 +572,7 @@ function HomeContent() {
                 placeholder="Porecla ta..."
                 maxLength={21}
                 autoFocus
-                className="w-full px-4 py-3 border-2 border-white/[0.1] rounded-2xl font-bold text-gray-200 outline-none focus:border-red-800 transition-all text-sm bg-white/[0.05] focus:bg-white/[0.08] mb-3"
+                className="w-full px-4 py-3 border-2 border-edge-strong rounded-2xl font-bold text-body outline-none focus:border-red-800 transition-all text-sm bg-elevated focus:bg-elevated-hover mb-3"
               />
               {joinModalNume.trim().length > 0 && joinModalNume.trim().length < 3 && (
                 <p className="text-red-500 text-xs mb-3 font-medium">Minim 3 caractere</p>
@@ -610,10 +595,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0c0a0a] relative pattern-tradition">
-      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] bg-red-900/8 rounded-full blur-[140px] pointer-events-none" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="fixed top-[40%] left-[50%] -translate-x-1/2 w-[40vw] h-[40vw] bg-red-600/3 rounded-full blur-[120px] pointer-events-none" />
+    <main className="min-h-screen bg-main relative pattern-tradition">
 
       <Suspense fallback={
         <div className="h-screen flex items-center justify-center">
