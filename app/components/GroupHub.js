@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { safeCopy } from "../lib/utils";
 
 const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onLeave, onRename, onProvoca, onKick }) => {
@@ -10,11 +10,9 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   const [newName, setNewName] = useState(currentTeam?.details?.nume || "");
   const isCreator = currentTeam?.details?.creator === numePreluat?.toUpperCase().trim();
 
-  const [prevIndex, setPrevIndex] = useState(activeTeamIndex);
-  if (activeTeamIndex !== prevIndex) {
-    setPrevIndex(activeTeamIndex);
+  useEffect(() => {
     if (currentTeam) { setNewName(currentTeam.details.nume); setIsEditing(false); }
-  }
+  }, [activeTeamIndex]);
 
   if (!teams || teams.length === 0) return null;
 

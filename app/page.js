@@ -110,8 +110,8 @@ function HomeContent() {
     }
   }, [searchParams, router, setToastMsg]);
 
-  const safeGetLS = (k) => { try { return typeof window !== 'undefined' ? localStorage.getItem(k) : null; } catch { return null; } };
-  const safeSetLS = (k, v) => { try { if (typeof window !== 'undefined') localStorage.setItem(k, v); } catch {} };
+  const safeGetLS = (k) => safeLS.get(k);
+  const safeSetLS = (k, v) => safeLS.set(k, v);
 
   const getStoredTeamIds = useCallback(() => {
     try { return JSON.parse(safeGetLS("c_teamIds") || "[]"); } catch { return []; }

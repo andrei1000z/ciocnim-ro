@@ -96,6 +96,33 @@ async function checkAndAwardAchievements(jucator, stats, teamId = null) {
     achievementsToAward.push('provocator');
   }
 
+  // Campion Regional — verifică dacă jucătorul e pe locul 1 în regiunea sa
+  if (stats.regiune && !existingAchievements.includes('regional_champion')) {
+    try {
+      const topInRegion = await redis.zrevrange('leaderboard_regiuni_jucatori:' + stats.regiune, 0, 0, 'WITHSCORES');
+      if (topInRegion.length >= 2 && topInRegion[0] === jucator) {
+        achievementsToAward.push('regional_champion');
+      }
+    } catch {}
+  }
+
+  // Păstrător al Tradiției — a vizitat toate paginile educaționale
+  if (!existingAchievements.includes('tradition_keeper')) {
+    const pages = await redis.smembers(`user:${jucator}:visited_pages`);
+    const required = ['traditii', 'urari', 'retete', 'vopsit-natural', 'calendar'];
+    if (required.every(p => pages.includes(p))) {
+      achievementsToAward.push('tradition_keeper');
+    }
+  }
+
+  // Fluture Social — membru în 10+ echipe (sau 10 co-echipieri unici)
+  if (!existingAchievements.includes('social_butterfly')) {
+    const teamCount = parseInt(stats.teamsJoined) || 0;
+    if (teamCount >= 10) {
+      achievementsToAward.push('social_butterfly');
+    }
+  }
+
   // Adaugă achievement-urile noi
   if (achievementsToAward.length > 0) {
     await redis.sadd(userKey, ...achievementsToAward);
@@ -136,6 +163,7 @@ async function getUserStats(jucator) {
     currentStreak: parseInt(stats.currentStreak) || 0,
     duelsSent: parseInt(stats.duelsSent) || 0,
     goldenUsed: stats.goldenUsed === 'true',
+    teamsJoined: parseInt(stats.teamsJoined) || 0,
     regiune: stats.regiune || 'Muntenia'
   };
 }
@@ -449,11 +477,19 @@ export async function POST(request) {
         if (text === 'duel') statUpdates.duelsSent = 1;
         if (text === 'golden') statUpdates.goldenUsed = true;
 
+        // Track visited educational pages for tradition_keeper achievement
+        if (text === 'visit-page') {
+          const page = sanitizeStr(body.page, 30);
+          if (page) {
+            await redis.sadd(`user:${jucator.toUpperCase()}:visited_pages`, page);
+          }
+        }
+
         if (Object.keys(statUpdates).length > 0) {
           await updateUserStats(jucator, statUpdates);
-          const stats = await getUserStats(jucator);
-          await checkAndAwardAchievements(jucator, stats);
         }
+        const stats = await getUserStats(jucator);
+        await checkAndAwardAchievements(jucator, stats);
         return NextResponse.json({ success: true });
       }
 
@@ -551,6 +587,7 @@ export async function POST(request) {
           const exists = await redis.zscore(`team:${teamId}:membri`, cleanPlayer);
           if (exists === null) {
              await redis.zadd(`team:${teamId}:membri`, 0, cleanPlayer);
+             await updateUserStats(cleanPlayer, { teamsJoined: 1 });
              pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(() => {})
           }
         }
@@ -621,11 +658,13 @@ export async function POST(request) {
           local waiting = redis.call('zpopmin', KEYS[1], 1)
           if waiting and #waiting >= 2 then
             local matchedRoom = waiting[1]
+            local matchedScore = waiting[2]
             local playerCount = redis.call('scard', 'room:' .. matchedRoom .. ':players')
             if playerCount < 2 then
               return matchedRoom
             end
-            -- Room already full, put self in queue instead
+            -- Room already full — re-add the popped room so its owner isn't lost
+            redis.call('zadd', KEYS[1], matchedScore, matchedRoom)
           end
           redis.call('zadd', KEYS[1], ARGV[2], ARGV[3])
           return nil

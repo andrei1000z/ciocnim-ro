@@ -4,6 +4,7 @@ import ClientWrapper from "./components/ClientWrapper";
 import Script from "next/script";
 import ScrollToTop from "./components/ScrollToTop";
 import ThemeToggle from "./components/ThemeToggle";
+import Footer from "./components/Footer";
 
 
 const outfit = Outfit({ 
@@ -82,17 +83,14 @@ export const viewport = {
 export default function RootLayout({ children }) {
   const schemaMarkup = {
     "@context": "https://schema.org",
-    "@type": "VideoGame",
+    "@type": "WebApplication",
     "name": "Ciocnim.ro",
     "url": "https://ciocnim.ro",
     "description": "Un joc tradițional de Paște online, unde utilizatorii pot ciocni ouă virtuale cu prietenii și familia, personaliza ouă și participa în clasamentul național.",
-    "numberOfPlayers": {
-      "@type": "QuantitativeValue",
-      "minValue": 1,
-      "maxValue": 2
-    },
-    "genre": ["Joc de Tradiție", "Multiplayer Online", "Browser Game"],
-    "gamePlatform": ["Web Browser", "Mobile"],
+    "applicationCategory": "GameApplication",
+    "applicationSubCategory": "BrowserGame",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
     "author": {
       "@type": "Organization",
       "name": "Ciocnim.ro"
@@ -101,8 +99,6 @@ export default function RootLayout({ children }) {
       "@type": "Organization",
       "name": "Ciocnim.ro"
     },
-    "applicationCategory": "Game",
-    "operatingSystem": "Any",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -113,14 +109,14 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="ro" className={`light ${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
+    <html lang="ro" className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('c_theme');if(t==='dark')document.documentElement.classList.remove('light');else if(t==='light')document.documentElement.classList.add('light');else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.remove('light');else document.documentElement.classList.add('light')}catch(e){};if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('c_theme');if(t==='dark'){;}else if(t==='light')document.documentElement.classList.add('light');else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){;}else document.documentElement.classList.add('light')}catch(e){document.documentElement.classList.add('light')};if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}` }} />
         <Script
           id="schema-main"
           type="application/ld+json"
@@ -155,6 +151,7 @@ export default function RootLayout({ children }) {
             <main id="main-content" className="flex-1 w-full max-w-[100vw] px-mobile-fix relative">
               {children}
             </main>
+            <Footer />
           </div>
         </ClientWrapper>
 

@@ -1,6 +1,6 @@
 export default function sitemap() {
   const baseUrl = 'https://ciocnim.ro';
-  const lastBuild = new Date('2026-03-20');
+  const lastBuild = new Date();
   return [
     { url: baseUrl,                          lastModified: lastBuild, changeFrequency: 'daily',   priority: 1.0 },
     { url: `${baseUrl}/traditii`,            lastModified: lastBuild, changeFrequency: 'monthly', priority: 0.9 },

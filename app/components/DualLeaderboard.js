@@ -26,7 +26,8 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
         targetIdx--;
       }
       const targetScore = parseInt(topPlayers[targetIdx].scor) || 0;
-      const wins = Math.max(1, targetScore - myServerScore);
+      // If score is equal, player needs 1 win to overtake; if already higher, show 1 minimum
+      const wins = Math.max(1, targetScore - myServerScore + 1);
       return { myRank: idx + 1, winsNeeded: wins, targetRank: targetIdx + 1 };
     }
 

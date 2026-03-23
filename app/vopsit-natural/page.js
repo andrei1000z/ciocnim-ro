@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
+import ContentNav from "../components/ContentNav";
 
 // ─── Focus Mode Toggle ─────────────────────────────────────────────────────
 const FocusModeToggle = ({ active, onToggle }) => (
@@ -110,11 +111,9 @@ export default function VopsitNaturalPage() {
   return (
     <>
       <Script id="schema-vopsit-natural" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }} />
-      <main className={`min-h-screen text-gray-200 transition-colors duration-300 ${
-        focusMode ? "bg-[#0e0c0c]" : "bg-[#0c0a0a]"
-      }`}>
+      <main className={`min-h-screen text-gray-200 transition-colors duration-300 bg-main`}>
 
-        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-[#141111] shadow-lg shadow-black/20 border-b border-red-900/20">
+        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
             <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
@@ -126,6 +125,7 @@ export default function VopsitNaturalPage() {
             </Link>
           </div>
         </div>
+        <ContentNav current="/vopsit-natural" />
 
         {/* Focus Mode Banner */}
         <AnimatePresence>

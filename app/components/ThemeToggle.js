@@ -35,7 +35,8 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className={`fixed bottom-4 left-4 md:top-4 md:left-auto md:right-4 md:bottom-auto z-[900] w-10 h-10 flex items-center justify-center rounded-full text-lg transition-all active:scale-90 backdrop-blur-sm shadow-lg border border-edge-strong ${
+      tabIndex={0}
+      className={`fixed bottom-4 left-4 md:top-4 md:left-auto md:right-4 md:bottom-auto z-[900] w-10 h-10 flex items-center justify-center rounded-full text-lg transition-all active:scale-90 backdrop-blur-sm shadow-lg border border-edge-strong focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-transparent ${
         isLight
           ? "bg-surface hover:bg-surface-hover"
           : "bg-elevated hover:bg-elevated-hover"

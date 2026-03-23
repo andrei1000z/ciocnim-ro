@@ -8,6 +8,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import ContentNav from "../components/ContentNav";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
@@ -26,10 +27,10 @@ export default function CalendarPage() {
   const currentYear = new Date().getFullYear();
   return (
     <>
-      <main className="min-h-screen bg-[#0c0a0a] text-gray-200">
+      <main className="min-h-screen bg-main text-gray-200">
         
         {/* Header */}
-        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-[#141111] shadow-lg shadow-black/20 border-b border-red-900/20">
+        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
            <Link href="/" className="flex items-center gap-2 group">
               <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
               <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
@@ -38,6 +39,7 @@ export default function CalendarPage() {
               Înapoi acasă
            </Link>
         </div>
+        <ContentNav current="/calendar" />
 
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
           

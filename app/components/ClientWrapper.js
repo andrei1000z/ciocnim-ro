@@ -70,11 +70,13 @@ function CookieBanner() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
+      role="dialog"
+      aria-label="Informații despre stocarea datelor"
+      aria-live="polite"
       className="fixed bottom-4 left-4 right-4 z-[1300] max-w-md mx-auto bg-[#1a1515] border border-red-900/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex flex-col gap-3"
     >
       <p className="text-xs text-gray-300 leading-relaxed">
-        Ciocnim.ro folosește <strong className="text-white">localStorage</strong> pentru a-ți salva preferințele (poreclă, temă, statistici).
-        Nu folosim cookies de tracking.{' '}
+        Salvăm preferințele tale (poreclă, temă, statistici) doar în browserul tău — nu trimitem date către terți și nu folosim cookies de tracking.{' '}
         <a href="/privacy" className="text-red-400 hover:text-red-300 underline">Politica de confidențialitate</a>.
       </p>
       <button
@@ -327,7 +329,7 @@ export default function ClientWrapper({ children }) {
     }
   }, [userStats.regiune, nume, updateUserStats]);
 
-  // HEARTBEAT: ping la fiecare 10s pentru a număra utilizatorii activi
+  // HEARTBEAT: ping la fiecare 120s pentru a număra utilizatorii activi
   useEffect(() => {
     if (!isHydrated) return;
     if (!visitorIdRef.current) {
