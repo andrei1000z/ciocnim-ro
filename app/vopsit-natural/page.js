@@ -13,7 +13,7 @@ const FocusModeToggle = ({ active, onToggle }) => (
     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border ${
       active
         ? "bg-amber-900/30 text-amber-400 border-amber-700/40 shadow-lg shadow-amber-900/20"
-        : "bg-white/[0.05] text-gray-400 border-white/[0.1] hover:bg-white/[0.08] hover:text-gray-300"
+        : "bg-elevated text-dim border-edge-strong hover:bg-elevated-hover hover:text-body"
     }`}
   >
     {active ? "👨‍🍳" : "👁️"} Mod Bucătărie {active ? "ON" : "OFF"}
@@ -29,18 +29,18 @@ const ArticleSection = ({ title, icon, children, delay = 0, focusMode }) => (
     transition={{ duration: 0.6, delay, ease: "easeOut" }}
     className={`p-8 rounded-2xl border shadow-lg shadow-black/20 transition-all duration-300 ${
       focusMode
-        ? "bg-[#1a1515] border-amber-700/30"
-        : "bg-white/[0.04] border-white/[0.06]"
+        ? "bg-surface-hover border-amber-700/30"
+        : "bg-card border-edge"
     }`}
   >
     <div className="flex items-center gap-4 mb-6">
       <span className={focusMode ? "text-5xl" : "text-4xl"}>{icon}</span>
-      <h2 className={`font-black text-white ${focusMode ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl"}`}>{title}</h2>
+      <h2 className={`font-black text-heading ${focusMode ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl"}`}>{title}</h2>
     </div>
     <div className={`space-y-4 font-medium leading-relaxed transition-all duration-300 ${
       focusMode
-        ? "text-gray-100 text-lg md:text-xl"
-        : "text-gray-300 text-sm md:text-base"
+        ? "text-heading text-lg md:text-xl"
+        : "text-body text-sm md:text-base"
     }`}>
       {children}
     </div>
@@ -111,7 +111,7 @@ export default function VopsitNaturalPage() {
   return (
     <>
       <Script id="schema-vopsit-natural" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }} />
-      <main className={`min-h-screen text-gray-200 transition-colors duration-300 bg-main`}>
+      <main className={`min-h-screen text-body transition-colors duration-300 bg-main`}>
 
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
@@ -153,7 +153,7 @@ export default function VopsitNaturalPage() {
             }`}>
               Vopsitul Natural al <span className="text-red-500">Ouălor de Paște</span>
             </h1>
-            <p className={`text-gray-400 font-bold ${focusMode ? "text-base md:text-lg" : "text-sm md:text-base"}`}>
+            <p className={`text-dim font-bold ${focusMode ? "text-base md:text-lg" : "text-sm md:text-base"}`}>
               Culori vibrante folosind doar ingrediente din natură, ca pe vremea bunicilor.
             </p>
           </header>

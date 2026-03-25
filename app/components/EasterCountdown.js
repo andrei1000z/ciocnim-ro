@@ -53,7 +53,7 @@ export default function EasterCountdown() {
   ];
 
   return (
-    <div className="rounded-2xl border border-red-900/20 bg-white/[0.04] backdrop-blur-xl p-4 shadow-sm">
+    <div className="rounded-2xl border border-red-900/20 bg-card backdrop-blur-xl p-4 shadow-sm">
       <p className="text-[10px] font-bold text-red-500/60 uppercase tracking-[0.3em] text-center mb-3">
         Până la Paștele Ortodox {state.year}
       </p>
@@ -61,11 +61,11 @@ export default function EasterCountdown() {
         {units.map(u => (
           <div key={u.label} className="text-center">
             <div className="bg-red-900/20 border border-red-900/20 rounded-xl py-2 px-1">
-              <span className="text-xl sm:text-2xl font-black text-white tabular-nums">
+              <span className="text-xl sm:text-2xl font-black text-heading tabular-nums">
                 {String(u.val).padStart(2, "0")}
               </span>
             </div>
-            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mt-1 block">{u.label}</span>
+            <span className="text-[9px] font-bold text-muted uppercase tracking-wider mt-1 block">{u.label}</span>
           </div>
         ))}
       </div>

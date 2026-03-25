@@ -31,9 +31,9 @@ const MessageCard = ({ text, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.3, delay: index * 0.03 }}
-      className="bg-white/[0.03] p-5 rounded-xl border border-white/[0.06] hover:border-red-900/30 transition-all group relative"
+      className="bg-card p-5 rounded-xl border border-edge hover:border-red-900/30 transition-all group relative"
     >
-      <p className="text-gray-300 text-sm md:text-base font-medium italic pr-24 leading-relaxed select-text">
+      <p className="text-body text-sm md:text-base font-medium italic pr-24 leading-relaxed select-text">
         &ldquo;{text}&rdquo;
       </p>
       <div className="absolute top-4 right-4 flex gap-1.5">
@@ -67,11 +67,11 @@ const CategorySection = ({ title, icon, messages, delay = 0, startIndex = 0 }) =
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay, ease: "easeOut" }}
-    className="bg-white/[0.04] p-6 md:p-8 rounded-2xl border border-white/[0.06] shadow-lg shadow-black/20"
+    className="bg-card p-6 md:p-8 rounded-2xl border border-edge shadow-lg shadow-black/20"
   >
     <div className="flex items-center gap-3 mb-6 border-b border-red-900/20 pb-4">
       <span className="text-3xl">{icon}</span>
-      <h2 className="text-xl md:text-2xl font-black text-white">{title}</h2>
+      <h2 className="text-xl md:text-2xl font-black text-heading">{title}</h2>
     </div>
     <div className="flex flex-col gap-3">
       {messages.map((msg, idx) => (
@@ -195,13 +195,13 @@ const GreetingGenerator = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="bg-white/[0.04] p-6 md:p-8 rounded-2xl border border-white/[0.06] shadow-lg shadow-black/20"
+      className="bg-card p-6 md:p-8 rounded-2xl border border-edge shadow-lg shadow-black/20"
     >
       <div className="flex items-center gap-3 mb-6 border-b border-red-900/20 pb-4">
         <span className="text-3xl">🎨</span>
-        <h2 className="text-xl md:text-2xl font-black text-white">Generator de Felicitări</h2>
+        <h2 className="text-xl md:text-2xl font-black text-heading">Generator de Felicitări</h2>
       </div>
-      <p className="text-gray-400 text-sm mb-5">Introdu numele persoanei și generează un card personalizat.</p>
+      <p className="text-dim text-sm mb-5">Introdu numele persoanei și generează un card personalizat.</p>
 
       <div className="flex gap-3 mb-6">
         <input
@@ -211,7 +211,7 @@ const GreetingGenerator = () => {
           onChange={(e) => setNume(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
           maxLength={30}
-          className="flex-1 bg-white/[0.05] border border-red-900/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition-all"
+          className="flex-1 bg-elevated border border-red-900/30 rounded-xl px-4 py-3 text-heading placeholder:text-muted focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition-all"
         />
         <button
           onClick={handleGenerate}
@@ -239,10 +239,10 @@ const GreetingGenerator = () => {
 
               <div className="relative z-10">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-red-400 mb-3">Felicitare de Paște</p>
-                <p className="text-lg md:text-xl text-gray-200 font-medium italic leading-relaxed select-text">
+                <p className="text-lg md:text-xl text-body font-medium italic leading-relaxed select-text">
                   &ldquo;{greetingText}&rdquo;
                 </p>
-                <p className="mt-4 text-right text-xs text-gray-500">— ciocnim.ro</p>
+                <p className="mt-4 text-right text-xs text-muted">— ciocnim.ro</p>
               </div>
             </div>
 
@@ -267,7 +267,7 @@ const GreetingGenerator = () => {
               </button>
               <button
                 onClick={handleGenerate}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-white/[0.05] text-gray-300 hover:bg-white/[0.1] border border-white/[0.1] transition-all active:scale-95"
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-elevated text-body hover:bg-overlay border border-edge-strong transition-all active:scale-95"
               >
                 🔄 Alt model
               </button>
@@ -327,12 +327,12 @@ export default function UrariPage() {
   return (
     <>
       <Script id="schema-urari" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <main className="min-h-screen bg-main text-gray-200">
+      <main className="min-h-screen bg-main text-body">
 
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
+            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
           </Link>
           <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
             Înapoi acasă
@@ -343,10 +343,10 @@ export default function UrariPage() {
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
 
           <header className="text-center space-y-4">
-            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+            <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
               Mesaje și <span className="text-red-500">Urări de Paște</span>
             </h1>
-            <p className="text-gray-400 font-bold text-sm md:text-base">
+            <p className="text-dim font-bold text-sm md:text-base">
               Copiază un mesaj și trimite vestea Învierii pe WhatsApp sau Facebook.
             </p>
           </header>

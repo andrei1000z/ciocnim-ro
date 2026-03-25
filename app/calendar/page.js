@@ -27,13 +27,13 @@ export default function CalendarPage() {
   const currentYear = new Date().getFullYear();
   return (
     <>
-      <main className="min-h-screen bg-main text-gray-200">
+      <main className="min-h-screen bg-main text-body">
         
         {/* Header */}
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
            <Link href="/" className="flex items-center gap-2 group">
               <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-              <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
+              <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
            </Link>
            <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
               Înapoi acasă
@@ -44,10 +44,10 @@ export default function CalendarPage() {
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
           
           <header className="text-center space-y-4">
-            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+            <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
               Calendarul <span className="text-red-500">Paștelui</span>
             </h1>
-            <p className="text-gray-400 font-bold text-sm md:text-base">
+            <p className="text-dim font-bold text-sm md:text-base">
               Află când pică Sărbătorile Pascale între {datePaste[0].an} și {datePaste[datePaste.length - 1].an}
             </p>
           </header>
@@ -63,12 +63,12 @@ export default function CalendarPage() {
                 className={`p-6 rounded-lg shadow-lg transition-all ${
                   item.an === currentYear
                     ? "bg-red-900/20 border border-red-700/30 shadow-red-900/20 ring-1 ring-red-700/20"
-                    : "bg-white/[0.04] border border-white/[0.06] hover:border-red-900/30"
+                    : "bg-card border border-edge hover:border-red-900/30"
                 }`}
               >
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-4">
-                    <span className={`text-3xl md:text-4xl font-black ${item.an === currentYear ? "text-red-500" : "text-white"}`}>
+                    <span className={`text-3xl md:text-4xl font-black ${item.an === currentYear ? "text-red-500" : "text-heading"}`}>
                       {item.an}
                     </span>
                     {item.special && (
@@ -86,14 +86,14 @@ export default function CalendarPage() {
                   <div className="flex gap-6 text-center">
                     <div>
                       <div className="text-xs font-bold text-red-500 uppercase tracking-wide">Ortodox</div>
-                      <div className={`text-xl md:text-2xl font-black ${item.an === currentYear ? "text-white" : "text-gray-200"}`}>
+                      <div className={`text-xl md:text-2xl font-black ${item.an === currentYear ? "text-heading" : "text-body"}`}>
                         {item.ortodox}
                       </div>
                     </div>
-                    <div className="w-px bg-white/10"></div>
+                    <div className="w-px bg-overlay"></div>
                     <div>
                       <div className="text-xs font-bold text-red-500 uppercase tracking-wide">Catolic</div>
-                      <div className={`text-xl md:text-2xl font-black ${item.an === currentYear ? "text-white" : "text-gray-200"}`}>
+                      <div className={`text-xl md:text-2xl font-black ${item.an === currentYear ? "text-heading" : "text-body"}`}>
                         {item.catolic}
                       </div>
                     </div>
@@ -103,12 +103,12 @@ export default function CalendarPage() {
             ))}
           </section>
 
-          <article className="bg-white/[0.04] p-8 rounded-2xl border border-white/[0.06] shadow-lg shadow-black/20">
+          <article className="bg-card p-8 rounded-2xl border border-edge shadow-lg shadow-black/20">
             <div className="flex items-center gap-4 mb-6">
               <span className="text-4xl">🌕</span>
-              <h2 className="text-2xl md:text-3xl font-black text-white">Cum se calculează Paștele?</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-heading">Cum se calculează Paștele?</h2>
             </div>
-            <div className="space-y-4 text-gray-300 font-medium leading-relaxed">
+            <div className="space-y-4 text-body font-medium leading-relaxed">
               <p>
                 Te-ai întrebat vreodată de ce Paștele își schimbă data în fiecare an, spre deosebire de Crăciun? 
                 Regula a fost stabilită la Sinodul de la Niceea din anul 325.

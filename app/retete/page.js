@@ -15,7 +15,7 @@ const RecipeCard = ({ recipe, onClick, index }) => (
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: index * 0.05 }}
     onClick={onClick}
-    className="w-full text-left rounded-2xl border border-white/[0.06] hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98] relative"
+    className="w-full text-left rounded-2xl border border-edge hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98] relative"
   >
     <div className={`h-1.5 w-full ${
       recipe.difficulty === "Ușor" ? "bg-gradient-to-r from-green-600 to-green-400"
@@ -23,9 +23,9 @@ const RecipeCard = ({ recipe, onClick, index }) => (
         : "bg-gradient-to-r from-red-700 to-red-400"
     }`} />
 
-    <div className="p-5 space-y-3 bg-white/[0.04]">
+    <div className="p-5 space-y-3 bg-card">
       <div className="flex items-start justify-between">
-        <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+        <div className="w-14 h-14 rounded-2xl bg-elevated flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
           {recipe.icon}
         </div>
         <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
@@ -40,17 +40,17 @@ const RecipeCard = ({ recipe, onClick, index }) => (
       </div>
 
       <div>
-        <h2 className="text-lg font-black text-white group-hover:text-red-400 transition-colors leading-snug">{recipe.name}</h2>
-        <p className="text-gray-400 text-sm mt-1 line-clamp-2 leading-relaxed">{recipe.description}</p>
+        <h2 className="text-lg font-black text-heading group-hover:text-red-400 transition-colors leading-snug">{recipe.name}</h2>
+        <p className="text-dim text-sm mt-1 line-clamp-2 leading-relaxed">{recipe.description}</p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-gray-500">
-        <span className="flex items-center gap-1 bg-white/[0.04] px-2.5 py-1 rounded-lg">⏱️ {recipe.totalLabel}</span>
-        <span className="flex items-center gap-1 bg-white/[0.04] px-2.5 py-1 rounded-lg">🍽️ {recipe.servings} {recipe.servingsUnit}</span>
-        <span className="flex items-center gap-1 bg-white/[0.04] px-2.5 py-1 rounded-lg">🔥 {recipe.calories} kcal</span>
+      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted">
+        <span className="flex items-center gap-1 bg-card px-2.5 py-1 rounded-lg">⏱️ {recipe.totalLabel}</span>
+        <span className="flex items-center gap-1 bg-card px-2.5 py-1 rounded-lg">🍽️ {recipe.servings} {recipe.servingsUnit}</span>
+        <span className="flex items-center gap-1 bg-card px-2.5 py-1 rounded-lg">🔥 {recipe.calories} kcal</span>
       </div>
 
-      <div className="pt-2 border-t border-white/[0.04]">
+      <div className="pt-2 border-t border-edge">
         <span className="text-xs font-bold text-red-400 group-hover:text-red-300 transition-colors flex items-center gap-1">
           Deschide rețeta <span className="group-hover:translate-x-1 transition-transform">→</span>
         </span>
@@ -121,18 +121,18 @@ const IngredientList = ({ ingredients, multiplier, title, healthyMode = false, h
           ? healthySwaps.find(s => nameText.toLowerCase().includes(s.match.toLowerCase()))
           : null;
         return (
-          <div key={i} className={`flex items-baseline gap-2 py-2 border-b border-white/[0.04] last:border-0 px-2 -mx-2 rounded-lg transition-colors ${swap ? 'bg-green-900/10' : 'hover:bg-white/[0.02]'}`}>
+          <div key={i} className={`flex items-baseline gap-2 py-2 border-b border-edge last:border-0 px-2 -mx-2 rounded-lg transition-colors ${swap ? 'bg-green-900/10' : 'hover:bg-card'}`}>
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 relative top-[-1px] ${swap ? 'bg-green-500/60' : 'bg-red-500/40'}`} />
             {isDescriptive ? (
               <div className="flex-1">
-                <span className={`text-sm md:text-base font-medium ${swap ? 'line-through text-gray-500' : 'text-gray-200'}`}>{nameText}</span>
+                <span className={`text-sm md:text-base font-medium ${swap ? 'line-through text-muted' : 'text-body'}`}>{nameText}</span>
                 {swap && <span className="block text-sm text-green-300 font-medium mt-0.5">→ {swap.swap}</span>}
               </div>
             ) : (
               <div className="flex-1 flex items-baseline gap-2 flex-wrap">
                 <span className={`font-black text-sm tabular-nums whitespace-nowrap ${swap ? 'text-green-400' : 'text-red-400'}`}>{qtyText}</span>
                 <div className="flex-1">
-                  <span className={`text-sm md:text-base font-medium ${swap ? 'line-through text-gray-500' : 'text-gray-200'}`}>{nameText}</span>
+                  <span className={`text-sm md:text-base font-medium ${swap ? 'line-through text-muted' : 'text-body'}`}>{nameText}</span>
                   {swap && <span className="block text-sm text-green-300 font-medium mt-0.5">→ {swap.swap}</span>}
                 </div>
               </div>
@@ -174,13 +174,13 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
     <div className="space-y-6">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-            <h3 className={`font-black text-white flex items-center gap-2 ${kitchenMode ? "text-3xl md:text-4xl" : "text-lg"}`}>
+            <h3 className={`font-black text-heading flex items-center gap-2 ${kitchenMode ? "text-3xl md:text-4xl" : "text-lg"}`}>
               Pași de Preparare
             </h3>
             <div className="flex items-center gap-3">
-              <span className={`font-bold text-gray-500 ${kitchenMode ? "text-lg" : "text-xs"}`}>{checked.length}/{steps.length} pași</span>
+              <span className={`font-bold text-muted ${kitchenMode ? "text-lg" : "text-xs"}`}>{checked.length}/{steps.length} pași</span>
               {checked.length > 0 && (
-                <button onClick={resetAll} className={`text-gray-500 hover:text-red-400 transition-colors font-bold underline underline-offset-2 ${kitchenMode ? "text-lg" : "text-xs"}`}>
+                <button onClick={resetAll} className={`text-muted hover:text-red-400 transition-colors font-bold underline underline-offset-2 ${kitchenMode ? "text-lg" : "text-xs"}`}>
                   Resetează
                 </button>
               )}
@@ -188,13 +188,13 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
           </div>
       </div>
 
-      <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5 -mt-2">
-        <span className="inline-flex w-5 h-5 rounded-full border border-white/[0.15] items-center justify-center text-[10px] text-gray-500">1</span>
+      <p className="text-xs text-muted font-medium flex items-center gap-1.5 -mt-2">
+        <span className="inline-flex w-5 h-5 rounded-full border border-edge-strong items-center justify-center text-[10px] text-muted">1</span>
         Apasă pe un pas pentru a-l bifa ca terminat
       </p>
 
       <div className="relative">
-        <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-white/[0.06]" />
+        <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-edge" />
 
         <div className="space-y-3">
           {steps.map((step, idx) => {
@@ -217,7 +217,7 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
                   <span className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-black transition-all ${
                     isDone
                       ? "bg-green-600 border-green-500 text-white shadow-lg shadow-green-900/30"
-                      : "bg-[#141111] border-white/[0.15] text-gray-400"
+                      : "bg-surface border-edge-strong text-dim"
                   }`}>
                     {isDone ? "✓" : idx + 1}
                   </span>
@@ -347,7 +347,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className={`space-y-6 rounded-2xl transition-colors duration-300 ${kitchenMode ? "bg-[#1a1515] p-4 md:p-6" : ""}`}
+      className={`space-y-6 rounded-2xl transition-colors duration-300 ${kitchenMode ? "bg-surface-hover p-4 md:p-6" : ""}`}
     >
       {/* Back button and Share button */}
       <div className="flex gap-3 items-center flex-wrap">

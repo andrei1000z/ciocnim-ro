@@ -61,7 +61,7 @@ export const ColorSelector = ({ selected, onSelect }) => {
   ];
   return (
     <div className="space-y-2">
-      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Culoare Ou</label>
+      <label className="block text-[10px] font-bold text-dim uppercase tracking-wide">Culoare Ou</label>
       <div className="grid grid-cols-4 gap-1.5">
         {culori.map(c => (
           <motion.button
@@ -69,12 +69,12 @@ export const ColorSelector = ({ selected, onSelect }) => {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(c.id)}
-            className={`rounded-xl border-2 transition-all relative flex flex-col items-center justify-center p-1.5 ${selected === c.id ? "border-white shadow-md bg-white/[0.08]" : "border-transparent opacity-60 hover:opacity-90 bg-white/[0.03]"}`}
+            className={`rounded-xl border-2 transition-all relative flex flex-col items-center justify-center p-1.5 ${selected === c.id ? "border-white shadow-md bg-elevated-hover" : "border-transparent opacity-60 hover:opacity-90 bg-card"}`}
           >
             <div className="w-8 h-10">
               <MiniEgg grad1={c.grad1} grad2={c.grad2} patternType={c.patternType} patternColor={c.patternColor} />
             </div>
-            <span className="text-[8px] font-bold text-gray-400 mt-0.5">{c.label}</span>
+            <span className="text-[8px] font-bold text-dim mt-0.5">{c.label}</span>
             {selected === c.id && (
               <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-900 rounded-full flex items-center justify-center text-white text-[9px] border border-white/30">✓</motion.span>
             )}
@@ -90,14 +90,14 @@ export const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="space-y-2">
-      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Regiunea Ta</label>
+      <label className="block text-[10px] font-bold text-dim uppercase tracking-wide">Regiunea Ta</label>
       <div className="relative">
         <button
           onClick={() => setIsOpen(v => !v)}
-          className="w-full px-3 py-2.5 bg-white/[0.05] rounded-xl border border-white/[0.1] font-semibold text-left flex justify-between items-center hover:border-red-800 transition-all text-sm"
+          className="w-full px-3 py-2.5 bg-elevated rounded-xl border border-edge-strong font-semibold text-left flex justify-between items-center hover:border-red-800 transition-all text-sm"
         >
-          <span className={selectedRegion ? "text-gray-200" : "text-gray-400 text-xs"}>{selectedRegion || "Alege..."}</span>
-          <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }} className="text-gray-400 text-xs">▾</motion.span>
+          <span className={selectedRegion ? "text-body" : "text-dim text-xs"}>{selectedRegion || "Alege..."}</span>
+          <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }} className="text-dim text-xs">▾</motion.span>
         </button>
         <AnimatePresence>
           {isOpen && (
@@ -106,13 +106,13 @@ export const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className="absolute bottom-full left-0 w-full mb-1.5 bg-[#141111]/95 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/30"
+              className="absolute bottom-full left-0 w-full mb-1.5 bg-surface/95 backdrop-blur-xl rounded-2xl border border-edge-strong p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/30"
             >
               {REGIUNI_ISTORICE.map(r => (
                 <button
                   key={r}
                   onClick={() => { onSelectRegion(r); setIsOpen(false); }}
-                  className={`px-2 py-2 text-xs font-semibold rounded-xl border transition-all ${selectedRegion === r ? "bg-red-800 text-white border-red-800" : "bg-white/[0.05] text-gray-300 border-white/[0.08] hover:border-red-800 hover:text-red-400"}`}
+                  className={`px-2 py-2 text-xs font-semibold rounded-xl border transition-all ${selectedRegion === r ? "bg-red-800 text-white border-red-800" : "bg-elevated text-body border-edge hover:border-red-800 hover:text-red-400"}`}
                 >
                   {r}
                 </button>

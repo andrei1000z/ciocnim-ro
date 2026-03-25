@@ -11,13 +11,13 @@ const ArticleSection = ({ title, icon, children, delay = 0 }) => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay, ease: "easeOut" }}
-    className="bg-white/[0.04] p-8 rounded-2xl border border-white/[0.06] shadow-lg shadow-black/20"
+    className="bg-card p-8 rounded-2xl border border-edge shadow-lg shadow-black/20"
   >
     <div className="flex items-center gap-4 mb-6">
       <span className="text-4xl">{icon}</span>
-      <h2 className="text-2xl md:text-3xl font-black text-white">{title}</h2>
+      <h2 className="text-2xl md:text-3xl font-black text-heading">{title}</h2>
     </div>
-    <div className="space-y-4 text-gray-300 text-sm md:text-base font-medium leading-relaxed">
+    <div className="space-y-4 text-body text-sm md:text-base font-medium leading-relaxed">
       {children}
     </div>
   </motion.article>
@@ -75,12 +75,12 @@ export default function TraditiiPage() {
   return (
     <>
       <Script id="schema-traditii" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-      <main className="min-h-screen bg-main text-gray-200">
+      <main className="min-h-screen bg-main text-body">
 
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
+            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
           </Link>
           <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
             Înapoi acasă
@@ -91,10 +91,10 @@ export default function TraditiiPage() {
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">
 
           <header className="text-center space-y-4">
-            <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+            <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
               Tradiția <span className="text-red-500">Ciocnitului</span>
             </h1>
-            <p className="text-gray-400 font-bold text-sm md:text-base">
+            <p className="text-dim font-bold text-sm md:text-base">
               Află regulile jocului de Paște care a unit generații de români.
             </p>
           </header>

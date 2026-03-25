@@ -16,7 +16,7 @@ export default function NotFound() {
           <div className="text-8xl" role="img" aria-label="Ou spart">🥚</div>
           <h1 className="text-5xl md:text-7xl font-black text-white">404</h1>
           <p className="text-xl md:text-2xl font-bold text-red-400">Oul a fost ciocnit prea tare!</p>
-          <p className="text-gray-500 font-medium text-sm md:text-base max-w-sm mx-auto">
+          <p className="text-muted font-medium text-sm md:text-base max-w-sm mx-auto">
             Pagina pe care o cauți s-a spart la ciocnit și nu mai există. Hai înapoi la masa de Paște!
           </p>
         </div>
@@ -28,7 +28,7 @@ export default function NotFound() {
           >
             <span role="img" aria-label="Ou de Paște">🥚</span> Ciocnește ouă online
           </Link>
-          <Link href="/traditii" className="text-sm text-gray-400 hover:text-red-400 transition-colors">
+          <Link href="/traditii" className="text-sm text-dim hover:text-red-400 transition-colors">
             sau descoperă tradițiile de Paște →
           </Link>
         </div>

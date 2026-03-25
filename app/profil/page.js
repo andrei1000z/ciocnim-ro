@@ -61,11 +61,11 @@ export default function ProfilPage() {
   const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
   return (
-    <main className="min-h-screen bg-[#0c0a0a] text-gray-200">
-      <div className="w-full flex justify-between items-center p-6 md:p-8 bg-[#141111] shadow-lg shadow-black/20 border-b border-red-900/20">
+    <main className="min-h-screen bg-main text-body">
+      <div className="w-full flex justify-between items-center p-6 md:p-8 bg-surface shadow-lg shadow-black/20 border-b border-red-900/20">
         <Link href="/" className="flex items-center gap-2 group">
           <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-          <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
+          <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
         </Link>
         <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
           Înapoi acasă
@@ -77,7 +77,7 @@ export default function ProfilPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-2 shadow-lg">
             <span className="text-4xl">🥚</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white">
+          <h1 className="text-3xl md:text-4xl font-black text-heading">
             {nume || "Anonim"}
           </h1>
           {userStats.regiune && userStats.regiune !== "Alege regiunea..." && (
@@ -87,15 +87,15 @@ export default function ProfilPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white/[0.04] border border-green-900/20 rounded-2xl p-4 text-center">
+          <div className="bg-card border border-green-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-green-400">{wins}</p>
             <p className="text-[10px] font-bold text-green-500 uppercase tracking-wide mt-1">Victorii</p>
           </div>
-          <div className="bg-white/[0.04] border border-red-900/20 rounded-2xl p-4 text-center">
+          <div className="bg-card border border-red-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-red-400">{losses}</p>
             <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide mt-1">Înfrângeri</p>
           </div>
-          <div className="bg-white/[0.04] border border-amber-900/20 rounded-2xl p-4 text-center">
+          <div className="bg-card border border-amber-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-amber-400">{winRate}%</p>
             <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wide mt-1">Win Rate</p>
           </div>
@@ -103,10 +103,10 @@ export default function ProfilPage() {
 
         {/* Win Rate Bar */}
         {total > 0 && (
-          <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-5">
+          <div className="bg-card border border-edge rounded-2xl p-5">
             <div className="flex justify-between text-xs font-bold mb-2">
               <span className="text-green-400">{wins} W</span>
-              <span className="text-gray-500">{total} total</span>
+              <span className="text-muted">{total} total</span>
               <span className="text-red-400">{losses} L</span>
             </div>
             <div className="w-full h-3 bg-red-900/30 rounded-full overflow-hidden">
@@ -122,7 +122,7 @@ export default function ProfilPage() {
 
         {/* Achievements */}
         <section>
-          <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-black text-heading mb-4 flex items-center gap-2">
             <span>🏅</span> Realizări ({earnedKeys.size}/{Object.keys(ALL_ACHIEVEMENTS).length})
           </h2>
 
@@ -142,14 +142,14 @@ export default function ProfilPage() {
                     className={`rounded-2xl border p-4 transition-all ${
                       earned
                         ? RARITY_COLORS[ach.rarity]
-                        : 'border-white/[0.04] bg-white/[0.02] opacity-40'
+                        : 'border-edge bg-card opacity-40'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <span className={`text-2xl ${earned ? '' : 'grayscale'}`}>{ach.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <p className={`font-bold text-sm ${earned ? 'text-white' : 'text-gray-500'}`}>{ach.name}</p>
-                        <p className="text-[11px] text-gray-500 mt-0.5">{ach.desc}</p>
+                        <p className={`font-bold text-sm ${earned ? 'text-heading' : 'text-muted'}`}>{ach.name}</p>
+                        <p className="text-[11px] text-muted mt-0.5">{ach.desc}</p>
                         <span className={`text-[9px] font-black uppercase tracking-wider ${RARITY_TEXT[ach.rarity]}`}>
                           {RARITY_LABELS[ach.rarity]}
                         </span>
@@ -167,7 +167,7 @@ export default function ProfilPage() {
 
         {!nume && (
           <div className="text-center bg-red-900/10 border border-red-900/20 rounded-2xl p-6">
-            <p className="text-gray-400 text-sm mb-3">Pune-ți o poreclă pentru a vedea statisticile tale.</p>
+            <p className="text-dim text-sm mb-3">Pune-ți o poreclă pentru a vedea statisticile tale.</p>
             <Link href="/" className="inline-block bg-red-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 transition-all">
               Mergi la joc
             </Link>

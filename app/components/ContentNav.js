@@ -10,7 +10,7 @@ const navLinks = [
 
 export default function ContentNav({ current }) {
   return (
-    <nav aria-label="Pagini educaționale" className="w-full overflow-x-auto scrollbar-hide border-b border-red-900/10 bg-white/[0.02]">
+    <nav aria-label="Pagini educaționale" className="w-full overflow-x-auto scrollbar-hide border-b border-red-900/10 bg-card">
       <div className="flex items-center gap-1 px-4 py-2 max-w-4xl mx-auto">
         {navLinks.map(link => (
           <Link
@@ -19,7 +19,7 @@ export default function ContentNav({ current }) {
             className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
               current === link.href
                 ? "bg-red-700 text-white"
-                : "text-gray-400 hover:text-white hover:bg-white/[0.06]"
+                : "text-dim hover:text-heading hover:bg-elevated"
             }`}
           >
             {link.label}
