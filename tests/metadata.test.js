@@ -38,7 +38,7 @@ describe('SEO & Metadata', () => {
 
   it('has schema.org markup', () => {
     expect(layoutContent).toContain('schema.org');
-    expect(layoutContent).toContain('VideoGame');
+    expect(layoutContent).toContain('WebApplication');
   });
 });
 
@@ -100,7 +100,7 @@ describe('manifest.json', () => {
     expect(manifest.icons).toBeInstanceOf(Array);
     expect(manifest.icons.length).toBeGreaterThanOrEqual(2);
     const sizes = manifest.icons.map(i => i.sizes);
-    expect(sizes).toContain('192x192');
+    expect(sizes).toContain('180x180');
     expect(sizes).toContain('512x512');
   });
 

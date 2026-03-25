@@ -211,7 +211,7 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
                 <button
                   onClick={() => toggle(idx)}
                   className={`w-full text-left flex items-start gap-3 p-3 pl-1 rounded-xl transition-all ${
-                    isDone ? "bg-green-900/10" : "hover:bg-white/[0.02]"
+                    isDone ? "bg-green-900/10" : "hover:bg-card"
                   }`}
                 >
                   <span className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-black transition-all ${
@@ -224,7 +224,7 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
 
                   <div className="flex-1 min-w-0 pt-1">
                     <span className={`font-medium leading-relaxed block transition-all ${
-                      isDone ? "text-gray-500 line-through decoration-green-600/50" : "text-gray-200"
+                      isDone ? "text-muted line-through decoration-green-600/50" : "text-body"
                     } ${kitchenMode ? "text-xl md:text-2xl" : "text-sm md:text-base"}`}>
                       {stepData.text}
                     </span>
@@ -251,7 +251,7 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
         >
           <p className="text-3xl mb-2">🎉</p>
           <p className="text-green-400 font-black text-lg">Felicitări! Rețeta este gata!</p>
-          <p className="text-gray-500 text-sm mt-1">Poftă bună și Paște Fericit!</p>
+          <p className="text-muted text-sm mt-1">Poftă bună și Paște Fericit!</p>
         </motion.div>
       )}
 
@@ -353,13 +353,13 @@ const RecipeDetail = ({ recipe, onBack }) => {
       <div className="flex gap-3 items-center flex-wrap">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors font-bold text-sm active:scale-95"
+          className="flex items-center gap-2 text-dim hover:text-red-400 transition-colors font-bold text-sm active:scale-95"
         >
           ← Înapoi la rețete
         </button>
         <button
           onClick={handleShareRecipe}
-          className="flex items-center gap-2 text-gray-400 hover:text-amber-400 transition-colors font-bold text-sm active:scale-95"
+          className="flex items-center gap-2 text-dim hover:text-amber-400 transition-colors font-bold text-sm active:scale-95"
         >
           📲 Distribuie rețeta
         </button>
@@ -367,11 +367,11 @@ const RecipeDetail = ({ recipe, onBack }) => {
 
       {/* Header with Kitchen Mode Toggle */}
       <div className="flex justify-between items-start gap-4">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-white/[0.04] to-amber-900/10 border border-white/[0.06] p-5 md:p-8 flex-1">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-900/20 via-card to-amber-900/10 border border-edge p-5 md:p-8 flex-1">
           <div className="absolute top-3 right-3 text-6xl md:text-7xl opacity-15 select-none">{recipe.icon}</div>
           <div className="relative z-10">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/[0.08] flex items-center justify-center text-3xl md:text-5xl">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-elevated-hover flex items-center justify-center text-3xl md:text-5xl">
                 {recipe.icon}
               </div>
               <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
@@ -384,8 +384,8 @@ const RecipeDetail = ({ recipe, onBack }) => {
                 {recipe.difficulty}
               </span>
             </div>
-            <h1 className="text-xl md:text-4xl font-black text-white leading-tight">{recipe.name}</h1>
-            <p className="text-gray-400 mt-1.5 leading-relaxed text-sm">{recipe.description}</p>
+            <h1 className="text-xl md:text-4xl font-black text-heading leading-tight">{recipe.name}</h1>
+            <p className="text-dim mt-1.5 leading-relaxed text-sm">{recipe.description}</p>
           </div>
         </div>
         <div className="flex flex-col gap-2 flex-shrink-0">
@@ -394,7 +394,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
               kitchenMode
                 ? "bg-amber-900/30 text-amber-400 border-amber-700/40 shadow-lg shadow-amber-900/20"
-                : "bg-white/[0.05] text-gray-400 border-white/[0.1] hover:bg-white/[0.08] hover:text-gray-300"
+                : "bg-elevated text-dim border-edge-strong hover:bg-elevated-hover hover:text-body"
             }`}
           >
             {kitchenMode ? "👨‍🍳" : "👁️"} Bucătărie
@@ -404,7 +404,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
               healthyMode
                 ? "bg-green-900/25 text-green-300 border-green-700/40 shadow-lg shadow-green-900/15"
-                : "bg-white/[0.04] text-gray-400 border-white/[0.08] hover:border-green-700/30 hover:text-green-400"
+                : "bg-card text-dim border-edge hover:border-green-700/30 hover:text-green-400"
             }`}
           >
             🥗 {healthyMode ? "Sănătos ON" : "Sănătos"}
@@ -438,7 +438,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
               className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all active:scale-95 border ${
                 activeVariant === i
                   ? "bg-red-700 text-white border-red-700 shadow-lg shadow-red-900/30"
-                  : "bg-white/[0.04] text-gray-400 border-white/[0.06] hover:border-red-900/30 hover:text-gray-200"
+                  : "bg-card text-dim border-edge hover:border-red-900/30 hover:text-body"
               }`}
             >
               {v.label}
@@ -456,19 +456,19 @@ const RecipeDetail = ({ recipe, onBack }) => {
           { icon: "🍽️", label: "Porții", value: `${targetServings} ${recipe.servingsUnit}` },
           { icon: "💪", label: "Calorii", value: `${Math.round((healthyMode && recipe.healthyCalories ? recipe.healthyCalories : recipe.calories) * multiplier)} kcal${healthyMode && recipe.healthyCalories && recipe.healthyCalories < recipe.calories ? ' 🥗' : ''}` },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-center flex-shrink-0 min-w-[80px]">
+          <div key={stat.label} className="bg-card border border-edge rounded-xl px-3 py-2.5 text-center flex-shrink-0 min-w-[80px]">
             <span className="text-base block">{stat.icon}</span>
-            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-500 mt-0.5">{stat.label}</p>
-            <p className="text-xs font-bold text-white whitespace-nowrap">{stat.value}</p>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-muted mt-0.5">{stat.label}</p>
+            <p className="text-xs font-bold text-heading whitespace-nowrap">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Ingredients section */}
-      <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
+      <div className="bg-card border border-edge rounded-2xl p-4 md:p-6">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div className="flex-1">
-            <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2 mb-2">
+            <h3 className="text-base md:text-lg font-black text-heading flex items-center gap-2 mb-2">
               🥄 Ingrediente
             </h3>
             <button
@@ -482,7 +482,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
               {copiedFeedback || "📋 Copiază lista"}
             </button>
           </div>
-          <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06] flex-shrink-0">
+          <div className="flex items-center gap-1 bg-card rounded-xl p-1 border border-edge flex-shrink-0">
             <button
               onClick={() => adjustServings(-1)}
               disabled={targetServings <= 1}
@@ -500,7 +500,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
                 style={{ background: 'transparent' }}
                 maxLength={3}
               />
-              <span className="text-[10px] text-gray-500 font-bold whitespace-nowrap">{recipe.servingsUnit}</span>
+              <span className="text-[10px] text-muted font-bold whitespace-nowrap">{recipe.servingsUnit}</span>
             </div>
             <button
               onClick={() => adjustServings(1)}
@@ -519,14 +519,14 @@ const RecipeDetail = ({ recipe, onBack }) => {
 
         <IngredientList ingredients={currentIngredients} multiplier={multiplier} healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} />
         {currentFilling && currentFilling.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-white/[0.06]">
+          <div className="mt-6 pt-6 border-t border-edge">
             <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} />
           </div>
         )}
       </div>
 
       {/* Steps */}
-      <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-4 md:p-6">
+      <div className="bg-card border border-edge rounded-2xl p-4 md:p-6">
         <StepByStep steps={currentSteps} recipeId={`${recipe.id}-${recipe.variants?.[activeVariant]?.id || 'default'}`} tips={recipe.tips} kitchenMode={kitchenMode} />
       </div>
     </motion.div>
@@ -552,13 +552,13 @@ function RetePageContent() {
   });
 
   return (
-      <main className="min-h-screen bg-main text-gray-200">
+      <main className="min-h-screen bg-main text-body">
 
         {/* Header */}
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
+            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
           </Link>
           <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
             Înapoi acasă
@@ -586,10 +586,10 @@ function RetePageContent() {
                 className="space-y-8"
               >
                 <header className="text-center space-y-4">
-                  <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+                  <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
                     Rețete de <span className="text-red-500">Paște {year}</span>
                   </h1>
-                  <p className="text-gray-400 font-bold text-sm md:text-base max-w-lg mx-auto">
+                  <p className="text-dim font-bold text-sm md:text-base max-w-lg mx-auto">
                     {retete.length} rețete tradiționale cu variante, pas cu pas, cu sfaturi și cantități ajustabile.
                   </p>
                 </header>
@@ -601,7 +601,7 @@ function RetePageContent() {
                     placeholder="Caută rețetă..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-white/[0.1] bg-white/[0.04] text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.08] transition-all text-sm"
+                    className="w-full px-4 py-3 rounded-xl border border-edge-strong bg-card text-heading placeholder-muted focus:outline-none focus:border-red-500/50 focus:bg-elevated-hover transition-all text-sm"
                   />
                 </div>
 
@@ -614,7 +614,7 @@ function RetePageContent() {
                       className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all active:scale-95 border ${
                         filterDiff === diff
                           ? "bg-red-700 text-white border-red-700 shadow-lg shadow-red-900/30"
-                          : "bg-white/[0.04] text-gray-400 border-white/[0.06] hover:border-red-900/30 hover:text-gray-200"
+                          : "bg-card text-dim border-edge hover:border-red-900/30 hover:text-body"
                       }`}
                     >
                       {diff === "toate" ? "Toate" : diff}
@@ -641,7 +641,7 @@ function RetePageContent() {
                       animate={{ opacity: 1 }}
                       className="col-span-full text-center py-12"
                     >
-                      <p className="text-gray-400 font-bold text-lg">Niciuna rețetă găsită. Încearcă alt termen de căutare.</p>
+                      <p className="text-dim font-bold text-lg">Niciuna rețetă găsită. Încearcă alt termen de căutare.</p>
                     </motion.div>
                   )}
                 </div>
