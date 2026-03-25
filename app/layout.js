@@ -155,57 +155,19 @@ export default function RootLayout({ children }) {
           </div>
         </ClientWrapper>
 
-        {/* CSS RUNTIME FIXES (THE TANK LOCK - Anti-crop sistem pentru iPhone/Android) */}
+        {/* Runtime CSS — only rules not covered by globals.css */}
         <style dangerouslySetInnerHTML={{ __html: `
-          :root {
-            --safe-area-left: env(safe-area-inset-left, 0px);
-            --safe-area-right: env(safe-area-inset-right, 0px);
-            --safe-area-top: env(safe-area-inset-top, 0px);
-            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-          }
-
           body {
-            min-height: 100dvh;
-            width: 100vw;
             max-width: 100%;
-            position: relative;
-            background-color: var(--t-bg-main, #0c0a0a);
-            overscroll-behavior: none;
             overflow-x: hidden;
           }
-
-          .px-mobile-fix {
-            padding-left: var(--safe-area-left) !important;
-            padding-right: var(--safe-area-right) !important;
-            padding-top: var(--safe-area-top);
-            padding-bottom: var(--safe-area-bottom);
-          }
-
-          button, input, a, [role="button"] {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-          }
-
-          @media screen and (max-width: 850px) {
-            input, textarea, select { font-size: 16px !important; }
-          }
-
           main {
             animation: page-fade-in 0.3s ease-out forwards;
           }
-
           @keyframes page-fade-in {
             0% { opacity: 0; }
             100% { opacity: 1; }
           }
-
-          .scrollbar-hide::-webkit-scrollbar { display: none; }
-          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-          
-          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.2); border-radius: 10px; }
-
         `}} />
 
       </body>

@@ -110,20 +110,17 @@ function HomeContent() {
     }
   }, [searchParams, router, setToastMsg]);
 
-  const safeGetLS = (k) => safeLS.get(k);
-  const safeSetLS = (k, v) => safeLS.set(k, v);
-
   const getStoredTeamIds = useCallback(() => {
-    try { return JSON.parse(safeGetLS("c_teamIds") || "[]"); } catch { return []; }
+    try { return JSON.parse(safeLS.get("c_teamIds") || "[]"); } catch { return []; }
   }, []);
   const addStoredTeamId = useCallback((id) => {
     const ids = getStoredTeamIds();
-    if (!ids.includes(id)) { const n = [...ids, id]; safeSetLS("c_teamIds", JSON.stringify(n)); return n; }
+    if (!ids.includes(id)) { const n = [...ids, id]; safeLS.set("c_teamIds", JSON.stringify(n)); return n; }
     return ids;
   }, [getStoredTeamIds]);
   const removeStoredTeamId = (id) => {
     const n = getStoredTeamIds().filter(t => t !== id);
-    safeSetLS("c_teamIds", JSON.stringify(n));
+    safeLS.set("c_teamIds", JSON.stringify(n));
   };
 
   const teamIds = loadedTeams.map(t => t.details.id).join(",");
@@ -188,7 +185,7 @@ function HomeContent() {
           valid.push(f.value.tid);
         }
       }
-      safeSetLS("c_teamIds", JSON.stringify(valid));
+      safeLS.set("c_teamIds", JSON.stringify(valid));
       setLoadedTeams(results);
       if (pId) router.replace("/");
     };
