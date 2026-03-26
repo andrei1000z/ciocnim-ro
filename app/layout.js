@@ -54,6 +54,7 @@ export const metadata = {
     description: "Provoacă-ți familia la ciocnit ouă virtual. Gratuit, pe orice telefon, fără instalare. Hristos a Înviat!",
     images: ["/og-image.jpg"],
   },
+  alternates: { canonical: "https://ciocnim.ro" },
   robots: {
     index: true,
     follow: true,

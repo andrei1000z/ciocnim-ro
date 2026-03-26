@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
+import PageHeader from "../components/PageHeader";
 import ContentNav from "../components/ContentNav";
 
 const ArticleSection = ({ title, icon, children, delay = 0 }) => (
@@ -77,15 +78,7 @@ export default function TraditiiPage() {
       <Script id="schema-traditii" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <main className="min-h-screen bg-main text-body">
 
-        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
-          </Link>
-          <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
-            Înapoi acasă
-          </Link>
-        </div>
+        <PageHeader />
         <ContentNav current="/traditii" />
 
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">

@@ -3,6 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Termeni și Condiții",
   description: "Termeni și condiții de utilizare a site-ului Ciocnim.ro — regulile jocului de ciocnit ouă online.",
+  alternates: { canonical: "https://ciocnim.ro/terms" },
 };
 
 export default function TermsPage() {

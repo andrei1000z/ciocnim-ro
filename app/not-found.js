@@ -14,7 +14,7 @@ export default function NotFound() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center space-y-8">
         <div className="space-y-4">
           <div className="text-8xl" role="img" aria-label="Ou spart">🥚</div>
-          <h1 className="text-5xl md:text-7xl font-black text-white">404</h1>
+          <h1 className="text-5xl md:text-7xl font-black text-heading">404</h1>
           <p className="text-xl md:text-2xl font-bold text-red-400">Oul a fost ciocnit prea tare!</p>
           <p className="text-muted font-medium text-sm md:text-base max-w-sm mx-auto">
             Pagina pe care o cauți s-a spart la ciocnit și nu mai există. Hai înapoi la masa de Paște!
@@ -33,7 +33,6 @@ export default function NotFound() {
           </Link>
         </div>
 
-        {/* Easter egg decoration */}
         <div className="flex items-center gap-3 mt-8 opacity-20">
           <span className="text-2xl rotate-12" role="img" aria-label="Ou decorat">🥚</span>
           <span className="text-3xl -rotate-6" role="img" aria-label="Ou decorat">🥚</span>

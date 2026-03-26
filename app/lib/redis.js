@@ -21,9 +21,7 @@ const redisClientSingleton = () => {
     console.error('[Neural Redis] Eroare de conexiune:', err.message);
   });
 
-  client.on('connect', () => {
-    console.log('🔗 [Neural Redis] Baza de date conectată cu succes!');
-  });
+  client.on('connect', () => {});
 
   return client;
 };

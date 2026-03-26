@@ -3,6 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Politica de Confidențialitate",
   description: "Politica de confidențialitate a site-ului Ciocnim.ro — cum colectăm și protejăm datele tale.",
+  alternates: { canonical: "https://ciocnim.ro/privacy" },
 };
 
 export default function PrivacyPage() {

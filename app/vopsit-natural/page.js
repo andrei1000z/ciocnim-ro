@@ -116,7 +116,7 @@ export default function VopsitNaturalPage() {
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-white">Ciocnim<span className="text-red-500">.ro</span></span>
+            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-accent-red-strong">.ro</span></span>
           </Link>
           <div className="flex items-center gap-3">
             <FocusModeToggle active={focusMode} onToggle={() => setFocusMode(f => !f)} />

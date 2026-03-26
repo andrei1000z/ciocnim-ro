@@ -8,11 +8,12 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import PageHeader from "../components/PageHeader";
 import ContentNav from "../components/ContentNav";
 
 const fadeUpVariant = {
-  hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
-  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: [0.23, 1, 0.32, 1] } }
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.23, 1, 0.32, 1] } }
 };
 
 const datePaste = [
@@ -29,16 +30,7 @@ export default function CalendarPage() {
     <>
       <main className="min-h-screen bg-main text-body">
         
-        {/* Header */}
-        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
-           <Link href="/" className="flex items-center gap-2 group">
-              <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-              <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-red-500">.ro</span></span>
-           </Link>
-           <Link href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95">
-              Înapoi acasă
-           </Link>
-        </div>
+        <PageHeader />
         <ContentNav current="/calendar" />
 
         <div className="w-full max-w-4xl mx-auto pt-8 pb-16 px-6 space-y-8">

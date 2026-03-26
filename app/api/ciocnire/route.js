@@ -36,13 +36,7 @@ async function getClasamentJucatori() {
   } catch (e) { return []; }
 }
 
-// Protejăm numele sistemului
 const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
-
-// Filtru poreclă (shared)
-const esteNumeInterzisServer = esteNumeInterzisShared;
-
-// ACHIEVEMENTS imported from @/app/lib/achievements
 
 async function checkAndAwardAchievements(jucator, stats, teamId = null) {
   const achievementsToAward = [];
