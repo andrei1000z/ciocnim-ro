@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2';
+const CACHE_VERSION = '3';
 const CACHE_NAME = `ciocnim-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -7,6 +7,9 @@ const STATIC_ASSETS = [
   '/urari',
   '/vopsit-natural',
   '/calendar',
+  '/clasament',
+  '/despre',
+  '/ghid',
   '/manifest.json',
   '/apple-touch-icon.png',
   '/og-image.jpg',
@@ -63,6 +66,37 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       });
+    })
+  );
+});
+
+// Push notifications
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Ciocnim.ro';
+  const options = {
+    body: data.body || 'Ai primit o provocare!',
+    icon: '/icon-512x512.png',
+    badge: '/apple-touch-icon.png',
+    data: { url: data.url || '/' },
+    vibrate: [100, 50, 100],
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes('ciocnim.ro') && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
     })
   );
 });

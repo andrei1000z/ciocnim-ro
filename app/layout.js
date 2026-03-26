@@ -5,6 +5,7 @@ import Script from "next/script";
 import ScrollToTop from "./components/ScrollToTop";
 import ThemeToggle from "./components/ThemeToggle";
 import Footer from "./components/Footer";
+import SoundToggle from "./components/SoundToggle";
 
 
 const outfit = Outfit({ 
@@ -148,6 +149,7 @@ export default function RootLayout({ children }) {
         <ClientWrapper>
           <ScrollToTop />
           <ThemeToggle />
+          <SoundToggle />
           <div className="relative z-10 w-full max-w-[100vw] min-h-[100dvh] flex flex-col">
             <main id="main-content" className="flex-1 w-full max-w-[100vw] px-mobile-fix relative">
               {children}

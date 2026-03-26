@@ -11,6 +11,7 @@ const fireConfetti = async (opts) => {
 };
 import { motion, AnimatePresence } from "framer-motion";
 import { safeCopy } from "../../lib/utils";
+import { playCrack, playVictory, playDefeat, isSoundEnabled, toggleSound } from "../../lib/sounds";
 
 // --- BAZA DE DATE CITATE ---
 const CITATE_IERTARE = [
@@ -205,7 +206,7 @@ function ArenaMaster({ room }) {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => !isSoundEnabled());
   const chatContainerRef = useRef(null);
   const [revansaRequests, setRevansaRequests] = useState({});
   const opponentRef = useRef(null);
@@ -253,7 +254,9 @@ function ArenaMaster({ room }) {
       audio.volume = 0.35 + Math.random() * 0.3;
       audio.playbackRate = 0.9 + Math.random() * 0.2;
       audio.play().catch(() => {});
-    } catch (err) {}
+    } catch {}
+    if (name === "victorie") playVictory();
+    else if (name === "esec") playDefeat();
   };
 
   const broadcastJoin = useCallback(async () => {
@@ -542,6 +545,7 @@ function ArenaMaster({ room }) {
       // Faza 2: EXACT la impact — sunet + shake + vibrație
       setImpactFlash(true);
       try { crackAudio?.play().catch(() => {}); } catch {}
+      if (!isMuted) playCrack();
       triggerVibrate(amCastigat ? [100, 50, 100] : [800]);
 
       setTimeout(() => {
@@ -740,7 +744,7 @@ function ArenaMaster({ room }) {
             </span>
             <span className="text-[11px] md:text-xs font-black text-heading tabular-nums">{onlineCount || 1}</span>
             <span className="text-[9px] md:text-[10px] font-semibold text-faint">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
-            <button onClick={() => setIsMuted(m => !m)} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
+            <button onClick={() => { const next = toggleSound(); setIsMuted(!next); }} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
           <span className="text-[9px] md:text-[10px] font-bold text-muted tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
         </div>

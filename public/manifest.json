@@ -6,7 +6,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#010000",
+  "background_color": "#0c0a0a",
   "theme_color": "#dc2626",
   "orientation": "portrait-primary",
   "categories": ["games", "entertainment"],
@@ -31,6 +31,18 @@
       "url": "/?autoArena=true",
       "description": "Ciocnește ouă cu cineva din România",
       "icons": [{ "src": "/apple-touch-icon.png", "sizes": "180x180" }]
+    },
+    {
+      "name": "Clasament",
+      "short_name": "Clasament",
+      "url": "/clasament",
+      "description": "Vezi clasamentul național"
+    },
+    {
+      "name": "Rețete de Paște",
+      "short_name": "Rețete",
+      "url": "/retete",
+      "description": "Rețete tradiționale de Paște"
     }
   ]
 }

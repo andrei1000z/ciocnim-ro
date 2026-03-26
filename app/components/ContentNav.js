@@ -6,6 +6,8 @@ const navLinks = [
   { href: "/urari", label: "Urări" },
   { href: "/vopsit-natural", label: "Vopsit" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/ghid", label: "Ghid" },
+  { href: "/clasament", label: "Clasament" },
 ];
 
 export default function ContentNav({ current }) {

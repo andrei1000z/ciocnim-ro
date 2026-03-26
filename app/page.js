@@ -14,6 +14,7 @@ import PlayModal from "./components/PlayModal";
 import EasterCountdown from "./components/EasterCountdown";
 import { safeLS, safeCopy } from "./lib/utils";
 import { getNextEaster } from "./lib/easterUtils";
+import { requestNotificationPermission, isNotificationSupported, getNotificationStatus } from "./lib/notifications";
 
 const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
   initial: { opacity: 0, y: 18 },
@@ -425,6 +426,9 @@ function HomeContent() {
       <motion.div {...fadeUp(0.15, prefersReducedMotion)}>
         <SectionLabel>Clasament</SectionLabel>
         <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
+        <Link href="/clasament" className="block text-center text-[10px] font-bold text-red-500/50 hover:text-red-400 mt-2 transition-colors">
+          Vezi clasamentul complet →
+        </Link>
       </motion.div>
 
       {/* ACHIEVEMENTS */}
@@ -459,6 +463,8 @@ function HomeContent() {
             { href: "/retete", icon: "🍳", text: "Rețete" },
             { href: "/calendar", icon: "📅", text: "Calendar" },
             { href: "/urari", icon: "🕊️", text: "Urări" },
+            { href: "/ghid", icon: "🎮", text: "Ghid" },
+            { href: "/despre", icon: "💡", text: "Despre" },
           ].map((item, i) => (
             <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 + i * 0.05 }}>
               <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-card backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[56px] flex-1">
@@ -505,6 +511,22 @@ function HomeContent() {
           >
             <span className="text-lg">📥</span>
             <span className="font-bold text-dim text-sm">Instalează aplicația</span>
+          </button>
+        </motion.div>
+      )}
+
+      {/* NOTIFICĂRI */}
+      {isNotificationSupported() && getNotificationStatus() === "default" && nume && (
+        <motion.div {...fadeUp(0.28, prefersReducedMotion)}>
+          <button
+            onClick={async () => {
+              const granted = await requestNotificationPermission();
+              setToastMsg(granted ? "Notificări activate!" : "Notificările au fost blocate.");
+            }}
+            className="w-full py-3.5 rounded-2xl border border-edge bg-card hover:bg-card-hover transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
+          >
+            <span className="text-lg">🔔</span>
+            <span className="font-bold text-dim text-sm">Activează notificările</span>
           </button>
         </motion.div>
       )}
