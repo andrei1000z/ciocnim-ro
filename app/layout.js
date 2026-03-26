@@ -140,10 +140,10 @@ export default function RootLayout({ children }) {
       `}>
         <a href="#main-content" className="skip-to-content">Salt la conținut</a>
 
-        {/* Ambient glow subtil */}
+        {/* Ambient glow — pure gradients, no filter:blur for GPU perf */}
         <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden select-none opacity-60" aria-hidden="true">
-          <div className="absolute top-0 left-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(220,38,38,0.06),transparent_70%)] blur-3xl will-change-transform"></div>
-          <div className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(245,158,11,0.03),transparent_70%)] blur-3xl will-change-transform"></div>
+          <div className="absolute top-0 left-0 w-[50vw] h-[50vw] bg-[radial-gradient(circle,rgba(220,38,38,0.04),transparent_70%)]"></div>
+          <div className="absolute bottom-0 right-0 w-[50vw] h-[50vw] bg-[radial-gradient(circle,rgba(245,158,11,0.025),transparent_70%)]"></div>
         </div>
 
         <ClientWrapper>

@@ -297,15 +297,15 @@ function HomeContent() {
 
       {/* HERO TRADIȚIONAL */}
       <motion.div {...fadeUp(0, prefersReducedMotion)} className="text-center pt-8 pb-6 relative overflow-hidden w-full max-w-full">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04]" aria-hidden="true">
-          <div className="absolute top-2 left-[10%] text-5xl rotate-12 animate-float-v9">🥚</div>
-          <div className="absolute top-8 right-[15%] text-3xl -rotate-12" style={{animation:'float-gentle 8s ease-in-out infinite 1s'}}>🥚</div>
-          <div className="absolute bottom-4 left-[20%] text-4xl rotate-6" style={{animation:'float-gentle 7s ease-in-out infinite 0.5s'}}>🥚</div>
-          <div className="absolute bottom-2 right-[25%] text-2xl -rotate-6" style={{animation:'float-gentle 9s ease-in-out infinite 2s'}}>🥚</div>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04] hidden md:block" aria-hidden="true">
+          <div className="absolute top-2 left-[10%] text-5xl rotate-12">🥚</div>
+          <div className="absolute top-8 right-[15%] text-3xl -rotate-12">🥚</div>
+          <div className="absolute bottom-4 left-[20%] text-4xl rotate-6">🥚</div>
+          <div className="absolute bottom-2 right-[25%] text-2xl -rotate-6">🥚</div>
         </div>
 
         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }} className="relative z-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-4 shadow-lg shadow-red-900/10 backdrop-blur-sm">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-4 shadow-lg shadow-red-900/10">
             <span className="text-4xl drop-shadow-lg" role="img" aria-label="Ou de Paște">🥚</span>
           </div>
         </motion.div>
@@ -321,7 +321,7 @@ function HomeContent() {
 
         {/* COUNTER CIOCNIRI + LIVE */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-5 flex flex-col items-center gap-2 relative z-10">
-          <div className="inline-flex items-center gap-2 bg-card backdrop-blur-xl border border-red-500/15 text-heading px-4 sm:px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20 max-w-full">
+          <div className="inline-flex items-center gap-2 bg-card border border-red-500/15 text-heading px-4 sm:px-6 py-3 rounded-2xl font-black shadow-xl shadow-black/20 max-w-full">
             <span className="text-lg flex-shrink-0" role="img" aria-label="Ou de Paște">🥚</span>
             <span className="tabular-nums text-heading text-xl sm:text-2xl">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
             <span className="font-semibold text-muted text-[10px] sm:text-xs">Ciocniri Naționale</span>
@@ -345,7 +345,7 @@ function HomeContent() {
       {/* PROFIL */}
       <motion.div {...fadeUp(0.08, prefersReducedMotion)}>
         <SectionLabel>{nume ? "Profilul Tău" : "Începe Aici"}</SectionLabel>
-        <div className="rounded-2xl border border-red-900/20 bg-card backdrop-blur-xl p-4 sm:p-5 space-y-4 shadow-sm w-full max-w-full overflow-hidden">
+        <div className="rounded-2xl border border-red-900/20 bg-card p-4 sm:p-5 space-y-4 shadow-sm w-full max-w-full overflow-hidden">
           <div>
             <div className="flex gap-2 w-full max-w-full">
               <input
@@ -434,7 +434,7 @@ function HomeContent() {
       {/* ACHIEVEMENTS */}
       <motion.div {...fadeUp(0.18, prefersReducedMotion)}>
         <SectionLabel>Achievement-uri</SectionLabel>
-        <div className="rounded-2xl border border-amber-900/20 bg-card backdrop-blur-xl p-4 shadow-sm">
+        <div className="rounded-2xl border border-amber-900/20 bg-card p-4 shadow-sm">
           {achievements.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {achievements.map(a => (
@@ -467,7 +467,7 @@ function HomeContent() {
             { href: "/despre", icon: "💡", text: "Despre" },
           ].map((item, i) => (
             <motion.div key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 + i * 0.05 }}>
-              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-card backdrop-blur-sm hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[56px] flex-1">
+              <Link href={item.href} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-2xl border border-red-900/20 bg-card hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[56px] flex-1">
                 <span className="text-lg sm:text-2xl">{item.icon}</span>
                 <span className="font-bold text-[9px] sm:text-[11px] text-dim group-hover:text-white transition-colors text-center">{item.text}</span>
               </Link>

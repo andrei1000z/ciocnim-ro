@@ -41,7 +41,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-edge bg-card backdrop-blur-xl shadow-lg shadow-black/20">
+    <div className="rounded-2xl overflow-hidden border border-edge bg-card shadow-lg shadow-black/20">
       <div className="flex">
         {[["jucatori", "🏆 Jucători"], ["regiuni", "🗺️ Regiuni"]].map(([v, label]) => (
           <button

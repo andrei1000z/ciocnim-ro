@@ -11,12 +11,16 @@ function getCtx() {
   if (!audioCtx && typeof AudioContext !== "undefined") {
     audioCtx = new AudioContext();
   }
+  // Resume if suspended (mobile requires user gesture)
+  if (audioCtx?.state === "suspended") {
+    audioCtx.resume().catch(() => {});
+  }
   return audioCtx;
 }
 
 function playTone(freq, duration, type = "sine", startTime = 0) {
   const ctx = getCtx();
-  if (!ctx) return;
+  if (!ctx || ctx.state === "suspended") return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = type;

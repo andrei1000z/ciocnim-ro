@@ -65,7 +65,7 @@ export default function DesprePage() {
               { label: "Timp real", desc: "WebSocket pentru dueluri instantanee", icon: "⚡" },
               { label: "PWA", desc: "Instalabil pe telefon ca aplicație", icon: "📱" },
               { label: "Clasamente", desc: "Top jucători și regiuni, actualizat live", icon: "🏆" },
-              { label: "Achievement-uri", desc: "18 realizări de deblocat", icon: "🏅" },
+              { label: "Achievement-uri", desc: "16 realizări de deblocat", icon: "🏅" },
               { label: "Grupuri", desc: "Creează echipe și provoacă prietenii", icon: "👥" },
               { label: "Teme", desc: "Mod întunecat și luminos", icon: "🎨" },
             ].map(item => (

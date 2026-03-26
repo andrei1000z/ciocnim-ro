@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getOrthodoxEaster, getNextEaster } from "@/app/lib/easterUtils";
 
+// Memoized outside component — Easter date doesn't change within a session
+let cachedEaster = null;
+function getCachedEaster() {
+  if (!cachedEaster) cachedEaster = getNextEaster();
+  return cachedEaster;
+}
+
 function getState() {
-  // Calculat la runtime, nu la build time — se auto-actualizează după Paște
-  const easterDate = getNextEaster();
+  const easterDate = getCachedEaster();
   const now = new Date();
   const easterStart = new Date(easterDate);
   easterStart.setHours(0, 0, 0, 0);
@@ -38,7 +44,7 @@ export default function EasterCountdown() {
 
   if (state.type === "risen") {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-900/10 backdrop-blur-xl p-5 shadow-sm text-center">
+      <div className="rounded-2xl border border-amber-500/20 bg-amber-900/10 p-5 shadow-sm text-center">
         <p className="text-2xl font-black text-amber-400 mb-1">Hristos a Înviat! ✝️</p>
         <p className="text-xs font-bold text-amber-500/60">Paște Fericit tuturor!</p>
       </div>
@@ -53,7 +59,7 @@ export default function EasterCountdown() {
   ];
 
   return (
-    <div className="rounded-2xl border border-red-900/20 bg-card backdrop-blur-xl p-4 shadow-sm">
+    <div className="rounded-2xl border border-red-900/20 bg-card p-4 shadow-sm">
       <p className="text-[10px] font-bold text-red-500/60 uppercase tracking-[0.3em] text-center mb-3">
         Până la Paștele Ortodox {state.year}
       </p>

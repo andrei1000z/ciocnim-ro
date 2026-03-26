@@ -7,15 +7,31 @@ export function getCurrentSeason() {
   const easterEnd = new Date(easter);
   easterEnd.setDate(easterEnd.getDate() + 7);
 
-  const prevEaster = getOrthodoxEaster(year - 1);
-  const prevEnd = new Date(prevEaster);
-  prevEnd.setDate(prevEnd.getDate() + 7);
-
-  // Season runs from 2 weeks before Easter to 1 week after
   const seasonStart = new Date(easter);
   seasonStart.setDate(seasonStart.getDate() - 14);
 
   const isActive = now >= seasonStart && now <= easterEnd;
+
+  // If season ended, show next year's season
+  if (now > easterEnd) {
+    const nextYear = year + 1;
+    const nextEaster = getOrthodoxEaster(nextYear);
+    const nextStart = new Date(nextEaster);
+    nextStart.setDate(nextStart.getDate() - 14);
+
+    const formatDate = (d) =>
+      d.toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
+
+    return {
+      name: `Paște ${nextYear}`,
+      year: nextYear,
+      start: nextStart,
+      end: new Date(nextEaster.getTime() + 7 * 86400000),
+      easterDate: nextEaster,
+      isActive: false,
+      label: `Începe pe ${formatDate(nextStart)}`,
+    };
+  }
 
   const formatDate = (d) =>
     d.toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
@@ -29,8 +45,6 @@ export function getCurrentSeason() {
     isActive,
     label: isActive
       ? "Sezon Activ"
-      : now < seasonStart
-        ? `Începe pe ${formatDate(seasonStart)}`
-        : "Sezon Încheiat",
+      : `Începe pe ${formatDate(seasonStart)}`,
   };
 }

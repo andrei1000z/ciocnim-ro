@@ -40,7 +40,7 @@ const steps = [
   {
     title: "Deblochează Achievement-uri",
     icon: "🏅",
-    desc: "Jocul are 18 achievement-uri de deblocat, de la prima victorie pana la 100 de victorii. Verifica-le pe pagina de profil!",
+    desc: "Jocul are 16 achievement-uri de deblocat, de la prima victorie pana la 100 de victorii. Verifica-le pe pagina de profil!",
     tip: "Unele achievement-uri sunt secrete — descoperă-le singur!",
   },
 ];

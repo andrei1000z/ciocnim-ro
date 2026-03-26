@@ -31,7 +31,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-red-900/20 bg-card backdrop-blur-xl shadow-sm">
+    <div className="rounded-2xl overflow-hidden border border-red-900/20 bg-card shadow-sm">
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-red-900/10 bg-red-900/20">
         <span className="font-bold text-heading text-sm">👥 Grupul Meu</span>
         {teams.length > 1 && (

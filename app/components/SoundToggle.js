@@ -21,7 +21,7 @@ export default function SoundToggle() {
         setEnabled(next);
         if (next) playClick();
       }}
-      className="fixed bottom-20 right-4 z-50 w-10 h-10 rounded-full bg-card border border-edge shadow-lg flex items-center justify-center text-sm hover:bg-elevated transition-all active:scale-90"
+      className="fixed bottom-4 right-4 md:top-4 md:right-16 md:bottom-auto z-50 w-10 h-10 rounded-full bg-card border border-edge shadow-lg flex items-center justify-center text-sm hover:bg-elevated transition-all active:scale-90"
       aria-label={enabled ? "Dezactivează sunetele" : "Activează sunetele"}
       title={enabled ? "Sunet: pornit" : "Sunet: oprit"}
     >

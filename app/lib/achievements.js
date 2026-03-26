@@ -1,8 +1,8 @@
 export const ACHIEVEMENTS = {
   'first_win': { name: 'Prima Victorie', desc: 'Câștigă primul meci', icon: '🏆', rarity: 'common' },
-  'wins_10': { name: 'Ciocnitor Amator', desc: 'Câștigă 10 meciuri', icon: '🥇', rarity: 'common' },
+  'wins_10': { name: 'Ciocnitor Amator', desc: 'Câștigă 10 meciuri', icon: '🥉', rarity: 'common' },
   'wins_50': { name: 'Ciocnitor Experimentat', desc: 'Câștigă 50 meciuri', icon: '🥈', rarity: 'uncommon' },
-  'wins_100': { name: 'Maestru al Ouălor', desc: 'Câștigă 100 meciuri', icon: '🥉', rarity: 'rare' },
+  'wins_100': { name: 'Maestru al Ouălor', desc: 'Câștigă 100 meciuri', icon: '🥇', rarity: 'rare' },
   'wins_500': { name: 'Legendă Vie', desc: 'Câștigă 500 meciuri', icon: '👑', rarity: 'epic' },
   'wins_1000': { name: 'Zeul Ciocnitului', desc: 'Câștigă 1000 meciuri', icon: '⚡', rarity: 'legendary' },
   'first_group': { name: 'Prieten Bun', desc: 'Joacă primul meci în grup', icon: '👥', rarity: 'common' },
