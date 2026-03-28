@@ -175,7 +175,8 @@ async function getUserAchievements(jucator) {
 // --- Input sanitization helpers ---
 function sanitizeStr(val, maxLen = 100) {
   if (typeof val !== 'string') return '';
-  return val.slice(0, maxLen).trim();
+  // Strip characters dangerous in Redis key names (colons, newlines, glob chars)
+  return val.slice(0, maxLen).replace(/[:\n\r\*\?\[\]]/g, '').trim();
 }
 function sanitizeId(val) {
   if (typeof val !== 'string' || val === 'null' || val === 'undefined') return '';
@@ -281,11 +282,11 @@ export async function POST(request) {
         // Runda 2: scrieri stats + pusher — în paralel între ele
         const updates = safeName && currentStats ? (esteCastigator ? {
           wins: 1,
-          currentStreak: currentStats.currentStreak + 1,
+          currentStreak: String(currentStats.currentStreak + 1),
           ...(teamId ? { teamWins: 1 } : {})
         } : {
           losses: 1,
-          currentStreak: 0
+          currentStreak: '0'
         }) : null;
 
         // Fire-and-forget broadcasts
@@ -295,7 +296,18 @@ export async function POST(request) {
         // Stats update is critical — await it
         if (updates) {
           await updateUserStats(safeName, updates);
-          checkAndAwardAchievements(safeName, { ...currentStats, ...updates }, teamId).catch(() => {});
+          // Pass actual new totals (not deltas) to achievement checker
+          const newStats = esteCastigator ? {
+            ...currentStats,
+            wins: currentStats.wins + 1,
+            currentStreak: currentStats.currentStreak + 1,
+            ...(teamId ? { teamWins: (currentStats.teamWins || 0) + 1 } : {})
+          } : {
+            ...currentStats,
+            losses: currentStats.losses + 1,
+            currentStreak: 0
+          };
+          checkAndAwardAchievements(safeName, newStats, teamId).catch(() => {});
         }
 
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
@@ -410,6 +422,9 @@ export async function POST(request) {
 
       case 'revansa': {
         if (!jucator || !roomId) return NextResponse.json({ success: false });
+        const revRlKey = `ratelimit:rev:${jucator.toUpperCase()}`;
+        const revRl = await redis.set(revRlKey, '1', 'EX', 2, 'NX');
+        if (!revRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
         const revClean = jucator.toUpperCase();
         // Store request in Redis (source of truth when Pusher is unreliable)
         await redis.sadd(`room:${roomId}:revansa`, revClean);
@@ -428,6 +443,12 @@ export async function POST(request) {
         return NextResponse.json({ success: true, revansaOk: false, count: revCount });
       }
 
+      case 'clear-round': {
+        if (!roomId) return NextResponse.json({ success: false });
+        redis.del(`room:${roomId}:revansa-ok`, `room:${roomId}:lovitura`, `room:${roomId}:revansa`).catch(() => {});
+        return NextResponse.json({ success: true });
+      }
+
       case 'revansa-ok': {
         if (!roomId || !jucator) return NextResponse.json({ success: false });
         redis.del(`room:${roomId}:revansa`, `room:${roomId}:lovitura`).catch(() => {});
@@ -442,6 +463,10 @@ export async function POST(request) {
           redis.smembers(`room:${roomId}:revansa`),
           redis.get(`room:${roomId}:revansa-ok`)
         ]);
+        // Consume revansa-ok flag + clear stale lovitura so they can't re-trigger
+        if (revOkFlag) {
+          redis.del(`room:${roomId}:revansa-ok`, `room:${roomId}:lovitura`).catch(() => {});
+        }
         return NextResponse.json({ success: true, players: revPlayers, revansaOk: !!revOkFlag });
       }
 
@@ -532,7 +557,7 @@ export async function POST(request) {
           : [null];
 
         const pipeline = redis.pipeline();
-        pipeline.set(`nume_rezervat:${newClean}`, "1");
+        pipeline.set(`nume_rezervat:${newClean}`, "1", 'EX', 60 * 60 * 24 * 90); // 90 days TTL
 
         // CLEAN-UP PERFECT (Fără duplicate în grupuri și topuri)
         if (oldClean && oldClean !== newClean) {
@@ -619,6 +644,7 @@ export async function POST(request) {
 
       case 'redenumeste-echipa': {
         if (!teamId || !newName || newName.length < 3) return NextResponse.json({ success: false });
+        if (esteNumeInterzisServer(newName)) return NextResponse.json({ success: false, error: "Numele conține cuvinte nepotrivite." });
         const renameTeamStats = await redis.hgetall(`team:${teamId}:stats`);
         if (renameTeamStats.creator && jucator && renameTeamStats.creator !== jucator.toUpperCase()) {
           return NextResponse.json({ success: false, error: "Doar creatorul poate redenumi grupul." });

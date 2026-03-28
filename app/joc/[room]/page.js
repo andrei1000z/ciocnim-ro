@@ -364,7 +364,8 @@ function ArenaMaster({ room }) {
         }
       } catch {}
     };
-    const interval = setInterval(poll, 3000);
+    poll(); // poll immediately for instant sync
+    const interval = setInterval(poll, 1500);
     return () => clearInterval(interval);
   }, [rezultat, isBotMatch, opponent, room]);
 
@@ -578,6 +579,11 @@ function ArenaMaster({ room }) {
         return prev === currentNume ? opponentRef.current.jucator : currentNume;
       });
     }
+    // Clear stale Redis keys so lovitura/revansa-ok can't re-trigger next round
+    fetch('/api/ciocnire', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId: room, actiune: 'clear-round' })
+    }).catch(() => {});
   };
   resetForRevansaRef.current = resetForRevansa;
 
