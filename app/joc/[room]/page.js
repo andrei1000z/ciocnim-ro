@@ -333,7 +333,7 @@ function ArenaMaster({ room }) {
         });
         const data = await res.json();
         if (data.success && data.lovitura) {
-          executeBattleRef.current(data.lovitura);
+          executeBattleRef.current?.(data.lovitura);
         }
       } catch {}
     };
@@ -493,11 +493,9 @@ function ArenaMaster({ room }) {
   // Retry join for ALL room types — ensures registration in Redis even if Pusher is down
   useEffect(() => {
     if (opponent || rezultat || isStriking || isBotMatch || !nume) return;
-    let sent = false;
-    const tryJoin = () => { if (!sent) { broadcastJoin(); sent = true; } };
-    tryJoin();
+    broadcastJoin();
     // Retry every 3s in case first join failed (network error)
-    const interval = setInterval(() => { if (!sent) tryJoin(); }, 3000);
+    const interval = setInterval(broadcastJoin, 3000);
     return () => clearInterval(interval);
   }, [opponent, rezultat, isStriking, isBotMatch, nume, broadcastJoin]);
 
@@ -883,6 +881,7 @@ function ArenaMaster({ room }) {
                onChange={e => setChatInput(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && handleChat()}
                placeholder="SCRIE UN MESAJ..."
+               maxLength={200}
                className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-heading tracking-widest placeholder:text-amber-500/30"
             />
             <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/30 text-sm md:text-xs active:scale-95 flex items-center justify-center cursor-pointer">🕊️</button>
