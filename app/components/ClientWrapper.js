@@ -22,6 +22,7 @@ function ToastBar({ msg, onDone }) {
       initial={{ opacity: 0, y: -30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -30 }}
+      role="alert"
       className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-5 py-3 rounded-2xl bg-surface-hover border border-red-900/30 shadow-xl shadow-black/40 text-sm font-bold text-body max-w-[90vw] text-center pointer-events-auto"
     >
       {msg}
@@ -43,6 +44,7 @@ function AchievementToast({ achievement, onDone }) {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: -40 }}
       transition={{ type: "spring", bounce: 0.5 }}
+      role="alert"
       className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-6 py-4 rounded-2xl bg-gradient-to-br from-amber-900/90 to-red-900/90 border border-amber-500/30 shadow-2xl shadow-amber-900/30 text-center pointer-events-auto backdrop-blur-xl max-w-[90vw]"
     >
       <div className="text-3xl mb-1">{achievement.icon}</div>
@@ -459,11 +461,12 @@ export default function ClientWrapper({ children }) {
 
     let achQueue = [];
     let achShowing = false;
+    let achTimer = null;
     const showNextAch = () => {
       if (achQueue.length === 0) { achShowing = false; return; }
       achShowing = true;
       setAchievementToast(achQueue.shift());
-      setTimeout(showNextAch, 5500);
+      achTimer = setTimeout(showNextAch, 5500);
     };
     channel.bind('achievement-unlocked', (data) => {
       if (!data.achievements || !Array.isArray(data.achievements)) return;
@@ -475,6 +478,7 @@ export default function ClientWrapper({ children }) {
 
     return () => {
       if (notifTimer) clearTimeout(notifTimer);
+      if (achTimer) clearTimeout(achTimer);
       achQueue = [];
       channel.unbind_all();
       pusherRef.current?.unsubscribe(channelName);
@@ -516,6 +520,7 @@ export default function ClientWrapper({ children }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -50, scale: 0.9 }}
                 transition={{ type: "spring", bounce: 0.5 }}
+                role="alertdialog"
                 className="relative w-[90%] max-w-sm bg-surface p-8 md:p-10 rounded-3xl border border-red-900/30 shadow-[0_25px_60px_rgba(0,0,0,0.6)] overflow-hidden pointer-events-auto"
               >
                 <div className="relative z-10 text-center">

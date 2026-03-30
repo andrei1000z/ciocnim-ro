@@ -1,7 +1,7 @@
 const year = new Date().getFullYear();
 
 export const metadata = {
-  title: `Profilul Meu – Statistici și Realizări | Ciocnim.ro`,
+  title: { absolute: "Profilul Meu – Statistici și Realizări | Ciocnim.ro" },
   description: `Vezi realizările tale, statisticile de meciuri și insignele câștigate în jocul de ciocnit ouă de Paște ${year}. Ciocnim.ro - Păstrăm Tradiția.`,
   robots: { index: false, follow: false },
   openGraph: {

@@ -1,36 +1,39 @@
 "use client";
 
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { safeLS } from "@/app/lib/utils";
 
 const emptySubscribe = () => () => {};
 
-export default function ThemeToggle() {
-  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "light";
-    const stored = safeLS.get("c_theme");
-    if (stored) return stored;
-    return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
-  });
+function readThemeFromDOM() {
+  return document.documentElement.classList.contains("light") ? "light" : "dark";
+}
 
-  useEffect(() => {
-    if (theme === "light") {
+export default function ThemeToggle() {
+  // isClient: false on server/hydration, true after mount — prevents hydration mismatch
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  // Read theme directly from the DOM class set by the inline <head> script.
+  // This is always in sync: no useEffect needed, no flash.
+  const domTheme = useSyncExternalStore(emptySubscribe, readThemeFromDOM, () => "dark");
+  const [theme, setTheme] = useState(null);
+
+  // After client mount, sync state from DOM once
+  const activeTheme = theme ?? (isClient ? domTheme : "dark");
+
+  const toggle = () => {
+    const next = activeTheme === "dark" ? "light" : "dark";
+    setTheme(next);
+    safeLS.set("c_theme", next);
+    if (next === "light") {
       document.documentElement.classList.add("light");
     } else {
       document.documentElement.classList.remove("light");
     }
-  }, [theme]);
-
-  const toggle = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    safeLS.set("c_theme", next);
   };
 
   if (!isClient) return null;
 
-  const isLight = theme === "light";
+  const isLight = activeTheme === "light";
 
   return (
     <button

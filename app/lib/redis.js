@@ -1,12 +1,18 @@
 import Redis from 'ioredis';
 
 
-const redisClientSingleton = () => {
-  if (!process.env.REDIS_URL) {
-    throw new Error("❌ REDIS_URL lipsește din .env!");
+function getRedisUrl() {
+  if (process.env.REDIS_URL) return process.env.REDIS_URL;
+  // Upstash REST credentials → derive ioredis TLS URL automatically
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    const host = new URL(process.env.UPSTASH_REDIS_REST_URL).hostname;
+    return `rediss://default:${process.env.UPSTASH_REDIS_REST_TOKEN}@${host}:6380`;
   }
+  throw new Error("❌ Lipsesc credențialele Redis din .env! Setează REDIS_URL sau UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN.");
+}
 
-  const client = new Redis(process.env.REDIS_URL, {
+const redisClientSingleton = () => {
+  const client = new Redis(getRedisUrl(), {
     maxRetriesPerRequest: 3,
     connectTimeout: 10000,
     enableAutoPipelining: true,

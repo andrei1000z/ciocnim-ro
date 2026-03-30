@@ -351,6 +351,7 @@ function HomeContent() {
               <input
                 value={localNume}
                 onChange={e => { setLocalNume(e.target.value); setNumeError(""); }}
+                onInput={e => { setLocalNume(e.target.value); setNumeError(""); }}
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
                 placeholder="Porecla ta..."
                 maxLength={21}
@@ -377,8 +378,8 @@ function HomeContent() {
             </AnimatePresence>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <RegionSelector selectedRegion={userStats.regiune} onSelectRegion={r => setUserStats({ ...userStats, regiune: r })} />
-            <ColorSelector selected={userStats.skin || "red"} onSelect={s => setUserStats({ ...userStats, skin: s })} />
+            <RegionSelector selectedRegion={userStats.regiune} onSelectRegion={r => setUserStats(prev => ({ ...prev, regiune: r }))} />
+            <ColorSelector selected={userStats.skin || "red"} onSelect={s => setUserStats(prev => ({ ...prev, skin: s }))} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="border border-green-900/30 rounded-xl p-3 text-center bg-green-900/10">
@@ -496,7 +497,7 @@ function HomeContent() {
       </motion.div>
 
       {/* INSTALEAZĂ — hide if already running as PWA */}
-      {typeof window !== 'undefined' && !window.matchMedia('(display-mode: standalone)').matches && (
+      {isHydrated && typeof window !== 'undefined' && !window.matchMedia('(display-mode: standalone)').matches && (
         <motion.div {...fadeUp(0.27, prefersReducedMotion)}>
           <button
             onClick={() => {
