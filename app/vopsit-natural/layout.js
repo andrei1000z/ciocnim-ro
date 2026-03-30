@@ -1,4 +1,15 @@
+import Script from "next/script";
+
 const year = new Date().getFullYear();
+
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasă", "item": "https://ciocnim.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Vopsit Natural Ouă", "item": "https://ciocnim.ro/vopsit-natural" }
+  ]
+};
 
 export const metadata = {
   title: `Cum Vopsești Ouă Natural ${year} – Rețete cu Foi de Ceapă, Curcumă și Varză`,
@@ -26,5 +37,10 @@ export const metadata = {
 };
 
 export default function VopsitNaturalLayout({ children }) {
-  return children;
+  return (
+    <>
+      <Script id="breadcrumb-vopsit" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      {children}
+    </>
+  );
 }

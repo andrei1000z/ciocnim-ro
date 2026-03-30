@@ -627,6 +627,24 @@ export default function Home() {
       }>
         <HomeContent />
       </Suspense>
+
+      {/* SEO content — crawlable context for search engines */}
+      <section className="w-full max-w-md mx-auto px-4 pb-10 pt-2 text-center">
+        <div className="border-t border-red-900/10 pt-6 space-y-3">
+          <p className="text-xs text-faint leading-relaxed">
+            <strong className="text-muted">Ciocnim.ro</strong> este jocul tradițional românesc de ciocnit ouă de Paște, acum online.
+            Joacă gratuit cu prietenii și familia, indiferent de distanță. Hristos a Înviat! 🥚
+          </p>
+          <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px]" aria-label="Pagini utile">
+            <a href="/traditii" className="text-red-500/50 hover:text-red-400 transition-colors">Tradiții Pascale</a>
+            <a href="/urari" className="text-red-500/50 hover:text-red-400 transition-colors">Urări de Paște</a>
+            <a href="/retete" className="text-red-500/50 hover:text-red-400 transition-colors">Rețete de Paște</a>
+            <a href="/vopsit-natural" className="text-red-500/50 hover:text-red-400 transition-colors">Vopsit Natural</a>
+            <a href="/calendar" className="text-red-500/50 hover:text-red-400 transition-colors">Calendar Paște</a>
+            <a href="/ghid" className="text-red-500/50 hover:text-red-400 transition-colors">Ghid de Joc</a>
+          </nav>
+        </div>
+      </section>
     </main>
   );
 }

@@ -107,7 +107,8 @@ export default function RootLayout({ children }) {
       "priceCurrency": "RON"
     },
     "inLanguage": "ro",
-    "image": "/og-image.jpg"
+    "image": "https://ciocnim.ro/og-image.jpg",
+    "screenshot": "https://ciocnim.ro/og-image.jpg"
   };
 
   return (

@@ -1,4 +1,15 @@
+import Script from "next/script";
+
 const year = new Date().getFullYear();
+
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasă", "item": "https://ciocnim.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Calendar Paște", "item": "https://ciocnim.ro/calendar" }
+  ]
+};
 
 export const metadata = {
   title: `Când Pică Paștele în ${year}, ${year + 1}, ${year + 2}? – Calendar Ortodox și Catolic`,
@@ -26,5 +37,10 @@ export const metadata = {
 };
 
 export default function CalendarLayout({ children }) {
-  return children;
+  return (
+    <>
+      <Script id="breadcrumb-calendar" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      {children}
+    </>
+  );
 }

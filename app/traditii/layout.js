@@ -1,4 +1,15 @@
+import Script from "next/script";
+
 const year = new Date().getFullYear();
+
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasă", "item": "https://ciocnim.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Tradiții Pascale", "item": "https://ciocnim.ro/traditii" }
+  ]
+};
 
 export const metadata = {
   title: `Tradiția Ciocnitului de Ouă ${year} – Reguli, Semnificații și Obiceiuri de Paște`,
@@ -26,5 +37,10 @@ export const metadata = {
 };
 
 export default function TraditiiLayout({ children }) {
-  return children;
+  return (
+    <>
+      <Script id="breadcrumb-traditii" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      {children}
+    </>
+  );
 }
