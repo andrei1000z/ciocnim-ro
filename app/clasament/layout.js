@@ -34,10 +34,21 @@ const breadcrumb = {
   ]
 };
 
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": `Clasament Național Ciocnit Ouă ${year}`,
+  "description": `Top jucători și regiuni la ciocnit ouă de Paște ${year} pe ciocnim.ro`,
+  "url": "https://ciocnim.ro/clasament",
+  "numberOfItems": 10,
+  "itemListOrder": "https://schema.org/ItemListOrderDescending"
+};
+
 export default function ClasamentLayout({ children }) {
   return (
     <>
       <Script id="breadcrumb-clasament" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <Script id="schema-clasament" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       {children}
     </>
   );

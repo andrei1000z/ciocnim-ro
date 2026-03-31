@@ -22,12 +22,7 @@ const redisClientSingleton = () => {
     }
   });
 
-  client.on('error', (err) => {
-    if (err.message.includes('ECONNREFUSED')) return;
-    console.error('[Neural Redis] Eroare de conexiune:', err.message);
-  });
-
-  client.on('connect', () => {});
+  client.on('error', () => {});
 
   return client;
 };

@@ -10,7 +10,7 @@ import SoundToggle from "./components/SoundToggle";
 
 const outfit = Outfit({ 
   subsets: ["latin", "latin-ext"], 
-  weight: ["100", "300", "400", "500", "700", "900"],
+  weight: ["400", "500", "700", "900"],
   display: "swap",
   variable: "--font-outfit"
 });
@@ -115,6 +115,7 @@ export default function RootLayout({ children }) {
     <html lang="ro" className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
+        <link rel="preconnect" href="https://ws-eu.pusher.com" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -159,20 +160,6 @@ export default function RootLayout({ children }) {
           </div>
         </ClientWrapper>
 
-        {/* Runtime CSS — only rules not covered by globals.css */}
-        <style dangerouslySetInnerHTML={{ __html: `
-          body {
-            max-width: 100%;
-            overflow-x: hidden;
-          }
-          main {
-            animation: page-fade-in 0.3s ease-out forwards;
-          }
-          @keyframes page-fade-in {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-          }
-        `}} />
 
       </body>
     </html>

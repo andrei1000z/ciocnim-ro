@@ -19,7 +19,11 @@ export async function checkRateLimit(ip, actiune) {
   const maxRequests = isWrite ? 10 : 60;
   const windowSec = 60;
   const key = `ratelimit:${ip}:${isWrite ? 'write' : 'read'}`;
-  const current = await redis.incr(key);
-  if (current === 1) await redis.expire(key, windowSec);
+  const luaScript = `
+    local current = redis.call('incr', KEYS[1])
+    if current == 1 then redis.call('expire', KEYS[1], ARGV[1]) end
+    return current
+  `;
+  const current = await redis.eval(luaScript, 1, key, windowSec);
   return current <= maxRequests;
 }

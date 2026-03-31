@@ -189,7 +189,7 @@ function ArenaMaster({ room }) {
   const searchParams = useSearchParams();
   const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef, connectionState } = useGlobalStats();
 
-  const [me] = useState({ skin: userStats.skin || 'red', isGolden: false, hasStar: userStats.wins >= 10 });
+  const [me] = useState({ skin: userStats.skin || 'red', hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
 
   const [isStriking, setIsStriking] = useState(false);
@@ -231,6 +231,14 @@ function ArenaMaster({ room }) {
     } catch {}
   }, []);
 
+  // Preload sounds so they play instantly during battle
+  useEffect(() => {
+    const sounds = ['/spargere.mp3', '/victorie.mp3', '/esec.mp3'];
+    sounds.forEach(src => {
+      try { const a = new Audio(src); a.preload = 'auto'; a.load(); } catch {}
+    });
+  }, []);
+
   // Refs stabile — rezolvă stale closure-uri din Pusher handlers
   const regiuneRef = useRef(userStats.regiune);
   useEffect(() => { regiuneRef.current = userStats.regiune; }, [userStats.regiune]);
@@ -269,7 +277,7 @@ function ArenaMaster({ room }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           roomId: room, actiune: 'join', jucator: nume,
-          skin: me.skin, isGolden: me.isGolden, hasStar: me.hasStar,
+          skin: me.skin, hasStar: me.hasStar,
           hostToken, regiune: regiuneRef.current
         })
       });
@@ -288,6 +296,7 @@ function ArenaMaster({ room }) {
   }, [room, nume, me, updateStats, router]);
 
   // POLLING FALLBACK — discover opponents via Redis when WebSocket is unreliable
+  // Slower interval when Pusher is connected (fallback only), faster when disconnected
   useEffect(() => {
     if (!nume || opponent || isBotMatch) return;
     const pollRoom = async () => {
@@ -301,7 +310,7 @@ function ArenaMaster({ room }) {
           const otherPlayer = data.players.find(p => p !== nume.toUpperCase());
           if (otherPlayer && !opponentRef.current) {
             const sd = data.skinData?.[otherPlayer] || {};
-            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', isGolden: sd.isGolden || false, hasStar: sd.hasStar || false, regiune: sd.regiune || 'România' };
+            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', hasStar: sd.hasStar || false, regiune: sd.regiune || 'România' };
             setOpponent(oppData);
             opponentRef.current = oppData;
             setAtacantName(prev => {
@@ -316,10 +325,11 @@ function ArenaMaster({ room }) {
         }
       } catch {}
     };
-    const interval = setInterval(pollRoom, 3000);
+    const pollInterval = connectionState === 'connected' ? 8000 : 3000;
+    const interval = setInterval(pollRoom, pollInterval);
     pollRoom(); // poll immediately
     return () => clearInterval(interval);
-  }, [nume, opponent, isBotMatch, room, isPrivate, isProvocare]);
+  }, [nume, opponent, isBotMatch, room, isPrivate, isProvocare, connectionState]);
 
   // LOVITURA POLLING — defender discovers battle result when Pusher is unreliable
   useEffect(() => {
@@ -337,9 +347,10 @@ function ArenaMaster({ room }) {
         }
       } catch {}
     };
-    const interval = setInterval(poll, 2000);
+    const pollInterval = connectionState === 'connected' ? 6000 : 2000;
+    const interval = setInterval(poll, pollInterval);
     return () => clearInterval(interval);
-  }, [opponent, rezultat, isBotMatch, atacantName, nume, room]);
+  }, [opponent, rezultat, isBotMatch, atacantName, nume, room, connectionState]);
 
   // REVANSA POLLING — discover opponent's revansa request when Pusher fails
   useEffect(() => {
@@ -365,9 +376,10 @@ function ArenaMaster({ room }) {
       } catch {}
     };
     poll(); // poll immediately for instant sync
-    const interval = setInterval(poll, 1500);
+    const pollInterval = connectionState === 'connected' ? 5000 : 1500;
+    const interval = setInterval(poll, pollInterval);
     return () => clearInterval(interval);
-  }, [rezultat, isBotMatch, opponent, room]);
+  }, [rezultat, isBotMatch, opponent, room, connectionState]);
 
   // LOGICĂ BOT — fallback to bot if no opponent found after timeout
   useEffect(() => {
@@ -519,11 +531,7 @@ function ArenaMaster({ room }) {
     const myName = numeRef.current;
     const celCareALovit = data.atacant || myName;
 
-    if (me.isGolden) amCastigat = true;
-    else if (opponentRef.current?.isGolden) amCastigat = false;
-    else {
-      amCastigat = celCareALovit === myName ? data.castigaCelCareDa : !data.castigaCelCareDa;
-    }
+    amCastigat = celCareALovit === myName ? data.castigaCelCareDa : !data.castigaCelCareDa;
 
     // INCREMENT GLOBAL — called once here, guarded by rezultatRef (prevents double-call)
     incrementGlobalRef.current(amCastigat, (isProvocare && teamIdPreluat) ? teamIdPreluat : null);

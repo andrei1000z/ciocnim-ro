@@ -131,6 +131,8 @@
     min-height: 100vh;
     min-height: 100dvh;
     width: 100vw;
+    max-width: 100%;
+    overflow-x: hidden;
     background-color: var(--t-bg-main);
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
@@ -138,6 +140,15 @@
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  main {
+    animation: page-fade-in 0.3s ease-out forwards;
+  }
+
+  @keyframes page-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
   }
 
   ::selection {

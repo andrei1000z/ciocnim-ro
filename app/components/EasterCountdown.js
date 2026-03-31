@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getOrthodoxEaster, getNextEaster } from "@/app/lib/easterUtils";
+import { getNextEaster } from "@/app/lib/easterUtils";
 
 // Memoized outside component — Easter date doesn't change within a session
 let cachedEaster = null;

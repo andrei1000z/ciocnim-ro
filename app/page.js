@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useRef } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalStats } from "./components/ClientWrapper";
@@ -55,6 +55,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, setUserStats, isHydrated, triggerVibrate, onlineCount, pusherRef: globalPusherRef } = useGlobalStats();
   const prefersReducedMotion = useReducedMotion();
+  const easterYear = useMemo(() => getNextEaster().getFullYear(), []);
 
   const [loadedTeams, setLoadedTeams] = useState([]);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -315,7 +316,7 @@ function HomeContent() {
 
         <div className="flex items-center justify-center gap-3 mt-1.5">
           <div className="h-px w-8 bg-gradient-to-r from-transparent to-red-500/30" />
-          <p className="text-[10px] font-black text-red-500/25 uppercase tracking-[0.5em]">Paști {getNextEaster().getFullYear()}</p>
+          <p className="text-[10px] font-black text-red-500/25 uppercase tracking-[0.5em]">Paști {easterYear}</p>
           <div className="h-px w-8 bg-gradient-to-l from-transparent to-red-500/30" />
         </div>
 

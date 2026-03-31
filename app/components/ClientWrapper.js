@@ -285,8 +285,7 @@ export default function ClientWrapper({ children }) {
       });
       return true;
 
-    } catch (e) {
-      console.error("Eroare la validare nume", e);
+    } catch {
       setToastMsg("Eroare la rețea. Încearcă din nou.");
       return false;
     }
@@ -325,8 +324,7 @@ export default function ClientWrapper({ children }) {
             updateUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
         }
       }
-    } catch (e) {
-      console.error("Eroare la incrementare bilanț:", e);
+    } catch {
       setToastMsg("Conexiune instabilă — ciocnirea s-ar putea să nu se fi salvat.");
     }
   }, [userStats.regiune, nume, updateUserStats]);

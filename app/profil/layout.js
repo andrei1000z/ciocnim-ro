@@ -12,7 +12,6 @@ export const metadata = {
     type: "profile",
   },
   alternates: { canonical: "https://ciocnim.ro/profil" },
-  robots: { index: false, follow: false },
 };
 
 export default function ProfilLayout({ children }) {

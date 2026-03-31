@@ -78,8 +78,8 @@ export async function POST(request) {
         ]);
         const noulTotal = results[0][1];
 
-        pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
-        if (teamId) pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(() => {});
+        pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(e => console.error('[Pusher global]', e?.message));
+        if (teamId) pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(e => console.error('[Pusher team]', e?.message));
 
         if (safeName && currentStats) {
           const updates = esteCastigator
@@ -89,7 +89,7 @@ export async function POST(request) {
           const newStats = esteCastigator
             ? { ...currentStats, wins: currentStats.wins + 1, currentStreak: currentStats.currentStreak + 1, ...(teamId ? { teamWins: (currentStats.teamWins || 0) + 1 } : {}) }
             : { ...currentStats, losses: currentStats.losses + 1, currentStreak: 0 };
-          checkAndAwardAchievements(safeName, newStats, teamId).catch(() => {});
+          checkAndAwardAchievements(safeName, newStats, teamId).catch(e => console.error('[Achievements]', e?.message));
         }
 
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
@@ -132,7 +132,7 @@ export async function POST(request) {
             serverIsHost = members.length <= 1 || members[0] === cleanName;
           }
         }
-        pusher.trigger(`arena-v22-${roomId}`, 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(() => {});
+        pusher.trigger(`arena-v22-${roomId}`, 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(e => console.error('[Pusher join]', e?.message));
         return NextResponse.json({ success: true, isHost: serverIsHost });
       }
 
@@ -171,8 +171,8 @@ export async function POST(request) {
         if (!jucator || !atacant || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
         const castigaCelCareDa = Math.random() < 0.5;
         const lovituraData = { jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now() };
-        redis.setex(`room:${roomId}:lovitura`, 120, JSON.stringify(lovituraData)).catch(() => {});
-        pusher.trigger(`arena-v22-${roomId}`, 'lovitura', lovituraData).catch(() => {});
+        redis.setex(`room:${roomId}:lovitura`, 120, JSON.stringify(lovituraData)).catch(e => console.error('[Redis lovitura]', e?.message));
+        pusher.trigger(`arena-v22-${roomId}`, 'lovitura', lovituraData).catch(e => console.error('[Pusher lovitura]', e?.message));
         return NextResponse.json({ success: true, castigaCelCareDa });
       }
 
@@ -320,7 +320,7 @@ export async function POST(request) {
           }
         }
         await pipeline.exec();
-        getClasamentJucatori().then(top => pusher.trigger('global', 'update-complet', { topJucatori: top })).catch(() => {});
+        getClasamentJucatori().then(top => pusher.trigger('global', 'update-complet', { topJucatori: top })).catch(e => console.error('[Pusher rename]', e?.message));
         return NextResponse.json({ success: true });
       }
 
@@ -405,7 +405,7 @@ export async function POST(request) {
         if (!duelRl) return NextResponse.json({ success: false, error: "Așteaptă puțin între provocări." }, { status: 429 });
         pusher.trigger(`user-notif-${oponentNume.toUpperCase()}`, 'duel-request', {
           deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
-        }).catch(() => {});
+        }).catch(e => console.error('[Pusher duel]', e?.message));
         return NextResponse.json({ success: true });
       }
 
@@ -504,7 +504,7 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: "Acțiune necunoscută" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API Error]:", error);
+    console.error("[API Error]:", error?.message, error?.stack?.split('\n')[1]?.trim());
     return NextResponse.json({ success: false, error: "Eroare internă" }, { status: 500 });
   }
 }
