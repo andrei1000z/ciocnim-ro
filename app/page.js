@@ -290,31 +290,22 @@ function HomeContent() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.96 }}
-          onClick={handleArena}
-          disabled={isJoiningArena}
+          onClick={() => {
+            if (!nume || nume.length < 3) { handleArena(); return; }
+            triggerVibrate(); setIsPlayModalOpen(true);
+          }}
           className="w-full py-5 md:py-6 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-2xl border border-red-600 shadow-2xl shadow-red-900/40 transition-all disabled:opacity-60 flex items-center justify-center gap-3 active:scale-[0.97]"
         >
-          {isJoiningArena ? (
-            <>
-              <div className="w-6 h-6 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
-              <span className="text-lg">Se caută adversar...</span>
-            </>
-          ) : (
-            <>
-              <span className="text-3xl">🥚</span>
-              CIOCNEȘTE ACUM!
-            </>
-          )}
+          <span className="text-3xl">🥚</span>
+          CIOCNEȘTE CU UN PRIETEN!
         </motion.button>
         <div className="flex items-center justify-center gap-4 text-xs font-bold">
           <button
-            onClick={() => {
-              if (!nume || nume.length < 3) { handleArena(); return; }
-              triggerVibrate(); setIsPlayModalOpen(true);
-            }}
+            onClick={handleArena}
+            disabled={isJoiningArena}
             className="text-red-400/70 hover:text-red-400 transition-colors"
           >
-            Joacă cu un prieten →
+            Joacă cu un român →
           </button>
           <span className="text-faint">|</span>
           <button
@@ -399,10 +390,10 @@ function HomeContent() {
           href={`https://wa.me/?text=${encodeURIComponent("Hai la ciocnit ouă de Paște! 🥚⚔️\nhttps://ciocnim.ro")}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-5 py-4 rounded-2xl bg-green-700 hover:bg-green-600 text-white transition-all active:scale-[0.98] flex items-center justify-center shadow-lg"
+          className="px-4 py-3 rounded-2xl bg-green-700 hover:bg-green-600 text-white transition-all active:scale-[0.98] flex items-center justify-center shadow-lg"
           aria-label="Trimite pe WhatsApp"
         >
-          <span className="text-lg">💬</span>
+          <img src="/whatsapp.webp" alt="WhatsApp" className="w-8 h-8" />
         </a>
       </motion.div>
 
@@ -420,6 +411,36 @@ function HomeContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ═══ NAVIGARE — Butoane frumoase ═══ */}
+      <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
+        <SectionLabel>Descoperă</SectionLabel>
+        <div className="flex gap-2 justify-center flex-wrap">
+          {[
+            { href: "/traditii", icon: "📖", text: "Tradiții" },
+            { href: "/retete", icon: "🍳", text: "Rețete" },
+            { href: "/urari", icon: "🕊️", text: "Urări" },
+            { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
+            { href: "/calendar", icon: "📅", text: "Calendar" },
+            { href: "/ghid", icon: "🎮", text: "Ghid" },
+            { href: "/clasament", icon: "🏆", text: "Clasament" },
+          ].map((item) => (
+            <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 p-3 rounded-2xl border border-edge bg-card hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[64px]">
+              <span className="text-xl">{item.icon}</span>
+              <span className="font-bold text-xs text-dim group-hover:text-white transition-colors text-center">{item.text}</span>
+            </Link>
+          ))}
+        </div>
+        <div className="flex items-center justify-center gap-3 mt-4 text-xs font-medium flex-wrap">
+          <Link href="/terms" className="text-muted hover:text-red-400 transition-colors">Termeni și Condiții</Link>
+          <span className="text-faint">·</span>
+          <Link href="/privacy" className="text-muted hover:text-red-400 transition-colors">Confidențialitate</Link>
+          <span className="text-faint">·</span>
+          <Link href="/despre" className="text-muted hover:text-red-400 transition-colors">Despre</Link>
+          <span className="text-faint">·</span>
+          <a href="https://buymeacoffee.com/ciocnim" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 transition-colors font-bold">☕ Donează</a>
+        </div>
+      </motion.div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
 

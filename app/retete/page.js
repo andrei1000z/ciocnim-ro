@@ -111,16 +111,18 @@ const formatIngredient = (ing, multiplier) => {
 };
 
 // ─── Interactive Ingredient List ────────────────────────────────────────────
-const IngredientList = ({ ingredients, multiplier, title, healthyMode = false, healthySwaps = [] }) => {
+const IngredientList = ({ ingredients, multiplier, title, healthyMode = false, healthySwaps = [], getSwappedName }) => {
   if (!ingredients || ingredients.length === 0) return null;
   return (
     <div className="space-y-0.5">
       {title && <h4 className="text-sm font-bold uppercase tracking-widest text-red-400 mb-3">{title}</h4>}
       {ingredients.map((ing, i) => {
         const { qtyText, nameText, isDescriptive } = formatIngredient(ing, multiplier);
-        const swap = healthyMode
+        const healthySwap = healthyMode
           ? healthySwaps.find(s => nameText.toLowerCase().includes(s.match.toLowerCase()))
           : null;
+        const modeSwap = getSwappedName ? getSwappedName(nameText) : null;
+        const swap = modeSwap ? { swap: modeSwap } : healthySwap;
         return (
           <div key={i} className={`flex items-baseline gap-2 py-2 border-b border-edge last:border-0 px-2 -mx-2 rounded-lg transition-colors ${swap ? 'bg-green-900/10' : 'hover:bg-card'}`}>
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 relative top-[-1px] ${swap ? 'bg-green-500/60' : 'bg-red-500/40'}`} />
@@ -281,6 +283,8 @@ const RecipeDetail = ({ recipe, onBack }) => {
   const [activeVariant, setActiveVariant] = useState(0);
   const [kitchenMode, setKitchenMode] = useState(false);
   const [healthyMode, setHealthyMode] = useState(false);
+  const [rapidMode, setRapidMode] = useState(false);
+  const [ieftinMode, setIeftinMode] = useState(false);
   const [copiedFeedback, setCopiedFeedback] = useState("");
   const targetServings = Math.max(1, parseInt(servingsInput) || recipe.servings);
   const multiplier = targetServings / recipe.servings;
@@ -290,12 +294,31 @@ const RecipeDetail = ({ recipe, onBack }) => {
   const isDefaultVariant = !variant || activeVariant === 0;
   const currentIngredients = (!isDefaultVariant && variant?.baseIngredients) ? variant.baseIngredients : recipe.baseIngredients;
   const currentFilling = (!isDefaultVariant && variant?.filling) ? variant.filling : recipe.filling;
-  const currentSteps = recipe.steps.map((step, idx) => {
-    if (!isDefaultVariant && variant?.stepsOverride?.[idx]) {
+
+  // Rapid/Ieftin mode: override steps if available
+  const baseSteps = (rapidMode && recipe.rapidMode?.stepsOverride)
+    ? recipe.rapidMode.stepsOverride
+    : recipe.steps;
+  const currentSteps = baseSteps.map((step, idx) => {
+    if (!rapidMode && !isDefaultVariant && variant?.stepsOverride?.[idx]) {
       return variant.stepsOverride[idx];
     }
     return step;
   });
+
+  // Apply ingredient swaps for rapidMode or ieftinMode
+  const getSwappedName = (nameText) => {
+    const swaps = [
+      ...(rapidMode && recipe.rapidMode?.swaps ? recipe.rapidMode.swaps : []),
+      ...(ieftinMode && recipe.ieftinMode?.swaps ? recipe.ieftinMode.swaps : []),
+    ];
+    for (const s of swaps) {
+      if (nameText.toLowerCase().includes(s.match.toLowerCase())) {
+        return s.swap;
+      }
+    }
+    return null;
+  };
 
   const handleCopyIngredients = () => {
     const all = [...currentIngredients, ...(currentFilling || [])];
@@ -410,6 +433,30 @@ const RecipeDetail = ({ recipe, onBack }) => {
           >
             🥗 {healthyMode ? "Sănătos ON" : "Sănătos"}
           </button>
+          {recipe.rapidMode && (
+            <button
+              onClick={() => setRapidMode(m => !m)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
+                rapidMode
+                  ? "bg-blue-900/25 text-blue-300 border-blue-700/40 shadow-lg shadow-blue-900/15"
+                  : "bg-card text-dim border-edge hover:border-blue-700/30 hover:text-blue-400"
+              }`}
+            >
+              ⚡ {rapidMode ? "Rapid ON" : "Rapid"}
+            </button>
+          )}
+          {recipe.ieftinMode && (
+            <button
+              onClick={() => setIeftinMode(m => !m)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
+                ieftinMode
+                  ? "bg-amber-900/25 text-amber-300 border-amber-700/40 shadow-lg shadow-amber-900/15"
+                  : "bg-card text-dim border-edge hover:border-amber-700/30 hover:text-amber-400"
+              }`}
+            >
+              💰 {ieftinMode ? "Ieftin ON" : "Ieftin"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -426,6 +473,24 @@ const RecipeDetail = ({ recipe, onBack }) => {
         <div className="rounded-xl bg-green-900/15 border border-green-700/25 px-4 py-3 flex items-start gap-2.5">
           <span className="text-lg flex-shrink-0">✅</span>
           <p className="text-xs text-green-400/70 leading-relaxed">{recipe.healthyNote}</p>
+        </div>
+      )}
+      {rapidMode && recipe.rapidMode && (
+        <div className="rounded-xl bg-blue-900/15 border border-blue-700/25 px-4 py-3 flex items-start gap-2.5">
+          <span className="text-lg flex-shrink-0">⚡</span>
+          <div>
+            <p className="text-sm font-bold text-blue-300 mb-1">Mod Rapid activ — {recipe.rapidMode.totalLabel}</p>
+            <p className="text-xs text-blue-400/70 leading-relaxed">{recipe.rapidMode.note}</p>
+          </div>
+        </div>
+      )}
+      {ieftinMode && recipe.ieftinMode && (
+        <div className="rounded-xl bg-amber-900/15 border border-amber-700/25 px-4 py-3 flex items-start gap-2.5">
+          <span className="text-lg flex-shrink-0">💰</span>
+          <div>
+            <p className="text-sm font-bold text-amber-300 mb-1">Mod Ieftin activ — ingrediente din casă</p>
+            <p className="text-xs text-amber-400/70 leading-relaxed">{recipe.ieftinMode.note}</p>
+          </div>
         </div>
       )}
 
@@ -518,10 +583,10 @@ const RecipeDetail = ({ recipe, onBack }) => {
           </p>
         )}
 
-        <IngredientList ingredients={currentIngredients} multiplier={multiplier} healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} />
+        <IngredientList ingredients={currentIngredients} multiplier={multiplier} healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} getSwappedName={getSwappedName} />
         {currentFilling && currentFilling.length > 0 && (
           <div className="mt-6 pt-6 border-t border-edge">
-            <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} />
+            <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} getSwappedName={getSwappedName} />
           </div>
         )}
       </div>
