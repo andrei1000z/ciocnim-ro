@@ -82,15 +82,15 @@ export default function ProfilPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-card border border-green-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-green-400">{wins}</p>
-            <p className="text-[10px] font-bold text-green-500 uppercase tracking-wide mt-1">Victorii</p>
+            <p className="text-xs font-bold text-green-500 uppercase tracking-wide mt-1">Victorii</p>
           </div>
           <div className="bg-card border border-red-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-red-400">{losses}</p>
-            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide mt-1">Înfrângeri</p>
+            <p className="text-xs font-bold text-red-500 uppercase tracking-wide mt-1">Înfrângeri</p>
           </div>
           <div className="bg-card border border-amber-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-amber-400">{winRate}%</p>
-            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wide mt-1">Win Rate</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-wide mt-1">Win Rate</p>
           </div>
         </div>
 
@@ -142,8 +142,8 @@ export default function ProfilPage() {
                       <span className={`text-2xl ${earned ? '' : 'grayscale'}`}>{ach.icon}</span>
                       <div className="flex-1 min-w-0">
                         <p className={`font-bold text-sm ${earned ? 'text-heading' : 'text-muted'}`}>{ach.name}</p>
-                        <p className="text-[11px] text-muted mt-0.5">{ach.desc}</p>
-                        <span className={`text-[9px] font-black uppercase tracking-wider ${RARITY_TEXT[ach.rarity]}`}>
+                        <p className="text-xs text-muted mt-0.5">{ach.desc}</p>
+                        <span className={`text-xs font-black uppercase tracking-wider ${RARITY_TEXT[ach.rarity]}`}>
                           {RARITY_LABELS[ach.rarity]}
                         </span>
                       </div>

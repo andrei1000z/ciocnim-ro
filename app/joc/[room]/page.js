@@ -697,7 +697,7 @@ function ArenaMaster({ room }) {
   const shareRoom = () => {
     const code = room.replace('privat-', '');
     const url = `${window.location.origin}/joc/${room}`;
-    const text = `Hai la o ciocneală de ouă! Codul camerei: ${code} sau intră direct pe`;
+    const text = `Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici:`;
     if (navigator.share) {
       navigator.share({ title: "Ciocnim.ro - Hai la duel!", text, url }).then(() => {}).catch(() => {
         // Fallback if share was dismissed
@@ -715,7 +715,7 @@ function ArenaMaster({ room }) {
   const shareWhatsApp = () => {
     const code = room.replace('privat-', '');
     const url = `${window.location.origin}/joc/${room}`;
-    const text = `Hai la o ciocneală de ouă pe Ciocnim.ro! 🥚⚔️ Codul camerei: ${code} sau intră direct: ${url}`;
+    const text = `Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici: ${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -729,11 +729,11 @@ function ArenaMaster({ room }) {
           <div className="flex items-center gap-2 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
             <button onClick={copyRoomCode} className="group relative bg-elevated backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/30 shadow-lg shadow-black/30 hover:bg-elevated-hover hover:border-red-700/50 transition-all active:scale-95">
               <div className="flex items-center gap-2 md:gap-3 relative z-10">
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-red-500/60 group-hover:text-accent-red transition-colors hidden sm:inline">Cod Cameră: </span>
+                <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-red-500/60 group-hover:text-accent-red transition-colors hidden sm:inline">Cod Cameră: </span>
                 <span className="text-red-500 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]">{room.replace('privat-', '')}</span>
-                <span className="bg-red-900/30 p-1.5 md:p-2 rounded-xl text-[10px] md:text-xs ml-1 md:ml-2 group-hover:bg-red-900/40 transition-all border border-red-900/30">{copied ? '✅' : '📋'}</span>
+                <span className="bg-red-900/30 p-1.5 md:p-2 rounded-xl text-xs md:text-xs ml-1 md:ml-2 group-hover:bg-red-900/40 transition-all border border-red-900/30">{copied ? '✅' : '📋'}</span>
               </div>
-              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] font-black text-accent-green tracking-widest">COPIAT!</span>}
+              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-xs md:text-xs font-black text-accent-green tracking-widest">COPIAT!</span>}
             </button>
             <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite prietenului" aria-label="Distribuie link-ul camerei">
               <span className="text-base md:text-lg">📲</span>
@@ -751,15 +751,30 @@ function ArenaMaster({ room }) {
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
             </span>
-            <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] ${connectionState === 'connected' ? 'text-accent-green' : connectionState === 'connecting' ? 'text-yellow-400' : 'text-accent-red'}`}>
+            <span className={`text-xs md:text-xs font-black uppercase tracking-[0.2em] ${connectionState === 'connected' ? 'text-accent-green' : connectionState === 'connecting' ? 'text-yellow-400' : 'text-accent-red'}`}>
               {connectionState === 'connected' ? 'LIVE' : connectionState === 'connecting' ? 'SE CONECTEAZĂ...' : 'DECONECTAT'}
             </span>
-            <span className="text-[11px] md:text-xs font-black text-heading tabular-nums">{onlineCount || 1}</span>
-            <span className="text-[9px] md:text-[10px] font-semibold text-faint">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+            <span className="text-xs md:text-xs font-black text-heading tabular-nums">{onlineCount || 1}</span>
+            <span className="text-xs md:text-xs font-semibold text-faint">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
             <button onClick={() => { const next = toggleSound(); setIsMuted(!next); }} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
-          <span className="text-[9px] md:text-[10px] font-bold text-muted tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
+          <span className="text-xs md:text-xs font-bold text-muted tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
         </div>
+
+        {/* TURN INDICATOR — clar pentru toți */}
+        {opponent && !rezultat && !collisionAnim && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-3 px-5 py-2.5 rounded-2xl font-black text-center text-base flex-shrink-0 ${
+              canStrike
+                ? 'bg-green-900/30 border border-green-700/30 text-green-400 animate-pulse'
+                : 'bg-amber-900/20 border border-amber-700/20 text-amber-400'
+            }`}
+          >
+            {canStrike ? "E RÂNDUL TĂU! Apasă butonul de jos!" : "Așteaptă... adversarul lovește!"}
+          </motion.div>
+        )}
 
         {/* Zona de Duel */}
         <div className="flex justify-center items-center w-full gap-2 sm:gap-6 md:gap-16 mb-6 relative z-10 flex-shrink-0">
@@ -772,7 +787,7 @@ function ArenaMaster({ room }) {
           >
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
             <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/30 border-l-2 border-l-green-500/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
-              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
+              <span className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
               <span className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{nume}</span>
             </div>
           </motion.div>
@@ -814,13 +829,17 @@ function ArenaMaster({ room }) {
               <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 w-full">
                 <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
                 <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl border border-red-900/30 border-r-2 border-r-red-600/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
-                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
+                  <span className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
                   <span className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{opponent.jucator}</span>
                 </div>
               </motion.div>
             ) : (
-              <div className="w-full aspect-[1/1.35] bg-card rounded-[2rem] border border-dashed border-red-900/30 animate-pulse flex items-center justify-center text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-red-500/40 text-center px-2 backdrop-blur-sm relative overflow-hidden">
-                <span className="relative z-10">Așteptăm...</span>
+              <div className="w-full aspect-[1/1.35] bg-card rounded-[2rem] border border-dashed border-red-900/30 flex flex-col items-center justify-center text-center px-3 backdrop-blur-sm relative overflow-hidden gap-2">
+                <span className="text-3xl animate-bounce">🥚</span>
+                <span className="text-xs font-bold text-red-400/60">
+                  {isPrivate ? "Trimite codul!" : "Se caută..."}
+                </span>
+                <span className="text-xs font-medium text-muted">Câteva secunde</span>
               </div>
             )}
           </motion.div>
@@ -834,18 +853,18 @@ function ArenaMaster({ room }) {
               whileTap={canStrike ? { scale: 0.94 } : {}}
               animate={canStrike ? { scale: [1, 1.03, 1] } : {}}
               transition={{ repeat: Infinity, repeatDelay: 0.4, duration: 1.6, ease: "easeInOut" }}
-              className={`w-full py-5 md:py-6 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
+              className={`w-full py-6 md:py-7 rounded-[2rem] transition-all shadow-lg overflow-hidden relative ${
                 canStrike
                   ? 'bg-red-700 text-white shadow-[0_20px_40px_rgba(220,38,38,0.3)] border border-red-500/40 hover:bg-red-600 cursor-pointer pointer-events-auto'
                   : 'bg-card text-faint border border-red-900/20 backdrop-blur-md cursor-not-allowed pointer-events-none'
               }`}
             >
               <span className="relative z-10 text-center flex flex-col items-center justify-center gap-1">
-                <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base">
+                <span className="font-black uppercase tracking-[0.3em] text-base md:text-lg">
                   {canStrike ? "💥 CIOCNEȘTE OUL!" : "🛡️ APĂRĂ OUL!"}
                 </span>
                 {canStrike && (
-                  <span className="text-[9px] md:text-[10px] opacity-70 normal-case tracking-widest font-bold text-red-200 block">
+                  <span className="text-xs opacity-70 normal-case tracking-widest font-bold text-red-200 block">
                     Apasă sau mișcă telefonul
                   </span>
                 )}
@@ -869,7 +888,7 @@ function ArenaMaster({ room }) {
           <div className="h-28 md:h-36 overflow-y-auto flex flex-col-reverse gap-2 mb-3 custom-scrollbar pr-2 relative z-10" ref={chatContainerRef}>
             {messages.map((m, i) => (
               <div key={i} className={`flex flex-col ${m.autor === nume ? 'items-end' : 'items-start'}`}>
-                <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.3em] text-amber-500/50 px-2 mb-1">{m.autor}</span>
+                <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-amber-500/50 px-2 mb-1">{m.autor}</span>
                 <div className={`px-3 py-2 md:px-4 md:py-2.5 rounded-2xl text-xs md:text-sm font-bold border ${m.autor === nume ? 'bg-red-700 text-white rounded-tr-sm border-red-600/30' : 'bg-elevated text-dim rounded-tl-sm border-edge'}`}>
                    {m.text}
                 </div>
@@ -878,7 +897,7 @@ function ArenaMaster({ room }) {
             {messages.length === 0 && (
                 <div className="text-center w-full h-full flex flex-col justify-center items-center opacity-40 mt-2 pointer-events-none">
                     <span className="text-xl md:text-2xl mb-1 filter sepia-[0.3]">💬</span>
-                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/70">Liniște la masă...</span>
+                    <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-amber-500/70">Liniște la masă...</span>
                 </div>
             )}
           </div>
@@ -933,7 +952,7 @@ function ArenaMaster({ room }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.4 }}
                 >
-                  <p className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1 ${rezultat.win ? 'text-green-400/70' : 'text-red-400/70'}`}>
+                  <p className={`text-xs font-black uppercase tracking-[0.4em] mb-1 ${rezultat.win ? 'text-green-400/70' : 'text-red-400/70'}`}>
                     {rezultat.win ? 'Hristos a Înviat!' : 'Adevărat a Înviat!'}
                   </p>
                   <h2 className={`text-3xl md:text-4xl font-black italic tracking-tight ${rezultat.win ? 'text-accent-green' : 'text-accent-red'}`}>
@@ -941,9 +960,9 @@ function ArenaMaster({ room }) {
                   </h2>
                   {/* Scor */}
                   <div className="flex items-center justify-center gap-3 mt-3">
-                    <span className="text-[10px] font-black text-green-500/70 uppercase tracking-widest">{userStats.wins || 0} victorii</span>
+                    <span className="text-xs font-black text-green-500/70 uppercase tracking-widest">{userStats.wins || 0} victorii</span>
                     <span className="text-white/20">·</span>
-                    <span className="text-[10px] font-black text-red-500/50 uppercase tracking-widest">{userStats.losses || 0} înfrângeri</span>
+                    <span className="text-xs font-black text-red-500/50 uppercase tracking-widest">{userStats.losses || 0} înfrângeri</span>
                   </div>
                 </motion.div>
               </div>
@@ -956,7 +975,7 @@ function ArenaMaster({ room }) {
                 className="mx-5 mb-5 bg-card border border-edge rounded-2xl p-4 relative"
               >
                 <span className="absolute top-1 left-3 text-3xl text-amber-500/10 font-serif leading-none">&ldquo;</span>
-                <p className="text-[11px] md:text-sm font-medium text-amber-400/70 italic leading-relaxed px-2 mt-1">
+                <p className="text-xs md:text-sm font-medium text-amber-400/70 italic leading-relaxed px-2 mt-1">
                   {citatFinal}
                 </p>
               </motion.div>

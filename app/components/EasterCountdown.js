@@ -60,7 +60,7 @@ export default function EasterCountdown() {
 
   return (
     <div className="rounded-2xl border border-red-900/20 bg-card p-4 shadow-sm">
-      <p className="text-[10px] font-bold text-red-500/60 uppercase tracking-[0.3em] text-center mb-3">
+      <p className="text-xs font-bold text-red-500/60 uppercase tracking-[0.3em] text-center mb-3">
         Până la Paștele Ortodox {state.year}
       </p>
       <div className="grid grid-cols-4 gap-2">
@@ -71,7 +71,7 @@ export default function EasterCountdown() {
                 {String(u.val).padStart(2, "0")}
               </span>
             </div>
-            <span className="text-[9px] font-bold text-muted uppercase tracking-wider mt-1 block">{u.label}</span>
+            <span className="text-xs font-bold text-muted uppercase tracking-wider mt-1 block">{u.label}</span>
           </div>
         ))}
       </div>

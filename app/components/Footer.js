@@ -7,7 +7,7 @@ export default function Footer() {
         {/* Content links grid — helps crawlers discover all pages */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           <div className="space-y-2">
-            <p className="font-black text-red-500/50 uppercase tracking-widest text-[10px]">Joc</p>
+            <p className="font-black text-red-500/50 uppercase tracking-widest text-xs">Joc</p>
             <nav className="flex flex-col gap-1.5" aria-label="Joc">
               <Link href="/" className="text-muted hover:text-red-400 transition-colors">Joacă Acum</Link>
               <Link href="/ghid" className="text-muted hover:text-red-400 transition-colors">Ghid de Joc</Link>
@@ -15,7 +15,7 @@ export default function Footer() {
             </nav>
           </div>
           <div className="space-y-2">
-            <p className="font-black text-red-500/50 uppercase tracking-widest text-[10px]">Tradiții</p>
+            <p className="font-black text-red-500/50 uppercase tracking-widest text-xs">Tradiții</p>
             <nav className="flex flex-col gap-1.5" aria-label="Traditii">
               <Link href="/traditii" className="text-muted hover:text-red-400 transition-colors">Tradiții Pascale</Link>
               <Link href="/urari" className="text-muted hover:text-red-400 transition-colors">Urări de Paște</Link>
@@ -23,14 +23,14 @@ export default function Footer() {
             </nav>
           </div>
           <div className="space-y-2">
-            <p className="font-black text-red-500/50 uppercase tracking-widest text-[10px]">Rețete</p>
+            <p className="font-black text-red-500/50 uppercase tracking-widest text-xs">Rețete</p>
             <nav className="flex flex-col gap-1.5" aria-label="Retete">
               <Link href="/retete" className="text-muted hover:text-red-400 transition-colors">Rețete de Paște</Link>
               <Link href="/vopsit-natural" className="text-muted hover:text-red-400 transition-colors">Vopsit Natural Ouă</Link>
             </nav>
           </div>
           <div className="space-y-2">
-            <p className="font-black text-red-500/50 uppercase tracking-widest text-[10px]">Info</p>
+            <p className="font-black text-red-500/50 uppercase tracking-widest text-xs">Info</p>
             <nav className="flex flex-col gap-1.5" aria-label="Info">
               <Link href="/despre" className="text-muted hover:text-red-400 transition-colors">Despre Noi</Link>
               <Link href="/privacy" className="text-muted hover:text-red-400 transition-colors">Confidențialitate</Link>

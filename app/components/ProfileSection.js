@@ -61,7 +61,7 @@ export const ColorSelector = ({ selected, onSelect }) => {
   ];
   return (
     <div className="space-y-2">
-      <label className="block text-[10px] font-bold text-dim uppercase tracking-wide">Culoare Ou</label>
+      <label className="block text-xs font-bold text-dim uppercase tracking-wide">Culoare Ou</label>
       <div className="grid grid-cols-4 gap-1.5">
         {culori.map(c => (
           <motion.button
@@ -74,7 +74,7 @@ export const ColorSelector = ({ selected, onSelect }) => {
             <div className="w-8 h-10">
               <MiniEgg grad1={c.grad1} grad2={c.grad2} patternType={c.patternType} patternColor={c.patternColor} />
             </div>
-            <span className="text-[8px] font-bold text-dim mt-0.5">{c.label}</span>
+            <span className="text-xs font-bold text-dim mt-0.5">{c.label}</span>
             {selected === c.id && (
               <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-900 rounded-full flex items-center justify-center text-white text-[9px] border border-white/30">✓</motion.span>
             )}
@@ -90,7 +90,7 @@ export const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="space-y-2">
-      <label className="block text-[10px] font-bold text-dim uppercase tracking-wide">Regiunea Ta</label>
+      <label className="block text-xs font-bold text-dim uppercase tracking-wide">Regiunea Ta</label>
       <div className="relative">
         <button
           onClick={() => setIsOpen(v => !v)}

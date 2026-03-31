@@ -72,7 +72,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                   ))}
                   {myName && (myRank !== null || targetRank !== null) && (
                     <div className="mt-3 pt-3 border-t border-red-900/8">
-                      <p className="text-center text-[11px] font-semibold text-red-400">
+                      <p className="text-center text-xs font-semibold text-red-400">
                         {myRank === 1
                           ? "🎉 Ești Campion Național!"
                           : myRank !== null
