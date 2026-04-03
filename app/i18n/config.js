@@ -1,4 +1,4 @@
-export const locales = ['ro', 'bg'];
+export const locales = ['ro', 'bg', 'el'];
 export const defaultLocale = 'ro';
 
 export const localeConfig = {
@@ -43,6 +43,26 @@ export const localeConfig = {
     currency: 'BGN',
     gameName: '\u0422\u0440\u043E\u0441\u043D\u0438',
     shareText: '\u0425\u0430\u0439\u0434\u0435 \u043D\u0430 \u0431\u043E\u0440\u0431\u0430 \u0441 \u044F\u0439\u0446\u0430 \u0437\u0430 \u0412\u0435\u043B\u0438\u043A\u0434\u0435\u043D! \u{1F95A}\u2694\uFE0F',
+  },
+  el: {
+    name: 'Ελληνικά',
+    flag: '🇬🇷',
+    easterType: 'orthodox',
+    defaultEggSkin: 'red',
+    greetingWin: 'Χριστός Ανέστη!',
+    greetingLose: 'Αληθώς Ανέστη!',
+    defaultRegion: 'Αττική',
+    regions: [
+      'Αττική', 'Θεσσαλονίκη', 'Κρήτη', 'Πελοπόννησος', 'Θεσσαλία',
+      'Μακεδονία', 'Ήπειρος', 'Θράκη', 'Στερεά Ελλάδα', 'Νησιά Αιγαίου',
+      'Ιόνια Νησιά', 'Δωδεκάνησα', 'Κυκλάδες'
+    ],
+    leaderboardKey: 'EL',
+    domain: 'trosc.gg/el',
+    ogLocale: 'el_GR',
+    currency: 'EUR',
+    gameName: 'Τσούγκρισμα',
+    shareText: 'Πάμε να τσουγκρίσουμε αβγά! 🥚⚔️',
   },
 };
 

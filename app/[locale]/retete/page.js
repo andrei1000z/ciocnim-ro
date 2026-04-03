@@ -3,14 +3,25 @@
 import { useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { safeLS, safeCopy } from "@/app/lib/utils";
-import { retete } from "./data";
+import { retete as reteteRo } from "./data";
+import { retete as reteteBg } from "./data-bg";
+import { retete as reteteEl } from "./data-el";
+import LocaleLink from "../../components/LocaleLink";
+import { useT } from "../../i18n/useT";
+import { useLocaleConfig } from "../../components/DictionaryProvider";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
 
+// ─── Difficulty mapping per locale ─────────────────────────────────────────
+const difficultyMap = {
+  ro: { easy: 'Ușor', medium: 'Mediu', advanced: 'Avansat' },
+  bg: { easy: 'Лесно', medium: 'Средно', advanced: 'Напреднало' },
+  el: { easy: 'Εύκολο', medium: 'Μέτριο', advanced: 'Προχωρημένο' },
+};
+
 // ─── Recipe Card (Grid View) ────────────────────────────────────────────────
-const RecipeCard = ({ recipe, onClick, index }) => (
+const RecipeCard = ({ recipe, onClick, index, recipesUI, diff }) => (
   <motion.button
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -19,8 +30,8 @@ const RecipeCard = ({ recipe, onClick, index }) => (
     className="w-full text-left rounded-2xl border border-edge hover:border-red-900/30 transition-all group overflow-hidden shadow-lg shadow-black/20 active:scale-[0.98] relative"
   >
     <div className={`h-1.5 w-full ${
-      recipe.difficulty === "Ușor" ? "bg-gradient-to-r from-green-600 to-green-400"
-        : recipe.difficulty === "Mediu" ? "bg-gradient-to-r from-amber-600 to-yellow-400"
+      recipe.difficulty === diff.easy ? "bg-gradient-to-r from-green-600 to-green-400"
+        : recipe.difficulty === diff.medium ? "bg-gradient-to-r from-amber-600 to-yellow-400"
         : "bg-gradient-to-r from-red-700 to-red-400"
     }`} />
 
@@ -30,9 +41,9 @@ const RecipeCard = ({ recipe, onClick, index }) => (
           {recipe.icon}
         </div>
         <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
-          recipe.difficulty === "Ușor"
+          recipe.difficulty === diff.easy
             ? "bg-green-900/20 text-green-400 border-green-900/30"
-            : recipe.difficulty === "Mediu"
+            : recipe.difficulty === diff.medium
               ? "bg-yellow-900/20 text-yellow-400 border-yellow-900/30"
               : "bg-red-900/20 text-red-400 border-red-900/30"
         }`}>
@@ -53,7 +64,7 @@ const RecipeCard = ({ recipe, onClick, index }) => (
 
       <div className="pt-2 border-t border-edge">
         <span className="text-xs font-bold text-red-400 group-hover:text-red-300 transition-colors flex items-center gap-1">
-          Deschide rețeta <span className="group-hover:translate-x-1 transition-transform">→</span>
+          {recipesUI.openRecipe} <span className="group-hover:translate-x-1 transition-transform">→</span>
         </span>
       </div>
     </div>
@@ -148,7 +159,7 @@ const IngredientList = ({ ingredients, multiplier, title, healthyMode = false, h
 };
 
 // ─── Step-by-Step with Beautiful Design ─────────────────────────────────────
-const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
+const StepByStep = ({ steps, recipeId, tips, kitchenMode = false, recipesUI }) => {
   const storageKey = `c_recipe_${recipeId}`;
   const [checked, setChecked] = useState(() => {
     const saved = safeLS.get(storageKey);
@@ -178,13 +189,13 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
             <h3 className={`font-black text-heading flex items-center gap-2 ${kitchenMode ? "text-3xl md:text-4xl" : "text-lg"}`}>
-              Pași de Preparare
+              {recipesUI.preparationSteps}
             </h3>
             <div className="flex items-center gap-3">
-              <span className={`font-bold text-muted ${kitchenMode ? "text-lg" : "text-xs"}`}>{checked.length}/{steps.length} pași</span>
+              <span className={`font-bold text-muted ${kitchenMode ? "text-lg" : "text-xs"}`}>{checked.length}/{steps.length} {recipesUI.steps}</span>
               {checked.length > 0 && (
                 <button onClick={resetAll} className={`text-muted hover:text-red-400 transition-colors font-bold underline underline-offset-2 ${kitchenMode ? "text-lg" : "text-xs"}`}>
-                  Resetează
+                  {recipesUI.reset}
                 </button>
               )}
             </div>
@@ -193,7 +204,7 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
 
       <p className="text-xs text-muted font-medium flex items-center gap-1.5 -mt-2">
         <span className="inline-flex w-5 h-5 rounded-full border border-edge-strong items-center justify-center text-[10px] text-muted">1</span>
-        Apasă pe un pas pentru a-l bifa ca terminat
+        {recipesUI.tapToCheck}
       </p>
 
       <div className="relative">
@@ -253,15 +264,15 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
           className="text-center py-6 bg-gradient-to-br from-green-900/20 to-amber-900/10 border border-green-900/20 rounded-2xl"
         >
           <p className="text-3xl mb-2">🎉</p>
-          <p className="text-green-400 font-black text-lg">Felicitări! Rețeta este gata!</p>
-          <p className="text-muted text-sm mt-1">Poftă bună și Paște Fericit!</p>
+          <p className="text-green-400 font-black text-lg">{recipesUI.recipeDone}</p>
+          <p className="text-muted text-sm mt-1">{recipesUI.recipeDoneSubtitle}</p>
         </motion.div>
       )}
 
       {tips && tips.length > 0 && (
         <div className="bg-amber-900/10 border border-amber-900/15 rounded-2xl p-5 space-y-3">
           <h4 className="text-sm font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
-            💡 Sfaturi de Bucătar
+            {recipesUI.chefTips}
           </h4>
           <ul className="space-y-2">
             {tips.map((tip, i) => (
@@ -278,7 +289,7 @@ const StepByStep = ({ steps, recipeId, tips, kitchenMode = false }) => {
 };
 
 // ─── Recipe Detail View ─────────────────────────────────────────────────────
-const RecipeDetail = ({ recipe, onBack }) => {
+const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
   const [servingsInput, setServingsInput] = useState(String(recipe.servings));
   const [activeVariant, setActiveVariant] = useState(0);
   const [kitchenMode, setKitchenMode] = useState(false);
@@ -329,27 +340,28 @@ const RecipeDetail = ({ recipe, onBack }) => {
       })
       .join("\n");
 
-    const text = `*Ingrediente pentru ${targetServings} ${recipe.servingsUnit} — ${recipe.name}*\n\n${ingredientsList}`;
+    const text = `*${recipesUI.ingredients} — ${targetServings} ${recipe.servingsUnit} — ${recipe.name}*\n\n${ingredientsList}`;
     safeCopy(text);
-    setCopiedFeedback("✅ Copiat!");
+    setCopiedFeedback(recipesUI.copied);
     setTimeout(() => setCopiedFeedback(""), 2000);
   };
 
   const handleShareRecipe = () => {
-    const text = `${recipe.name}\n${recipe.description}\nhttps://ciocnim.ro/retete?r=${recipe.id}`;
+    const url = `https://trosc.gg/${locale}/retete?r=${recipe.id}`;
+    const text = `${recipe.name}\n${recipe.description}\n${url}`;
     if (navigator.share) {
       navigator.share({
         title: recipe.name,
         text: recipe.description,
-        url: `https://ciocnim.ro/retete?r=${recipe.id}`,
+        url,
       }).catch(() => {
         safeCopy(text);
-        setCopiedFeedback("Linkul rețetei a fost copiat!");
+        setCopiedFeedback(recipesUI.copied);
         setTimeout(() => setCopiedFeedback(""), 2000);
       });
     } else {
       safeCopy(text);
-      setCopiedFeedback("Linkul rețetei a fost copiat!");
+      setCopiedFeedback(recipesUI.copied);
       setTimeout(() => setCopiedFeedback(""), 2000);
     }
   };
@@ -379,13 +391,13 @@ const RecipeDetail = ({ recipe, onBack }) => {
           onClick={onBack}
           className="flex items-center gap-2 text-dim hover:text-red-400 transition-colors font-bold text-sm active:scale-95"
         >
-          ← Înapoi la rețete
+          {recipesUI.backToRecipes}
         </button>
         <button
           onClick={handleShareRecipe}
           className="flex items-center gap-2 text-dim hover:text-amber-400 transition-colors font-bold text-sm active:scale-95"
         >
-          📲 Distribuie rețeta
+          {recipesUI.shareRecipe}
         </button>
       </div>
 
@@ -399,9 +411,9 @@ const RecipeDetail = ({ recipe, onBack }) => {
                 {recipe.icon}
               </div>
               <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-                recipe.difficulty === "Ușor"
+                recipe.difficulty === diff.easy
                   ? "bg-green-900/20 text-green-400 border-green-900/30"
-                  : recipe.difficulty === "Mediu"
+                  : recipe.difficulty === diff.medium
                     ? "bg-yellow-900/20 text-yellow-400 border-yellow-900/30"
                     : "bg-red-900/20 text-red-400 border-red-900/30"
               }`}>
@@ -421,7 +433,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
                 : "bg-elevated text-dim border-edge-strong hover:bg-elevated-hover hover:text-body"
             }`}
           >
-            {kitchenMode ? "👨‍🍳" : "👁️"} Bucătărie
+            {kitchenMode ? "👨‍🍳" : "👁️"} {recipesUI.kitchenMode}
           </button>
           <button
             onClick={() => setHealthyMode(m => !m)}
@@ -431,7 +443,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
                 : "bg-card text-dim border-edge hover:border-green-700/30 hover:text-green-400"
             }`}
           >
-            🥗 {healthyMode ? "Sănătos ON" : "Sănătos"}
+            🥗 {healthyMode ? recipesUI.healthyOn : recipesUI.healthyMode}
           </button>
           {recipe.rapidMode && (
             <button
@@ -442,7 +454,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
                   : "bg-card text-dim border-edge hover:border-blue-700/30 hover:text-blue-400"
               }`}
             >
-              ⚡ {rapidMode ? "Rapid ON" : "Rapid"}
+              ⚡ {rapidMode ? recipesUI.rapidOn : recipesUI.rapidMode}
             </button>
           )}
           {recipe.ieftinMode && (
@@ -454,7 +466,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
                   : "bg-card text-dim border-edge hover:border-amber-700/30 hover:text-amber-400"
               }`}
             >
-              💰 {ieftinMode ? "Ieftin ON" : "Ieftin"}
+              💰 {ieftinMode ? recipesUI.cheapOn : recipesUI.cheapMode}
             </button>
           )}
         </div>
@@ -464,7 +476,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
         <div className="rounded-xl bg-green-900/15 border border-green-700/25 px-4 py-3 flex items-start gap-2.5">
           <span className="text-lg flex-shrink-0">🥗</span>
           <div>
-            <p className="text-sm font-bold text-green-300 mb-1">Mod Sănătos activ</p>
+            <p className="text-sm font-bold text-green-300 mb-1">{recipesUI.healthyActive}</p>
             <p className="text-xs text-green-400/70 leading-relaxed">{recipe.healthyNote}</p>
           </div>
         </div>
@@ -479,7 +491,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
         <div className="rounded-xl bg-blue-900/15 border border-blue-700/25 px-4 py-3 flex items-start gap-2.5">
           <span className="text-lg flex-shrink-0">⚡</span>
           <div>
-            <p className="text-sm font-bold text-blue-300 mb-1">Mod Rapid activ — {recipe.rapidMode.totalLabel}</p>
+            <p className="text-sm font-bold text-blue-300 mb-1">{recipesUI.rapidActive} — {recipe.rapidMode.totalLabel}</p>
             <p className="text-xs text-blue-400/70 leading-relaxed">{recipe.rapidMode.note}</p>
           </div>
         </div>
@@ -488,7 +500,7 @@ const RecipeDetail = ({ recipe, onBack }) => {
         <div className="rounded-xl bg-amber-900/15 border border-amber-700/25 px-4 py-3 flex items-start gap-2.5">
           <span className="text-lg flex-shrink-0">💰</span>
           <div>
-            <p className="text-sm font-bold text-amber-300 mb-1">Mod Ieftin activ — ingrediente din casă</p>
+            <p className="text-sm font-bold text-amber-300 mb-1">{recipesUI.cheapActive}</p>
             <p className="text-xs text-amber-400/70 leading-relaxed">{recipe.ieftinMode.note}</p>
           </div>
         </div>
@@ -516,11 +528,11 @@ const RecipeDetail = ({ recipe, onBack }) => {
       {/* Stats row */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
         {[
-          { icon: "⏱️", label: "Prep", value: recipe.prepLabel },
-          { icon: "🔥", label: "Gătire", value: recipe.cookLabel },
-          { icon: "⏳", label: "Total", value: recipe.totalLabel },
-          { icon: "🍽️", label: "Porții", value: `${targetServings} ${recipe.servingsUnit}` },
-          { icon: "💪", label: "Calorii", value: `${Math.round((healthyMode && recipe.healthyCalories ? recipe.healthyCalories : recipe.calories) * multiplier)} kcal${healthyMode && recipe.healthyCalories && recipe.healthyCalories < recipe.calories ? ' 🥗' : ''}` },
+          { icon: "⏱️", label: recipesUI.prep, value: recipe.prepLabel },
+          { icon: "🔥", label: recipesUI.cook, value: recipe.cookLabel },
+          { icon: "⏳", label: recipesUI.total, value: recipe.totalLabel },
+          { icon: "🍽️", label: recipesUI.servings, value: `${targetServings} ${recipe.servingsUnit}` },
+          { icon: "💪", label: recipesUI.calories, value: `${Math.round((healthyMode && recipe.healthyCalories ? recipe.healthyCalories : recipe.calories) * multiplier)} kcal${healthyMode && recipe.healthyCalories && recipe.healthyCalories < recipe.calories ? ' 🥗' : ''}` },
         ].map((stat) => (
           <div key={stat.label} className="bg-card border border-edge rounded-xl px-3 py-2.5 text-center flex-shrink-0 min-w-[80px]">
             <span className="text-base block">{stat.icon}</span>
@@ -535,17 +547,17 @@ const RecipeDetail = ({ recipe, onBack }) => {
         <div className="flex items-center justify-between gap-3 mb-5">
           <div className="flex-1">
             <h3 className="text-base md:text-lg font-black text-heading flex items-center gap-2 mb-2">
-              🥄 Ingrediente
+              {recipesUI.ingredients}
             </h3>
             <button
               onClick={handleCopyIngredients}
               className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 ${
-                copiedFeedback === "✅ Copiat!"
+                copiedFeedback === recipesUI.copied
                   ? "bg-green-900/30 text-green-400 border border-green-700/40"
                   : "bg-red-900/20 text-red-400 border border-red-900/30 hover:bg-red-900/30"
               }`}
             >
-              {copiedFeedback || "📋 Copiază lista"}
+              {copiedFeedback || recipesUI.copyList}
             </button>
           </div>
           <div className="flex items-center gap-1 bg-card rounded-xl p-1 border border-edge flex-shrink-0">
@@ -579,21 +591,21 @@ const RecipeDetail = ({ recipe, onBack }) => {
 
         {multiplier !== 1 && (
           <p className="text-xs text-amber-400/60 font-bold mb-4 flex items-center gap-1.5">
-            <span>📐</span> Cantitățile sunt ajustate pentru {targetServings} {recipe.servingsUnit} (×{multiplier % 1 === 0 ? multiplier : multiplier.toFixed(2)})
+            <span>📐</span> {recipesUI.adjustedFor?.replace('{servings}', targetServings).replace('{unit}', recipe.servingsUnit).replace('{multiplier}', multiplier % 1 === 0 ? multiplier : multiplier.toFixed(2)) || `${targetServings} ${recipe.servingsUnit} (×${multiplier % 1 === 0 ? multiplier : multiplier.toFixed(2)})`}
           </p>
         )}
 
         <IngredientList ingredients={currentIngredients} multiplier={multiplier} healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} getSwappedName={getSwappedName} />
         {currentFilling && currentFilling.length > 0 && (
           <div className="mt-6 pt-6 border-t border-edge">
-            <IngredientList ingredients={currentFilling} multiplier={multiplier} title="Umplutură" healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} getSwappedName={getSwappedName} />
+            <IngredientList ingredients={currentFilling} multiplier={multiplier} title={recipesUI.filling} healthyMode={healthyMode} healthySwaps={recipe.healthySwaps || []} getSwappedName={getSwappedName} />
           </div>
         )}
       </div>
 
       {/* Steps */}
       <div className="bg-card border border-edge rounded-2xl p-4 md:p-6">
-        <StepByStep steps={currentSteps} recipeId={`${recipe.id}-${recipe.variants?.[activeVariant]?.id || 'default'}`} tips={recipe.tips} kitchenMode={kitchenMode} />
+        <StepByStep steps={currentSteps} recipeId={`${recipe.id}-${recipe.variants?.[activeVariant]?.id || 'default'}`} tips={recipe.tips} kitchenMode={kitchenMode} recipesUI={recipesUI} />
       </div>
     </motion.div>
   );
@@ -603,16 +615,27 @@ const RecipeDetail = ({ recipe, onBack }) => {
 function RetePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useT();
+  const { locale } = useLocaleConfig();
+  const recipesUI = t('content.recipes');
+
+  const retete = locale === 'bg' ? reteteBg : locale === 'el' ? reteteEl : reteteRo;
+  const diff = difficultyMap[locale] || difficultyMap.ro;
+
   const selectedId = searchParams.get("r");
   const selectedRecipe = retete.find(r => r.id === selectedId) || null;
-  
+
   const [filterDiff, setFilterDiff] = useState("toate");
   const [search, setSearch] = useState("");
 
   const year = new Date().getFullYear();
 
   const filteredRetete = retete.filter(r => {
-    const matchDiff = filterDiff === "toate" || r.difficulty === filterDiff;
+    const matchDiff = filterDiff === "toate"
+      || r.difficulty === filterDiff
+      || (filterDiff === diff.easy && r.difficulty === diff.easy)
+      || (filterDiff === diff.medium && r.difficulty === diff.medium)
+      || (filterDiff === diff.advanced && r.difficulty === diff.advanced);
     const matchSearch = search === "" || r.name.toLowerCase().includes(search.toLowerCase()) || r.description.toLowerCase().includes(search.toLowerCase());
     return matchDiff && matchSearch;
   });
@@ -629,10 +652,13 @@ function RetePageContent() {
               <RecipeDetail
                 key={selectedRecipe.id}
                 recipe={selectedRecipe}
-                onBack={() => { 
-                  router.push('/retete', { scroll: false }); 
-                  window.scrollTo(0, 0); 
+                onBack={() => {
+                  router.push(`/${locale}/retete`, { scroll: false });
+                  window.scrollTo(0, 0);
                 }}
+                recipesUI={recipesUI}
+                locale={locale}
+                diff={diff}
               />
             ) : (
               <motion.div
@@ -644,10 +670,10 @@ function RetePageContent() {
               >
                 <header className="text-center space-y-4">
                   <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
-                    Rețete de <span className="text-red-500">Paște {year}</span>
+                    {recipesUI.pageTitle?.replace('{year}', year)}
                   </h1>
                   <p className="text-dim font-bold text-sm md:text-base max-w-lg mx-auto">
-                    {retete.length} rețete tradiționale cu variante, pas cu pas, cu sfaturi și cantități ajustabile.
+                    {recipesUI.pageSubtitle?.replace('{count}', retete.length)}
                   </p>
                 </header>
 
@@ -655,7 +681,7 @@ function RetePageContent() {
                 <div className="max-w-md mx-auto w-full">
                   <input
                     type="text"
-                    placeholder="Caută rețetă..."
+                    placeholder={recipesUI.searchPlaceholder}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-edge-strong bg-card text-heading placeholder-muted focus:outline-none focus:border-red-500/50 focus:bg-elevated-hover transition-all text-sm"
@@ -664,17 +690,22 @@ function RetePageContent() {
 
                 {/* Difficulty filters */}
                 <div className="flex gap-2 justify-center flex-wrap">
-                  {["toate", "Ușor", "Mediu", "Avansat"].map((diff) => (
+                  {[
+                    { key: "toate", label: recipesUI.allFilter },
+                    { key: diff.easy, label: recipesUI.easyDiff },
+                    { key: diff.medium, label: recipesUI.mediumDiff },
+                    { key: diff.advanced, label: recipesUI.advancedDiff },
+                  ].map((item) => (
                     <button
-                      key={diff}
-                      onClick={() => setFilterDiff(diff)}
+                      key={item.key}
+                      onClick={() => setFilterDiff(item.key)}
                       className={`px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all active:scale-95 border ${
-                        filterDiff === diff
+                        filterDiff === item.key
                           ? "bg-red-700 text-white border-red-700 shadow-lg shadow-red-900/30"
                           : "bg-card text-dim border-edge hover:border-red-900/30 hover:text-body"
                       }`}
                     >
-                      {diff === "toate" ? "Toate" : diff}
+                      {item.label}
                     </button>
                   ))}
                 </div>
@@ -686,9 +717,11 @@ function RetePageContent() {
                         key={recipe.id}
                         recipe={recipe}
                         index={i}
-                        onClick={() => { 
-                          router.push(`/retete?r=${recipe.id}`, { scroll: false }); 
-                          window.scrollTo(0, 0); 
+                        recipesUI={recipesUI}
+                        diff={diff}
+                        onClick={() => {
+                          router.push(`/${locale}/retete?r=${recipe.id}`, { scroll: false });
+                          window.scrollTo(0, 0);
                         }}
                       />
                     ))
@@ -698,15 +731,15 @@ function RetePageContent() {
                       animate={{ opacity: 1 }}
                       className="col-span-full text-center py-12"
                     >
-                      <p className="text-dim font-bold text-lg">Niciuna rețetă găsită. Încearcă alt termen de căutare.</p>
+                      <p className="text-dim font-bold text-lg">{recipesUI.noResults}</p>
                     </motion.div>
                   )}
                 </div>
 
                 <div className="text-center">
-                  <Link href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
-                    🥚 Ciocnește ouă online
-                  </Link>
+                  <LocaleLink href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
+                    {recipesUI.ctaOnline}
+                  </LocaleLink>
                 </div>
               </motion.div>
             )}

@@ -2,75 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import Script from "next/script";
+import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
-
-const steps = [
-  {
-    title: "Pune-ți o Poreclă",
-    icon: "✏️",
-    desc: "Intră pe pagina principală și scrie-ți o poreclă de 3-21 caractere. Aceasta va apărea în clasament și în camerele de joc.",
-    tip: "Alege ceva memorabil — adversarii tăi o vor vedea!",
-  },
-  {
-    title: "Personalizează-ți Oul",
-    icon: "🎨",
-    desc: "Apasă pe oul tău pentru a alege culoarea: Roșu, Albastru, Auriu sau Verde. Fiecare culoare are un model tradițional românesc unic.",
-    tip: "Culoarea nu influențează șansele — este pur estetică.",
-  },
-  {
-    title: "Alege Modul de Joc",
-    icon: "🎮",
-    desc: "Ai trei opțiuni: Ciocnește cu un Prieten (cameră privată cu cod), Ciocnește cu Concetățenii (arena publică), sau creează un Grup pentru mai mulți jucători.",
-    tip: null,
-  },
-  {
-    title: "Ciocnește!",
-    icon: "💥",
-    desc: "Când ambii jucători sunt în cameră, ciocnirea se face automat. Un ou se sparge — celălalt supraviețuiește. Rezultatul este aleatoriu, ca în viața reală!",
-    tip: "Cel care lovește zice \"Hristos a Înviat!\", celălalt răspunde \"Adevărat a Înviat!\"",
-  },
-  {
-    title: "Urcă în Clasament",
-    icon: "🏆",
-    desc: "Fiecare victorie contează! Victoriile tale se adaugă automat în clasamentul național și regional. Poți vedea clasamentul complet pe pagina dedicată.",
-    tip: null,
-  },
-  {
-    title: "Deblochează Achievement-uri",
-    icon: "🏅",
-    desc: "Jocul are 16 achievement-uri de deblocat, de la prima victorie pana la 100 de victorii. Verifica-le pe pagina de profil!",
-    tip: "Unele achievement-uri sunt secrete — descoperă-le singur!",
-  },
-];
-
-const faqItems = [
-  {
-    q: "Este gratuit?",
-    a: "Da, complet gratuit. Fără reclame, fără achiziții in-app.",
-  },
-  {
-    q: "Trebuie să-mi fac cont?",
-    a: "Nu. Pui o poreclă și joci instant. Statisticile se salvează în browser.",
-  },
-  {
-    q: "Pot juca de pe telefon?",
-    a: "Da! Ciocnim.ro funcționează pe orice telefon, tabletă sau computer cu browser. Poți chiar să-l instalezi ca aplicație.",
-  },
-  {
-    q: "Cum invit un prieten?",
-    a: "Apasă \"Ciocnește cu un Prieten\", creează o cameră, și trimite-i codul de 4 caractere prietenului tău.",
-  },
-  {
-    q: "Ce sunt grupurile?",
-    a: "Grupurile îți permit să creezi o echipă cu prietenii sau familia. Poți provoca membrii grupului la dueluri direct.",
-  },
-  {
-    q: "Cum funcționează clasamentul?",
-    a: "Fiecare victorie adaugă un punct la clasamentul tău personal și la regiunea ta. Top 10 jucători și top 20 regiuni sunt afișate.",
-  },
-];
+import { useT } from "../../i18n/useT";
 
 function FAQItem({ item, index }) {
   const [open, setOpen] = useState(false);
@@ -113,12 +48,15 @@ function FAQItem({ item, index }) {
 }
 
 export default function GhidPage() {
+  const t = useT();
+  const guide = t('content.guide');
+
   const howToSchema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "Cum joci ciocnit ouă online pe Ciocnim.ro",
-    "description": "Ghid pas cu pas pentru a juca ciocnit ouă online de Paște.",
-    "step": steps.map((s, i) => ({
+    "name": `${guide.pageTitle} ${guide.pageHighlight}`,
+    "description": guide.pageSubtitle,
+    "step": guide.steps.map((s, i) => ({
       "@type": "HowToStep",
       "position": i + 1,
       "name": s.title,
@@ -126,28 +64,42 @@ export default function GhidPage() {
     })),
   };
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": guide.faq.map((item) => ({
+      "@type": "Question",
+      "name": item.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.a,
+      },
+    })),
+  };
+
   return (
     <>
       <Script id="schema-ghid" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
+      <Script id="schema-ghid-faq" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <main className="min-h-screen bg-main text-body">
         <PageHeader />
 
         <div className="w-full max-w-3xl mx-auto pt-8 pb-16 px-6 space-y-8">
           <header className="text-center space-y-4">
             <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
-              Ghid de <span className="text-red-500">Joc</span>
+              {guide.pageTitle} <span className="text-red-500">{guide.pageHighlight}</span>
             </h1>
             <p className="text-dim font-bold text-sm md:text-base">
-              Tot ce trebuie să știi ca să ciocnești ouă online.
+              {guide.pageSubtitle}
             </p>
           </header>
 
           {/* Steps */}
           <section className="space-y-4">
             <h2 className="text-xl font-black text-heading flex items-center gap-2">
-              <span>📋</span> Pas cu Pas
+              <span>📋</span> {guide.stepsLabel}
             </h2>
-            {steps.map((step, i) => (
+            {guide.steps.map((step, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -161,7 +113,7 @@ export default function GhidPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Pasul {i + 1}</span>
+                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">{guide.stepsLabel.split(' ')[0]} {i + 1}</span>
                   </div>
                   <h3 className="font-bold text-heading text-sm mb-1">{step.title}</h3>
                   <p className="text-body text-sm leading-relaxed">{step.desc}</p>
@@ -176,10 +128,10 @@ export default function GhidPage() {
           {/* FAQ */}
           <section className="space-y-4">
             <h2 className="text-xl font-black text-heading flex items-center gap-2">
-              <span>❓</span> Întrebări Frecvente
+              <span>❓</span> {guide.faqLabel}
             </h2>
             <div className="space-y-2">
-              {faqItems.map((item, i) => (
+              {guide.faq.map((item, i) => (
                 <FAQItem key={i} item={item} index={i} />
               ))}
             </div>
@@ -187,13 +139,13 @@ export default function GhidPage() {
 
           {/* CTA */}
           <div className="text-center space-y-3">
-            <Link
+            <LocaleLink
               href="/"
               className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg"
             >
-              🥚 Hai la joc!
-            </Link>
-            <p className="text-muted text-xs">Gratuit, fără cont, pe orice dispozitiv.</p>
+              {guide.ctaOnline}
+            </LocaleLink>
+            <p className="text-muted text-xs">{guide.pageSubtitle}</p>
           </div>
         </div>
       </main>

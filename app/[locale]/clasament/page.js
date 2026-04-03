@@ -2,16 +2,13 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import { safeCopy } from "../../lib/utils";
 import { getCurrentSeason } from "../../lib/seasons";
-
-const TABS = [
-  { key: "jucatori", label: "Jucători", icon: "🏆" },
-  { key: "regiuni", label: "Regiuni", icon: "🗺️" },
-];
+import { useT } from "../../i18n/useT";
+import { useLocaleConfig } from "../../components/DictionaryProvider";
 
 const medals = ["🥇", "🥈", "🥉"];
 
@@ -78,6 +75,13 @@ export default function ClasamentPage() {
   const { topRegiuni, topJucatori, nume, userStats, isHydrated } = useGlobalStats();
   const [tab, setTab] = useState("jucatori");
   const season = getCurrentSeason();
+  const t = useT();
+  const { locale } = useLocaleConfig();
+
+  const TABS = [
+    { key: "jucatori", label: t('content.clasament.players'), icon: "🏆" },
+    { key: "regiuni", label: t('content.clasament.regions'), icon: "🗺️" },
+  ];
 
   const maxRegionScore = useMemo(() => {
     if (!topRegiuni || topRegiuni.length === 0) return 1;
@@ -92,15 +96,13 @@ export default function ClasamentPage() {
   }, [topJucatori, nume]);
 
   const shareRanking = () => {
-    const text = myRank === 1
-      ? "Sunt Campionul Național la ciocnit ouă pe ciocnim.ro! 🥚🏆"
-      : myRank
-        ? `Sunt pe locul ${myRank} la ciocnit ouă pe ciocnim.ro! 🥚⚔️`
-        : "Hai la o ciocneală de ouă pe ciocnim.ro! 🥚⚔️";
+    const text = myRank
+      ? t('content.clasament.shareText', { rank: myRank })
+      : t('leaderboard.shareGeneric');
     if (navigator.share) {
-      navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro/clasament" }).catch(() => {});
+      navigator.share({ title: t('seo.siteName'), text, url: `https://trosc.gg/${locale}/clasament` }).catch(() => {});
     } else {
-      safeCopy(`${text}\nhttps://ciocnim.ro/clasament`);
+      safeCopy(`${text}\nhttps://trosc.gg/${locale}/clasament`);
     }
   };
 
@@ -111,10 +113,10 @@ export default function ClasamentPage() {
       <div className="w-full max-w-2xl mx-auto pt-8 pb-16 px-6 space-y-6">
         <header className="text-center space-y-3">
           <h1 className="text-4xl md:text-5xl font-black text-heading">
-            Clasament <span className="text-red-500">Național</span>
+            {t('content.clasament.pageTitle')} <span className="text-red-500">{t('content.clasament.pageHighlight')}</span>
           </h1>
           <p className="text-dim font-bold text-sm">
-            Cei mai puternici ciocnitori de ouă din România
+            {t('content.clasament.pageSubtitle')}
           </p>
         </header>
 
@@ -129,7 +131,7 @@ export default function ClasamentPage() {
           }`}
         >
           <p className="text-[10px] font-black uppercase tracking-widest text-red-500 mb-1">
-            {season.isActive ? "🔴 Sezon Activ" : "📅 Sezon"}
+            {season.isActive ? `🔴 ${t('content.clasament.season')}` : `📅 ${t('content.clasament.season')}`}
           </p>
           <p className="text-lg font-black text-heading">{season.name}</p>
           <p className="text-xs text-dim mt-0.5">{season.label}</p>
@@ -143,31 +145,31 @@ export default function ClasamentPage() {
             className="bg-gradient-to-r from-amber-900/20 to-red-900/20 border border-amber-700/20 rounded-2xl p-4 flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Locul tău</p>
+              <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">{t('content.clasament.myStats')}</p>
               <p className="text-2xl font-black text-heading">
                 {myRank ? `#${myRank}` : "—"}
               </p>
             </div>
             <div className="text-right">
               <p className="text-xs font-bold text-dim">{nume}</p>
-              <p className="text-lg font-black text-red-400">{userStats.wins || 0} victorii</p>
+              <p className="text-lg font-black text-red-400">{userStats.wins || 0} {t('content.clasament.wins')}</p>
             </div>
           </motion.div>
         )}
 
         {/* Tabs */}
         <div className="flex rounded-2xl overflow-hidden border border-edge bg-card">
-          {TABS.map(t => (
+          {TABS.map(tb => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tb.key}
+              onClick={() => setTab(tb.key)}
               className={`flex-1 py-3.5 text-xs font-bold uppercase tracking-widest transition-all duration-200 ${
-                tab === t.key
+                tab === tb.key
                   ? "bg-red-700 text-white"
                   : "text-dim hover:text-red-400 hover:bg-elevated"
               }`}
             >
-              {t.icon} {t.label}
+              {tb.icon} {tb.label}
             </button>
           ))}
         </div>
@@ -196,8 +198,7 @@ export default function ClasamentPage() {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <span className="text-5xl mb-3">🥚</span>
-                    <p className="text-dim text-sm font-bold">Niciun jucător încă.</p>
-                    <p className="text-muted text-xs mt-1">Fii primul care ciocnește un ou!</p>
+                    <p className="text-dim text-sm font-bold">{t('content.clasament.noData')}</p>
                   </div>
                 )}
               </motion.div>
@@ -222,8 +223,7 @@ export default function ClasamentPage() {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <span className="text-5xl mb-3">🗺️</span>
-                    <p className="text-dim text-sm font-bold">Nicio regiune încă.</p>
-                    <p className="text-muted text-xs mt-1">Alege-ți regiunea și începe să ciocnești!</p>
+                    <p className="text-dim text-sm font-bold">{t('content.clasament.noData')}</p>
                   </div>
                 )}
               </motion.div>
@@ -237,17 +237,17 @@ export default function ClasamentPage() {
           className="w-full py-4 rounded-2xl border-2 border-dashed border-red-900/30 bg-red-900/10 hover:bg-red-900/20 hover:border-red-800/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
         >
           <span className="text-xl">📲</span>
-          <span className="font-black text-red-400 text-sm">Distribuie clasamentul tău</span>
+          <span className="font-black text-red-400 text-sm">{t('content.clasament.share')}</span>
         </button>
 
         {/* CTA */}
         <div className="text-center">
-          <Link
+          <LocaleLink
             href="/"
             className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg"
           >
-            🥚 Joacă acum
-          </Link>
+            {t('content.despre.ctaOnline')}
+          </LocaleLink>
         </div>
       </div>
     </main>

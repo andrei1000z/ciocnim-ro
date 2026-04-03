@@ -1,21 +1,20 @@
-import Link from "next/link";
+"use client";
 
-export const metadata = {
-  title: "Termeni și Condiții",
-  description: "Termeni și condiții de utilizare a site-ului Ciocnim.ro — regulile jocului de ciocnit ouă online.",
-  alternates: { canonical: "https://ciocnim.ro/terms" },
-};
+import LocaleLink from "../../components/LocaleLink";
+import { useT } from "../../i18n/useT";
 
 export default function TermsPage() {
+  const t = useT();
+
   return (
     <main className="min-h-screen bg-main text-body">
       <div className="max-w-2xl mx-auto px-4 py-12 space-y-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href="/" className="text-red-400 hover:text-red-300 transition-colors text-sm font-bold">← Acasă</Link>
+          <LocaleLink href="/" className="text-red-400 hover:text-red-300 transition-colors text-sm font-bold">← Acasă</LocaleLink>
         </div>
 
-        <h1 className="text-3xl font-black text-heading">Termeni și Condiții</h1>
-        <p className="text-xs text-muted">Ultima actualizare: 20 martie 2026</p>
+        <h1 className="text-3xl font-black text-heading">{t('content.terms.pageTitle')}</h1>
+        <p className="text-xs text-muted">{t('content.terms.lastUpdated')}: 20 martie 2026</p>
 
         <section className="space-y-4 text-sm text-body leading-relaxed">
           <h2 className="text-lg font-bold text-heading mt-6">1. Descrierea serviciului</h2>
@@ -45,7 +44,7 @@ export default function TermsPage() {
         </section>
 
         <div className="pt-8 border-t border-red-900/20">
-          <Link href="/" className="text-sm text-dim hover:text-red-400 transition-colors font-bold">← Înapoi la joc</Link>
+          <LocaleLink href="/" className="text-sm text-dim hover:text-red-400 transition-colors font-bold">← Înapoi la joc</LocaleLink>
         </div>
       </div>
     </main>

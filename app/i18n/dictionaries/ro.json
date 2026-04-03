@@ -266,5 +266,372 @@
     "body": "Pagina pe care o cauți s-a spart la ciocnit și nu mai există. Hai înapoi la masa de Paște!",
     "cta": "🥚 Ciocnește ouă online",
     "alt": "sau descoperă tradițiile de Paște →"
+  },
+
+  "units": {
+    "buc": "buc",
+    "linguri": "linguri",
+    "lingurită": "lingurită",
+    "lingurite": "lingurite",
+    "legătură": "legătură",
+    "căței": "căței",
+    "g": "g",
+    "kg": "kg",
+    "ml": "ml",
+    "l": "l"
+  },
+
+  "content": {
+    "traditions": {
+      "pageTitle": "Tradiția Ciocnitului",
+      "pageHighlight": "Ciocnitului",
+      "pageSubtitle": "Află regulile jocului de Paște care a unit generații de români.",
+      "sections": [
+        {
+          "title": "De ce ciocnim ouă?",
+          "icon": "🥚",
+          "paragraphs": [
+            "Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Legenda spune că Sfânta Maria Magdalena, ajungând la Roma, i-ar fi oferit împăratului Tiberiu un ou roșu, rostind cuvintele <strong class=\"text-red-400\">\"Hristos a Înviat!\"</strong>.",
+            "Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt. Astăzi, acest joc a devenit un prilej de bucurie și reunire a familiei."
+          ]
+        },
+        {
+          "title": "Regulile Nescrise",
+          "icon": "📜",
+          "paragraphs": [
+            "Dacă te-ai întrebat vreodată cum se ciocnesc ouăle corect, există un protocol simplu păstrat din tată-n fiu:"
+          ],
+          "rules": [
+            {"label": "Cap la Cap", "desc": "Regula primei zile de Paște (Duminică)."},
+            {"label": "Cap la Dos", "desc": "Permis abia începând cu a doua zi (Luni)."},
+            {"label": "Dos la Dos", "desc": "Rezervat strict pentru a treia zi de sărbătoare."}
+          ],
+          "highlight": "Cel care lovește zice \"Hristos a Înviat!\", iar celălalt răspunde \"Adevărat a Înviat!\""
+        },
+        {
+          "title": "Semnificația Culorilor",
+          "icon": "🎨",
+          "paragraphs": ["Deși oul roșu este cel mai cunoscut, tradiția românească a păstrat și alte culori, fiecare cu un sens aparte:"],
+          "colors": [
+            {"color": "text-red-600", "label": "ROȘU", "desc": "Simbolul jertfei, al vieții și al iubirii divine."},
+            {"color": "text-yellow-600", "label": "GALBEN", "desc": "Reprezintă lumina, belșugul și grâul copt al verii ce urmează."},
+            {"color": "text-blue-600", "label": "ALBASTRU", "desc": "Simbolizează cerul, credința și infinitul spiritual."},
+            {"color": "text-green-600", "label": "VERDE", "desc": "Culoarea primăverii, a reînnoirii naturii și a speranței."}
+          ]
+        },
+        {
+          "title": "Cum Alegi Oul Tare",
+          "icon": "🛡️",
+          "paragraphs": ["Secretul câștigării duelurilor stă în alegerea oului potrivit din coș:"],
+          "tips": [
+            "Caută un ou cu o formă cât mai ascuțită la vârf. Forța se concentrează mai bine pe o suprafață mică.",
+            "Verifică sunetul! Unii bat ușor oul de dinte — dacă sună plin și ascuțit, coaja este groasă.",
+            "Strânge-l ușor în mână. Oul trebuie să se simtă ferm, fără micro-fisuri ascunse sub stratul de vopsea."
+          ]
+        },
+        {
+          "title": "Superstiții Românești",
+          "icon": "✨",
+          "paragraphs": ["Jocul nu este doar o competiție, ci și un mod de a atrage norocul în casă:"],
+          "tips": [
+            "Cine are oul cel mai tare și iese învingător din toate duelurile, va fi sănătos și puternic tot restul anului.",
+            "Dacă găsești la masă un ou cu două gălbenușuri, vei avea parte de noroc dublu.",
+            "Cojile ouălor sparte nu se aruncă la gunoi! Tradiția cere să le îngropi în pământul grădinii pentru a proteja recolta."
+          ]
+        }
+      ],
+      "faq": [
+        {"q": "De ce ciocnim ouă de Paște?", "a": "Tradiția ciocnitului ouălor de Paște este una dintre cele mai vechi datini din România. Culoarea roșie simbolizează sângele vărsat de Mântuitor, iar ciocnitul oului reprezintă deschiderea Sfântului Mormânt."},
+        {"q": "Care sunt regulile ciocnitului de ouă?", "a": "Cap la Cap – regula primei zile de Paște. Cap la Dos – permis din a doua zi. Dos la Dos – rezervat pentru a treia zi. Cel care lovește zice 'Hristos a Înviat!', iar celălalt răspunde 'Adevărat a Înviat!'"},
+        {"q": "Ce semnifică culorile ouălor de Paște?", "a": "Roșu – simbolul jertfei. Galben – lumina și belșugul. Albastru – cerul și credința. Verde – primăvara și speranța."},
+        {"q": "Cum aleg oul cel mai tare pentru ciocnit?", "a": "Caută un ou ascuțit la vârf, verifică sunetul lovind ușor de dinte, și strânge-l ușor în mână — trebuie să fie ferm."},
+        {"q": "Ce superstiții sunt legate de ciocnitul ouălor?", "a": "Cel care iese învingător va fi sănătos tot anul. Oul cu două gălbenușuri aduce noroc dublu. Cojile se îngroapă în grădină pentru a proteja recolta."}
+      ],
+      "ctaOnline": "🥚 Ciocnește ouă online"
+    },
+    "greetings": {
+      "pageTitle": "Mesaje și Urări",
+      "pageHighlight": "de Paște",
+      "pageSubtitle": "Copiază un mesaj și trimite vestea Învierii pe WhatsApp sau Facebook.",
+      "shareFooter": "🥚 Hai la o ciocneală online pe",
+      "copyTitle": "Copiază Mesajul",
+      "whatsappTitle": "Trimite pe WhatsApp",
+      "categories": [
+        {
+          "title": "Tradiționale & De Familie",
+          "icon": "🕊️",
+          "messages": [
+            "Fie ca Lumina Sfântă a Învierii să îți aducă în suflet pace, bucurie și sănătate. Hristos a Înviat!",
+            "Cu ocazia Sfintelor Sărbători de Paște, vă doresc multă sănătate, fericire și liniște sufletească. Paște Fericit!",
+            "Hristos a Înviat! Să ne bucurăm împreună de Lumina Sfintei Învieri și să păstrăm în suflet credința, speranța și iubirea.",
+            "Sărbători pline de lumină, dragoste și binecuvântare. Fie ca bucuria Învierii să vă umple inimile. Hristos a Înviat!",
+            "Vă doresc un Paște luminat, cu masa plină și inimile deschise. Hristos a Înviat! Adevărat a Înviat!",
+            "Pentru cei dragi: fie ca Sfintele Sărbători de Paște să vă aducă tot ce e mai bun în suflet. Paște Fericit!"
+          ]
+        },
+        {
+          "title": "Scurte & Pentru SMS",
+          "icon": "📱",
+          "messages": [
+            "Hristos a Înviat! Paște fericit! 🥚",
+            "Sărbători fericite și ouă tari! 🥚💪",
+            "Paște luminos și plin de bucurie! ✨",
+            "Hristos a Înviat! La mulți ani cu sănătate! 🌟"
+          ]
+        },
+        {
+          "title": "Amuzante & Pentru Prieteni",
+          "icon": "😄",
+          "messages": [
+            "Hristos a Înviat! Și oul meu a supraviețuit — al tău ce mai face? 😏🥚",
+            "Paște Fericit! Dacă oul tău rezistă mai mult ca al meu, recunosc: ești campion. Dar revanșa e pe ciocnim.ro! 🥊🥚",
+            "Nu contează cine ciocnește primul — contează cine rămâne cu oul întreg! Paște Fericit! 💪",
+            "Fie ca oul tău să fie tare ca diamantul și norocul tău la fel de mare! Hristos a Înviat!"
+          ]
+        },
+        {
+          "title": "Spirituale & Religioase",
+          "icon": "✝️",
+          "messages": [
+            "Hristos a Înviat! Fie ca lumina Învierii să ne lumineze drumul și să ne aducă pace în suflet. Adevărat a Înviat!",
+            "În această sfântă zi, să ne amintim că iubirea și iertarea sunt cele mai mari daruri. Hristos a Înviat!",
+            "Să mulțumim Domnului pentru darul Învierii și să purtăm în inimă speranța și credința. Paște Binecuvântat!",
+            "Precum ouăle vopsite în roșu ne amintesc de jertfa Mântuitorului, fie ca Învierea Sa să ne umple sufletele de lumină."
+          ]
+        }
+      ],
+      "generatorTitle": "Generator de Felicitări",
+      "generatorSubtitle": "Introdu numele persoanei și generează un card personalizat.",
+      "generatorPlaceholder": "Numele persoanei...",
+      "generatorButton": "Generează ✨",
+      "generatorCopy": "📋 Copiază",
+      "generatorShare": "📲 Trimite pe WhatsApp",
+      "generatorNext": "Alt mesaj ↻",
+      "templates": [
+        "Dragă {name}, fie ca Lumina Sfântă a Învierii să îți aducă în suflet pace, bucurie și sănătate. Hristos a Înviat!",
+        "{name}, îți doresc un Paște plin de lumină, iubire și momente frumoase alături de cei dragi. Paște Fericit!",
+        "Pentru {name}: Sărbătoarea Învierii să îți aducă binecuvântare și speranță. Hristos a Înviat! Adevărat a Înviat!",
+        "Scump(ă) {name}, fie ca ouăle roșii să îți poarte noroc și fericire tot anul. Un Paște minunat!"
+      ]
+    },
+    "dyeing": {
+      "pageTitle": "Vopsitul Natural",
+      "pageHighlight": "al Ouălor de Paște",
+      "pageSubtitle": "Culori vibrante folosind doar ingrediente din natură, ca pe vremea bunicilor.",
+      "focusModeLabel": "Mod Bucătărie",
+      "focusModeOn": "ON",
+      "focusModeOff": "OFF",
+      "sections": [
+        {
+          "title": "Roșu Tradițional (Coji de Ceapă)",
+          "icon": "🧅",
+          "paragraphs": ["Cea mai veche și mai cunoscută metodă. Roșul intens obținut din coji de ceapă este culoarea Paștelui autentic românesc."],
+          "steps": [
+            "Adună cojile uscate de la 10-15 cepe și fierbe-le în 2 litri de apă cu 2 linguri de oțet alb, timp de 30 de minute.",
+            "Strecoară lichidul obținut, lasă-l să se răcească puțin.",
+            "Adaugă ouăle crude, spălate bine înainte, și fierbe-le la foc mic timp de 10-12 minute.",
+            "Scoate-le și lasă-le să se usuce natural. Pentru luciu, șterge ouăle cu un pic de ulei pe o cârpă moale."
+          ]
+        },
+        {
+          "title": "Galben Auriu (Turmeric / Curcumă)",
+          "icon": "✨",
+          "paragraphs": ["Un galben cald și vibrant — o metodă simplă și spectaculoasă."],
+          "steps": [
+            "Pune 3-4 linguri de pudră de turmeric în 3 căni de apă fierbinte.",
+            "Adaugă 2 linguri de oțet alb (fixează culoarea mai bine).",
+            "Scufundă ouăle fierte reci și lasă-le 2-3 ore. Pentru galben intens, lasă peste noapte la frigider."
+          ]
+        },
+        {
+          "title": "Albastru Pastel (Varză Roșie)",
+          "icon": "💧",
+          "paragraphs": ["Surprinzător, varza roșie dă albastru! Metoda este lentă dar rezultatul este magic."],
+          "steps": [
+            "Taie o jumătate de varză roșie și fierbe-o în 4 căni de apă timp de 45 de minute.",
+            "Scoate varza, adaugă 2-3 linguri de oțet în apa violet-albastră.",
+            "Scufundă ouăle fierte și lasă-le câteva ore (4-8) sau peste noapte."
+          ]
+        },
+        {
+          "title": "Sfaturi Importante",
+          "icon": "💡",
+          "paragraphs": [],
+          "tips": [
+            "Folosește oțet în fiecare vopsea — fixează culoarea și previne crapadurile.",
+            "Ouăle albe absorb culoarea mult mai bine decât cele maro.",
+            "Lasă ouăle la temperatura camerei 30 de minute înainte de fierbere — previne fisurarea.",
+            "Pentru modele, lipește frunze de pătrunjel pe ou cu un ciorap vechi înainte de scufundare!"
+          ]
+        }
+      ],
+      "ctaOnline": "🥚 Ciocnește ouă online"
+    },
+    "calendar": {
+      "pageTitle": "Calendarul",
+      "pageHighlight": "Paștelui",
+      "pageSubtitle": "Află când pică Sărbătorile Pascale între {startYear} și {endYear}",
+      "orthodox": "Ortodox",
+      "catholic": "Catolic",
+      "sameDay": "Aceeași zi",
+      "currentYear": "Anul curent",
+      "showMore": "📅 Vezi următorii ani (până în {year}) →",
+      "howTitle": "Cum se calculează Paștele?",
+      "howIcon": "🌕",
+      "howParagraphs": [
+        "Te-ai întrebat vreodată de ce Paștele își schimbă data în fiecare an, spre deosebire de Crăciun? Regula a fost stabilită la Sinodul de la Niceea din anul 325.",
+        "Paștele se sărbătorește întotdeauna în <strong class=\"text-red-400\">prima duminică după prima Lună Plină</strong> care cade după sau chiar în ziua echinocțiului de primăvară (21 martie).",
+        "Diferența dintre Paștele Ortodox și cel Catolic apare din cauza calendarului folosit. Biserica Catolică folosește calendarul Gregorian, în timp ce Biserica Ortodoxă calculează data Paștelui folosind vechiul calendar Iulian."
+      ],
+      "ctaOnline": "🥚 Ciocnește ouă online"
+    },
+    "guide": {
+      "pageTitle": "Ghid",
+      "pageHighlight": "de Joc",
+      "pageSubtitle": "Tot ce trebuie să știi ca să ciocnești ouă online.",
+      "stepsLabel": "Pas cu Pas",
+      "steps": [
+        {"title": "Pune-ți o Poreclă", "icon": "✏️", "desc": "Intră pe pagina principală și scrie-ți o poreclă de 3-21 caractere. Aceasta va apărea în clasament și în camerele de joc.", "tip": "Alege ceva memorabil — adversarii tăi o vor vedea!"},
+        {"title": "Personalizează-ți Oul", "icon": "🎨", "desc": "Apasă pe oul tău pentru a alege culoarea: Roșu, Albastru, Auriu sau Verde. Fiecare culoare are un model tradițional unic.", "tip": "Culoarea nu influențează șansele — este pur estetică."},
+        {"title": "Alege Modul de Joc", "icon": "🎮", "desc": "Ai trei opțiuni: Ciocnește cu un Prieten (cameră privată cu cod), Ciocnește cu Concetățenii (arena publică), sau creează un Grup pentru mai mulți jucători.", "tip": null},
+        {"title": "Ciocnește!", "icon": "💥", "desc": "Când ambii jucători sunt în cameră, ciocnirea se face automat. Un ou se sparge — celălalt supraviețuiește. Rezultatul este aleatoriu, ca în viața reală!", "tip": "Cel care lovește zice \"Hristos a Înviat!\", celălalt răspunde \"Adevărat a Înviat!\""},
+        {"title": "Urcă în Clasament", "icon": "🏆", "desc": "Fiecare victorie contează! Victoriile tale se adaugă automat în clasamentul național și regional.", "tip": null},
+        {"title": "Deblochează Achievement-uri", "icon": "🏅", "desc": "Jocul are 16 achievement-uri de deblocat, de la prima victorie până la 100 de victorii. Verifică-le pe pagina de profil!", "tip": "Unele achievement-uri sunt secrete — descoperă-le singur!"}
+      ],
+      "faqLabel": "Întrebări Frecvente",
+      "faq": [
+        {"q": "Este gratuit?", "a": "Da, complet gratuit. Fără reclame, fără achiziții in-app."},
+        {"q": "Trebuie să-mi fac cont?", "a": "Nu. Pui o poreclă și joci instant. Statisticile se salvează în browser."},
+        {"q": "Pot juca de pe telefon?", "a": "Da! Funcționează pe orice telefon, tabletă sau computer cu browser. Poți chiar să-l instalezi ca aplicație."},
+        {"q": "Cum invit un prieten?", "a": "Apasă \"Ciocnește cu un Prieten\", creează o cameră, și trimite-i codul de 4 caractere prietenului tău."},
+        {"q": "Ce sunt grupurile?", "a": "Grupurile îți permit să creezi o echipă cu prietenii sau familia. Poți provoca membrii grupului la dueluri direct."},
+        {"q": "Cum funcționează clasamentul?", "a": "Fiecare victorie adaugă un punct la clasamentul tău personal și la regiunea ta. Top 10 jucători și top 20 regiuni sunt afișate."}
+      ],
+      "ctaOnline": "🥚 Ciocnește ouă online"
+    },
+    "recipes": {
+      "pageTitle": "Rețete de Paște {year}",
+      "pageSubtitle": "{count} rețete tradiționale cu variante, pas cu pas, cu sfaturi și cantități ajustabile.",
+      "searchPlaceholder": "Caută rețetă...",
+      "allFilter": "Toate",
+      "openRecipe": "Deschide rețeta",
+      "backToRecipes": "← Înapoi la rețete",
+      "shareRecipe": "📲 Distribuie rețeta",
+      "ingredients": "🥄 Ingrediente",
+      "copyList": "📋 Copiază lista",
+      "copied": "✅ Copiat!",
+      "preparationSteps": "Pași de Preparare",
+      "steps": "pași",
+      "reset": "Resetează",
+      "tapToCheck": "Apasă pe un pas pentru a-l bifa ca terminat",
+      "recipeDone": "Felicitări! Rețeta este gata!",
+      "recipeDoneSubtitle": "Poftă bună și Paște Fericit!",
+      "chefTips": "💡 Sfaturi de Bucătar",
+      "adjustedFor": "Cantitățile sunt ajustate pentru {servings} {unit} (×{multiplier})",
+      "kitchenMode": "Bucătărie",
+      "healthyMode": "Sănătos",
+      "healthyOn": "Sănătos ON",
+      "rapidMode": "Rapid",
+      "rapidOn": "Rapid ON",
+      "cheapMode": "Ieftin",
+      "cheapOn": "Ieftin ON",
+      "healthyActive": "Mod Sănătos activ",
+      "rapidActive": "Mod Rapid activ",
+      "cheapActive": "Mod Ieftin activ — ingrediente din casă",
+      "noResults": "Nicio rețetă găsită. Încearcă alt termen de căutare.",
+      "easyDiff": "Ușor",
+      "mediumDiff": "Mediu",
+      "advancedDiff": "Avansat",
+      "filling": "Umplutură",
+      "prep": "Prep",
+      "cook": "Gătire",
+      "total": "Total",
+      "servings": "Porții",
+      "calories": "Calorii",
+      "ctaOnline": "🥚 Ciocnește ouă online"
+    },
+    "clasament": {
+      "pageTitle": "Clasament Național",
+      "pageHighlight": "Ciocnit Ouă",
+      "pageSubtitle": "Top jucători și regiuni.",
+      "players": "Jucători",
+      "regions": "Regiuni",
+      "season": "Sezon",
+      "wins": "victorii",
+      "winRate": "Win rate",
+      "share": "📲 Distribuie",
+      "shareText": "Sunt pe locul {rank} în clasamentul național de ciocnit ouă!",
+      "noData": "Clasamentul se încarcă...",
+      "myStats": "Statisticile Mele",
+      "totalMatches": "Meciuri totale",
+      "victories": "Victorii",
+      "defeats": "Înfrângeri"
+    },
+    "profil": {
+      "pageTitle": "Profilul Meu",
+      "stats": "Statistici",
+      "totalMatches": "Meciuri",
+      "victories": "Victorii",
+      "defeats": "Înfrângeri",
+      "winRate": "Rata de câștig",
+      "achievements": "Realizări",
+      "achievementsCount": "{earned}/{total} deblocate",
+      "locked": "Blocat",
+      "rarityCommon": "Comun",
+      "rarityUncommon": "Neobișnuit",
+      "rarityRare": "Rar",
+      "rarityEpic": "Epic",
+      "rarityLegendary": "Legendar",
+      "noName": "Anonim",
+      "setNameFirst": "Pune-ți o poreclă pe pagina principală pentru a-ți vedea profilul."
+    },
+    "despre": {
+      "pageTitle": "Despre",
+      "pageHighlight": "",
+      "pageSubtitle": "Povestea din spatele jocului tradițional de Paște, mutat în online.",
+      "sections": [
+        {
+          "title": "Misiunea Noastră",
+          "icon": "🎯",
+          "paragraphs": [
+            "S-a născut dintr-o idee simplă: <strong class=\"text-red-400\">să aducem tradiția ciocnitului de ouă în era digitală</strong>, fără să pierdem din farmecul ei.",
+            "Fie că ești departe de familie, fie că vrei să te distrezi cu prietenii într-un mod nou, îți oferim experiența autentică a ciocnitului de ouă — direct din browser, pe orice dispozitiv."
+          ]
+        },
+        {
+          "title": "Cum Funcționează",
+          "icon": "⚙️",
+          "paragraphs": ["Fiecare joc simulează un duel real de ciocnit ouă:"],
+          "list": [
+            "Alegi o poreclă și personalizezi oul tău (culoare).",
+            "Creezi o cameră privată sau intri în Arena pentru a găsi un adversar.",
+            "Ouăle se ciocnesc în timp real — unul se sparge, celălalt supraviețuiește.",
+            "Victoriile tale urcă în clasamentul național și regional."
+          ]
+        },
+        {
+          "title": "Tradiție & Tehnologie",
+          "icon": "🔧",
+          "paragraphs": ["Combinăm tradiția cu tehnologie modernă:"],
+          "features": [
+            {"label": "Timp real", "desc": "WebSocket pentru dueluri instantanee", "icon": "⚡"},
+            {"label": "PWA", "desc": "Instalabil pe telefon ca aplicație", "icon": "📱"},
+            {"label": "Clasamente", "desc": "Top jucători și regiuni, actualizat live", "icon": "🏆"},
+            {"label": "Achievement-uri", "desc": "16 realizări de deblocat", "icon": "🏅"},
+            {"label": "Grupuri", "desc": "Creează echipe și provoacă prietenii", "icon": "👥"},
+            {"label": "Teme", "desc": "Mod întunecat și luminos", "icon": "🎨"}
+          ]
+        }
+      ],
+      "ctaOnline": "🥚 Ciocnește ouă online"
+    },
+    "terms": {
+      "pageTitle": "Termeni și Condiții",
+      "lastUpdated": "Ultima actualizare"
+    },
+    "privacy": {
+      "pageTitle": "Politica de Confidențialitate",
+      "lastUpdated": "Ultima actualizare"
+    }
   }
 }

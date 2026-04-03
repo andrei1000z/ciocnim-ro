@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import LocaleLink from "../../components/LocaleLink";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import PageHeader from "../../components/PageHeader";
 import { ACHIEVEMENTS as ALL_ACHIEVEMENTS } from "../../lib/achievements";
+import { useT } from "../../i18n/useT";
+import { useLocaleConfig } from "../../components/DictionaryProvider";
 
 const RARITY_COLORS = {
   common: 'border-gray-600/30 bg-gray-900/20',
@@ -23,18 +25,20 @@ const RARITY_TEXT = {
   legendary: 'text-amber-400',
 };
 
-const RARITY_LABELS = {
-  common: 'Comun',
-  uncommon: 'Neobișnuit',
-  rare: 'Rar',
-  epic: 'Epic',
-  legendary: 'Legendar',
-};
-
 export default function ProfilPage() {
   const { nume, userStats, isHydrated } = useGlobalStats();
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const t = useT();
+  const { locale } = useLocaleConfig();
+
+  const RARITY_LABELS = {
+    common: t('content.profil.rarityCommon'),
+    uncommon: t('content.profil.rarityUncommon'),
+    rare: t('content.profil.rarityRare'),
+    epic: t('content.profil.rarityEpic'),
+    legendary: t('content.profil.rarityLegendary'),
+  };
 
   useEffect(() => {
     if (!isHydrated || !nume) return;
@@ -71,7 +75,7 @@ export default function ProfilPage() {
             <span className="text-4xl">🥚</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-heading">
-            {nume || "Anonim"}
+            {nume || t('content.profil.noName')}
           </h1>
           {userStats.regiune && userStats.regiune !== "Alege regiunea..." && (
             <p className="text-sm font-bold text-red-400">{userStats.regiune}</p>
@@ -82,15 +86,15 @@ export default function ProfilPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-card border border-green-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-green-400">{wins}</p>
-            <p className="text-xs font-bold text-green-500 uppercase tracking-wide mt-1">Victorii</p>
+            <p className="text-xs font-bold text-green-500 uppercase tracking-wide mt-1">{t('content.profil.victories')}</p>
           </div>
           <div className="bg-card border border-red-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-red-400">{losses}</p>
-            <p className="text-xs font-bold text-red-500 uppercase tracking-wide mt-1">Înfrângeri</p>
+            <p className="text-xs font-bold text-red-500 uppercase tracking-wide mt-1">{t('content.profil.defeats')}</p>
           </div>
           <div className="bg-card border border-amber-900/20 rounded-2xl p-4 text-center">
             <p className="text-3xl font-black text-amber-400">{winRate}%</p>
-            <p className="text-xs font-bold text-amber-500 uppercase tracking-wide mt-1">Win Rate</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-wide mt-1">{t('content.profil.winRate')}</p>
           </div>
         </div>
 
@@ -116,7 +120,7 @@ export default function ProfilPage() {
         {/* Achievements */}
         <section>
           <h2 className="text-xl font-black text-heading mb-4 flex items-center gap-2">
-            <span>🏅</span> Realizări ({earnedKeys.size}/{Object.keys(ALL_ACHIEVEMENTS).length})
+            <span>🏅</span> {t('content.profil.achievements')} ({t('content.profil.achievementsCount', { earned: earnedKeys.size, total: Object.keys(ALL_ACHIEVEMENTS).length })})
           </h2>
 
           {loading ? (
@@ -160,10 +164,10 @@ export default function ProfilPage() {
 
         {!nume && (
           <div className="text-center bg-red-900/10 border border-red-900/20 rounded-2xl p-6">
-            <p className="text-dim text-sm mb-3">Pune-ți o poreclă pentru a vedea statisticile tale.</p>
-            <Link href="/" className="inline-block bg-red-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 transition-all">
-              Mergi la joc
-            </Link>
+            <p className="text-dim text-sm mb-3">{t('content.profil.setNameFirst')}</p>
+            <LocaleLink href="/" className="inline-block bg-red-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 transition-all">
+              {t('content.despre.ctaOnline')}
+            </LocaleLink>
           </div>
         )}
       </div>

@@ -1,21 +1,26 @@
-import Link from "next/link";
+"use client";
 
-const navLinks = [
-  { href: "/traditii", label: "Tradiții" },
-  { href: "/retete", label: "Rețete" },
-  { href: "/urari", label: "Urări" },
-  { href: "/vopsit-natural", label: "Vopsit" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/ghid", label: "Ghid" },
-  { href: "/clasament", label: "Clasament" },
-];
+import LocaleLink from "./LocaleLink";
+import { useT } from "@/app/i18n/useT";
 
 export default function ContentNav({ current }) {
+  const t = useT();
+
+  const navLinks = [
+    { href: "/traditii", label: t('discover.traditions') },
+    { href: "/retete", label: t('discover.recipes') },
+    { href: "/urari", label: t('discover.greetings') },
+    { href: "/vopsit-natural", label: t('discover.dyeing') },
+    { href: "/calendar", label: t('discover.calendar') },
+    { href: "/ghid", label: t('discover.guide') },
+    { href: "/clasament", label: t('discover.leaderboard') },
+  ];
+
   return (
-    <nav aria-label="Pagini educaționale" className="w-full overflow-x-auto scrollbar-hide border-b border-red-900/10 bg-card">
+    <nav aria-label="Content pages" className="w-full overflow-x-auto scrollbar-hide border-b border-red-900/10 bg-card">
       <div className="flex items-center gap-1 px-4 py-2 max-w-4xl mx-auto">
         {navLinks.map(link => (
-          <Link
+          <LocaleLink
             key={link.href}
             href={link.href}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
@@ -25,7 +30,7 @@ export default function ContentNav({ current }) {
             }`}
           >
             {link.label}
-          </Link>
+          </LocaleLink>
         ))}
       </div>
     </nav>

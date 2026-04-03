@@ -1,21 +1,20 @@
-import Link from "next/link";
+"use client";
 
-export const metadata = {
-  title: "Politica de Confidențialitate",
-  description: "Politica de confidențialitate a site-ului Ciocnim.ro — cum colectăm și protejăm datele tale.",
-  alternates: { canonical: "https://ciocnim.ro/privacy" },
-};
+import LocaleLink from "../../components/LocaleLink";
+import { useT } from "../../i18n/useT";
 
 export default function PrivacyPage() {
+  const t = useT();
+
   return (
     <main className="min-h-screen bg-main text-body">
       <div className="max-w-2xl mx-auto px-4 py-12 space-y-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href="/" className="text-red-400 hover:text-red-300 transition-colors text-sm font-bold">← Acasă</Link>
+          <LocaleLink href="/" className="text-red-400 hover:text-red-300 transition-colors text-sm font-bold">← Acasă</LocaleLink>
         </div>
 
-        <h1 className="text-3xl font-black text-heading">Politica de Confidențialitate</h1>
-        <p className="text-xs text-muted">Ultima actualizare: 20 martie 2026</p>
+        <h1 className="text-3xl font-black text-heading">{t('content.privacy.pageTitle')}</h1>
+        <p className="text-xs text-muted">{t('content.privacy.lastUpdated')}: 20 martie 2026</p>
 
         <section className="space-y-4 text-sm text-body leading-relaxed">
           <h2 className="text-lg font-bold text-heading mt-6">1. Ce date colectăm</h2>
@@ -57,7 +56,7 @@ export default function PrivacyPage() {
         </section>
 
         <div className="pt-8 border-t border-red-900/20">
-          <Link href="/" className="text-sm text-dim hover:text-red-400 transition-colors font-bold">← Înapoi la joc</Link>
+          <LocaleLink href="/" className="text-sm text-dim hover:text-red-400 transition-colors font-bold">← Înapoi la joc</LocaleLink>
         </div>
       </div>
     </main>
