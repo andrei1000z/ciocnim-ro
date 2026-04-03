@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getNextEaster } from "@/app/lib/easterUtils";
+import { useT } from "@/app/i18n/useT";
+import { useLocaleConfig } from "./DictionaryProvider";
 
 // Memoized outside component — Easter date doesn't change within a session
 let cachedEaster = null;
@@ -34,6 +36,7 @@ function getState() {
 
 export default function EasterCountdown() {
   const [state, setState] = useState(getState);
+  const t = useT();
 
   useEffect(() => {
     const interval = setInterval(() => setState(getState()), 1000);
@@ -45,23 +48,23 @@ export default function EasterCountdown() {
   if (state.type === "risen") {
     return (
       <div className="rounded-2xl border border-amber-500/20 bg-amber-900/10 p-5 shadow-sm text-center">
-        <p className="text-2xl font-black text-amber-400 mb-1">Hristos a Înviat! ✝️</p>
-        <p className="text-xs font-bold text-amber-500/60">Paște Fericit tuturor!</p>
+        <p className="text-2xl font-black text-amber-400 mb-1">{t('countdown.risen')}</p>
+        <p className="text-xs font-bold text-amber-500/60">{t('countdown.happyEaster')}</p>
       </div>
     );
   }
 
   const units = [
-    { val: state.zile, label: "Zile" },
-    { val: state.ore, label: "Ore" },
-    { val: state.min, label: "Min" },
-    { val: state.sec, label: "Sec" },
+    { val: state.zile, label: t('countdown.days') },
+    { val: state.ore, label: t('countdown.hours') },
+    { val: state.min, label: t('countdown.minutes') },
+    { val: state.sec, label: t('countdown.seconds') },
   ];
 
   return (
     <div className="rounded-2xl border border-red-900/20 bg-card p-4 shadow-sm">
       <p className="text-xs font-bold text-red-500/60 uppercase tracking-[0.3em] text-center mb-3">
-        Până la Paștele Ortodox {state.year}
+        {t('countdown.untilOrthodox', { year: state.year })}
       </p>
       <div className="grid grid-cols-4 gap-2">
         {units.map(u => (

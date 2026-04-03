@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const REGIUNI_ISTORICE = ["Transilvania", "Moldova", "Muntenia", "Oltenia", "Dobrogea", "Crișana", "Banat", "Maramureș", "Bucovina", "Diaspora"];
+import { useT } from "@/app/i18n/useT";
+import { useLocaleConfig } from "./DictionaryProvider";
 
 // ─── Mini Egg SVG ──────────────────────────────────────────────────────────────
 const MiniEgg = ({ grad1, grad2, patternType, patternColor }) => {
@@ -53,6 +53,7 @@ const MiniEgg = ({ grad1, grad2, patternType, patternColor }) => {
 
 // ─── Selector Culoare ───────────────────────────────────────────────────────────
 export const ColorSelector = ({ selected, onSelect }) => {
+  const t = useT();
   const culori = [
     { id: "red", label: "Roșu", grad1: '#dc2626', grad2: '#7f1d1d', patternType: 'cross-stitch', patternColor: 'rgba(255,255,255,0.2)' },
     { id: "blue", label: "Albastru", grad1: '#2563eb', grad2: '#1e3a8a', patternType: 'brau', patternColor: 'rgba(255,255,255,0.25)' },
@@ -61,7 +62,7 @@ export const ColorSelector = ({ selected, onSelect }) => {
   ];
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-bold text-dim uppercase tracking-wide">Culoare Ou</label>
+      <label className="block text-xs font-bold text-dim uppercase tracking-wide">{t('eggColor')}</label>
       <div className="grid grid-cols-4 gap-1.5">
         {culori.map(c => (
           <motion.button
@@ -87,16 +88,21 @@ export const ColorSelector = ({ selected, onSelect }) => {
 
 // ─── Selector Regiune ───────────────────────────────────────────────────────────
 export const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
+  const t = useT();
+  const { regions } = useLocaleConfig();
   const [isOpen, setIsOpen] = useState(false);
+
+  const REGIUNI = regions || ["Transilvania", "Moldova", "Muntenia", "Oltenia", "Dobrogea", "Crișana", "Banat", "Maramureș", "Bucovina", "Diaspora"];
+
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-bold text-dim uppercase tracking-wide">Regiunea Ta</label>
+      <label className="block text-xs font-bold text-dim uppercase tracking-wide">{t('regionLabel')}</label>
       <div className="relative">
         <button
           onClick={() => setIsOpen(v => !v)}
           className="w-full px-3 py-2.5 bg-elevated rounded-xl border border-edge-strong font-semibold text-left flex justify-between items-center hover:border-red-800 transition-all text-sm"
         >
-          <span className={selectedRegion ? "text-body" : "text-dim text-xs"}>{selectedRegion || "Alege..."}</span>
+          <span className={selectedRegion ? "text-body" : "text-dim text-xs"}>{selectedRegion || t('regionChoose')}</span>
           <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }} className="text-dim text-xs">▾</motion.span>
         </button>
         <AnimatePresence>
@@ -108,7 +114,7 @@ export const RegionSelector = ({ selectedRegion, onSelectRegion }) => {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full left-0 w-full mb-1.5 bg-surface/95 backdrop-blur-xl rounded-2xl border border-edge-strong p-2 grid grid-cols-2 gap-1 z-50 shadow-2xl shadow-black/30"
             >
-              {REGIUNI_ISTORICE.map(r => (
+              {REGIUNI.map(r => (
                 <button
                   key={r}
                   onClick={() => { onSelectRegion(r); setIsOpen(false); }}

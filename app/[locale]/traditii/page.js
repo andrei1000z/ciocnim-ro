@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
-import PageHeader from "../components/PageHeader";
-import ContentNav from "../components/ContentNav";
+import PageHeader from "../../components/PageHeader";
+import ContentNav from "../../components/ContentNav";
 
 const ArticleSection = ({ title, icon, children, delay = 0 }) => (
   <motion.article

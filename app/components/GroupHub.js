@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { safeCopy } from "../lib/utils";
+import { useT } from "@/app/i18n/useT";
 
 const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onLeave, onRename, onProvoca, onKick }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [copyText, setCopyText] = useState("🔗 Invită");
+  const t = useT();
+  const [copyText, setCopyText] = useState(t('groups.invite'));
   const currentTeam = teams?.[activeTeamIndex];
   const [newName, setNewName] = useState(currentTeam?.details?.nume || "");
   const isCreator = currentTeam?.details?.creator === numePreluat?.toUpperCase().trim();
@@ -20,20 +22,20 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
 
   const handleInvite = async () => {
     const url = `${window.location.origin}/?joinTeam=${currentTeam.details.id}`;
-    const shareText = `Hai în grupul meu de ciocnit ouă! Intră pe ${url} și arată-ne cine are cel mai tare ou 🥚⚔️`;
+    const shareText = t('groups.shareInvite', { url });
     if (navigator.share) {
-      try { await navigator.share({ title: "Ciocnim.ro - Hai la ciocneală!", text: shareText, url }); } catch {}
+      try { await navigator.share({ title: t('groups.shareTitle'), text: shareText, url }); } catch {}
     } else {
       safeCopy(shareText);
-      setCopyText("✅ Copiat!");
-      setTimeout(() => setCopyText("🔗 Invită"), 2000);
+      setCopyText(t('groups.copied'));
+      setTimeout(() => setCopyText(t('groups.invite')), 2000);
     }
   };
 
   return (
     <div className="rounded-2xl overflow-hidden border border-red-900/20 bg-card shadow-sm">
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-red-900/10 bg-red-900/20">
-        <span className="font-bold text-heading text-sm">👥 Grupul Meu</span>
+        <span className="font-bold text-heading text-sm">{t('groups.myGroup')}</span>
         {teams.length > 1 && (
           <div className="flex items-center gap-1.5">
             <button onClick={() => setActiveTeamIndex(p => (p - 1 + teams.length) % teams.length)} className="w-6 h-6 bg-red-800 text-white rounded-full text-xs hover:bg-red-900 transition-all flex items-center justify-center">◀</button>
@@ -59,7 +61,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
         </div>
         <div className="flex gap-2">
           <button onClick={handleInvite} className="flex-1 py-2.5 bg-red-800 text-white rounded-xl font-bold text-xs hover:bg-red-900 transition-all active:scale-95">{copyText}</button>
-          <button onClick={() => onLeave(currentTeam.details.id)} className="px-4 py-2.5 border border-red-900/30 text-red-400 rounded-xl font-bold text-xs hover:bg-red-900/20 transition-all active:scale-95">Ieși</button>
+          <button onClick={() => onLeave(currentTeam.details.id)} className="px-4 py-2.5 border border-red-900/30 text-red-400 rounded-xl font-bold text-xs hover:bg-red-900/20 transition-all active:scale-95">{t('groups.leave')}</button>
         </div>
         <div className="space-y-1.5 max-h-64 overflow-y-auto">
           {currentTeam.top.map((m, i) => (
@@ -81,7 +83,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
               </div>
             </div>
           ))}
-          {currentTeam.top.length <= 1 && <p className="text-center text-dim text-xs py-4">Invită prieteni să joace!</p>}
+          {currentTeam.top.length <= 1 && <p className="text-center text-dim text-xs py-4">{t('groups.inviteFriends')}</p>}
         </div>
       </div>
     </div>

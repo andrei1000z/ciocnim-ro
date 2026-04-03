@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
+import { useT } from "@/app/i18n/useT";
 
 const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   const [roomCode, setRoomCode] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [roomError, setRoomError] = useState("");
+  const t = useT();
 
   useEffect(() => {
     if (isOpen) { document.body.style.overflow = "hidden"; setRoomError(""); }
@@ -22,7 +24,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
     setIsCreating(true);
     try {
       const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'creeaza-camera-privata', gameMode: 'classic' }) });
-      if (!res.ok) { setRoomError("Eroare server. Încearcă din nou."); return; }
+      if (!res.ok) { setRoomError(t('playModal.serverError')); return; }
       const data = await res.json();
       if (data.success) {
         try {
@@ -30,21 +32,21 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
         } catch {}
         onClose();
         router.push(`/joc/privat-${data.cod}`);
-      } else { setRoomError(data.error || "Nu s-a putut crea camera."); }
-    } catch { setRoomError("Eroare de rețea. Încearcă din nou."); }
+      } else { setRoomError(data.error || t('playModal.cantCreate')); }
+    } catch { setRoomError(t('playModal.networkError')); }
     finally { setIsCreating(false); }
   };
 
   const joinRoom = async () => {
-    if (roomCode.length !== 4) { setRoomError("Codul are exact 4 caractere!"); return; }
+    if (roomCode.length !== 4) { setRoomError(t('playModal.code4chars')); return; }
     setIsJoining(true); setRoomError("");
     try {
       const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'check-room', cod: roomCode }) });
-      if (!res.ok) { setRoomError("Eroare server. Încearcă din nou."); return; }
+      if (!res.ok) { setRoomError(t('playModal.serverError')); return; }
       const data = await res.json();
-      if (!data.success) { setRoomError(data.error || "Camera este ocupată!"); }
+      if (!data.success) { setRoomError(data.error || t('playModal.roomOccupied')); }
       else { onClose(); router.push(`/joc/privat-${roomCode}`); }
-    } catch { setRoomError("Eroare de rețea. Încearcă din nou."); }
+    } catch { setRoomError(t('playModal.networkError')); }
     finally { setIsJoining(false); }
   };
 
@@ -66,8 +68,8 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
       >
         <div className="flex justify-between items-center mb-5">
           <div>
-            <h2 className="text-lg font-black text-heading">Joacă cu un Prieten 🥚</h2>
-            <p className="text-xs mt-0.5 text-dim">Creezi o cameră, trimiți codul prietenului</p>
+            <h2 className="text-lg font-black text-heading">{t('playModal.title')}</h2>
+            <p className="text-xs mt-0.5 text-dim">{t('playModal.subtitle')}</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 bg-elevated hover:bg-overlay rounded-full flex items-center justify-center transition-colors text-sm text-dim">×</button>
         </div>
@@ -80,18 +82,18 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             disabled={isCreating}
             className="w-full bg-red-800 hover:bg-red-900 disabled:opacity-60 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-red-900/20"
           >
-            {isCreating ? "Se creează..." : "Creează Cameră Nouă"}
+            {isCreating ? t('playModal.creating') : t('playModal.createRoom')}
           </motion.button>
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-edge-strong" />
-            <span className="text-xs font-bold uppercase tracking-wider text-dim">sau</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-dim">{t('playModal.or')}</span>
             <div className="flex-1 h-px bg-edge-strong" />
           </div>
           <input
             value={roomCode}
             onChange={e => { setRoomCode(e.target.value.toUpperCase().trim()); setRoomError(""); }}
             onKeyDown={e => e.key === "Enter" && joinRoom()}
-            placeholder="COD CAMERĂ"
+            placeholder={t('playModal.roomCodePlaceholder')}
             maxLength={4}
             className={`w-full px-4 py-3 rounded-2xl border-2 font-bold text-center text-base uppercase outline-none transition-all text-heading bg-elevated focus:bg-elevated-hover ${roomError ? "border-red-400 focus:border-red-600" : "border-edge-strong focus:border-red-800"}`}
           />
@@ -103,7 +105,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             disabled={isJoining}
             className="w-full bg-overlay hover:bg-elevated-hover disabled:opacity-60 text-heading py-3 rounded-2xl font-bold text-sm transition-all"
           >
-            {isJoining ? "Se verifică..." : "Intră cu Codul"}
+            {isJoining ? t('playModal.verifying') : t('playModal.joinWithCode')}
           </motion.button>
         </div>
       </motion.div>

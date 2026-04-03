@@ -4,8 +4,8 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
-import PageHeader from "../components/PageHeader";
-import ContentNav from "../components/ContentNav";
+import PageHeader from "../../components/PageHeader";
+import ContentNav from "../../components/ContentNav";
 
 // ─── WhatsApp share helper ──────────────────────────────────────────────────
 const shareWhatsApp = (text) => {

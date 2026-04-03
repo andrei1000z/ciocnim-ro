@@ -3,9 +3,13 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { safeCopy } from "../lib/utils";
+import { useT } from "@/app/i18n/useT";
+import { useLocaleConfig } from "./DictionaryProvider";
 
 const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   const [view, setView] = useState("jucatori");
+  const t = useT();
+  const { locale } = useLocaleConfig();
 
   const maxRegionScore = useMemo(() => {
     if (!topRegiuni || topRegiuni.length === 0) return 1;
@@ -40,10 +44,12 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
 
   const medals = ["🥇", "🥈", "🥉"];
 
+  const victLabel = winsNeeded === 1 ? t('leaderboard.victory') : t('leaderboard.victories');
+
   return (
     <div className="rounded-2xl overflow-hidden border border-edge bg-card shadow-lg shadow-black/20">
       <div className="flex">
-        {[["jucatori", "🏆 Jucători"], ["regiuni", "🗺️ Regiuni"]].map(([v, label]) => (
+        {[["jucatori", t('leaderboard.players')], ["regiuni", t('leaderboard.regions')]].map(([v, label]) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -74,16 +80,16 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                     <div className="mt-3 pt-3 border-t border-red-900/8">
                       <p className="text-center text-xs font-semibold text-red-400">
                         {myRank === 1
-                          ? "🎉 Ești Campion Național!"
+                          ? t('leaderboard.champion')
                           : myRank !== null
-                            ? `Locul #${myRank} · mai ai nevoie de ${winsNeeded} ${winsNeeded === 1 ? "victorie" : "victorii"} pentru locul ${targetRank}`
-                            : `Mai ai nevoie de ${winsNeeded} ${winsNeeded === 1 ? "victorie" : "victorii"} pentru locul ${targetRank} în clasament`}
+                            ? t('leaderboard.rank', { rank: myRank, needed: winsNeeded, victLabel, target: targetRank })
+                            : t('leaderboard.rank', { rank: myRank, needed: winsNeeded, victLabel, target: targetRank })}
                       </p>
                     </div>
                   )}
                 </>
               ) : (
-                <p className="text-center text-dim text-sm py-8">Niciun jucător încă. Fii primul!</p>
+                <p className="text-center text-dim text-sm py-8">{t('leaderboard.noPlayers')}</p>
               )}
             </motion.div>
           ) : (
@@ -106,7 +112,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                   </div>
                 ))
               ) : (
-                <p className="text-center text-dim text-sm py-8">Așteptăm prima bătălie...</p>
+                <p className="text-center text-dim text-sm py-8">{t('leaderboard.noRegions')}</p>
               )}
             </motion.div>
           )}
@@ -115,19 +121,19 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
           <button
             onClick={() => {
               const text = myRank === 1
-                ? `Sunt Campionul Național la ciocnit ouă pe ciocnim.ro! Îndrăznește să mă provoci? 🥚🏆`
+                ? t('leaderboard.shareChampion')
                 : myRank !== null
-                  ? `Sunt pe locul ${myRank} în clasamentul național de ciocnit ouă! Hai și tu la o ciocneală pe ciocnim.ro 🥚⚔️`
-                  : `Hai la o ciocneală de ouă pe ciocnim.ro! 🥚⚔️`;
+                  ? t('leaderboard.shareRank', { rank: myRank })
+                  : t('leaderboard.shareGeneric');
               if (navigator.share) {
-                navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
+                navigator.share({ title: t('seo.siteName'), text, url: `https://trosc.gg/${locale}` }).catch(() => {});
               } else {
-                safeCopy(`${text}\nhttps://ciocnim.ro`);
+                safeCopy(`${text}\nhttps://trosc.gg/${locale}`);
               }
             }}
             className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-elevated transition-all flex items-center justify-center gap-2 rounded-b-xl"
           >
-            <span>📲</span> Distribuie clasamentul tău
+            {t('leaderboard.shareBtn')}
           </button>
         )}
       </div>

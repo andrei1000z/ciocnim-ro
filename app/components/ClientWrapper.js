@@ -5,6 +5,8 @@ import Pusher from "pusher-js";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { safeLS } from "@/app/lib/utils";
+import { useT } from "@/app/i18n/useT";
+import { useLocaleConfig } from "./DictionaryProvider";
 
 const GlobalStatsContext = createContext();
 export const useGlobalStats = () => useContext(GlobalStatsContext);
@@ -32,10 +34,11 @@ function ToastBar({ msg, onDone }) {
 
 // Achievement toast — shows when a new achievement is unlocked
 function AchievementToast({ achievement, onDone }) {
+  const t = useT();
   useEffect(() => {
     if (!achievement) return;
-    const t = setTimeout(onDone, 5000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onDone, 5000);
+    return () => clearTimeout(timer);
   }, [achievement, onDone]);
   if (!achievement) return null;
   return (
@@ -48,7 +51,7 @@ function AchievementToast({ achievement, onDone }) {
       className="fixed top-4 left-1/2 -translate-x-1/2 z-[1100] px-6 py-4 rounded-2xl bg-gradient-to-br from-amber-900/90 to-red-900/90 border border-amber-500/30 shadow-2xl shadow-amber-900/30 text-center pointer-events-auto backdrop-blur-xl max-w-[90vw]"
     >
       <div className="text-3xl mb-1">{achievement.icon}</div>
-      <div className="text-xs font-black uppercase tracking-widest text-amber-400 mb-0.5">Achievement deblocat!</div>
+      <div className="text-xs font-black uppercase tracking-widest text-amber-400 mb-0.5">{t('achievement.unlocked')}</div>
       <div className="font-bold text-white text-sm">{achievement.name}</div>
       <div className="text-[11px] text-amber-200/60 mt-0.5">{achievement.desc}</div>
     </motion.div>
@@ -56,6 +59,8 @@ function AchievementToast({ achievement, onDone }) {
 }
 
 function CookieBanner() {
+  const t = useT();
+  const { locale } = useLocaleConfig();
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     try {
@@ -78,42 +83,43 @@ function CookieBanner() {
       className="fixed bottom-4 left-4 right-4 z-[1300] max-w-md mx-auto bg-surface-hover border border-red-900/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex flex-col gap-3"
     >
       <p className="text-xs text-body leading-relaxed">
-        Salvăm preferințele tale (poreclă, temă, statistici) doar în browserul tău — nu trimitem date către terți și nu folosim cookies de tracking.{' '}
-        <a href="/privacy" className="text-red-400 hover:text-red-300 underline">Politica de confidențialitate</a>.
+        {t('cookie.text')}{' '}
+        <a href={`/${locale}/privacy`} className="text-red-400 hover:text-red-300 underline">{t('cookie.privacyLink')}</a>.
       </p>
       <button
         onClick={accept}
         className="self-end px-5 py-2 bg-red-700 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 border border-red-600"
       >
-        Am înțeles
+        {t('cookie.accept')}
       </button>
     </motion.div>
   );
 }
 
 function LoadingScreen() {
+  const t = useT();
   const [timedOut, setTimedOut] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setTimedOut(true), 10000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setTimedOut(true), 10000);
+    return () => clearTimeout(timer);
   }, []);
   return (
     <div className="fixed inset-0 bg-main z-[100001] flex flex-col items-center justify-center">
       {!timedOut ? (
         <div className="flex flex-col items-center gap-5">
           <span className="text-8xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</span>
-          <p className="text-sm font-black text-red-500 uppercase tracking-[0.4em] animate-pulse">Se încarcă...</p>
+          <p className="text-sm font-black text-red-500 uppercase tracking-[0.4em] animate-pulse">{t('loading.text')}</p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5 text-center px-6 max-w-sm">
           <span className="text-6xl" role="img" aria-label="Eroare">⚠️</span>
-          <p className="text-base font-black text-red-400">Ceva nu a mers bine</p>
-          <p className="text-sm text-dim">Pagina nu s-a putut încărca. Verifică conexiunea la internet și încearcă din nou.</p>
+          <p className="text-base font-black text-red-400">{t('loading.errorTitle')}</p>
+          <p className="text-sm text-dim">{t('loading.errorDescription')}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-2 px-8 py-3 bg-red-700 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 border border-red-600"
           >
-            Reîncearcă
+            {t('loading.retry')}
           </button>
         </div>
       )}
@@ -149,6 +155,8 @@ function checkDataReset() {
 
 export default function ClientWrapper({ children }) {
   const router = useRouter();
+  const t = useT();
+  const { locale } = useLocaleConfig();
 
   useEffect(() => { checkDataReset(); }, []);
 
@@ -252,7 +260,7 @@ export default function ClientWrapper({ children }) {
     const cleanName = nouNume.toUpperCase().trim();
     if (cleanName === nume) return true;
     if (cleanName.length < 2) {
-      setToastMsg("Numele trebuie să aibă minim 2 caractere.");
+      setToastMsg(t('notifications.nameMinChars'));
       return false;
     }
 
@@ -272,7 +280,7 @@ export default function ClientWrapper({ children }) {
       const data = await res.json();
 
       if (!data.success) {
-        setToastMsg(data.error || "Acel nume este deja luat! Alege altul.");
+        setToastMsg(data.error || t('notifications.nameTaken'));
         return false;
       }
 
@@ -286,10 +294,10 @@ export default function ClientWrapper({ children }) {
       return true;
 
     } catch {
-      setToastMsg("Eroare la rețea. Încearcă din nou.");
+      setToastMsg(t('notifications.errorNetwork'));
       return false;
     }
-  }, [nume, setToastMsg]);
+  }, [nume, setToastMsg, t]);
 
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)
@@ -325,9 +333,9 @@ export default function ClientWrapper({ children }) {
         }
       }
     } catch {
-      setToastMsg("Conexiune instabilă — ciocnirea s-ar putea să nu se fi salvat.");
+      setToastMsg(t('notifications.unstableConnection'));
     }
-  }, [userStats.regiune, nume, updateUserStats]);
+  }, [userStats.regiune, nume, updateUserStats, t]);
 
   // HEARTBEAT: ping la fiecare 120s pentru a număra utilizatorii activi
   useEffect(() => {
@@ -523,11 +531,11 @@ export default function ClientWrapper({ children }) {
               >
                 <div className="relative z-10 text-center">
                   <div className="inline-flex items-center gap-2 bg-red-900/30 px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-400 rounded-full mb-4">
-                    ⚔️ Provocare
+                    {t('notifications.challenge')}
                   </div>
 
                   <p className="font-black text-2xl md:text-3xl text-heading leading-tight">
-                    <span className="text-red-500">{notificare.deLa}</span> <br/> te cheamă la duel!
+                    <span className="text-red-500">{notificare.deLa}</span> <br/> {t('notifications.challengeText')}
                   </p>
 
                   <div className="flex flex-col gap-3 pt-6 relative z-50">
@@ -535,13 +543,13 @@ export default function ClientWrapper({ children }) {
                       className="w-full bg-red-700 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg shadow-red-900/30 active:scale-95 text-white cursor-pointer pointer-events-auto"
                       onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?provocare=true&teamId=${notificare.teamId || ''}`); }}
                     >
-                      Acceptă
+                      {t('notifications.accept')}
                     </button>
                     <button
                       className="w-full bg-elevated py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-muted hover:bg-elevated-hover hover:text-dim transition-all active:scale-95 cursor-pointer pointer-events-auto"
                       onClick={() => setNotificare(null)}
                     >
-                      Refuză
+                      {t('notifications.decline')}
                     </button>
                   </div>
                 </div>

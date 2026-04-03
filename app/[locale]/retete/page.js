@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { safeLS, safeCopy } from "@/app/lib/utils";
 import { retete } from "./data";
-import PageHeader from "../components/PageHeader";
-import ContentNav from "../components/ContentNav";
+import PageHeader from "../../components/PageHeader";
+import ContentNav from "../../components/ContentNav";
 
 // ─── Recipe Card (Grid View) ────────────────────────────────────────────────
 const RecipeCard = ({ recipe, onClick, index }) => (

@@ -3,75 +3,66 @@
 
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useGlobalStats } from "../../components/ClientWrapper";
+import { useGlobalStats } from "../../../components/ClientWrapper";
+import { useT } from "../../../i18n/useT";
+import { useLocaleConfig } from "../../../components/DictionaryProvider";
 // Dynamic import — only loads canvas-confetti when needed (victory)
 const fireConfetti = async (opts) => {
   const confetti = (await import("canvas-confetti")).default;
   confetti(opts);
 };
 import { motion, AnimatePresence } from "framer-motion";
-import { safeCopy } from "../../lib/utils";
-import { playCrack, playVictory, playDefeat, isSoundEnabled, toggleSound } from "../../lib/sounds";
+import { safeCopy } from "../../../lib/utils";
+import { playCrack, playVictory, playDefeat, isSoundEnabled, toggleSound } from "../../../lib/sounds";
 
-// --- BAZA DE DATE CITATE ---
-const CITATE_IERTARE = [
-  "Iartă, și vei fi iertat. Oul tău s-a jertfit pentru bucuria aproapelui.",
-  "Iertarea este podul către liniștea sufletului.",
-  "Fii bun, căci toți cei pe care îi întâlnești duc o luptă grea.",
-  "Că de veţi ierta oamenilor greşealele lor, ierta-va şi vouă Tatăl vostru cel Ceresc."
-];
-
-const CITATE_SMERENIE = [
-  "Dumnezeu celor mândri le stă împotrivă, iar celor smeriți le dă har.",
-  "Cine se va smeri pe sine, va fi înălțat.",
-  "Cel mai mare dintre voi să fie slujitorul tuturor.",
-  "Biruința e trecătoare, tradiția și omenia sunt veșnice."
-];
+// Quotes (CITATE_IERTARE / CITATE_SMERENIE) now loaded from dictionary via t('quotes.forgiveness') / t('quotes.humility')
 
 // ==========================================================================================
 // 1. ENGINE GRAFIC: OuTitan (Renderizare Liquid Glass)
 // ==========================================================================================
 
 const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => {
+  const t = useT();
   const skinId = isGolden ? 'golden' : (skin || 'red');
 
   const skins = useMemo(() => ({
     red: {
-      label: 'Roșu de Rânduială',
+      label: t('eggSkins.red'),
       grad1: '#dc2626', grad2: '#7f1d1d',
       glow: 'rgba(220,38,38,0.5)',
       patternColor: 'rgba(255,255,255,0.18)',
       patternType: 'cross-stitch',
     },
     blue: {
-      label: 'Albastru Safir',
+      label: t('eggSkins.blue'),
       grad1: '#2563eb', grad2: '#1e3a8a',
       glow: 'rgba(37,99,235,0.5)',
       patternColor: 'rgba(255,255,255,0.25)',
       patternType: 'brau',
     },
     gold: {
-      label: 'Auriu Imperial',
+      label: t('eggSkins.gold'),
       grad1: '#f59e0b', grad2: '#78350f',
       glow: 'rgba(245,158,11,0.5)',
       patternColor: 'rgba(255,255,255,0.3)',
       patternType: 'ie-gala',
     },
     green: {
-      label: 'Verde de Codru',
+      label: t('eggSkins.green'),
       grad1: '#166534', grad2: '#052e16',
       glow: 'rgba(22,101,52,0.5)',
       patternColor: 'rgba(255,255,255,0.2)',
       patternType: 'brad',
     },
     golden: {
-      label: 'Ou de Aur',
+      label: t('eggSkins.golden'),
       grad1: '#fbbf24', grad2: '#78350f',
       glow: 'rgba(251,191,36,0.6)',
       patternColor: 'rgba(255,255,255,0.25)',
       patternType: 'cross-stitch',
     },
-  }), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [t]);
 
   const current = skins[skinId] || skins.red;
   const uid = React.useId().replace(/:/g, '');
@@ -188,6 +179,8 @@ function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef, connectionState } = useGlobalStats();
+  const t = useT();
+  const { locale } = useLocaleConfig();
 
   const [me] = useState({ skin: userStats.skin || 'red', hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);
@@ -283,7 +276,7 @@ function ArenaMaster({ room }) {
       });
       const data = await res.json();
       if (!data.success && data.error === "Camera este ocupată!") {
-        router.replace('/?error=ocupata');
+        router.replace(`/${locale}?error=ocupata`);
         return;
       }
       // Server determines host status
@@ -310,7 +303,7 @@ function ArenaMaster({ room }) {
           const otherPlayer = data.players.find(p => p !== nume.toUpperCase());
           if (otherPlayer && !opponentRef.current) {
             const sd = data.skinData?.[otherPlayer] || {};
-            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', hasStar: sd.hasStar || false, regiune: sd.regiune || 'România' };
+            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', hasStar: sd.hasStar || false, regiune: sd.regiune || (locale === 'bg' ? 'България' : 'România') };
             setOpponent(oppData);
             opponentRef.current = oppData;
             setAtacantName(prev => {
@@ -397,7 +390,7 @@ function ArenaMaster({ room }) {
       const botName = "🤖 BOT";
       const culoriDisponibile = ['red', 'blue', 'gold', 'green'];
       const randomSkin = culoriDisponibile[Math.floor(Math.random() * culoriDisponibile.length)];
-      setOpponent({ jucator: botName, skin: randomSkin, isGolden: false, hasStar: false, regiune: "România" });
+      setOpponent({ jucator: botName, skin: randomSkin, isGolden: false, hasStar: false, regiune: locale === 'bg' ? 'България' : 'România' });
       const botLoveseste = Math.random() > 0.5;
       setAtacantName(botLoveseste ? botName : nume);
     }, waitTime);
@@ -487,7 +480,7 @@ function ArenaMaster({ room }) {
     if (!opponent || rezultat) return;
     const handler = (e) => {
       e.preventDefault();
-      e.returnValue = 'Ești sigur că vrei să ieși din meci?';
+      e.returnValue = t('game.confirmLeave');
       return e.returnValue;
     };
     window.addEventListener('beforeunload', handler);
@@ -515,10 +508,10 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (!rezultat) return;
     const timeout = setTimeout(() => {
-      router.replace('/');
+      router.replace(`/${locale}`);
     }, 45000);
     return () => clearTimeout(timeout);
-  }, [rezultat, router]);
+  }, [rezultat, router, locale]);
 
   const executeBattle = (data) => {
     // Guard cu refs — funcționează chiar și în stale closures din Pusher
@@ -536,9 +529,8 @@ function ArenaMaster({ room }) {
     // INCREMENT GLOBAL — called once here, guarded by rezultatRef (prevents double-call)
     incrementGlobalRef.current(amCastigat, (isProvocare && teamIdPreluat) ? teamIdPreluat : null);
 
-    const citatAles = amCastigat
-      ? CITATE_SMERENIE[Math.floor(Math.random() * CITATE_SMERENIE.length)]
-      : CITATE_IERTARE[Math.floor(Math.random() * CITATE_IERTARE.length)];
+    const quotes = amCastigat ? t('quotes.humility') : t('quotes.forgiveness');
+    const citatAles = Array.isArray(quotes) ? quotes[Math.floor(Math.random() * quotes.length)] : quotes;
     setCitatFinal(citatAles);
 
     // Faza 1: ouăle se mișcă unul spre celălalt (450ms)
@@ -647,11 +639,7 @@ function ArenaMaster({ room }) {
     return () => window.removeEventListener("devicemotion", handleMotion);
   }, [canStrike, handleStrike]);
 
-  const BOT_CHAT_REPLIES = [
-    "Hristos a Înviat! 🥚", "Hai noroc! 💪", "Bine lovit!", "Ouă tari avem noi!",
-    "Așa da! 🎯", "Hai la ciocnit!", "Nu mă bat cu oricine 😎", "Frumos jucăm!",
-    "Paste fericit! 🐣", "Ești bun, dar eu-s mai bun!", "Oul meu e de oțel 🛡️",
-  ];
+  const BOT_CHAT_REPLIES = t('botChat');
 
   const handleChat = () => {
     const msg = chatInput.trim().slice(0, 200);
@@ -696,10 +684,10 @@ function ArenaMaster({ room }) {
 
   const shareRoom = () => {
     const code = room.replace('privat-', '');
-    const url = `${window.location.origin}/joc/${room}`;
-    const text = `Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici:`;
+    const url = `${window.location.origin}/${locale}/joc/${room}`;
+    const text = t('game.shareInvite');
     if (navigator.share) {
-      navigator.share({ title: "Ciocnim.ro - Hai la duel!", text, url }).then(() => {}).catch(() => {
+      navigator.share({ title: t('game.shareTitle'), text, url }).then(() => {}).catch(() => {
         // Fallback if share was dismissed
         safeCopy(`${text} ${url}`);
         setCopied(true);
@@ -714,8 +702,8 @@ function ArenaMaster({ room }) {
 
   const shareWhatsApp = () => {
     const code = room.replace('privat-', '');
-    const url = `${window.location.origin}/joc/${room}`;
-    const text = `Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici: ${url}`;
+    const url = `${window.location.origin}/${locale}/joc/${room}`;
+    const text = `${t('game.shareInvite')} ${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -729,13 +717,13 @@ function ArenaMaster({ room }) {
           <div className="flex items-center gap-2 z-20 flex-shrink-0 mt-2 mb-4 md:mt-4 md:mb-8">
             <button onClick={copyRoomCode} className="group relative bg-elevated backdrop-blur-xl px-5 py-3 md:px-8 md:py-4 rounded-full border border-red-900/30 shadow-lg shadow-black/30 hover:bg-elevated-hover hover:border-red-700/50 transition-all active:scale-95">
               <div className="flex items-center gap-2 md:gap-3 relative z-10">
-                <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-red-500/60 group-hover:text-accent-red transition-colors hidden sm:inline">Cod Cameră: </span>
+                <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-red-500/60 group-hover:text-accent-red transition-colors hidden sm:inline">{t('game.roomCode')}</span>
                 <span className="text-red-500 font-black text-xl md:text-2xl tracking-widest drop-shadow-[0_0_15px_rgba(220,38,38,0.3)]">{room.replace('privat-', '')}</span>
                 <span className="bg-red-900/30 p-1.5 md:p-2 rounded-xl text-xs md:text-xs ml-1 md:ml-2 group-hover:bg-red-900/40 transition-all border border-red-900/30">{copied ? '✅' : '📋'}</span>
               </div>
-              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-xs md:text-xs font-black text-accent-green tracking-widest">COPIAT!</span>}
+              {copied && <span className="absolute -bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 text-xs md:text-xs font-black text-accent-green tracking-widest">{t('game.copied')}</span>}
             </button>
-            <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite prietenului" aria-label="Distribuie link-ul camerei">
+            <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title={t('game.shareRoom')} aria-label={t('game.shareRoom')}>
               <span className="text-base md:text-lg">📲</span>
             </button>
             <button onClick={shareWhatsApp} className="bg-green-700 hover:bg-green-600 text-white p-3 md:p-4 rounded-full border border-green-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite pe WhatsApp" aria-label="Trimite pe WhatsApp">
@@ -752,13 +740,13 @@ function ArenaMaster({ room }) {
               <span className={`relative inline-flex rounded-full h-2 w-2 ${connectionState === 'connected' ? 'bg-green-500' : connectionState === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
             </span>
             <span className={`text-xs md:text-xs font-black uppercase tracking-[0.2em] ${connectionState === 'connected' ? 'text-accent-green' : connectionState === 'connecting' ? 'text-yellow-400' : 'text-accent-red'}`}>
-              {connectionState === 'connected' ? 'LIVE' : connectionState === 'connecting' ? 'SE CONECTEAZĂ...' : 'DECONECTAT'}
+              {connectionState === 'connected' ? t('game.live') : connectionState === 'connecting' ? t('game.connecting') : t('game.disconnected')}
             </span>
             <span className="text-xs md:text-xs font-black text-heading tabular-nums">{onlineCount || 1}</span>
-            <span className="text-xs md:text-xs font-semibold text-faint">{onlineCount === 1 ? 'persoană' : 'persoane'} online</span>
+            <span className="text-xs md:text-xs font-semibold text-faint">{onlineCount === 1 ? t('game.person') : t('game.persons')} online</span>
             <button onClick={() => { const next = toggleSound(); setIsMuted(!next); }} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
-          <span className="text-xs md:text-xs font-bold text-muted tabular-nums">{totalGlobal.toLocaleString('ro-RO')} ciocniri totale</span>
+          <span className="text-xs md:text-xs font-bold text-muted tabular-nums">{totalGlobal.toLocaleString(locale === 'bg' ? 'bg-BG' : 'ro-RO')} {t('game.totalCracks')}</span>
         </div>
 
         {/* TURN INDICATOR — clar pentru toți */}
@@ -772,7 +760,7 @@ function ArenaMaster({ room }) {
                 : 'bg-amber-900/20 border border-amber-700/20 text-amber-400'
             }`}
           >
-            {canStrike ? "E RÂNDUL TĂU! Apasă butonul de jos!" : "Așteaptă... adversarul lovește!"}
+            {canStrike ? t('game.yourTurn') : t('game.waitOpponent')}
           </motion.div>
         )}
 
@@ -787,7 +775,7 @@ function ArenaMaster({ room }) {
           >
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
             <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/30 border-l-2 border-l-green-500/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
-              <span className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{userStats.regiune || "Muntenia"}</span>
+              <span className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{userStats.regiune || t('game.regionUnknown')}</span>
               <span className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{nume}</span>
             </div>
           </motion.div>
@@ -829,7 +817,7 @@ function ArenaMaster({ room }) {
               <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4 w-full">
                 <OuTitan skin={opponent.skin} spart={rezultat && rezultat.win} hasStar={opponent.hasStar} isGolden={opponent.isGolden} />
                 <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl border border-red-900/30 border-r-2 border-r-red-600/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
-                  <span className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{opponent.regiune || "Necunoscut"}</span>
+                  <span className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{opponent.regiune || t('game.regionUnknown')}</span>
                   <span className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{opponent.jucator}</span>
                 </div>
               </motion.div>
@@ -837,9 +825,9 @@ function ArenaMaster({ room }) {
               <div className="w-full aspect-[1/1.35] bg-card rounded-[2rem] border border-dashed border-red-900/30 flex flex-col items-center justify-center text-center px-3 backdrop-blur-sm relative overflow-hidden gap-2">
                 <span className="text-3xl animate-bounce">🥚</span>
                 <span className="text-xs font-bold text-red-400/60">
-                  {isPrivate ? "Trimite codul!" : "Se caută..."}
+                  {isPrivate ? t('game.sendCode') : t('game.searching')}
                 </span>
-                <span className="text-xs font-medium text-muted">Câteva secunde</span>
+                <span className="text-xs font-medium text-muted">{t('game.fewSeconds')}</span>
               </div>
             )}
           </motion.div>
@@ -861,11 +849,11 @@ function ArenaMaster({ room }) {
             >
               <span className="relative z-10 text-center flex flex-col items-center justify-center gap-1">
                 <span className="font-black uppercase tracking-[0.3em] text-base md:text-lg">
-                  {canStrike ? "💥 CIOCNEȘTE OUL!" : "🛡️ APĂRĂ OUL!"}
+                  {canStrike ? t('game.strike') : t('game.defend')}
                 </span>
                 {canStrike && (
                   <span className="text-xs opacity-70 normal-case tracking-widest font-bold text-red-200 block">
-                    Apasă sau mișcă telefonul
+                    {t('game.tapOrShake')}
                   </span>
                 )}
               </span>
@@ -877,7 +865,7 @@ function ArenaMaster({ room }) {
               animate={{ opacity: 1 }}
               className="w-full py-5 md:py-6 rounded-[2rem] bg-card text-muted border border-red-900/20 backdrop-blur-md text-center flex items-center justify-center shadow-lg"
             >
-              <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base animate-pulse">⚡ CIOCNIRE...</span>
+              <span className="font-black uppercase tracking-[0.3em] text-sm md:text-base animate-pulse">{t('game.cracking')}</span>
             </motion.div>
           )}
         </div>
@@ -897,7 +885,7 @@ function ArenaMaster({ room }) {
             {messages.length === 0 && (
                 <div className="text-center w-full h-full flex flex-col justify-center items-center opacity-40 mt-2 pointer-events-none">
                     <span className="text-xl md:text-2xl mb-1 filter sepia-[0.3]">💬</span>
-                    <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-amber-500/70">Liniște la masă...</span>
+                    <span className="text-xs md:text-xs font-black uppercase tracking-[0.3em] text-amber-500/70">{t('game.chatEmpty')}</span>
                 </div>
             )}
           </div>
@@ -907,7 +895,7 @@ function ArenaMaster({ room }) {
                value={chatInput}
                onChange={e => setChatInput(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && handleChat()}
-               placeholder="SCRIE UN MESAJ..."
+               placeholder={t('game.chatPlaceholder')}
                maxLength={200}
                className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-heading tracking-widest placeholder:text-amber-500/30"
             />
@@ -953,16 +941,16 @@ function ArenaMaster({ room }) {
                   transition={{ delay: 0.3, duration: 0.4 }}
                 >
                   <p className={`text-xs font-black uppercase tracking-[0.4em] mb-1 ${rezultat.win ? 'text-green-400/70' : 'text-red-400/70'}`}>
-                    {rezultat.win ? 'Hristos a Înviat!' : 'Adevărat a Înviat!'}
+                    {rezultat.win ? t('result.greetingWin') : t('result.greetingLose')}
                   </p>
                   <h2 className={`text-3xl md:text-4xl font-black italic tracking-tight ${rezultat.win ? 'text-accent-green' : 'text-accent-red'}`}>
-                    {rezultat.win ? 'Victorie!' : 'Oul s-a spart'}
+                    {rezultat.win ? t('result.victory') : t('result.defeat')}
                   </h2>
                   {/* Scor */}
                   <div className="flex items-center justify-center gap-3 mt-3">
-                    <span className="text-xs font-black text-green-500/70 uppercase tracking-widest">{userStats.wins || 0} victorii</span>
+                    <span className="text-xs font-black text-green-500/70 uppercase tracking-widest">{userStats.wins || 0} {t('result.winsCount')}</span>
                     <span className="text-white/20">·</span>
-                    <span className="text-xs font-black text-red-500/50 uppercase tracking-widest">{userStats.losses || 0} înfrângeri</span>
+                    <span className="text-xs font-black text-red-500/50 uppercase tracking-widest">{userStats.losses || 0} {t('result.lossesCount')}</span>
                   </div>
                 </motion.div>
               </div>
@@ -990,10 +978,11 @@ function ArenaMaster({ room }) {
                 {/* Share Result Button */}
                 <button
                   onClick={async () => {
+                    const siteName = t('seo.siteName');
                     const text = rezultat.win
-                      ? `Am câștigat la ciocnit ouă pe Ciocnim.ro! 🏆🥚 Am ${userStats.wins || 0} victorii. Hai să ne ciocnim!`
-                      : `M-am luptat cinstit la ciocnit ouă pe Ciocnim.ro! 🥚💥 Hai la revanșă!`;
-                    const url = 'https://ciocnim.ro';
+                      ? t('result.shareWinText', { site: siteName, wins: userStats.wins || 0 })
+                      : t('result.shareLoseText', { site: siteName });
+                    const url = `https://${siteName.toLowerCase()}`;
                     // Try to generate and share an image card
                     try {
                       const canvas = document.createElement('canvas');
@@ -1013,25 +1002,25 @@ function ArenaMaster({ room }) {
                       const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                       ctx.fillStyle = rezultat.win ? '#22c55e' : '#ef4444';
                       ctx.font = `bold 72px ${fontFamily}`;
-                      ctx.fillText(rezultat.win ? 'VICTORIE!' : 'Oul s-a spart', 540, 450);
+                      ctx.fillText(rezultat.win ? t('result.victory').toUpperCase() : t('result.defeat'), 540, 450);
                       ctx.fillStyle = '#e5e5e5'; ctx.font = `36px ${fontFamily}`;
                       ctx.fillText(nume || 'Jucător', 540, 550);
                       ctx.fillStyle = '#9ca3af'; ctx.font = `28px ${fontFamily}`;
-                      ctx.fillText(`${userStats.wins || 0} victorii`, 540, 620);
+                      ctx.fillText(`${userStats.wins || 0} ${t('result.winsCount')}`, 540, 620);
                       ctx.fillStyle = 'rgba(220,38,38,0.6)'; ctx.font = `bold 32px ${fontFamily}`;
-                      ctx.fillText('ciocnim.ro', 540, 950);
+                      ctx.fillText(t('seo.siteName').toLowerCase(), 540, 950);
                       const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
                       if (blob && navigator.share && navigator.canShare) {
                         const file = new File([blob], 'rezultat-ciocnim.png', { type: 'image/png' });
                         if (navigator.canShare({ files: [file] })) {
-                          await navigator.share({ files: [file], title: 'Ciocnim.ro', text });
+                          await navigator.share({ files: [file], title: siteName, text });
                           return;
                         }
                       }
                     } catch {}
                     // Fallback to text share
                     if (navigator.share) {
-                      navigator.share({ title: 'Ciocnim.ro', text, url }).catch(() => {
+                      navigator.share({ title: siteName, text, url }).catch(() => {
                         safeCopy(`${text} ${url}`);
                       });
                     } else {
@@ -1040,18 +1029,19 @@ function ArenaMaster({ room }) {
                   }}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-gradient-to-r from-red-700 to-red-600 text-white border-red-500/30 hover:from-red-600 hover:to-red-500 shadow-lg shadow-red-900/30"
                 >
-                  📲 Distribuie Rezultatul
+                  {t('result.shareResult')}
                 </button>
                 <button
                   onClick={() => {
+                    const siteName = t('seo.siteName');
                     const text = rezultat.win
-                      ? `Am câștigat la ciocnit ouă pe Ciocnim.ro! 🏆🥚 Am ${userStats.wins || 0} victorii. Hai să ne ciocnim!`
-                      : `M-am luptat cinstit la ciocnit ouă pe Ciocnim.ro! 🥚💥 Hai la revanșă!`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent(`${text} https://ciocnim.ro`)}`, '_blank');
+                      ? t('result.shareWinText', { site: siteName, wins: userStats.wins || 0 })
+                      : t('result.shareLoseText', { site: siteName });
+                    window.open(`https://wa.me/?text=${encodeURIComponent(`${text} https://${siteName.toLowerCase()}`)}`, '_blank');
                   }}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-green-700 text-white border-green-600/30 hover:bg-green-600 shadow-lg shadow-green-900/30"
                 >
-                  💬 Trimite pe WhatsApp
+                  {t('result.shareWhatsApp')}
                 </button>
                 <button
                   onClick={handleRevansa}
@@ -1063,17 +1053,17 @@ function ArenaMaster({ room }) {
                     }`}
                 >
                   {isBotMatch
-                    ? '⚔️ Revanșă'
+                    ? t('result.revanche')
                     : revansaRequests[nume]
-                      ? `⏳ Așteptăm (${Object.values(revansaRequests).filter(Boolean).length}/2)...`
-                      : `⚔️ Revanșă (${Object.values(revansaRequests).filter(Boolean).length}/2)`
+                      ? `${t('result.waiting')} (${Object.values(revansaRequests).filter(Boolean).length}/2)...`
+                      : `${t('result.revanche')} (${Object.values(revansaRequests).filter(Boolean).length}/2)`
                   }
                 </button>
                 <button
-                  onClick={() => router.push('/')}
+                  onClick={() => router.push(`/${locale}`)}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto text-muted bg-card border-edge hover:bg-card-hover hover:text-dim"
                 >
-                  ← Înapoi acasă
+                  {t('result.home')}
                 </button>
               </motion.div>
             </motion.div>
@@ -1085,6 +1075,11 @@ function ArenaMaster({ room }) {
   );
 }
 
+function ArenaFallback() {
+  const t = useT();
+  return <div className="font-black animate-pulse text-red-500/70 tracking-widest text-sm uppercase flex-1 flex items-center justify-center">{t('game.preparing')}</div>;
+}
+
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
   return (
@@ -1092,7 +1087,7 @@ export default function PaginaJoc({ params }) {
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <Suspense fallback={<div className="font-black animate-pulse text-red-500/70 tracking-widest text-sm uppercase flex-1 flex items-center justify-center">SE PREGĂTEȘTE ARENA...</div>}>
+      <Suspense fallback={<ArenaFallback />}>
         <ArenaMaster room={resolvedParams.room} />
       </Suspense>
     </main>

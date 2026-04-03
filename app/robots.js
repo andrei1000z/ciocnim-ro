@@ -4,10 +4,10 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/joc/'],
+        disallow: ['/api/', '/ro/joc/', '/bg/joc/'],
       },
     ],
-    sitemap: 'https://ciocnim.ro/sitemap.xml',
-    host: 'https://ciocnim.ro',
+    sitemap: 'https://trosc.gg/sitemap.xml',
+    host: 'https://trosc.gg',
   };
 }

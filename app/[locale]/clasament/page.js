@@ -3,10 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import PageHeader from "../components/PageHeader";
-import { useGlobalStats } from "../components/ClientWrapper";
-import { safeCopy } from "../lib/utils";
-import { getCurrentSeason } from "../lib/seasons";
+import PageHeader from "../../components/PageHeader";
+import { useGlobalStats } from "../../components/ClientWrapper";
+import { safeCopy } from "../../lib/utils";
+import { getCurrentSeason } from "../../lib/seasons";
 
 const TABS = [
   { key: "jucatori", label: "Jucători", icon: "🏆" },

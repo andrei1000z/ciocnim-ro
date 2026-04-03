@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import PageHeader from "../components/PageHeader";
-import ContentNav from "../components/ContentNav";
+import PageHeader from "../../components/PageHeader";
+import ContentNav from "../../components/ContentNav";
 
 const datePaste = [
   { an: 2026, ortodox: "12 Aprilie", catolic: "5 Aprilie", special: false },

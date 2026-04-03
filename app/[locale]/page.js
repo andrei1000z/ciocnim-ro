@@ -3,15 +3,17 @@
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useGlobalStats } from "./components/ClientWrapper";
+import { useGlobalStats } from "../components/ClientWrapper";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import Link from "next/link";
-import { esteNumeInterzis, valideazaNume } from "./lib/profanityFilter";
-import DualLeaderboard from "./components/DualLeaderboard";
-import GroupHub from "./components/GroupHub";
-import PlayModal from "./components/PlayModal";
-import EasterCountdown from "./components/EasterCountdown";
-import { safeLS, safeCopy } from "./lib/utils";
+import { esteNumeInterzis, valideazaNume } from "../lib/profanityFilter";
+import DualLeaderboard from "../components/DualLeaderboard";
+import GroupHub from "../components/GroupHub";
+import PlayModal from "../components/PlayModal";
+import EasterCountdown from "../components/EasterCountdown";
+import { safeLS, safeCopy } from "../lib/utils";
+import { useT } from "../i18n/useT";
+import { useLocaleConfig } from "../components/DictionaryProvider";
+import LocaleLink from "../components/LocaleLink";
 
 const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
   initial: { opacity: 0, y: 18 },
@@ -29,6 +31,8 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const { totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats, isHydrated, triggerVibrate, onlineCount, pusherRef: globalPusherRef } = useGlobalStats();
   const prefersReducedMotion = useReducedMotion();
+  const t = useT();
+  const { locale, gameName } = useLocaleConfig();
 
   const [loadedTeams, setLoadedTeams] = useState([]);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -68,10 +72,10 @@ function HomeContent() {
 
   useEffect(() => {
     if (searchParams.get("error") === "ocupata") {
-      setToastMsg("Camera este ocupată! Încearcă alt cod.");
+      setToastMsg(t('notifications.roomOccupied'));
       router.replace("/");
     }
-  }, [searchParams, router, setToastMsg]);
+  }, [searchParams, router, setToastMsg, t]);
 
   const getStoredTeamIds = useCallback(() => {
     try { return JSON.parse(safeLS.get("c_teamIds") || "[]"); } catch { return []; }
@@ -158,7 +162,7 @@ function HomeContent() {
   const handleJoinModalSubmit = async () => {
     const final = joinModalNume.trim().toUpperCase();
     if (final.length < 3) return;
-    if (esteNumeInterzis(final)) { setToastMsg("Ai chef de glume? Alege alt nume"); return; }
+    if (esteNumeInterzis(final)) { setToastMsg(t('notifications.badNameJoke')); return; }
     setIsSavingName(true);
     const ok = await setNume(final);
     setIsSavingName(false);
@@ -171,7 +175,7 @@ function HomeContent() {
     if (!playerName || playerName.length < 3) {
       const tempName = "JUCATOR" + Math.random().toString(36).substring(2, 6).toUpperCase();
       const ok = await setNume(tempName);
-      if (!ok) { setToastMsg("Eroare. Încearcă din nou."); return; }
+      if (!ok) { setToastMsg(t('notifications.errorRetry')); return; }
       playerName = tempName;
     }
     triggerVibrate(); setIsJoiningArena(true);
@@ -182,12 +186,12 @@ function HomeContent() {
         try { sessionStorage.setItem('room-host-token', data.isHost ? 'arena-host' : ''); } catch {}
         router.push(`/joc/${data.roomId}`);
       }
-    } catch { setToastMsg("Eroare de rețea!"); }
+    } catch { setToastMsg(t('notifications.networkError')); }
     finally { setIsJoiningArena(false); }
   };
 
   const handleCreateTeam = async () => {
-    if (!nume || nume.trim().length < 3) { setToastMsg("Pune-ți o poreclă mai întâi!"); return; }
+    if (!nume || nume.trim().length < 3) { setToastMsg(t('notifications.setNicknameFirst')); return; }
     setLoadingTeam(true); triggerVibrate();
     try {
       const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "creeaza-echipa", creator: nume }) });
@@ -197,12 +201,12 @@ function HomeContent() {
         setLoadedTeams(prev => [...prev, { details: { id: d.teamId, nume: `GRUPUL LUI ${nume.toUpperCase().trim()}` }, top: [{ member: nume.toUpperCase().trim(), score: 0 }] }]);
         setActiveTeamIndex(loadedTeams.length);
       }
-    } catch { setToastMsg("Eroare la creare grup."); }
+    } catch { setToastMsg(t('notifications.errorCreateGroup')); }
     finally { setLoadingTeam(false); }
   };
 
   const handleRenameTeam = async (teamId, nouNume) => {
-    if (nouNume.length < 3) { setToastMsg("Nume prea scurt."); return; }
+    if (nouNume.length < 3) { setToastMsg(t('notifications.nameTooShort')); return; }
     triggerVibrate();
     setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, details: { ...t.details, nume: nouNume.toUpperCase().trim() } } : t));
     fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "redenumeste-echipa", teamId, newName: nouNume, jucator: nume }) });
@@ -211,7 +215,7 @@ function HomeContent() {
   const showConfirm = (message, onYes) => setConfirmDialog({ message, onYes });
 
   const handleLeaveTeam = (teamId) => {
-    showConfirm("Ești sigur că vrei să părăsești grupul?", () => {
+    showConfirm(t('groups.leaveConfirm'), () => {
       removeStoredTeamId(teamId);
       setLoadedTeams(prev => prev.filter(t => t.details.id !== teamId));
       setActiveTeamIndex(0);
@@ -219,12 +223,12 @@ function HomeContent() {
   };
 
   const handleKickMember = async (member, teamId) => {
-    showConfirm(`Ești sigur că vrei să-l elimini pe ${member} din grup?`, async () => {
+    showConfirm(t('groups.kickConfirm', { name: member }), async () => {
       triggerVibrate();
       try {
         await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume }) });
         setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, top: t.top.filter(m => m.member !== member) } : t));
-      } catch { setToastMsg("Eroare la eliminare."); }
+      } catch { setToastMsg(t('notifications.errorKick')); }
     });
   };
 
@@ -233,17 +237,17 @@ function HomeContent() {
     const roomCode = `privat-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     try {
       const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId }) });
-      if (!res.ok) { setToastMsg("Eroare la trimiterea provocării."); return; }
+      if (!res.ok) { setToastMsg(t('notifications.errorChallenge')); return; }
       try { sessionStorage.setItem('room-host-token', 'provocare-host'); } catch {}
       router.push(`/joc/${roomCode}?provocare=true&teamId=${teamId}`);
-    } catch { setToastMsg("Eroare de rețea. Încearcă din nou."); }
+    } catch { setToastMsg(t('notifications.errorNetwork')); }
   };
 
   if (!isHydrated) return (
     <div className="w-full max-w-md mx-auto pb-16 px-4 pt-8 space-y-6">
       <div className="text-center">
-        <h1 className="text-4xl font-black text-heading tracking-tight">CIOCNIM<span className="text-red-500">.</span>RO</h1>
-        <p className="text-sm font-bold text-red-400/60 mt-2">Ciocnește ouă online de Paște</p>
+        <h1 className="text-4xl font-black text-heading tracking-tight">{t('hero.title')}<span className="text-red-500">{t('hero.titleDot')}</span>{t('hero.titleSuffix')}</h1>
+        <p className="text-sm font-bold text-red-400/60 mt-2">{t('hero.subtitle')}</p>
       </div>
       <div className="space-y-4 animate-pulse">
         <div className="h-20 rounded-2xl bg-card border border-red-900/10" />
@@ -266,14 +270,14 @@ function HomeContent() {
             <span className="text-3xl drop-shadow-lg" role="img" aria-label="Ou de Paște">🥚</span>
           </div>
         </motion.div>
-        <h1 className="text-4xl font-black text-heading tracking-tight drop-shadow-sm">CIOCNIM<span className="text-red-500">.</span>RO</h1>
-        <p className="text-sm font-bold text-red-400/60 mt-1">Ciocnește ouă online de Paște</p>
+        <h1 className="text-4xl font-black text-heading tracking-tight drop-shadow-sm">{t('hero.title')}<span className="text-red-500">{t('hero.titleDot')}</span>{t('hero.titleSuffix')}</h1>
+        <p className="text-sm font-bold text-red-400/60 mt-1">{t('hero.subtitle')}</p>
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-3 flex items-center justify-center gap-3 flex-wrap">
           <div className="inline-flex items-center gap-2 bg-card border border-red-500/15 text-heading px-4 py-2 rounded-2xl font-black shadow-lg shadow-black/20">
             <span className="text-base" role="img" aria-label="Ou">🥚</span>
-            <span className="tabular-nums text-heading text-lg">{totalGlobal?.toLocaleString("ro-RO") || "…"}</span>
-            <span className="font-semibold text-muted text-xs">ciocniri</span>
+            <span className="tabular-nums text-heading text-lg">{totalGlobal?.toLocaleString(locale === 'bg' ? 'bg-BG' : 'ro-RO') || "…"}</span>
+            <span className="font-semibold text-muted text-xs">{t('hero.crackCount')}</span>
           </div>
           <div className="inline-flex items-center gap-1.5 text-xs text-green-400/70 font-bold">
             <span className="relative flex h-2 w-2">
@@ -297,7 +301,7 @@ function HomeContent() {
           className="w-full py-5 md:py-6 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-2xl border border-red-600 shadow-2xl shadow-red-900/40 transition-all disabled:opacity-60 flex items-center justify-center gap-3 active:scale-[0.97]"
         >
           <span className="text-3xl">🥚</span>
-          CIOCNEȘTE CU UN PRIETEN!
+          {t('cta.playText')}
         </motion.button>
         <div className="flex items-center justify-center gap-4 text-xs font-bold">
           <button
@@ -305,7 +309,7 @@ function HomeContent() {
             disabled={isJoiningArena}
             className="text-red-400/70 hover:text-red-400 transition-colors"
           >
-            Joacă cu un român →
+            {t('cta.arena')}
           </button>
           <span className="text-faint">|</span>
           <button
@@ -313,7 +317,7 @@ function HomeContent() {
             disabled={loadingTeam}
             className="text-muted hover:text-red-400 transition-colors disabled:opacity-50"
           >
-            {loadingTeam ? "..." : "Creează grup"}
+            {loadingTeam ? t('cta.creating') : t('cta.createGroup')}
           </button>
         </div>
       </motion.div>
@@ -329,20 +333,20 @@ function HomeContent() {
                 <span className="text-xs text-green-400 font-bold">{parseInt(userStats.wins) || 0} 🏆</span>
               )}
             </div>
-            <Link href="/profil" className="text-xs font-bold text-red-400/60 hover:text-red-400 transition-colors">
-              Profil →
-            </Link>
+            <LocaleLink href="/profil" className="text-xs font-bold text-red-400/60 hover:text-red-400 transition-colors">
+              {t('profile.profileLink')}
+            </LocaleLink>
           </div>
         ) : (
           <div className="rounded-2xl border border-red-900/15 bg-card p-4 space-y-2">
-            <p className="text-xs font-bold text-dim text-center">Opțional — pune-ți o poreclă</p>
+            <p className="text-xs font-bold text-dim text-center">{t('profile.optionalNickname')}</p>
             <div className="flex gap-2">
               <input
                 value={localNume}
                 onChange={e => { setLocalNume(e.target.value); setNumeError(""); }}
                 onInput={e => { setLocalNume(e.target.value); setNumeError(""); }}
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
-                placeholder="ex: Maria, Nicu, Gigi..."
+                placeholder={t('profile.placeholder')}
                 maxLength={21}
                 className="flex-1 min-w-0 px-3 py-2.5 border border-edge-strong rounded-xl font-bold text-body outline-none focus:border-red-800 transition-all text-sm bg-elevated"
               />
@@ -352,7 +356,7 @@ function HomeContent() {
                 disabled={isSavingName || isNameInvalid}
                 className={`px-4 py-2.5 font-bold rounded-xl border transition-all text-sm flex-shrink-0 ${isNameInvalid || isSavingName ? "bg-elevated text-muted border-edge cursor-not-allowed" : "bg-red-800 text-white border-red-800 hover:bg-red-900"}`}
               >
-                {isSavingName ? "…" : "OK"}
+                {isSavingName ? "…" : t('profile.ok')}
               </motion.button>
             </div>
             {numeError && <p className="text-orange-500 text-xs font-medium">{numeError}</p>}
@@ -362,32 +366,32 @@ function HomeContent() {
 
       {/* ═══ CLASAMENT ═══ */}
       <motion.div {...fadeUp(0.12, prefersReducedMotion)}>
-        <SectionLabel>Clasament</SectionLabel>
+        <SectionLabel>{t('leaderboard.label')}</SectionLabel>
         <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
-        <Link href="/clasament" className="block text-center text-xs font-bold text-red-500/50 hover:text-red-400 mt-2 transition-colors">
-          Vezi clasamentul complet →
-        </Link>
+        <LocaleLink href="/clasament" className="block text-center text-xs font-bold text-red-500/50 hover:text-red-400 mt-2 transition-colors">
+          {t('leaderboard.seeAll')}
+        </LocaleLink>
       </motion.div>
 
       {/* ═══ SHARE — cu urgență + WhatsApp ═══ */}
       <motion.div {...fadeUp(0.16, prefersReducedMotion)} className="flex gap-2">
         <button
           onClick={() => {
-            const text = "Hai la ciocnit ouă de Paște! 🥚⚔️ Intră pe ciocnim.ro";
+            const text = t('share.shareText');
             if (navigator.share) {
-              navigator.share({ title: "Ciocnim.ro", text, url: "https://ciocnim.ro" }).catch(() => {});
+              navigator.share({ title: t('seo.siteName'), text, url: `https://trosc.gg/${locale}` }).catch(() => {});
             } else {
-              safeCopy(`${text}\nhttps://ciocnim.ro`);
-              setToastMsg("Link copiat! Trimite-l prietenilor.");
+              safeCopy(`${text}\nhttps://trosc.gg/${locale}`);
+              setToastMsg(t('share.linkCopied'));
             }
           }}
           className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg"
         >
           <span className="text-lg">📲</span>
-          <span className="font-bold text-sm">Trimite prietenilor</span>
+          <span className="font-bold text-sm">{t('share.sendFriends')}</span>
         </button>
         <a
-          href={`https://wa.me/?text=${encodeURIComponent("Hai la ciocnit ouă de Paște! 🥚⚔️\nhttps://ciocnim.ro")}`}
+          href={`https://wa.me/?text=${encodeURIComponent(t('share.shareText') + "\nhttps://trosc.gg/" + locale)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="px-4 py-3 rounded-2xl bg-green-700 hover:bg-green-600 text-white transition-all active:scale-[0.98] flex items-center justify-center shadow-lg"
@@ -406,7 +410,7 @@ function HomeContent() {
       <AnimatePresence>
         {loadedTeams.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
-            <SectionLabel>Grupurile Mele</SectionLabel>
+            <SectionLabel>{t('groups.label')}</SectionLabel>
             <GroupHub teams={loadedTeams} activeTeamIndex={activeTeamIndex} setActiveTeamIndex={setActiveTeamIndex} numePreluat={nume} onRename={handleRenameTeam} onProvoca={handleProvocare} onLeave={handleLeaveTeam} onKick={handleKickMember} />
           </motion.div>
         )}
@@ -414,31 +418,31 @@ function HomeContent() {
 
       {/* ═══ NAVIGARE — Butoane frumoase ═══ */}
       <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
-        <SectionLabel>Descoperă</SectionLabel>
+        <SectionLabel>{t('discover.label')}</SectionLabel>
         <div className="flex gap-2 justify-center flex-wrap">
           {[
-            { href: "/traditii", icon: "📖", text: "Tradiții" },
-            { href: "/retete", icon: "🍳", text: "Rețete" },
-            { href: "/urari", icon: "🕊️", text: "Urări" },
-            { href: "/vopsit-natural", icon: "🧅", text: "Vopsit" },
-            { href: "/calendar", icon: "📅", text: "Calendar" },
-            { href: "/ghid", icon: "🎮", text: "Ghid" },
-            { href: "/clasament", icon: "🏆", text: "Clasament" },
+            { href: "/traditii", icon: "📖", text: t('discover.traditions') },
+            { href: "/retete", icon: "🍳", text: t('discover.recipes') },
+            { href: "/urari", icon: "🕊️", text: t('discover.wishes') },
+            { href: "/vopsit-natural", icon: "🧅", text: t('discover.dyeing') },
+            { href: "/calendar", icon: "📅", text: t('discover.calendar') },
+            { href: "/ghid", icon: "🎮", text: t('discover.guide') },
+            { href: "/clasament", icon: "🏆", text: t('discover.leaderboard') },
           ].map((item) => (
-            <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 p-3 rounded-2xl border border-edge bg-card hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[64px]">
+            <LocaleLink key={item.href} href={item.href} className="flex flex-col items-center gap-1 p-3 rounded-2xl border border-edge bg-card hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[64px]">
               <span className="text-xl">{item.icon}</span>
               <span className="font-bold text-xs text-dim group-hover:text-white transition-colors text-center">{item.text}</span>
-            </Link>
+            </LocaleLink>
           ))}
         </div>
         <div className="flex items-center justify-center gap-3 mt-4 text-xs font-medium flex-wrap">
-          <Link href="/terms" className="text-muted hover:text-red-400 transition-colors">Termeni și Condiții</Link>
+          <LocaleLink href="/terms" className="text-muted hover:text-red-400 transition-colors">{t('footer.terms')}</LocaleLink>
           <span className="text-faint">·</span>
-          <Link href="/privacy" className="text-muted hover:text-red-400 transition-colors">Confidențialitate</Link>
+          <LocaleLink href="/privacy" className="text-muted hover:text-red-400 transition-colors">{t('footer.privacy')}</LocaleLink>
           <span className="text-faint">·</span>
-          <Link href="/despre" className="text-muted hover:text-red-400 transition-colors">Despre</Link>
+          <LocaleLink href="/despre" className="text-muted hover:text-red-400 transition-colors">{t('footer.about')}</LocaleLink>
           <span className="text-faint">·</span>
-          <a href="https://buymeacoffee.com/ciocnim" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 transition-colors font-bold">☕ Donează</a>
+          <a href="https://buymeacoffee.com/ciocnim" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 transition-colors font-bold">{t('footer.donate')}</a>
         </div>
       </motion.div>
 
@@ -469,8 +473,8 @@ function HomeContent() {
             >
               <p className="text-sm font-bold text-body mb-5">{confirmDialog.message}</p>
               <div className="flex gap-3">
-                <button onClick={() => setConfirmDialog(null)} className="flex-1 py-3 rounded-xl bg-elevated text-dim font-bold text-sm hover:bg-overlay transition-all">Nu</button>
-                <button onClick={() => { setConfirmDialog(null); confirmDialog.onYes(); }} className="flex-1 py-3 rounded-xl bg-red-700 text-white font-bold text-sm hover:bg-red-800 transition-all">Da</button>
+                <button onClick={() => setConfirmDialog(null)} className="flex-1 py-3 rounded-xl bg-elevated text-dim font-bold text-sm hover:bg-overlay transition-all">{t('groups.no')}</button>
+                <button onClick={() => { setConfirmDialog(null); confirmDialog.onYes(); }} className="flex-1 py-3 rounded-xl bg-red-700 text-white font-bold text-sm hover:bg-red-800 transition-all">{t('groups.yes')}</button>
               </div>
             </motion.div>
           </motion.div>
@@ -490,27 +494,27 @@ function HomeContent() {
             >
               <div className="text-center mb-5">
                 <div className="text-4xl mb-3">🥚</div>
-                <h2 className="text-lg font-black text-heading">Ai fost invitat într-un grup!</h2>
-                <p className="text-xs text-dim mt-1">Pune-ți o poreclă ca să te alături</p>
+                <h2 className="text-lg font-black text-heading">{t('joinModal.title')}</h2>
+                <p className="text-xs text-dim mt-1">{t('joinModal.subtitle')}</p>
               </div>
               <input
                 value={joinModalNume}
                 onChange={e => setJoinModalNume(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleJoinModalSubmit()}
-                placeholder="Porecla ta..."
+                placeholder={t('joinModal.placeholder')}
                 maxLength={21}
                 autoFocus
                 className="w-full px-4 py-3 border-2 border-edge-strong rounded-2xl font-bold text-body outline-none focus:border-red-800 transition-all text-sm bg-elevated focus:bg-elevated-hover mb-3"
               />
               {joinModalNume.trim().length > 0 && joinModalNume.trim().length < 3 && (
-                <p className="text-red-500 text-xs mb-3 font-medium">Minim 3 caractere</p>
+                <p className="text-red-500 text-xs mb-3 font-medium">{t('profile.minChars')}</p>
               )}
               <button
                 onClick={handleJoinModalSubmit}
                 disabled={isSavingName || joinModalNume.trim().length < 3}
                 className="w-full py-3.5 bg-red-800 hover:bg-red-900 text-white font-black rounded-2xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {isSavingName ? "…" : "Intră în grup →"}
+                {isSavingName ? "…" : t('joinModal.join')}
               </button>
             </motion.div>
           </motion.div>,
@@ -518,6 +522,27 @@ function HomeContent() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function SeoSection() {
+  const t = useT();
+  return (
+    <section className="w-full max-w-md mx-auto px-4 pb-10 pt-2 text-center">
+      <div className="border-t border-red-900/10 pt-6 space-y-3">
+        <p className="text-xs text-faint leading-relaxed">
+          <strong className="text-muted">{t('seo.siteName')}</strong> {t('seo.description')}
+        </p>
+        <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs" aria-label="Pagini utile">
+          <LocaleLink href="/traditii" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.traditionsLink')}</LocaleLink>
+          <LocaleLink href="/urari" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.greetingsLink')}</LocaleLink>
+          <LocaleLink href="/retete" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.recipesLink')}</LocaleLink>
+          <LocaleLink href="/vopsit-natural" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.dyeingLink')}</LocaleLink>
+          <LocaleLink href="/calendar" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.calendarLink')}</LocaleLink>
+          <LocaleLink href="/ghid" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.guideLink')}</LocaleLink>
+        </nav>
+      </div>
+    </section>
   );
 }
 
@@ -537,22 +562,7 @@ export default function Home() {
       </Suspense>
 
       {/* SEO content — crawlable context for search engines */}
-      <section className="w-full max-w-md mx-auto px-4 pb-10 pt-2 text-center">
-        <div className="border-t border-red-900/10 pt-6 space-y-3">
-          <p className="text-xs text-faint leading-relaxed">
-            <strong className="text-muted">Ciocnim.ro</strong> este jocul tradițional românesc de ciocnit ouă de Paște, acum online.
-            Joacă gratuit cu prietenii și familia, indiferent de distanță. Hristos a Înviat! 🥚
-          </p>
-          <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs" aria-label="Pagini utile">
-            <a href="/traditii" className="text-red-500/50 hover:text-red-400 transition-colors">Tradiții Pascale</a>
-            <a href="/urari" className="text-red-500/50 hover:text-red-400 transition-colors">Urări de Paște</a>
-            <a href="/retete" className="text-red-500/50 hover:text-red-400 transition-colors">Rețete de Paște</a>
-            <a href="/vopsit-natural" className="text-red-500/50 hover:text-red-400 transition-colors">Vopsit Natural</a>
-            <a href="/calendar" className="text-red-500/50 hover:text-red-400 transition-colors">Calendar Paște</a>
-            <a href="/ghid" className="text-red-500/50 hover:text-red-400 transition-colors">Ghid de Joc</a>
-          </nav>
-        </div>
-      </section>
+      <SeoSection />
     </main>
   );
 }

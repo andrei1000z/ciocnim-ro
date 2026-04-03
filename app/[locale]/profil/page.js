@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useGlobalStats } from "../components/ClientWrapper";
-import PageHeader from "../components/PageHeader";
-import { ACHIEVEMENTS as ALL_ACHIEVEMENTS } from "../lib/achievements";
+import { useGlobalStats } from "../../components/ClientWrapper";
+import PageHeader from "../../components/PageHeader";
+import { ACHIEVEMENTS as ALL_ACHIEVEMENTS } from "../../lib/achievements";
 
 const RARITY_COLORS = {
   common: 'border-gray-600/30 bg-gray-900/20',

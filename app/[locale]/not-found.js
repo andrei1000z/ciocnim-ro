@@ -1,5 +1,5 @@
 import Link from "next/link";
-import PageHeader from "./components/PageHeader";
+import PageHeader from "../components/PageHeader";
 
 export const metadata = {
   title: "404 – Pagina nu există | Ciocnim.ro",

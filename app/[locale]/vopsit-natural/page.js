@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Script from "next/script";
-import ContentNav from "../components/ContentNav";
+import ContentNav from "../../components/ContentNav";
 
 // ─── Focus Mode Toggle ─────────────────────────────────────────────────────
 const FocusModeToggle = ({ active, onToggle }) => (

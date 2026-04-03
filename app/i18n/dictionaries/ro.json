@@ -1,0 +1,270 @@
+{
+  "meta": {
+    "title": "Ciocnim.ro – Ciocnește Ouă Online de Paște",
+    "titleTemplate": "%s | Ciocnim.ro",
+    "description": "Jocul tradițional de Paște, acum online! Ciocnește ouă cu familia, personalizează-ți oul și urcă în clasamentul național. Gratuit, pe orice telefon.",
+    "ogTitle": "Ciocnim.ro – Ciocnește Ouă Online cu Familia și Prietenii",
+    "ogDescription": "Jocul tradițional de Paște, acum online! Ciocnit ouă virtual, clasament național, dueluri în timp real. Gratuit, fără instalare. Hristos a Înviat!",
+    "twitterTitle": "Ciocnim.ro – Ciocnește Ouă Online! Hristos a Înviat!",
+    "twitterDescription": "Provoacă-ți familia la ciocnit ouă virtual. Gratuit, pe orice telefon, fără instalare. Hristos a Înviat!",
+    "applicationName": "Ciocnim.ro",
+    "schemaDescription": "Un joc tradițional de Paște online, unde utilizatorii pot ciocni ouă virtuale cu prietenii și familia, personaliza ouă și participa în clasamentul național."
+  },
+
+  "hero": {
+    "title": "CIOCNIM",
+    "titleDot": ".",
+    "titleSuffix": "RO",
+    "subtitle": "Ciocnește ouă online de Paște",
+    "crackCount": "ciocniri",
+    "online": "online"
+  },
+
+  "cta": {
+    "play": "🥚 CIOCNEȘTE CU UN PRIETEN!",
+    "playIcon": "🥚",
+    "playText": "CIOCNEȘTE CU UN PRIETEN!",
+    "arena": "Joacă cu un român →",
+    "createGroup": "Creează grup",
+    "creating": "..."
+  },
+
+  "profile": {
+    "optionalNickname": "Opțional — pune-ți o poreclă",
+    "placeholder": "ex: Maria, Nicu, Gigi...",
+    "ok": "OK",
+    "profileLink": "Profil →",
+    "minChars": "Minim 3 caractere",
+    "wins": "victorii"
+  },
+
+  "leaderboard": {
+    "label": "Clasament",
+    "seeAll": "Vezi clasamentul complet →",
+    "players": "🏆 Jucători",
+    "regions": "🗺️ Regiuni",
+    "champion": "🎉 Ești Campion Național!",
+    "rank": "Locul #{rank} · mai ai nevoie de {needed} {victLabel} pentru locul {target}",
+    "needWins": "Mai ai nevoie de {needed} {victLabel} pentru locul {target} în clasament",
+    "victory": "victorie",
+    "victories": "victorii",
+    "noPlayers": "Niciun jucător încă. Fii primul!",
+    "noRegions": "Așteptăm prima bătălie...",
+    "shareChampion": "Sunt Campionul Național la ciocnit ouă pe ciocnim.ro! Îndrăznește să mă provoci? 🥚🏆",
+    "shareRank": "Sunt pe locul {rank} în clasamentul național de ciocnit ouă! Hai și tu la o ciocneală pe ciocnim.ro 🥚⚔️",
+    "shareGeneric": "Hai la o ciocneală de ouă pe ciocnim.ro! 🥚⚔️",
+    "shareBtn": "📲 Distribuie clasamentul tău"
+  },
+
+  "share": {
+    "sendFriends": "Trimite prietenilor",
+    "linkCopied": "Link copiat! Trimite-l prietenilor.",
+    "shareText": "Hai la ciocnit ouă de Paște! 🥚⚔️ Intră pe ciocnim.ro"
+  },
+
+  "discover": {
+    "label": "Descoperă",
+    "traditions": "Tradiții",
+    "recipes": "Rețete",
+    "greetings": "Urări",
+    "dyeing": "Vopsit",
+    "calendar": "Calendar",
+    "guide": "Ghid",
+    "leaderboard": "Clasament"
+  },
+
+  "footer": {
+    "terms": "Termeni și Condiții",
+    "privacy": "Confidențialitate",
+    "about": "Despre",
+    "donate": "☕ Donează",
+    "copyright": "Ciocnim.ro"
+  },
+
+  "seo": {
+    "description": "este jocul tradițional românesc de ciocnit ouă de Paște, acum online. Joacă gratuit cu prietenii și familia, indiferent de distanță. Hristos a Înviat! 🥚",
+    "siteName": "Ciocnim.ro",
+    "traditionsLink": "Tradiții Pascale",
+    "greetingsLink": "Urări de Paște",
+    "recipesLink": "Rețete de Paște",
+    "dyeingLink": "Vopsit Natural",
+    "calendarLink": "Calendar Paște",
+    "guideLink": "Ghid de Joc"
+  },
+
+  "playModal": {
+    "title": "Joacă cu un Prieten 🥚",
+    "subtitle": "Creezi o cameră, trimiți codul prietenului",
+    "createRoom": "Creează Cameră Nouă",
+    "creating": "Se creează...",
+    "or": "sau",
+    "roomCodePlaceholder": "COD CAMERĂ",
+    "joinWithCode": "Intră cu Codul",
+    "verifying": "Se verifică...",
+    "code4chars": "Codul are exact 4 caractere!",
+    "serverError": "Eroare server. Încearcă din nou.",
+    "networkError": "Eroare de rețea. Încearcă din nou.",
+    "cantCreate": "Nu s-a putut crea camera.",
+    "roomOccupied": "Camera este ocupată!"
+  },
+
+  "game": {
+    "vs": "VS",
+    "roomCode": "Cod Cameră: ",
+    "copied": "COPIAT!",
+    "shareRoom": "Trimite prietenului",
+    "live": "LIVE",
+    "connecting": "SE CONECTEAZĂ...",
+    "disconnected": "DECONECTAT",
+    "person": "persoană",
+    "persons": "persoane",
+    "totalCracks": "ciocniri totale",
+    "yourTurn": "E RÂNDUL TĂU! Apasă butonul de jos!",
+    "waitOpponent": "Așteaptă... adversarul lovește!",
+    "strike": "💥 CIOCNEȘTE OUL!",
+    "defend": "🛡️ APĂRĂ OUL!",
+    "tapOrShake": "Apasă sau mișcă telefonul",
+    "cracking": "⚡ CIOCNIRE...",
+    "searching": "Se caută...",
+    "sendCode": "Trimite codul!",
+    "fewSeconds": "Câteva secunde",
+    "preparing": "SE PREGĂTEȘTE ARENA...",
+    "chatPlaceholder": "SCRIE UN MESAJ...",
+    "chatEmpty": "Liniște la masă...",
+    "confirmLeave": "Ești sigur că vrei să ieși din meci?",
+    "regionUnknown": "Necunoscut",
+    "shareTitle": "Ciocnim.ro - Hai la duel!",
+    "shareInvite": "Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici:"
+  },
+
+  "result": {
+    "victory": "Victorie!",
+    "defeat": "Oul s-a spart",
+    "winsCount": "victorii",
+    "lossesCount": "înfrângeri",
+    "shareResult": "📲 Distribuie Rezultatul",
+    "shareWhatsApp": "💬 Trimite pe WhatsApp",
+    "revanche": "⚔️ Revanșă",
+    "waiting": "⏳ Așteptăm",
+    "home": "← Înapoi acasă",
+    "shareWinText": "Am câștigat la ciocnit ouă pe {site}! 🏆🥚 Am {wins} victorii. Hai să ne ciocnim!",
+    "shareLoseText": "M-am luptat cinstit la ciocnit ouă pe {site}! 🥚💥 Hai la revanșă!",
+    "greetingWin": "Hristos a Înviat!",
+    "greetingLose": "Adevărat a Înviat!"
+  },
+
+  "countdown": {
+    "untilOrthodox": "Până la Paștele Ortodox {year}",
+    "untilCatholic": "Până la Paștele Catolic {year}",
+    "risen": "Hristos a Înviat! ✝️",
+    "happyEaster": "Paște Fericit tuturor!",
+    "days": "Zile",
+    "hours": "Ore",
+    "minutes": "Min",
+    "seconds": "Sec"
+  },
+
+  "groups": {
+    "label": "Grupurile Mele",
+    "myGroup": "👥 Grupul Meu",
+    "invite": "🔗 Invită",
+    "copied": "✅ Copiat!",
+    "leave": "Ieși",
+    "inviteFriends": "Invită prieteni să joace!",
+    "leaveConfirm": "Ești sigur că vrei să părăsești grupul?",
+    "kickConfirm": "Ești sigur că vrei să-l elimini pe {name} din grup?",
+    "no": "Nu",
+    "yes": "Da",
+    "shareInvite": "Hai în grupul meu de ciocnit ouă! Intră pe {url} și arată-ne cine are cel mai tare ou 🥚⚔️",
+    "shareTitle": "Ciocnim.ro - Hai la ciocneală!"
+  },
+
+  "joinModal": {
+    "title": "Ai fost invitat într-un grup!",
+    "subtitle": "Pune-ți o poreclă ca să te alături",
+    "placeholder": "Porecla ta...",
+    "join": "Intră în grup →"
+  },
+
+  "notifications": {
+    "challenge": "⚔️ Provocare",
+    "challengeText": "te cheamă la duel!",
+    "accept": "Acceptă",
+    "decline": "Refuză",
+    "roomOccupied": "Camera este ocupată! Încearcă alt cod.",
+    "setNicknameFirst": "Pune-ți o poreclă mai întâi!",
+    "networkError": "Eroare de rețea!",
+    "tooFast": "Prea rapid! Așteaptă puțin.",
+    "unstableConnection": "Conexiune instabilă — ciocnirea s-ar putea să nu se fi salvat.",
+    "errorRetry": "Eroare. Încearcă din nou.",
+    "badNameJoke": "Ai chef de glume? Alege alt nume",
+    "nameTooShort": "Nume prea scurt.",
+    "errorCreateGroup": "Eroare la creare grup.",
+    "errorKick": "Eroare la eliminare.",
+    "errorChallenge": "Eroare la trimiterea provocării.",
+    "errorNetwork": "Eroare de rețea. Încearcă din nou.",
+    "nameMinChars": "Numele trebuie să aibă minim 2 caractere.",
+    "nameTaken": "Acel nume este deja luat! Alege altul."
+  },
+
+  "loading": {
+    "text": "Se încarcă...",
+    "errorTitle": "Ceva nu a mers bine",
+    "errorDesc": "Pagina nu s-a putut încărca. Verifică conexiunea la internet și încearcă din nou.",
+    "retry": "Reîncearcă"
+  },
+
+  "cookie": {
+    "text": "Salvăm preferințele tale (poreclă, temă, statistici) doar în browserul tău — nu trimitem date către terți și nu folosim cookies de tracking.",
+    "privacyLink": "Politica de confidențialitate",
+    "accept": "Am înțeles"
+  },
+
+  "achievement": {
+    "unlocked": "Achievement deblocat!"
+  },
+
+  "quotes": {
+    "forgiveness": [
+      "Iartă, și vei fi iertat. Oul tău s-a jertfit pentru bucuria aproapelui.",
+      "Iertarea este podul către liniștea sufletului.",
+      "Fii bun, căci toți cei pe care îi întâlnești duc o luptă grea.",
+      "Că de veţi ierta oamenilor greşealele lor, ierta-va şi vouă Tatăl vostru cel Ceresc."
+    ],
+    "humility": [
+      "Dumnezeu celor mândri le stă împotrivă, iar celor smeriți le dă har.",
+      "Cine se va smeri pe sine, va fi înălțat.",
+      "Cel mai mare dintre voi să fie slujitorul tuturor.",
+      "Biruința e trecătoare, tradiția și omenia sunt veșnice."
+    ]
+  },
+
+  "botChat": [
+    "Hristos a Înviat! 🥚", "Hai noroc! 💪", "Bine lovit!", "Ouă tari avem noi!",
+    "Așa da! 🎯", "Hai la ciocnit!", "Nu mă bat cu oricine 😎", "Frumos jucăm!",
+    "Paste fericit! 🐣", "Ești bun, dar eu-s mai bun!", "Oul meu e de oțel 🛡️"
+  ],
+
+  "eggSkins": {
+    "red": "Roșu de Rânduială",
+    "blue": "Albastru Safir",
+    "gold": "Auriu Imperial",
+    "green": "Verde de Codru",
+    "golden": "Ou de Aur"
+  },
+
+  "eggColor": "Culoare Ou",
+  "regionLabel": "Regiunea Ta",
+  "regionChoose": "Alege...",
+  "skipToContent": "Salt la conținut",
+
+  "notFound": {
+    "title": "404 – Pagina nu există | Ciocnim.ro",
+    "description": "Oul pe care îl cauți s-a spart la ciocnit. Întoarce-te acasă și încearcă din nou!",
+    "heading": "404",
+    "subtitle": "Oul a fost ciocnit prea tare!",
+    "body": "Pagina pe care o cauți s-a spart la ciocnit și nu mai există. Hai înapoi la masa de Paște!",
+    "cta": "🥚 Ciocnește ouă online",
+    "alt": "sau descoperă tradițiile de Paște →"
+  }
+}
