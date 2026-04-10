@@ -406,7 +406,17 @@ function HomeContent() {
               </div>
               <button
                 onClick={() => {
-                  if (!navigator.geolocation) { setToastMsg("GPS indisponibil"); return; }
+                  if (!navigator.geolocation) {
+                    setToastMsg("Browserul nu suportă GPS");
+                    return;
+                  }
+                  // Geolocation API necesită HTTPS sau localhost
+                  const isSecure = window.isSecureContext || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                  if (!isSecure) {
+                    setToastMsg("GPS funcționează doar pe HTTPS");
+                    return;
+                  }
+                  setToastMsg("Caut locația...");
                   navigator.geolocation.getCurrentPosition(
                     async (pos) => {
                       try {
@@ -428,12 +438,25 @@ function HomeContent() {
                           safeLS.set("c_stats", JSON.stringify(newStats));
                           window.location.reload();
                         } else if (regions.length > 0) {
-                          setToastMsg(t('profile.chooseRegion'));
+                          setToastMsg("Nu s-a găsit regiunea — alege manual");
                         }
-                      } catch { setToastMsg("GPS error"); }
+                      } catch {
+                        setToastMsg("Eroare conexiune GPS");
+                      }
                     },
-                    () => setToastMsg("GPS blocat"),
-                    { enableHighAccuracy: false, timeout: 5000 }
+                    (err) => {
+                      // 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
+                      if (err.code === 1) {
+                        setToastMsg("Ai blocat permisiunea GPS — dă click pe 🔒 lângă URL");
+                      } else if (err.code === 2) {
+                        setToastMsg("Locația indisponibilă — verifică GPS-ul");
+                      } else if (err.code === 3) {
+                        setToastMsg("GPS prea lent — încearcă din nou");
+                      } else {
+                        setToastMsg("Eroare GPS necunoscută");
+                      }
+                    },
+                    { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
                   );
                 }}
                 className="px-3 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-1"
