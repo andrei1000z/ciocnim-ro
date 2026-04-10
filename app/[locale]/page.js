@@ -405,66 +405,92 @@ function HomeContent() {
                 </AnimatePresence>
               </div>
               <button
-                onClick={() => {
-                  if (!navigator.geolocation) {
-                    setToastMsg("Browserul nu suportă locația");
-                    return;
-                  }
-                  setToastMsg("Permite locația în pop-up...");
-                  // Apelăm DIRECT — Chrome arată prompt-ul nativ dacă permisiunea e "prompt"
-                  navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                      setToastMsg("Caut regiunea...");
-                      try {
-                        // Paralel: nominatim (precis) + ipapi (fallback)
-                        const nominatimP = fetch(
-                          `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=${locale}&zoom=8`,
-                          { headers: { 'Accept': 'application/json' } }
-                        ).then(r => r.json()).catch(() => null);
+                onClick={async () => {
+                  // Helper: găsește match-ul în regions
+                  const regions = localeConfig[locale]?.regions || [];
+                  const normalize = (s) => (s || '').toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/ (county|province|district|judet|judeţ|județ)/g, '')
+                    .trim();
+                  const findMatch = (...candidates) => {
+                    for (const c of candidates.filter(Boolean).map(normalize)) {
+                      const m = regions.find(r => {
+                        const rN = normalize(r);
+                        return c === rN || c.includes(rN) || rN.includes(c);
+                      });
+                      if (m) return m;
+                    }
+                    return null;
+                  };
+                  const setRegion = (match) => {
+                    const newStats = { ...userStats, regiune: match, regiuneSet: true };
+                    safeLS.set("c_stats", JSON.stringify(newStats));
+                    setToastMsg(`Regiunea ta: ${match}`);
+                    setTimeout(() => window.location.reload(), 500);
+                  };
 
-                        const data = await nominatimP;
-                        const county = data?.address?.county || data?.address?.state || data?.address?.region || '';
-                        const city = data?.address?.city || data?.address?.town || data?.address?.village || '';
-                        const regions = localeConfig[locale]?.regions || [];
-                        const normalize = (s) => (s || '').toLowerCase()
-                          .normalize('NFD')
-                          .replace(/[\u0300-\u036f]/g, '')
-                          .replace(/ (county|province|district|judet|judeţ|județ)/g, '')
-                          .trim();
-                        const candidates = [county, city].filter(Boolean).map(normalize);
-                        let match = null;
-                        for (const cand of candidates) {
-                          match = regions.find(r => {
-                            const rN = normalize(r);
-                            return cand === rN || cand.includes(rN) || rN.includes(cand);
-                          });
-                          if (match) break;
-                        }
-                        if (match) {
-                          const newStats = { ...userStats, regiune: match, regiuneSet: true };
-                          safeLS.set("c_stats", JSON.stringify(newStats));
-                          setToastMsg(`Regiunea ta: ${match}`);
-                          setTimeout(() => window.location.reload(), 500);
-                        } else {
-                          setToastMsg("Nu am identificat regiunea — alege manual");
-                        }
-                      } catch {
-                        setToastMsg("Eroare conexiune — alege manual");
+                  // Fallback IP-based via /api/geo (server-side, fără permisiuni)
+                  const tryIpFallback = async () => {
+                    try {
+                      const r = await fetch('/api/geo');
+                      const d = await r.json();
+                      if (d.success) {
+                        const m = findMatch(d.region, d.city);
+                        if (m) { setRegion(m); return true; }
                       }
-                    },
-                    (err) => {
-                      if (err.code === 1) {
-                        setToastMsg("Permisiune refuzată. Click 🔒 lângă URL → Locație → Permite");
-                      } else if (err.code === 2) {
-                        setToastMsg("Locația nedisponibilă — verifică GPS-ul / Wi-Fi");
-                      } else if (err.code === 3) {
-                        setToastMsg("Timeout — încearcă din nou");
-                      } else {
-                        setToastMsg("Eroare locație necunoscută");
-                      }
-                    },
-                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
-                  );
+                    } catch {}
+                    return false;
+                  };
+
+                  setToastMsg("Detectez locația...");
+
+                  // 1) Încearcă GPS (rapid, precis) dacă e disponibil
+                  if (navigator.geolocation) {
+                    let gpsHandled = false;
+                    const gpsTimeout = setTimeout(async () => {
+                      if (gpsHandled) return;
+                      gpsHandled = true;
+                      // GPS prea lent → fallback IP
+                      const ok = await tryIpFallback();
+                      if (!ok) setToastMsg("Nu am identificat regiunea — alege manual");
+                    }, 4000);
+
+                    navigator.geolocation.getCurrentPosition(
+                      async (pos) => {
+                        if (gpsHandled) return;
+                        gpsHandled = true;
+                        clearTimeout(gpsTimeout);
+                        try {
+                          const res = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=${locale}&zoom=8`,
+                            { headers: { 'Accept': 'application/json' } }
+                          );
+                          const data = await res.json();
+                          const county = data?.address?.county || data?.address?.state || data?.address?.region || '';
+                          const city = data?.address?.city || data?.address?.town || data?.address?.village || '';
+                          const m = findMatch(county, city);
+                          if (m) { setRegion(m); return; }
+                        } catch {}
+                        // Nominatim a eșuat → fallback IP
+                        const ok = await tryIpFallback();
+                        if (!ok) setToastMsg("Nu am identificat regiunea — alege manual");
+                      },
+                      async () => {
+                        if (gpsHandled) return;
+                        gpsHandled = true;
+                        clearTimeout(gpsTimeout);
+                        // Permisiune refuzată / eroare GPS → fallback IP automat
+                        const ok = await tryIpFallback();
+                        if (!ok) setToastMsg("Nu am identificat regiunea — alege manual");
+                      },
+                      { enableHighAccuracy: false, timeout: 4000, maximumAge: 300000 }
+                    );
+                  } else {
+                    // Browser fără GPS API → direct IP
+                    const ok = await tryIpFallback();
+                    if (!ok) setToastMsg("Nu am identificat regiunea — alege manual");
+                  }
                 }}
                 className="px-3 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-1"
                 aria-label={t('profile.detectLocation')}
