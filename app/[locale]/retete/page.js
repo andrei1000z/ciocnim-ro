@@ -4,6 +4,7 @@ import { useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { safeLS, safeCopy } from "@/app/lib/utils";
+import { getSiteUrl } from "@/app/lib/constants";
 import { retete as reteteRo } from "./data";
 import { retete as reteteBg } from "./data-bg";
 import { retete as reteteEl } from "./data-el";
@@ -347,7 +348,7 @@ const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
   };
 
   const handleShareRecipe = () => {
-    const url = `https://ciocnim.ro/${locale}/retete?r=${recipe.id}`;
+    const url = `${getSiteUrl(locale)}/${locale}/retete?r=${recipe.id}`;
     const text = `${recipe.name}\n${recipe.description}\n${url}`;
     if (navigator.share) {
       navigator.share({

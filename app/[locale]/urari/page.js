@@ -6,6 +6,7 @@ import Script from "next/script";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import { useLocaleConfig } from "../../components/DictionaryProvider";
+import { getSiteUrl } from "../../lib/constants";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
 
@@ -14,13 +15,13 @@ const MessageCard = ({ text, index, greetings, locale }) => {
   const [copiat, setCopiat] = useState(false);
 
   const shareWhatsApp = (msg) => {
-    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} https://ciocnim.ro/${locale}`);
+    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} ${getSiteUrl(locale)}/${locale}`);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, "_blank", "noopener");
   };
 
   const handleCopy = async () => {
     try {
-      const textDeCopiat = `${text}\n${greetings.shareFooter} https://ciocnim.ro/${locale}`;
+      const textDeCopiat = `${text}\n${greetings.shareFooter} ${getSiteUrl(locale)}/${locale}`;
       await navigator.clipboard.writeText(textDeCopiat);
       setCopiat(true);
       setTimeout(() => setCopiat(false), 2000);
@@ -97,7 +98,7 @@ const GreetingGenerator = ({ greetings, locale }) => {
     : '';
 
   const shareWhatsApp = (msg) => {
-    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} https://ciocnim.ro/${locale}`);
+    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} ${getSiteUrl(locale)}/${locale}`);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, "_blank", "noopener");
   };
 

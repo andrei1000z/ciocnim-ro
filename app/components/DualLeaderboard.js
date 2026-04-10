@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { safeCopy } from "../lib/utils";
+import { getSiteUrl } from "../lib/constants";
 import { useT } from "@/app/i18n/useT";
 import { useLocaleConfig } from "./DictionaryProvider";
 
@@ -126,9 +127,9 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                   ? t('leaderboard.shareRank', { rank: myRank })
                   : t('leaderboard.shareGeneric');
               if (navigator.share) {
-                navigator.share({ title: t('seo.siteName'), text, url: `https://ciocnim.ro/${locale}` }).catch(() => {});
+                navigator.share({ title: t('seo.siteName'), text, url: `${getSiteUrl(locale)}/${locale}` }).catch(() => {});
               } else {
-                safeCopy(`${text}\nhttps://ciocnim.ro/${locale}`);
+                safeCopy(`${text}\n${getSiteUrl(locale)}/${locale}`);
               }
             }}
             className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-elevated transition-all flex items-center justify-center gap-2 rounded-b-xl"
