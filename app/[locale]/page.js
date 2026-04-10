@@ -12,7 +12,7 @@ import PlayModal from "../components/PlayModal";
 import { safeLS, safeCopy } from "../lib/utils";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
-import { localeConfig } from "../i18n/config";
+import { localeConfig, REGION_MAPPINGS } from "../i18n/config";
 import LocaleLink from "../components/LocaleLink";
 
 const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
@@ -408,13 +408,26 @@ function HomeContent() {
                 onClick={async () => {
                   // Helper: găsește match-ul în regions
                   const regions = localeConfig[locale]?.regions || [];
+                  const mapping = REGION_MAPPINGS[locale] || {};
                   const normalize = (s) => (s || '').toLowerCase()
                     .normalize('NFD')
                     .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/ (county|province|district|judet|judeţ|județ)/g, '')
+                    .replace(/ (county|province|district|judet|judeţ|județ|nomos|nomós|prefecture)/gi, '')
                     .trim();
                   const findMatch = (...candidates) => {
-                    for (const c of candidates.filter(Boolean).map(normalize)) {
+                    const normalized = candidates.filter(Boolean).map(normalize);
+                    // 1) Mapping județ/oraș → regiune istorică
+                    for (const c of normalized) {
+                      if (mapping[c]) return mapping[c];
+                      // încearcă și fără spațiu/cratimă
+                      const compact = c.replace(/[\s-]/g, '');
+                      for (const [k, v] of Object.entries(mapping)) {
+                        const kCompact = k.replace(/[\s-]/g, '');
+                        if (kCompact === compact || compact.includes(kCompact) || kCompact.includes(compact)) return v;
+                      }
+                    }
+                    // 2) Match direct în lista regiunilor (fallback)
+                    for (const c of normalized) {
                       const m = regions.find(r => {
                         const rN = normalize(r);
                         return c === rN || c.includes(rN) || rN.includes(c);
