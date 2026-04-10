@@ -7,14 +7,14 @@
     "ogDescription": "Το παραδοσιακό παιχνίδι του Πάσχα, τώρα online! Τσούγκρισμα αβγών, εθνική κατάταξη, μονομαχίες σε πραγματικό χρόνο. Δωρεάν, χωρίς εγκατάσταση. Χριστός Ανέστη!",
     "twitterTitle": "Ciocnim.ro – Τσούγκρισε Αβγά Online! Χριστός Ανέστη!",
     "twitterDescription": "Προκάλεσε την οικογένειά σου σε τσούγκρισμα αβγών. Δωρεάν, σε κάθε κινητό, χωρίς εγκατάσταση. Χριστός Ανέστη!",
-    "applicationName": "Ciocnim.ro",
+    "applicationName": "Trosc.fun",
     "schemaDescription": "Ένα παραδοσιακό online παιχνίδι του Πάσχα, όπου οι χρήστες μπορούν να τσουγκρίσουν εικονικά αβγά με φίλους και οικογένεια, να προσαρμόσουν αβγά και να συμμετέχουν στην εθνική κατάταξη."
   },
 
   "hero": {
-    "title": "ΤΣΟΥΓΚ",
+    "title": "TROSC",
     "titleDot": ".",
-    "titleSuffix": "GG",
+    "titleSuffix": "FUN",
     "subtitle": "Τσούγκρισε αβγά online το Πάσχα",
     "crackCount": "τσουγκρίσματα",
     "online": "online"
@@ -81,12 +81,12 @@
     "privacy": "Απόρρητο",
     "about": "Σχετικά",
     "donate": "☕ Δωρεά",
-    "copyright": "Ciocnim.ro"
+    "copyright": "Trosc.fun"
   },
 
   "seo": {
     "description": "είναι το παραδοσιακό ελληνικό παιχνίδι τσουγκρίσματος αβγών του Πάσχα, τώρα online. Παίξε δωρεάν με φίλους και οικογένεια, ανεξαρτήτως απόστασης. Χριστός Ανέστη! 🥚",
-    "siteName": "Ciocnim.ro",
+    "siteName": "Trosc.fun",
     "traditionsLink": "Πασχαλινές Παραδόσεις",
     "greetingsLink": "Πασχαλινές Ευχές",
     "recipesLink": "Πασχαλινές Συνταγές",
@@ -613,7 +613,7 @@
     },
     "despre": {
       "pageTitle": "Σχετικά με",
-      "pageHighlight": "Ciocnim.ro",
+      "pageHighlight": "Trosc.fun",
       "pageSubtitle": "Η ιστορία πίσω από το παραδοσιακό πασχαλινό παιχνίδι, τώρα online.",
       "sections": [
         {
