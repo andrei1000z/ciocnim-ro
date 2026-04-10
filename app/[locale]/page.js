@@ -365,7 +365,7 @@ function HomeContent() {
           </div>
         )}
         {/* Selector regiune — apare când ai poreclă dar nu ai regiune */}
-        {nume && (!userStats.regiune || userStats.regiune === 'Muntenia') && (
+        {nume && !userStats.regiuneSet && (
           <div className="mt-2 rounded-2xl border border-amber-900/20 bg-card p-3 space-y-2">
             <p className="text-xs font-bold text-amber-400 text-center">{t('profile.regionRequired')}</p>
             <div className="flex gap-2">
@@ -390,7 +390,7 @@ function HomeContent() {
                         <button
                           key={r}
                           onClick={() => {
-                            const newStats = { ...userStats, regiune: r };
+                            const newStats = { ...userStats, regiune: r, regiuneSet: true };
                             safeLS.set("c_stats", JSON.stringify(newStats));
                             setRegionOpen(false);
                             window.location.reload();
@@ -406,68 +406,38 @@ function HomeContent() {
               </div>
               <button
                 onClick={async () => {
-                  if (!navigator.geolocation) {
-                    setToastMsg("Browserul nu suportă GPS");
-                    return;
+                  setToastMsg("Detectez locația...");
+                  try {
+                    // IP-based detection — fără permisiuni, instant, no prompt
+                    const res = await fetch('https://ipapi.co/json/');
+                    const data = await res.json();
+                    const region = data.region || data.region_code || '';
+                    const city = data.city || '';
+                    const country = data.country_code || '';
+                    const regions = localeConfig[locale]?.regions || [];
+                    const normalize = (s) => (s || '').toLowerCase()
+                      .normalize('NFD')
+                      .replace(/[\u0300-\u036f]/g, '')
+                      .trim();
+                    const candidates = [region, city, country].filter(Boolean).map(normalize);
+                    let match = null;
+                    for (const cand of candidates) {
+                      match = regions.find(r => {
+                        const rN = normalize(r);
+                        return cand.includes(rN) || rN.includes(cand);
+                      });
+                      if (match) break;
+                    }
+                    if (match) {
+                      const newStats = { ...userStats, regiune: match, regiuneSet: true };
+                      safeLS.set("c_stats", JSON.stringify(newStats));
+                      window.location.reload();
+                    } else {
+                      setToastMsg("Nu am găsit regiunea — alege manual din listă");
+                    }
+                  } catch {
+                    setToastMsg("Conexiune lentă — alege manual");
                   }
-                  // Geolocation API necesită HTTPS sau localhost
-                  const isSecure = window.isSecureContext || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                  if (!isSecure) {
-                    setToastMsg("GPS funcționează doar pe HTTPS");
-                    return;
-                  }
-                  // Verifică starea permisiunii (Chrome/Edge/Firefox modern)
-                  if (navigator.permissions && navigator.permissions.query) {
-                    try {
-                      const status = await navigator.permissions.query({ name: 'geolocation' });
-                      if (status.state === 'denied') {
-                        setToastMsg("Permisiune blocată. Click pe 🔒 lângă URL → Locație → Permite");
-                        return;
-                      }
-                    } catch {}
-                  }
-                  setToastMsg("Caut locația...");
-                  navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                      try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=${locale}`);
-                        const data = await res.json();
-                        const county = data.address?.county || data.address?.state || '';
-                        const regions = localeConfig[locale]?.regions || [];
-                        const normalize = (s) => s.toLowerCase()
-                          .normalize('NFD')
-                          .replace(/[\u0300-\u036f]/g, '')
-                          .trim();
-                        const countyN = normalize(county);
-                        const match = regions.find(r => {
-                          const rN = normalize(r);
-                          return countyN.includes(rN) || rN.includes(countyN.replace(/ (county|province|district)/g, ''));
-                        });
-                        if (match) {
-                          const newStats = { ...userStats, regiune: match };
-                          safeLS.set("c_stats", JSON.stringify(newStats));
-                          window.location.reload();
-                        } else if (regions.length > 0) {
-                          setToastMsg("Nu s-a găsit regiunea — alege manual");
-                        }
-                      } catch {
-                        setToastMsg("Eroare conexiune GPS");
-                      }
-                    },
-                    (err) => {
-                      // 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
-                      if (err.code === 1) {
-                        setToastMsg("Ai blocat permisiunea GPS — dă click pe 🔒 lângă URL");
-                      } else if (err.code === 2) {
-                        setToastMsg("Locația indisponibilă — verifică GPS-ul");
-                      } else if (err.code === 3) {
-                        setToastMsg("GPS prea lent — încearcă din nou");
-                      } else {
-                        setToastMsg("Eroare GPS necunoscută");
-                      }
-                    },
-                    { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
-                  );
                 }}
                 className="px-3 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-1"
                 aria-label={t('profile.detectLocation')}
