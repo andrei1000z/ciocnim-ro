@@ -27,9 +27,20 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // Detect language from header
-  const acceptLang = request.headers.get('accept-language') || '';
-  const detected = detectLocaleFromHeader(acceptLang);
+  // Domain-based locale: trosc.fun → bg/el, ciocnim.ro → ro
+  const host = request.headers.get('host') || '';
+  let detected;
+
+  if (host.includes('trosc.fun')) {
+    // Pe trosc.fun: detectează BG sau EL din browser, default BG
+    const acceptLang = request.headers.get('accept-language') || '';
+    const browserLang = detectLocaleFromHeader(acceptLang);
+    detected = (browserLang === 'el') ? 'el' : 'bg';
+  } else {
+    // Pe ciocnim.ro: detectează din browser, default RO
+    const acceptLang = request.headers.get('accept-language') || '';
+    detected = detectLocaleFromHeader(acceptLang);
+  }
 
   // Redirect to locale-prefixed version
   const url = request.nextUrl.clone();

@@ -12,7 +12,7 @@ import {
 export async function POST(request) {
   try {
     const origin = request.headers.get('origin');
-    const allowedOrigins = ['https://ciocnim.ro', 'https://www.ciocnim.ro', 'http://localhost:3000'];
+    const allowedOrigins = ['https://ciocnim.ro', 'https://www.ciocnim.ro', 'https://trosc.fun', 'https://www.trosc.fun', 'http://localhost:3000'];
     if (origin && !allowedOrigins.includes(origin)) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
