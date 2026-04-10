@@ -12,11 +12,13 @@ export default function LanguageSwitcher() {
   const { locale } = useLocaleConfig();
   const t = useT();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [isIntl, setIsIntl] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== "undefined") {
       setIsIntl(window.location.host.includes("trosc.fun"));
     }
@@ -46,6 +48,9 @@ export default function LanguageSwitcher() {
     }
     setOpen(false);
   };
+
+  // Render NIMIC pe server și primul render client → zero hydration mismatch
+  if (!mounted) return null;
 
   const current = localeConfig[locale];
 
