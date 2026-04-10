@@ -55,12 +55,11 @@ describe('Loading Screen', () => {
   });
 
   it('has retry button', () => {
-    expect(clientWrapper).toContain('Reîncearcă');
     expect(clientWrapper).toContain('window.location.reload()');
   });
 
   it('has error message', () => {
-    expect(clientWrapper).toContain('Ceva nu a mers bine');
+    expect(clientWrapper).toContain('aria-label="Error"');
   });
 });
 

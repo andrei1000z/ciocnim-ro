@@ -3,13 +3,13 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Accessibility', () => {
-  const layoutContent = fs.readFileSync(path.join(__dirname, '../app/layout.js'), 'utf-8');
-  const homeContent = fs.readFileSync(path.join(__dirname, '../app/page.js'), 'utf-8');
-  const gameContent = fs.readFileSync(path.join(__dirname, '../app/joc/[room]/page.js'), 'utf-8');
-  const notFoundContent = fs.readFileSync(path.join(__dirname, '../app/not-found.js'), 'utf-8');
+  const layoutContent = fs.readFileSync(path.join(__dirname, '../app/[locale]/layout.js'), 'utf-8');
+  const homeContent = fs.readFileSync(path.join(__dirname, '../app/[locale]/page.js'), 'utf-8');
+  const gameContent = fs.readFileSync(path.join(__dirname, '../app/[locale]/joc/[room]/page.js'), 'utf-8');
+  const notFoundContent = fs.readFileSync(path.join(__dirname, '../app/[locale]/not-found.js'), 'utf-8');
 
-  it('has lang="ro" on html element', () => {
-    expect(layoutContent).toContain('lang="ro"');
+  it('has lang attribute on html element', () => {
+    expect(layoutContent).toContain('lang={validLocale}');
   });
 
   it('has skip-to-content link', () => {

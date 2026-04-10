@@ -15,7 +15,7 @@ export const localeConfig = {
       'Crisana', 'Maramures', 'Dobrogea', 'Bucuresti'
     ],
     leaderboardKey: 'RO',
-    domain: 'trosc.gg/ro',
+    domain: 'ciocnim.ro/ro',
     ogLocale: 'ro_RO',
     currency: 'RON',
     gameName: 'Ciocnim',
@@ -38,7 +38,7 @@ export const localeConfig = {
       '\u0421\u043C\u043E\u043B\u044F\u043D', '\u0422\u044A\u0440\u0433\u043E\u0432\u0438\u0449\u0435'
     ],
     leaderboardKey: 'BG',
-    domain: 'trosc.gg/bg',
+    domain: 'ciocnim.ro/bg',
     ogLocale: 'bg_BG',
     currency: 'BGN',
     gameName: '\u0422\u0440\u043E\u0441\u043D\u0438',
@@ -58,7 +58,7 @@ export const localeConfig = {
       'Ιόνια Νησιά', 'Δωδεκάνησα', 'Κυκλάδες'
     ],
     leaderboardKey: 'EL',
-    domain: 'trosc.gg/el',
+    domain: 'ciocnim.ro/el',
     ogLocale: 'el_GR',
     currency: 'EUR',
     gameName: 'Τσούγκρισμα',

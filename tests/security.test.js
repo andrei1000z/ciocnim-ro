@@ -92,7 +92,7 @@ describe('API Security (route.js)', () => {
 
 describe('Game room noindex', () => {
   const layoutContent = fs.readFileSync(
-    path.join(__dirname, '../app/joc/[room]/layout.js'), 'utf-8'
+    path.join(__dirname, '../app/[locale]/joc/[room]/layout.js'), 'utf-8'
   );
 
   it('has robots noindex meta', () => {
@@ -103,22 +103,22 @@ describe('Game room noindex', () => {
 
 describe('Privacy & Legal Pages', () => {
   it('privacy page exists', () => {
-    const exists = fs.existsSync(path.join(__dirname, '../app/privacy/page.js'));
+    const exists = fs.existsSync(path.join(__dirname, '../app/[locale]/privacy/page.js'));
     expect(exists).toBe(true);
   });
 
   it('terms page exists', () => {
-    const exists = fs.existsSync(path.join(__dirname, '../app/terms/page.js'));
+    const exists = fs.existsSync(path.join(__dirname, '../app/[locale]/terms/page.js'));
     expect(exists).toBe(true);
   });
 
   it('privacy page mentions GDPR', () => {
-    const content = fs.readFileSync(path.join(__dirname, '../app/privacy/page.js'), 'utf-8');
+    const content = fs.readFileSync(path.join(__dirname, '../app/[locale]/privacy/page.js'), 'utf-8');
     expect(content).toContain('GDPR');
   });
 
   it('privacy page has contact email', () => {
-    const content = fs.readFileSync(path.join(__dirname, '../app/privacy/page.js'), 'utf-8');
+    const content = fs.readFileSync(path.join(__dirname, '../app/[locale]/privacy/page.js'), 'utf-8');
     expect(content).toContain('ciocnim@mail.com');
   });
 });

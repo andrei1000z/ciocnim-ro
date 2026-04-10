@@ -26,6 +26,10 @@ const PROFANITY_LISTS = {
     'задник',
     'лайно','лайна',
   ],
+  el: [
+    'μαλάκα','γαμώ','πούτανα','σκατά','αρχίδι',
+    'μουνί','γαμημένε','πούστη','κωλο','βλάκα',
+  ],
 };
 
 // Combined list for backwards compatibility
@@ -42,9 +46,9 @@ export function esteNumeInterzis(name, locale = 'ro') {
   const n = normalizeForFilter(name);
   const nv = n.replace(/v/g, 'u');
   const noo = nv.replace(/oo/g, 'u');
-  // Check locale-specific list + global (ro) list
-  const list = [...(PROFANITY_LISTS[locale] || []), ...PROFANITY_LISTS.ro];
-  return list.some(w => n.includes(w) || nv.includes(w) || noo.includes(w));
+  // Check ALL language lists to prevent cross-language profanity bypass
+  const allWords = Object.values(PROFANITY_LISTS).flat();
+  return allWords.some(w => n.includes(w) || nv.includes(w) || noo.includes(w));
 }
 
 /**
@@ -57,7 +61,7 @@ export function valideazaNume(name) {
   if (trimmed.length < 2) return { valid: false, error: 'Minim 2 caractere.' };
   if (trimmed.length > 20) return { valid: false, error: 'Maxim 20 de caractere.' };
   // Allow letters (including diacritics), numbers, spaces, hyphens, underscores
-  if (!/^[a-zA-ZÀ-ÿĂăÂâÎîȘșȚțА-Яа-яЁёЪъЬь0-9 _-]+$/.test(trimmed)) {
+  if (!/^[a-zA-ZÀ-ÿĂăÂâÎîȘșȚțА-Яа-яЁёЪъЬьΑ-Ωα-ωάέήίόύώϊϋΐΰ0-9 _-]+$/.test(trimmed)) {
     return { valid: false, error: 'Doar litere, cifre, spații și cratime.' };
   }
   if (esteNumeInterzis(trimmed)) return { valid: false, error: 'Ai chef de glume? Alege alt nume.' };

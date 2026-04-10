@@ -83,7 +83,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                           ? t('leaderboard.champion')
                           : myRank !== null
                             ? t('leaderboard.rank', { rank: myRank, needed: winsNeeded, victLabel, target: targetRank })
-                            : t('leaderboard.rank', { rank: myRank, needed: winsNeeded, victLabel, target: targetRank })}
+                            : t('leaderboard.needWins', { needed: winsNeeded, victLabel, target: targetRank })}
                       </p>
                     </div>
                   )}
@@ -126,9 +126,9 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                   ? t('leaderboard.shareRank', { rank: myRank })
                   : t('leaderboard.shareGeneric');
               if (navigator.share) {
-                navigator.share({ title: t('seo.siteName'), text, url: `https://trosc.gg/${locale}` }).catch(() => {});
+                navigator.share({ title: t('seo.siteName'), text, url: `https://ciocnim.ro/${locale}` }).catch(() => {});
               } else {
-                safeCopy(`${text}\nhttps://trosc.gg/${locale}`);
+                safeCopy(`${text}\nhttps://ciocnim.ro/${locale}`);
               }
             }}
             className="w-full mt-3 py-2.5 border-t border-red-900/8 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-elevated transition-all flex items-center justify-center gap-2 rounded-b-xl"

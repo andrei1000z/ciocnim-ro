@@ -2,6 +2,10 @@
   "name": "ciocnim-ro",
   "version": "0.1.0",
   "private": true,
+  "description": "Joc multiplayer de ciocnit ouă de Paște — tradiția românească online",
+  "author": "Ciocnim.ro",
+  "license": "MIT",
+  "homepage": "https://ciocnim.ro",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

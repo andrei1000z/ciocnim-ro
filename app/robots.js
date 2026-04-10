@@ -1,13 +1,15 @@
+import { BASE_URL } from './lib/constants';
+
 export default function robots() {
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/ro/joc/', '/bg/joc/'],
+        disallow: ['/api/', '/ro/joc/', '/bg/joc/', '/el/joc/'],
       },
     ],
-    sitemap: 'https://trosc.gg/sitemap.xml',
-    host: 'https://trosc.gg',
+    sitemap: `${BASE_URL}/sitemap.xml`,
+    host: BASE_URL,
   };
 }

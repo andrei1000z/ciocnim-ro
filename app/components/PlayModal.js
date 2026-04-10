@@ -71,7 +71,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             <h2 className="text-lg font-black text-heading">{t('playModal.title')}</h2>
             <p className="text-xs mt-0.5 text-dim">{t('playModal.subtitle')}</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 bg-elevated hover:bg-overlay rounded-full flex items-center justify-center transition-colors text-sm text-dim">×</button>
+          <button onClick={onClose} className="w-8 h-8 bg-elevated hover:bg-overlay rounded-full flex items-center justify-center transition-colors text-sm text-dim" aria-label={t('playModal.close')}>×</button>
         </div>
 
         <div className="space-y-3">
@@ -89,7 +89,9 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
             <span className="text-xs font-bold uppercase tracking-wider text-dim">{t('playModal.or')}</span>
             <div className="flex-1 h-px bg-edge-strong" />
           </div>
+          <label className="sr-only" htmlFor="room-code-input">{t('playModal.roomCodePlaceholder')}</label>
           <input
+            id="room-code-input"
             value={roomCode}
             onChange={e => { setRoomCode(e.target.value.toUpperCase().trim()); setRoomError(""); }}
             onKeyDown={e => e.key === "Enter" && joinRoom()}

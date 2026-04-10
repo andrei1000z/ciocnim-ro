@@ -5,13 +5,19 @@ export const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
 export function sanitizeStr(val, maxLen = 100) {
   if (typeof val !== 'string') return '';
   // Strip characters dangerous in Redis key names (colons, newlines, glob chars)
-  return val.slice(0, maxLen).replace(/[:\n\r\*\?\[\]]/g, '').trim();
+  return val.slice(0, maxLen).replace(/[:\n\r\*\?\[\]\{\}]/g, '').trim();
 }
 
 export function sanitizeId(val) {
   if (typeof val !== 'string' || val === 'null' || val === 'undefined') return '';
   const clean = val.slice(0, 64).replace(/[^a-zA-Z0-9\-_]/g, '');
   return clean || '';
+}
+
+export function getClientIp(request) {
+  return request.headers.get('x-real-ip')
+    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
 }
 
 export async function checkRateLimit(ip, actiune) {

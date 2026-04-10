@@ -97,7 +97,6 @@ function CookieBanner() {
 }
 
 function LoadingScreen() {
-  const t = useT();
   const [timedOut, setTimedOut] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setTimedOut(true), 10000);
@@ -107,19 +106,16 @@ function LoadingScreen() {
     <div className="fixed inset-0 bg-main z-[100001] flex flex-col items-center justify-center">
       {!timedOut ? (
         <div className="flex flex-col items-center gap-5">
-          <span className="text-8xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</span>
-          <p className="text-sm font-black text-red-500 uppercase tracking-[0.4em] animate-pulse">{t('loading.text')}</p>
+          <span className="text-8xl animate-bounce" role="img" aria-label="Loading">🥚</span>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5 text-center px-6 max-w-sm">
-          <span className="text-6xl" role="img" aria-label="Eroare">⚠️</span>
-          <p className="text-base font-black text-red-400">{t('loading.errorTitle')}</p>
-          <p className="text-sm text-dim">{t('loading.errorDescription')}</p>
+          <span className="text-6xl" role="img" aria-label="Error">⚠️</span>
           <button
             onClick={() => window.location.reload()}
             className="mt-2 px-8 py-3 bg-red-700 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 border border-red-600"
           >
-            {t('loading.retry')}
+            ↻
           </button>
         </div>
       )}
@@ -302,7 +298,7 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)
   // ==========================================================================
-  const incrementGlobal = useCallback(async (amCastigat = false, teamIdToUpdate = null) => {
+  const incrementGlobal = useCallback(async (amCastigat = false, teamIdToUpdate = null, roomId = null) => {
     try {
       if (!nume || nume.trim() === "") return;
 
@@ -311,7 +307,7 @@ export default function ClientWrapper({ children }) {
         jucator: nume,
         regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
         teamId: amCastigat ? teamIdToUpdate : null,
-        esteCastigator: amCastigat
+        roomId: roomId
       };
 
       const res = await fetch('/api/ciocnire', {

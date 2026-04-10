@@ -1,7 +1,8 @@
 import { locales } from './i18n/config';
+import { BASE_URL } from './lib/constants';
 
 export default function sitemap() {
-  const baseUrl = 'https://trosc.gg';
+  const baseUrl = BASE_URL;
   const pages = [
     { path: '', changeFrequency: 'daily', priority: 1.0 },
     { path: '/traditii', changeFrequency: 'monthly', priority: 0.9 },
@@ -19,7 +20,6 @@ export default function sitemap() {
   return locales.flatMap(locale =>
     pages.map(page => ({
       url: `${baseUrl}/${locale}${page.path}`,
-      lastModified: new Date(),
       changeFrequency: page.changeFrequency,
       priority: page.priority,
       alternates: {

@@ -9,6 +9,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import DictionaryProvider from "../components/DictionaryProvider";
 import { getDictionary } from "../i18n/getDictionary";
 import { locales, localeConfig } from "../i18n/config";
+import { BASE_URL } from "../lib/constants";
 
 const outfit = Outfit({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }) {
   const { locale } = await params;
   const dict = await getDictionary(locale);
   const config = localeConfig[locale] || localeConfig.ro;
-  const baseUrl = 'https://trosc.gg';
+  const baseUrl = BASE_URL;
 
   return {
     title: {
@@ -101,7 +102,7 @@ export default async function LocaleLayout({ children, params }) {
   const validLocale = locales.includes(locale) ? locale : 'ro';
   const dictionary = await getDictionary(validLocale);
   const config = localeConfig[validLocale] || localeConfig.ro;
-  const baseUrl = 'https://trosc.gg';
+  const baseUrl = BASE_URL;
 
   const schemaMarkup = {
     "@context": "https://schema.org",
@@ -122,7 +123,7 @@ export default async function LocaleLayout({ children, params }) {
   };
 
   return (
-    <html lang={validLocale} className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
+    <html lang={validLocale} suppressHydrationWarning className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
         <link rel="preconnect" href="https://ws-eu.pusher.com" />
@@ -130,10 +131,6 @@ export default async function LocaleLayout({ children, params }) {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        {locales.map(l => (
-          <link key={l} rel="alternate" hrefLang={l} href={`${baseUrl}/${l}`} />
-        ))}
-        <link rel="alternate" hrefLang="x-default" href={`${baseUrl}/ro`} />
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('c_theme');if(t==='dark'){;}else if(t==='light')document.documentElement.classList.add('light');else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){;}else document.documentElement.classList.add('light')}catch(e){document.documentElement.classList.add('light')};if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}` }} />
         <Script
           id="schema-main"

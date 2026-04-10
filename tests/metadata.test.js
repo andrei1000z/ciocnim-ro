@@ -3,16 +3,14 @@ import fs from 'fs';
 import path from 'path';
 
 describe('SEO & Metadata', () => {
-  const layoutContent = fs.readFileSync(path.join(__dirname, '../app/layout.js'), 'utf-8');
+  const layoutContent = fs.readFileSync(path.join(__dirname, '../app/[locale]/layout.js'), 'utf-8');
 
-  it('has lang="ro" on html element', () => {
-    expect(layoutContent).toContain('lang="ro"');
+  it('has lang attribute on html element', () => {
+    expect(layoutContent).toContain('lang={validLocale}');
   });
 
-  it('page title is under 60 characters', () => {
-    const match = layoutContent.match(/default:\s*"([^"]+)"/);
-    expect(match).toBeTruthy();
-    expect(match[1].length).toBeLessThanOrEqual(60);
+  it('page title uses i18n dictionary', () => {
+    expect(layoutContent).toContain('dict.meta.title');
   });
 
   it('has meta description', () => {
@@ -92,7 +90,7 @@ describe('manifest.json', () => {
   it('has required PWA fields', () => {
     expect(manifest.name).toBeTruthy();
     expect(manifest.short_name).toBeTruthy();
-    expect(manifest.start_url).toBe('/');
+    expect(manifest.start_url).toBe('/ro');
     expect(manifest.display).toBe('standalone');
   });
 

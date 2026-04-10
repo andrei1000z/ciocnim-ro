@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { timingSafeEqual, randomBytes } from 'crypto';
 import redis from '@/app/lib/redis';
 import { esteNumeInterzis, valideazaNume } from '@/app/lib/profanityFilter';
 import pusher from './pusher';
-import { sanitizeStr, sanitizeId, checkRateLimit, NUME_INTERZISE } from './utils';
+import { sanitizeStr, sanitizeId, checkRateLimit, getClientIp, NUME_INTERZISE } from './utils';
 import {
   getClasamentRegiuni, getClasamentJucatori,
   getUserStats, updateUserStats, getUserAchievements, checkAndAwardAchievements,
@@ -10,6 +11,12 @@ import {
 
 export async function POST(request) {
   try {
+    const origin = request.headers.get('origin');
+    const allowedOrigins = ['https://ciocnim.ro', 'https://www.ciocnim.ro', 'http://localhost:3000'];
+    if (origin && !allowedOrigins.includes(origin)) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+
     let body;
     try { body = await request.json(); } catch { return NextResponse.json({ success: false, error: "JSON invalid" }, { status: 400 }); }
     if (!body || typeof body !== 'object') return NextResponse.json({ success: false, error: "Body invalid" }, { status: 400 });
@@ -27,13 +34,11 @@ export async function POST(request) {
     const newName = sanitizeStr(body.newName, 30);
     const oponentNume = sanitizeStr(body.oponentNume, 30);
     const atacant = sanitizeStr(body.atacant, 30);
-    const esteCastigator = body.esteCastigator === true;
     const oldName = sanitizeStr(body.oldName, 30);
     const teamIds = Array.isArray(body.teamIds) ? body.teamIds.slice(0, 20).map(id => sanitizeId(id)).filter(Boolean) : [];
 
     // Rate limiting
-    const forwarded = request.headers.get('x-forwarded-for');
-    const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+    const ip = getClientIp(request);
     const allowed = await checkRateLimit(ip, actiune);
     if (!allowed) return NextResponse.json({ success: false, error: "Prea multe cereri. Așteaptă puțin." }, { status: 429 });
 
@@ -54,15 +59,29 @@ export async function POST(request) {
       }
 
       case 'increment-global': {
-        const rlIdentifier = jucator ? jucator.toUpperCase() : (request.headers.get('x-forwarded-for') || 'anon');
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
+        const rlIdentifier = jucator ? jucator.toUpperCase() : getClientIp(request);
         const rlKey = `ratelimit:inc:${rlIdentifier}`;
         const rlSet = await redis.set(rlKey, '1', 'EX', 2, 'NX');
         if (!rlSet) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
 
+        // Derive esteCastigator server-side from the lovitura stored in Redis
+        let serverEsteCastigator = false;
+        const safeName = jucator ? jucator.toUpperCase() : null;
+        if (safeName) {
+          const lovituraRaw = await redis.get(`room:${roomId}:lovitura`);
+          if (lovituraRaw) {
+            try {
+              const lovituraData = JSON.parse(lovituraRaw);
+              const esteAtacant = lovituraData.atacant === safeName;
+              serverEsteCastigator = esteAtacant ? lovituraData.castigaCelCareDa : !lovituraData.castigaCelCareDa;
+            } catch {}
+          }
+        }
+
         const pipeline = redis.pipeline();
         pipeline.incr('global_ciocniri_total');
-        const safeName = jucator ? jucator.toUpperCase() : null;
-        if (safeName && esteCastigator) {
+        if (safeName && serverEsteCastigator) {
           pipeline.zincrby('leaderboard_jucatori', 1, safeName);
           if (regiune && regiune !== "Alege regiunea...") pipeline.zincrby('leaderboard_regiuni', 1, regiune);
           if (teamId) pipeline.zincrby(`team:${teamId}:membri`, 1, safeName);
@@ -78,18 +97,18 @@ export async function POST(request) {
         ]);
         const noulTotal = results[0][1];
 
-        pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(e => console.error('[Pusher global]', e?.message));
-        if (teamId) pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(e => console.error('[Pusher team]', e?.message));
+        pusher.trigger('global', 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
+        if (teamId) pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(() => {});
 
         if (safeName && currentStats) {
-          const updates = esteCastigator
-            ? { wins: 1, currentStreak: String(currentStats.currentStreak + 1), ...(teamId ? { teamWins: 1 } : {}) }
+          const updates = serverEsteCastigator
+            ? { wins: 1, currentStreak: String(parseInt(currentStats.currentStreak) + 1), ...(teamId ? { teamWins: 1 } : {}) }
             : { losses: 1, currentStreak: '0' };
           await updateUserStats(safeName, updates);
-          const newStats = esteCastigator
+          const newStats = serverEsteCastigator
             ? { ...currentStats, wins: currentStats.wins + 1, currentStreak: currentStats.currentStreak + 1, ...(teamId ? { teamWins: (currentStats.teamWins || 0) + 1 } : {}) }
             : { ...currentStats, losses: currentStats.losses + 1, currentStreak: 0 };
-          checkAndAwardAchievements(safeName, newStats, teamId).catch(e => console.error('[Achievements]', e?.message));
+          checkAndAwardAchievements(safeName, newStats, teamId).catch(() => {});
         }
 
         return NextResponse.json({ success: true, total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat });
@@ -98,8 +117,8 @@ export async function POST(request) {
       // ── Room management ──────────────────────────────────────────────────────
 
       case 'join': {
-        if (!jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
-        const joinIp = request.headers.get('x-forwarded-for') || 'anon';
+        if (!jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
+        const joinIp = getClientIp(request);
         const joinRlKey = `ratelimit:join:${joinIp}`;
         const joinCount = await redis.incr(joinRlKey);
         if (joinCount === 1) await redis.expire(joinRlKey, 60);
@@ -114,7 +133,7 @@ export async function POST(request) {
           const count = await redis.scard(playerSetKey);
           if (count > 2) {
             await redis.srem(playerSetKey, cleanName);
-            return NextResponse.json({ success: false, error: "Camera este ocupată!" });
+            return NextResponse.json({ success: false, error: "Camera este ocupată!" }, { status: 409 });
           }
         }
         await redis.setex(`room:${roomId}:skin:${cleanName}`, 7200, JSON.stringify({ skin, isGolden, hasStar, regiune }));
@@ -132,24 +151,24 @@ export async function POST(request) {
             serverIsHost = members.length <= 1 || members[0] === cleanName;
           }
         }
-        pusher.trigger(`arena-v22-${roomId}`, 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(e => console.error('[Pusher join]', e?.message));
+        pusher.trigger(`arena-v22-${roomId}`, 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true, isHost: serverIsHost });
       }
 
       case 'check-room': {
         const cod = sanitizeId(body.cod);
-        if (!cod || cod.length < 4 || cod.length > 6) return NextResponse.json({ success: false, error: "Cod invalid" });
+        if (!cod || cod.length < 4 || cod.length > 6) return NextResponse.json({ success: false, error: "Cod invalid" }, { status: 400 });
         const [roomExists, count] = await Promise.all([
           redis.exists(`room:privat-${cod}`),
           redis.scard(`room:privat-${cod}:players`),
         ]);
-        if (!roomExists && count === 0) return NextResponse.json({ success: false, error: "Camera nu există. Verifică codul." });
-        if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." });
+        if (!roomExists && count === 0) return NextResponse.json({ success: false, error: "Camera nu există. Verifică codul." }, { status: 404 });
+        if (count >= 2) return NextResponse.json({ success: false, error: "Camera este ocupată! Încearcă alt cod." }, { status: 409 });
         return NextResponse.json({ success: true });
       }
 
       case 'get-room-players': {
-        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" });
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
         const players = await redis.smembers(`room:${roomId}:players`);
         const skinData = {};
         await Promise.all(players.map(async (p) => {
@@ -160,7 +179,7 @@ export async function POST(request) {
       }
 
       case 'get-room-lovitura': {
-        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" });
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
         const raw = await redis.get(`room:${roomId}:lovitura`);
         if (!raw) return NextResponse.json({ success: true, lovitura: null });
         try { return NextResponse.json({ success: true, lovitura: JSON.parse(raw) }); }
@@ -168,16 +187,16 @@ export async function POST(request) {
       }
 
       case 'lovitura': {
-        if (!jucator || !atacant || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
+        if (!jucator || !atacant || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         const castigaCelCareDa = Math.random() < 0.5;
         const lovituraData = { jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now() };
-        redis.setex(`room:${roomId}:lovitura`, 120, JSON.stringify(lovituraData)).catch(e => console.error('[Redis lovitura]', e?.message));
-        pusher.trigger(`arena-v22-${roomId}`, 'lovitura', lovituraData).catch(e => console.error('[Pusher lovitura]', e?.message));
+        redis.setex(`room:${roomId}:lovitura`, 120, JSON.stringify(lovituraData)).catch(() => {});
+        pusher.trigger(`arena-v22-${roomId}`, 'lovitura', lovituraData).catch(() => {});
         return NextResponse.json({ success: true, castigaCelCareDa });
       }
 
       case 'arena-chat': {
-        if (!text || !jucator || !roomId) return NextResponse.json({ success: false });
+        if (!text || !jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         const chatRlKey = `ratelimit:chat:${jucator.toUpperCase()}`;
         const chatRl = await redis.set(chatRlKey, '1', 'EX', 1, 'NX');
         if (!chatRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
@@ -186,7 +205,7 @@ export async function POST(request) {
       }
 
       case 'revansa': {
-        if (!jucator || !roomId) return NextResponse.json({ success: false });
+        if (!jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         const revRlKey = `ratelimit:rev:${jucator.toUpperCase()}`;
         const revRl = await redis.set(revRlKey, '1', 'EX', 2, 'NX');
         if (!revRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
@@ -206,13 +225,13 @@ export async function POST(request) {
       }
 
       case 'clear-round': {
-        if (!roomId) return NextResponse.json({ success: false });
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
         redis.del(`room:${roomId}:revansa-ok`, `room:${roomId}:lovitura`, `room:${roomId}:revansa`).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
       case 'revansa-ok': {
-        if (!roomId || !jucator) return NextResponse.json({ success: false });
+        if (!roomId || !jucator) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         redis.del(`room:${roomId}:revansa`, `room:${roomId}:lovitura`).catch(() => {});
         redis.setex(`room:${roomId}:revansa-ok`, 60, '1').catch(() => {});
         pusher.trigger(`arena-v22-${roomId}`, 'revansa-ok', { jucator: jucator.toUpperCase(), t: Date.now() }).catch(() => {});
@@ -220,7 +239,7 @@ export async function POST(request) {
       }
 
       case 'get-room-revansa': {
-        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" });
+        if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
         const [revPlayers, revOkFlag] = await Promise.all([
           redis.smembers(`room:${roomId}:revansa`),
           redis.get(`room:${roomId}:revansa-ok`),
@@ -230,7 +249,7 @@ export async function POST(request) {
       }
 
       case 'creeaza-camera-privata': {
-        const createIp = request.headers.get('x-forwarded-for') || 'anon';
+        const createIp = getClientIp(request);
         const createRlKey = `ratelimit:create:${createIp}`;
         const createCount = await redis.incr(createRlKey);
         if (createCount === 1) await redis.expire(createRlKey, 60);
@@ -242,7 +261,7 @@ export async function POST(request) {
           for (let i = 0; i < 4; i++) cod += CHARS[Math.floor(Math.random() * CHARS.length)];
           attempts++;
         } while (attempts < 20 && await redis.exists(`room:privat-${cod}`));
-        const hostToken = Math.random().toString(36).substring(2, 18);
+        const hostToken = randomBytes(16).toString('hex');
         await redis.setex(`room:privat-${cod}`, 7200, JSON.stringify({ status: 'waiting', t: Date.now(), hostToken }));
         return NextResponse.json({ success: true, cod, hostToken });
       }
@@ -250,13 +269,13 @@ export async function POST(request) {
       // ── User stats & achievements ────────────────────────────────────────────
 
       case 'get-achievements': {
-        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" });
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
         const achievements = await getUserAchievements(jucator);
         return NextResponse.json({ success: true, achievements });
       }
 
       case 'get-user-stats': {
-        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" });
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
         const cleanPlayer = jucator.toUpperCase();
         const [stats, globalScore] = await Promise.all([
           getUserStats(cleanPlayer),
@@ -266,7 +285,7 @@ export async function POST(request) {
       }
 
       case 'update-stats': {
-        if (!jucator) return NextResponse.json({ success: false });
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
         const statUpdates = {};
         if (text === 'message') statUpdates.messagesSent = 1;
         if (text === 'duel') statUpdates.duelsSent = 1;
@@ -285,18 +304,18 @@ export async function POST(request) {
 
       case 'schimba-porecla': {
         const numeValidation = valideazaNume(newName);
-        if (!numeValidation.valid) return NextResponse.json({ success: false, error: numeValidation.error });
-        const nameRlIp = request.headers.get('x-forwarded-for') || 'anon';
+        if (!numeValidation.valid) return NextResponse.json({ success: false, error: numeValidation.error }, { status: 400 });
+        const nameRlIp = getClientIp(request);
         const nameRlKey = `ratelimit:name:${nameRlIp}`;
         const nameRl = await redis.set(nameRlKey, '1', 'EX', 5, 'NX');
         if (!nameRl) return NextResponse.json({ success: false, error: "Așteaptă puțin înainte de a schimba iar." }, { status: 429 });
 
         const newClean = newName.toUpperCase();
         const oldClean = oldName ? oldName.toUpperCase() : null;
-        if (NUME_INTERZISE.includes(newClean)) return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." });
+        if (NUME_INTERZISE.includes(newClean)) return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." }, { status: 400 });
 
         const isTaken = await redis.get(`nume_rezervat:${newClean}`);
-        if (isTaken && isTaken !== oldClean) return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" });
+        if (isTaken && isTaken !== oldClean) return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
 
         const hasTeams = oldClean && oldClean !== newClean && teamIds && teamIds.length > 0;
         const [globalScore, ...teamScores] = (oldClean && oldClean !== newClean)
@@ -320,16 +339,16 @@ export async function POST(request) {
           }
         }
         await pipeline.exec();
-        getClasamentJucatori().then(top => pusher.trigger('global', 'update-complet', { topJucatori: top })).catch(e => console.error('[Pusher rename]', e?.message));
+        getClasamentJucatori().then(top => pusher.trigger('global', 'update-complet', { topJucatori: top })).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
       // ── Teams ────────────────────────────────────────────────────────────────
 
       case 'get-team-details': {
-        if (!teamId) return NextResponse.json({ success: false, error: "Lipsește ID" });
+        if (!teamId) return NextResponse.json({ success: false, error: "Lipsește ID" }, { status: 400 });
         const teamName = await redis.get(`team:${teamId}:nume`);
-        if (!teamName) return NextResponse.json({ success: false, error: "Grup inexistent" });
+        if (!teamName) return NextResponse.json({ success: false, error: "Grup inexistent" }, { status: 404 });
         const TTL = 60 * 60 * 24 * 30;
         await Promise.all([
           redis.expire(`team:${teamId}:nume`, TTL),
@@ -355,7 +374,7 @@ export async function POST(request) {
       }
 
       case 'creeaza-echipa': {
-        if (!creator || creator.length < 3) return NextResponse.json({ success: false });
+        if (!creator || creator.length < 3) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         const teamRlKey = `ratelimit:team:${creator.toUpperCase()}`;
         const teamRl = await redis.set(teamRlKey, '1', 'EX', 10, 'NX');
         if (!teamRl) return NextResponse.json({ success: false, error: "Așteaptă puțin înainte de a crea alt grup." }, { status: 429 });
@@ -374,22 +393,24 @@ export async function POST(request) {
       }
 
       case 'redenumeste-echipa': {
-        if (!teamId || !newName || newName.length < 3) return NextResponse.json({ success: false });
-        if (esteNumeInterzis(newName)) return NextResponse.json({ success: false, error: "Numele conține cuvinte nepotrivite." });
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
+        if (!teamId || !newName || newName.length < 3) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
+        if (esteNumeInterzis(newName)) return NextResponse.json({ success: false, error: "Numele conține cuvinte nepotrivite." }, { status: 400 });
         const renameTeamStats = await redis.hgetall(`team:${teamId}:stats`);
         if (renameTeamStats.creator && jucator && renameTeamStats.creator !== jucator.toUpperCase()) {
-          return NextResponse.json({ success: false, error: "Doar creatorul poate redenumi grupul." });
+          return NextResponse.json({ success: false, error: "Doar creatorul poate redenumi grupul." }, { status: 403 });
         }
         await redis.set(`team:${teamId}:nume`, newName.toUpperCase().slice(0, 50));
         return NextResponse.json({ success: true });
       }
 
       case 'kick-member': {
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
         const memberToKick = sanitizeStr(body.member, 30);
-        if (!teamId || !memberToKick) return NextResponse.json({ success: false, error: "Date incomplete" });
+        if (!teamId || !memberToKick) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         const kickTeamStats = await redis.hgetall(`team:${teamId}:stats`);
         if (!kickTeamStats.creator || !jucator || kickTeamStats.creator !== jucator.toUpperCase()) {
-          return NextResponse.json({ success: false, error: "Doar creatorul poate elimina membri." });
+          return NextResponse.json({ success: false, error: "Doar creatorul poate elimina membri." }, { status: 403 });
         }
         await redis.zrem(`team:${teamId}:membri`, memberToKick.toUpperCase());
         pusher.trigger(`team-${teamId}`, 'team-update', { t: Date.now() }).catch(() => {});
@@ -399,20 +420,20 @@ export async function POST(request) {
       // ── Provocare duel ───────────────────────────────────────────────────────
 
       case 'provocare-duel': {
-        if (!oponentNume || !jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" });
+        if (!oponentNume || !jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         const duelRlKey = `ratelimit:duel:${jucator.toUpperCase()}`;
         const duelRl = await redis.set(duelRlKey, '1', 'EX', 5, 'NX');
         if (!duelRl) return NextResponse.json({ success: false, error: "Așteaptă puțin între provocări." }, { status: 429 });
         pusher.trigger(`user-notif-${oponentNume.toUpperCase()}`, 'duel-request', {
           deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
-        }).catch(e => console.error('[Pusher duel]', e?.message));
+        }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
       // ── Arena matchmaking ────────────────────────────────────────────────────
 
       case 'arena-matchmaking': {
-        const mmIp = request.headers.get('x-forwarded-for') || 'anon';
+        const mmIp = getClientIp(request);
         const mmRlKey = `ratelimit:mm:${mmIp}`;
         const mmRl = await redis.set(mmRlKey, '1', 'EX', 3, 'NX');
         if (!mmRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
@@ -445,7 +466,7 @@ export async function POST(request) {
 
       case 'arena-heartbeat': {
         const visitorId = sanitizeId(body.visitorId);
-        if (!visitorId) return NextResponse.json({ success: false });
+        if (!visitorId) return NextResponse.json({ success: false, error: "Cerere invalidă" }, { status: 400 });
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zadd('arena:online', now, visitorId);
@@ -459,7 +480,7 @@ export async function POST(request) {
 
       case 'arena-disconnect': {
         const visitorId = sanitizeId(body.visitorId);
-        if (!visitorId) return NextResponse.json({ success: false });
+        if (!visitorId) return NextResponse.json({ success: false, error: "Cerere invalidă" }, { status: 400 });
         const pipeline = redis.pipeline();
         pipeline.zrem('arena:online', visitorId);
         pipeline.zcard('arena:online');
@@ -472,11 +493,15 @@ export async function POST(request) {
       // ── Admin ────────────────────────────────────────────────────────────────
 
       case 'reset-all': {
-        const resetIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+        const resetIp = getClientIp(request);
         const allowedIps = (process.env.ADMIN_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
         if (allowedIps.length > 0 && !allowedIps.includes(resetIp)) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
         const secret = sanitizeStr(body.secret, 50);
-        if (secret !== process.env.ADMIN_SECRET) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        const secretBuf = Buffer.from(secret || '');
+        const expectedBuf = Buffer.from(process.env.ADMIN_SECRET || '');
+        if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
         const confirmToken = sanitizeStr(body.confirmToken, 64);
         if (!confirmToken) {
           const token = Math.random().toString(36).substring(2, 18);
@@ -503,8 +528,16 @@ export async function POST(request) {
       default:
         return NextResponse.json({ success: false, error: "Acțiune necunoscută" }, { status: 400 });
     }
-  } catch (error) {
-    console.error("[API Error]:", error?.message, error?.stack?.split('\n')[1]?.trim());
+  } catch {
     return NextResponse.json({ success: false, error: "Eroare internă" }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    api: "ciocnim.ro",
+    version: "1.0",
+    usage: "POST cu { actiune: '...' }"
+  });
 }

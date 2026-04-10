@@ -100,9 +100,9 @@ export default function ClasamentPage() {
       ? t('content.clasament.shareText', { rank: myRank })
       : t('leaderboard.shareGeneric');
     if (navigator.share) {
-      navigator.share({ title: t('seo.siteName'), text, url: `https://trosc.gg/${locale}/clasament` }).catch(() => {});
+      navigator.share({ title: t('seo.siteName'), text, url: `https://ciocnim.ro/${locale}/clasament` }).catch(() => {});
     } else {
-      safeCopy(`${text}\nhttps://trosc.gg/${locale}/clasament`);
+      safeCopy(`${text}\nhttps://ciocnim.ro/${locale}/clasament`);
     }
   };
 

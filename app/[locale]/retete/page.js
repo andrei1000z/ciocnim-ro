@@ -347,7 +347,7 @@ const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
   };
 
   const handleShareRecipe = () => {
-    const url = `https://trosc.gg/${locale}/retete?r=${recipe.id}`;
+    const url = `https://ciocnim.ro/${locale}/retete?r=${recipe.id}`;
     const text = `${recipe.name}\n${recipe.description}\n${url}`;
     if (navigator.share) {
       navigator.share({

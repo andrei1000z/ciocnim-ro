@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.js'],
     include: ['tests/**/*.test.{js,jsx}'],
-    pool: 'forks',
+    pool: 'threads',
   },
   resolve: {
     alias: {

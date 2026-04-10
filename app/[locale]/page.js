@@ -9,10 +9,10 @@ import { esteNumeInterzis, valideazaNume } from "../lib/profanityFilter";
 import DualLeaderboard from "../components/DualLeaderboard";
 import GroupHub from "../components/GroupHub";
 import PlayModal from "../components/PlayModal";
-import EasterCountdown from "../components/EasterCountdown";
 import { safeLS, safeCopy } from "../lib/utils";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
+import { localeConfig } from "../i18n/config";
 import LocaleLink from "../components/LocaleLink";
 
 const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
@@ -53,6 +53,7 @@ function HomeContent() {
   const [numeError, setNumeError] = useState("");
   const [isJoiningArena, setIsJoiningArena] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const [regionOpen, setRegionOpen] = useState(false);
 
   useEffect(() => {
     if (nume && !hasInitializedName) { setLocalNume(nume); setHasInitializedName(true); }
@@ -322,13 +323,14 @@ function HomeContent() {
         </div>
       </motion.div>
 
-      {/* ═══ PROFIL COMPACT ═══ */}
+      {/* ═══ PROFIL + REGIUNE ═══ */}
       <motion.div {...fadeUp(0.08, prefersReducedMotion)}>
         {nume ? (
           <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-card border border-edge">
             <div className="flex items-center gap-2.5">
               <span className="text-lg">🥚</span>
               <span className="font-bold text-body text-sm">{nume}</span>
+              {userStats.regiune && <span className="text-xs text-muted">· {userStats.regiune}</span>}
               {(parseInt(userStats.wins) || 0) > 0 && (
                 <span className="text-xs text-green-400 font-bold">{parseInt(userStats.wins) || 0} 🏆</span>
               )}
@@ -338,8 +340,8 @@ function HomeContent() {
             </LocaleLink>
           </div>
         ) : (
-          <div className="rounded-2xl border border-red-900/15 bg-card p-4 space-y-2">
-            <p className="text-xs font-bold text-dim text-center">{t('profile.optionalNickname')}</p>
+          <div className="rounded-2xl border border-red-900/15 bg-card p-4 space-y-3">
+            <p className="text-xs font-bold text-heading text-center">{t('profile.optionalNickname')}</p>
             <div className="flex gap-2">
               <input
                 value={localNume}
@@ -362,48 +364,87 @@ function HomeContent() {
             {numeError && <p className="text-orange-500 text-xs font-medium">{numeError}</p>}
           </div>
         )}
+        {/* Selector regiune — apare când ai poreclă dar nu ai regiune */}
+        {nume && (!userStats.regiune || userStats.regiune === 'Muntenia') && (
+          <div className="mt-2 rounded-2xl border border-amber-900/20 bg-card p-3 space-y-2">
+            <p className="text-xs font-bold text-amber-400 text-center">{t('profile.regionRequired')}</p>
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <button
+                  onClick={() => setRegionOpen(!regionOpen)}
+                  className="w-full px-3 py-2.5 border border-edge-strong rounded-xl font-bold text-body text-sm bg-elevated cursor-pointer text-left flex items-center justify-between"
+                >
+                  <span className="text-muted">{t('profile.chooseRegion')}</span>
+                  <span className="text-xs text-muted">{regionOpen ? '▲' : '▼'}</span>
+                </button>
+                <AnimatePresence>
+                  {regionOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute z-50 left-0 right-0 mt-1 bg-surface border border-edge rounded-xl shadow-2xl shadow-black/40 overflow-hidden max-h-52 overflow-y-auto scrollbar-hide"
+                    >
+                      {(localeConfig[locale]?.regions || []).map(r => (
+                        <button
+                          key={r}
+                          onClick={() => {
+                            const newStats = { ...userStats, regiune: r };
+                            safeLS.set("c_stats", JSON.stringify(newStats));
+                            setRegionOpen(false);
+                            window.location.reload();
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm font-bold text-body hover:bg-red-800 hover:text-white transition-colors"
+                        >
+                          {r}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <button
+                onClick={() => {
+                  if (!navigator.geolocation) { setToastMsg("GPS indisponibil"); return; }
+                  navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                      try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=${locale}`);
+                        const data = await res.json();
+                        const county = data.address?.county || data.address?.state || '';
+                        const regions = localeConfig[locale]?.regions || [];
+                        const match = regions.find(r => county.toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes(county.toLowerCase().replace(' county', '').replace(' province', '')));
+                        if (match) {
+                          const newStats = { ...userStats, regiune: match };
+                          safeLS.set("c_stats", JSON.stringify(newStats));
+                          window.location.reload();
+                        } else if (regions.length > 0) {
+                          setToastMsg(t('profile.chooseRegion'));
+                        }
+                      } catch { setToastMsg("GPS error"); }
+                    },
+                    () => setToastMsg("GPS blocat"),
+                    { enableHighAccuracy: false, timeout: 5000 }
+                  );
+                }}
+                className="px-3 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-1"
+                aria-label={t('profile.detectLocation')}
+              >
+                📍
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* ═══ CLASAMENT ═══ */}
       <motion.div {...fadeUp(0.12, prefersReducedMotion)}>
         <SectionLabel>{t('leaderboard.label')}</SectionLabel>
         <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
-        <LocaleLink href="/clasament" className="block text-center text-xs font-bold text-red-500/50 hover:text-red-400 mt-2 transition-colors">
+        <LocaleLink href="/clasament" className="block text-center text-xs font-bold text-red-400/70 hover:text-red-400 mt-2 transition-colors">
           {t('leaderboard.seeAll')}
         </LocaleLink>
-      </motion.div>
-
-      {/* ═══ SHARE — cu urgență + WhatsApp ═══ */}
-      <motion.div {...fadeUp(0.16, prefersReducedMotion)} className="flex gap-2">
-        <button
-          onClick={() => {
-            const text = t('share.shareText');
-            if (navigator.share) {
-              navigator.share({ title: t('seo.siteName'), text, url: `https://trosc.gg/${locale}` }).catch(() => {});
-            } else {
-              safeCopy(`${text}\nhttps://trosc.gg/${locale}`);
-              setToastMsg(t('share.linkCopied'));
-            }
-          }}
-          className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg"
-        >
-          <span className="text-lg">📲</span>
-          <span className="font-bold text-sm">{t('share.sendFriends')}</span>
-        </button>
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(t('share.shareText') + "\nhttps://trosc.gg/" + locale)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-4 py-3 rounded-2xl bg-green-700 hover:bg-green-600 text-white transition-all active:scale-[0.98] flex items-center justify-center shadow-lg"
-          aria-label="Trimite pe WhatsApp"
-        >
-          <img src="/whatsapp.webp" alt="WhatsApp" className="w-8 h-8" />
-        </a>
-      </motion.div>
-
-      {/* ═══ COUNTDOWN PAȘTE ═══ */}
-      <motion.div {...fadeUp(0.19, prefersReducedMotion)}>
-        <EasterCountdown />
       </motion.div>
 
       {/* ═══ GRUPURI (condițional) ═══ */}
@@ -416,14 +457,17 @@ function HomeContent() {
         )}
       </AnimatePresence>
 
-      {/* ═══ NAVIGARE — Butoane frumoase ═══ */}
+      {/* ═══ NAVIGARE + SEO ═══ */}
       <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
+        <p className="text-xs text-faint leading-relaxed text-center mb-4">
+          <strong className="text-muted">{t('seo.siteName')}</strong> {t('seo.description')}
+        </p>
         <SectionLabel>{t('discover.label')}</SectionLabel>
         <div className="flex gap-2 justify-center flex-wrap">
           {[
             { href: "/traditii", icon: "📖", text: t('discover.traditions') },
             { href: "/retete", icon: "🍳", text: t('discover.recipes') },
-            { href: "/urari", icon: "🕊️", text: t('discover.wishes') },
+            { href: "/urari", icon: "🕊️", text: t('discover.greetings') },
             { href: "/vopsit-natural", icon: "🧅", text: t('discover.dyeing') },
             { href: "/calendar", icon: "📅", text: t('discover.calendar') },
             { href: "/ghid", icon: "🎮", text: t('discover.guide') },
@@ -436,10 +480,6 @@ function HomeContent() {
           ))}
         </div>
         <div className="flex items-center justify-center gap-3 mt-4 text-xs font-medium flex-wrap">
-          <LocaleLink href="/terms" className="text-muted hover:text-red-400 transition-colors">{t('footer.terms')}</LocaleLink>
-          <span className="text-faint">·</span>
-          <LocaleLink href="/privacy" className="text-muted hover:text-red-400 transition-colors">{t('footer.privacy')}</LocaleLink>
-          <span className="text-faint">·</span>
           <LocaleLink href="/despre" className="text-muted hover:text-red-400 transition-colors">{t('footer.about')}</LocaleLink>
           <span className="text-faint">·</span>
           <a href="https://buymeacoffee.com/ciocnim" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 transition-colors font-bold">{t('footer.donate')}</a>
@@ -525,26 +565,6 @@ function HomeContent() {
   );
 }
 
-function SeoSection() {
-  const t = useT();
-  return (
-    <section className="w-full max-w-md mx-auto px-4 pb-10 pt-2 text-center">
-      <div className="border-t border-red-900/10 pt-6 space-y-3">
-        <p className="text-xs text-faint leading-relaxed">
-          <strong className="text-muted">{t('seo.siteName')}</strong> {t('seo.description')}
-        </p>
-        <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs" aria-label="Pagini utile">
-          <LocaleLink href="/traditii" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.traditionsLink')}</LocaleLink>
-          <LocaleLink href="/urari" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.greetingsLink')}</LocaleLink>
-          <LocaleLink href="/retete" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.recipesLink')}</LocaleLink>
-          <LocaleLink href="/vopsit-natural" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.dyeingLink')}</LocaleLink>
-          <LocaleLink href="/calendar" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.calendarLink')}</LocaleLink>
-          <LocaleLink href="/ghid" className="text-red-500/50 hover:text-red-400 transition-colors">{t('seo.guideLink')}</LocaleLink>
-        </nav>
-      </div>
-    </section>
-  );
-}
 
 export default function Home() {
   return (
@@ -554,7 +574,7 @@ export default function Home() {
         <div className="h-screen flex items-center justify-center">
           <div className="text-center space-y-3">
             <div className="text-5xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</div>
-            <p className="text-xs font-bold text-red-500 animate-pulse uppercase tracking-widest">Se încarcă...</p>
+            <p className="text-xs font-bold text-red-500 animate-pulse uppercase tracking-widest">...</p>
           </div>
         </div>
       }>
@@ -562,7 +582,6 @@ export default function Home() {
       </Suspense>
 
       {/* SEO content — crawlable context for search engines */}
-      <SeoSection />
     </main>
   );
 }

@@ -14,5 +14,5 @@ export const ACHIEVEMENTS = {
   'streak_10': { name: 'Flamă Vie', desc: 'Câștigă 10 meciuri consecutive', icon: '🌟', rarity: 'rare' },
   'provocator': { name: 'Provocatorul', desc: 'Provoacă 50 de jucători la duel', icon: '⚔️', rarity: 'uncommon' },
   'tradition_keeper': { name: 'Păstrător al Tradiției', desc: 'Vizitează toate paginile educaționale', icon: '📚', rarity: 'rare' },
-  'social_butterfly': { name: 'Fluture Social', desc: 'Adaugă 10 prieteni', icon: '🦋', rarity: 'uncommon' },
+  'social_butterfly': { name: 'Fluture Social', desc: 'Alătură-te la 10 grupuri diferite', icon: '🦋', rarity: 'uncommon' },
 };

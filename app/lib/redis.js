@@ -6,7 +6,7 @@ function getRedisUrl() {
   // Upstash REST credentials → derive ioredis TLS URL automatically
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
     const host = new URL(process.env.UPSTASH_REDIS_REST_URL).hostname;
-    return `rediss://default:${process.env.UPSTASH_REDIS_REST_TOKEN}@${host}:6380`;
+    return `rediss://default:${process.env.UPSTASH_REDIS_REST_TOKEN}@${host}:6379`;
   }
   throw new Error("❌ Lipsesc credențialele Redis din .env! Setează REDIS_URL sau UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN.");
 }

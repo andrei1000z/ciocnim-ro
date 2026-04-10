@@ -38,9 +38,9 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
         <span className="font-bold text-heading text-sm">{t('groups.myGroup')}</span>
         {teams.length > 1 && (
           <div className="flex items-center gap-1.5">
-            <button onClick={() => setActiveTeamIndex(p => (p - 1 + teams.length) % teams.length)} className="w-6 h-6 bg-red-800 text-white rounded-full text-xs hover:bg-red-900 transition-all flex items-center justify-center">◀</button>
+            <button onClick={() => setActiveTeamIndex(p => (p - 1 + teams.length) % teams.length)} className="w-6 h-6 bg-red-800 text-white rounded-full text-xs hover:bg-red-900 transition-all flex items-center justify-center" aria-label={t('groups.previousGroup')}>◀</button>
             <span className="text-xs text-dim font-semibold">{activeTeamIndex + 1}/{teams.length}</span>
-            <button onClick={() => setActiveTeamIndex(p => (p + 1) % teams.length)} className="w-6 h-6 bg-red-800 text-white rounded-full text-xs hover:bg-red-900 transition-all flex items-center justify-center">▶</button>
+            <button onClick={() => setActiveTeamIndex(p => (p + 1) % teams.length)} className="w-6 h-6 bg-red-800 text-white rounded-full text-xs hover:bg-red-900 transition-all flex items-center justify-center" aria-label={t('groups.nextGroup')}>▶</button>
           </div>
         )}
       </div>
@@ -48,14 +48,15 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
         <div className="flex items-center gap-2">
           {isEditing && isCreator ? (
             <div className="flex gap-2 flex-1 min-w-0">
-              <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border border-edge-strong rounded-xl text-sm font-bold text-body outline-none focus:border-red-800 bg-elevated" />
+              <label className="sr-only" htmlFor="group-rename-input">{t('groups.editName')}</label>
+              <input id="group-rename-input" value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 min-w-0 px-3 py-2 border border-edge-strong rounded-xl text-sm font-bold text-body outline-none focus:border-red-800 bg-elevated" />
               <button onClick={handleSave} className="px-3 py-2 bg-red-800 text-white rounded-xl text-sm font-bold hover:bg-red-900 transition-all">OK</button>
-              <button onClick={() => setIsEditing(false)} className="px-2.5 py-2 bg-elevated-hover rounded-xl text-sm hover:bg-overlay transition-all text-dim">✕</button>
+              <button onClick={() => setIsEditing(false)} className="px-2.5 py-2 bg-elevated-hover rounded-xl text-sm hover:bg-overlay transition-all text-dim" aria-label={t('groups.cancelEdit')}>✕</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 flex-1">
               <span className="font-bold text-heading text-sm">{currentTeam.details.nume}</span>
-              {isCreator && <button onClick={() => setIsEditing(true)} className="text-body hover:text-red-800 transition-colors text-xs">✏️</button>}
+              {isCreator && <button onClick={() => setIsEditing(true)} className="text-body hover:text-red-800 transition-colors text-xs" aria-label={t('groups.editName')}>✏️</button>}
             </div>
           )}
         </div>
@@ -74,9 +75,9 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
                 <span className="font-bold text-red-400 text-xs">{parseInt(m.score) || 0} 🏆</span>
                 {m.member !== numePreluat?.toUpperCase().trim() && (
                   <>
-                    <button onClick={() => onProvoca(m.member, currentTeam.details.id)} className="w-7 h-7 bg-red-800 text-white rounded-lg text-xs hover:bg-red-900 transition-all active:scale-95 flex items-center justify-center" title="Provoacă">⚔️</button>
+                    <button onClick={() => onProvoca(m.member, currentTeam.details.id)} className="w-7 h-7 bg-red-800 text-white rounded-lg text-xs hover:bg-red-900 transition-all active:scale-95 flex items-center justify-center" title="Provoacă" aria-label={t('groups.challenge')}>⚔️</button>
                     {isCreator && (
-                      <button onClick={() => onKick(m.member, currentTeam.details.id)} className="w-7 h-7 bg-elevated-hover text-dim rounded-lg text-xs hover:bg-red-900/30 hover:text-red-400 transition-all active:scale-95 flex items-center justify-center" title="Elimină din grup">✕</button>
+                      <button onClick={() => onKick(m.member, currentTeam.details.id)} className="w-7 h-7 bg-elevated-hover text-dim rounded-lg text-xs hover:bg-red-900/30 hover:text-red-400 transition-all active:scale-95 flex items-center justify-center" title="Elimină din grup" aria-label={t('groups.kick')}>✕</button>
                     )}
                   </>
                 )}

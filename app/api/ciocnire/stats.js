@@ -81,12 +81,14 @@ export async function checkAndAwardAchievements(jucator, stats, teamId = null) {
 
   if (stats.duelsSent >= 50 && !existingAchievements.includes('provocator')) achievementsToAward.push('provocator');
 
-  if (stats.regiune && !existingAchievements.includes('regional_champion')) {
-    try {
-      const topInRegion = await redis.zrevrange('leaderboard_regiuni_jucatori:' + stats.regiune, 0, 0, 'WITHSCORES');
-      if (topInRegion.length >= 2 && topInRegion[0] === jucator) achievementsToAward.push('regional_champion');
-    } catch {}
-  }
+  // TODO: regional_champion needs the regional per-player leaderboard (leaderboard_regiuni_jucatori:${region})
+  // to be populated first. Re-enable once that leaderboard is implemented.
+  // if (stats.regiune && !existingAchievements.includes('regional_champion')) {
+  //   try {
+  //     const topInRegion = await redis.zrevrange('leaderboard_regiuni_jucatori:' + stats.regiune, 0, 0, 'WITHSCORES');
+  //     if (topInRegion.length >= 2 && topInRegion[0] === jucator) achievementsToAward.push('regional_champion');
+  //   } catch {}
+  // }
 
   if (!existingAchievements.includes('tradition_keeper')) {
     const pages = await redis.smembers(`user:${jucator}:visited_pages`);
@@ -99,11 +101,19 @@ export async function checkAndAwardAchievements(jucator, stats, teamId = null) {
   }
 
   if (achievementsToAward.length > 0) {
-    await redis.sadd(userKey, ...achievementsToAward);
-    pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
-      achievements: achievementsToAward.map(key => ACHIEVEMENTS[key]),
-      t: Date.now()
-    }).catch(() => {});
+    // SADD returns the number of newly added members (1 = new, 0 = already existed)
+    // Only notify for truly new achievements to avoid race condition duplicates
+    const newlyAwarded = [];
+    for (const achKey of achievementsToAward) {
+      const added = await redis.sadd(userKey, achKey);
+      if (added === 1) newlyAwarded.push(achKey);
+    }
+    if (newlyAwarded.length > 0) {
+      pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
+        achievements: newlyAwarded.map(key => ACHIEVEMENTS[key]),
+        t: Date.now()
+      }).catch(() => {});
+    }
   }
 
   return achievementsToAward;

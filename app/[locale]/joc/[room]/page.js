@@ -241,11 +241,11 @@ function ArenaMaster({ room }) {
   // Refs pt guard-uri executeBattle — imperative, fără stale closures
   const rezultatRef = useRef(null);
   const isStrikingRef = useRef(false);
+  const battleExecutedRef = useRef(false);
   const executeBattleRef = useRef(null);
   const incrementGlobalRef = useRef(incrementGlobal);
   useEffect(() => { incrementGlobalRef.current = incrementGlobal; }, [incrementGlobal]);
 
-  const isArena = !isPrivate && !isBotMatch;
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
 
   const playArenaSound = (name) => {
@@ -515,7 +515,13 @@ function ArenaMaster({ room }) {
 
   const executeBattle = (data) => {
     // Guard cu refs — funcționează chiar și în stale closures din Pusher
-    if (rezultatRef.current || isStrikingRef.current) return;
+    if (battleExecutedRef.current) return;
+    battleExecutedRef.current = true;
+
+    if (rezultatRef.current || isStrikingRef.current) {
+      battleExecutedRef.current = false;
+      return;
+    }
     rezultatRef.current = 'pending';
     isStrikingRef.current = true;
     setIsStriking(true);
@@ -527,7 +533,7 @@ function ArenaMaster({ room }) {
     amCastigat = celCareALovit === myName ? data.castigaCelCareDa : !data.castigaCelCareDa;
 
     // INCREMENT GLOBAL — called once here, guarded by rezultatRef (prevents double-call)
-    incrementGlobalRef.current(amCastigat, (isProvocare && teamIdPreluat) ? teamIdPreluat : null);
+    incrementGlobalRef.current(amCastigat, (isProvocare && teamIdPreluat) ? teamIdPreluat : null, room);
 
     const quotes = amCastigat ? t('quotes.humility') : t('quotes.forgiveness');
     const citatAles = Array.isArray(quotes) ? quotes[Math.floor(Math.random() * quotes.length)] : quotes;
@@ -565,6 +571,7 @@ function ArenaMaster({ room }) {
     if (!rezultatRef.current) return; // already reset
     rezultatRef.current = null;
     isStrikingRef.current = false;
+    battleExecutedRef.current = false;
     strikePendingRef.current = false;
     setRezultat(null);
     setIsStriking(false);
@@ -683,7 +690,6 @@ function ArenaMaster({ room }) {
   };
 
   const shareRoom = () => {
-    const code = room.replace('privat-', '');
     const url = `${window.location.origin}/${locale}/joc/${room}`;
     const text = t('game.shareInvite');
     if (navigator.share) {
@@ -701,7 +707,6 @@ function ArenaMaster({ room }) {
   };
 
   const shareWhatsApp = () => {
-    const code = room.replace('privat-', '');
     const url = `${window.location.origin}/${locale}/joc/${room}`;
     const text = `${t('game.shareInvite')} ${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
@@ -726,7 +731,7 @@ function ArenaMaster({ room }) {
             <button onClick={shareRoom} className="bg-red-700 hover:bg-red-600 text-white p-3 md:p-4 rounded-full border border-red-800 shadow-lg shadow-black/30 transition-all active:scale-95" title={t('game.shareRoom')} aria-label={t('game.shareRoom')}>
               <span className="text-base md:text-lg">📲</span>
             </button>
-            <button onClick={shareWhatsApp} className="bg-green-700 hover:bg-green-600 text-white p-3 md:p-4 rounded-full border border-green-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="Trimite pe WhatsApp" aria-label="Trimite pe WhatsApp">
+            <button onClick={shareWhatsApp} className="bg-green-700 hover:bg-green-600 text-white p-3 md:p-4 rounded-full border border-green-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="WhatsApp" aria-label="WhatsApp">
               <span className="text-base md:text-lg">💬</span>
             </button>
           </div>
@@ -743,8 +748,8 @@ function ArenaMaster({ room }) {
               {connectionState === 'connected' ? t('game.live') : connectionState === 'connecting' ? t('game.connecting') : t('game.disconnected')}
             </span>
             <span className="text-xs md:text-xs font-black text-heading tabular-nums">{onlineCount || 1}</span>
-            <span className="text-xs md:text-xs font-semibold text-faint">{onlineCount === 1 ? t('game.person') : t('game.persons')} online</span>
-            <button onClick={() => { const next = toggleSound(); setIsMuted(!next); }} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Activează sunetul" : "Dezactivează sunetul"}>{isMuted ? '🔇' : '🔊'}</button>
+            <span className="text-xs md:text-xs font-semibold text-faint">{onlineCount === 1 ? t('game.person') : t('game.persons')} {t('game.online')}</span>
+            <button onClick={() => { const next = toggleSound(); setIsMuted(!next); }} className="ml-1 text-sm opacity-60 hover:opacity-100 transition-opacity" aria-label={isMuted ? "Unmute" : "Mute"}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
           <span className="text-xs md:text-xs font-bold text-muted tabular-nums">{totalGlobal.toLocaleString(locale === 'bg' ? 'bg-BG' : 'ro-RO')} {t('game.totalCracks')}</span>
         </div>
@@ -891,7 +896,9 @@ function ArenaMaster({ room }) {
           </div>
 
           <div className="flex gap-2 bg-card p-1.5 rounded-full border border-red-900/20 focus-within:border-red-700/40 focus-within:bg-elevated transition-all relative z-10">
+            <label className="sr-only" htmlFor="chat-input">{t('game.chatPlaceholder')}</label>
             <input
+               id="chat-input"
                value={chatInput}
                onChange={e => setChatInput(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && handleChat()}
@@ -899,7 +906,7 @@ function ArenaMaster({ room }) {
                maxLength={200}
                className="flex-1 bg-transparent pl-4 text-sm md:text-xs font-black outline-none text-heading tracking-widest placeholder:text-amber-500/30"
             />
-            <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/30 text-sm md:text-xs active:scale-95 flex items-center justify-center cursor-pointer">🕊️</button>
+            <button onClick={handleChat} className="bg-red-900/30 w-12 h-12 md:w-10 md:h-10 rounded-full hover:bg-red-700 transition-colors border border-red-900/30 text-sm md:text-xs active:scale-95 flex items-center justify-center cursor-pointer" aria-label={t('game.sendMessage')}>🕊️</button>
           </div>
         </div>
       </div>
@@ -911,7 +918,7 @@ function ArenaMaster({ room }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[2147483647] flex items-center justify-center p-4 text-center backdrop-blur-2xl"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-center backdrop-blur-2xl"
             style={{ background: rezultat.win ? 'radial-gradient(ellipse at center, rgba(0,40,10,0.97) 0%, rgba(0,0,0,0.98) 100%)' : 'radial-gradient(ellipse at center, rgba(40,0,0,0.97) 0%, rgba(0,0,0,0.98) 100%)' }}
           >
             {/* Glow fundal */}
@@ -950,7 +957,7 @@ function ArenaMaster({ room }) {
                   <div className="flex items-center justify-center gap-3 mt-3">
                     <span className="text-xs font-black text-green-500/70 uppercase tracking-widest">{userStats.wins || 0} {t('result.winsCount')}</span>
                     <span className="text-white/20">·</span>
-                    <span className="text-xs font-black text-red-500/50 uppercase tracking-widest">{userStats.losses || 0} {t('result.lossesCount')}</span>
+                    <span className="text-xs font-black text-red-400/70 uppercase tracking-widest">{userStats.losses || 0} {t('result.lossesCount')}</span>
                   </div>
                 </motion.div>
               </div>
@@ -1004,7 +1011,7 @@ function ArenaMaster({ room }) {
                       ctx.font = `bold 72px ${fontFamily}`;
                       ctx.fillText(rezultat.win ? t('result.victory').toUpperCase() : t('result.defeat'), 540, 450);
                       ctx.fillStyle = '#e5e5e5'; ctx.font = `36px ${fontFamily}`;
-                      ctx.fillText(nume || 'Jucător', 540, 550);
+                      ctx.fillText(nume || t('game.player'), 540, 550);
                       ctx.fillStyle = '#9ca3af'; ctx.font = `28px ${fontFamily}`;
                       ctx.fillText(`${userStats.wins || 0} ${t('result.winsCount')}`, 540, 620);
                       ctx.fillStyle = 'rgba(220,38,38,0.6)'; ctx.font = `bold 32px ${fontFamily}`;

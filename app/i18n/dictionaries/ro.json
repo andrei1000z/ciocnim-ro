@@ -24,18 +24,21 @@
     "play": "🥚 CIOCNEȘTE CU UN PRIETEN!",
     "playIcon": "🥚",
     "playText": "CIOCNEȘTE CU UN PRIETEN!",
-    "arena": "Joacă cu un român →",
+    "arena": "Ciocnește cu un român →",
     "createGroup": "Creează grup",
     "creating": "..."
   },
 
   "profile": {
-    "optionalNickname": "Opțional — pune-ți o poreclă",
-    "placeholder": "ex: Maria, Nicu, Gigi...",
+    "optionalNickname": "Pune-ți o poreclă",
+    "placeholder": "Pune-ți o poreclă...",
     "ok": "OK",
     "profileLink": "Profil →",
     "minChars": "Minim 3 caractere",
-    "wins": "victorii"
+    "wins": "victorii",
+    "chooseRegion": "Alege regiunea ta",
+    "detectLocation": "Detectează automat",
+    "regionRequired": "Alege-ți regiunea ca să apari în clasament!"
   },
 
   "leaderboard": {
@@ -44,7 +47,7 @@
     "players": "🏆 Jucători",
     "regions": "🗺️ Regiuni",
     "champion": "🎉 Ești Campion Național!",
-    "rank": "Locul #{rank} · mai ai nevoie de {needed} {victLabel} pentru locul {target}",
+    "rank": "Locul {rank} · mai ai nevoie de {needed} {victLabel} pentru locul {target}",
     "needWins": "Mai ai nevoie de {needed} {victLabel} pentru locul {target} în clasament",
     "victory": "victorie",
     "victories": "victorii",
@@ -105,7 +108,8 @@
     "serverError": "Eroare server. Încearcă din nou.",
     "networkError": "Eroare de rețea. Încearcă din nou.",
     "cantCreate": "Nu s-a putut crea camera.",
-    "roomOccupied": "Camera este ocupată!"
+    "roomOccupied": "Camera este ocupată!",
+    "close": "Închide"
   },
 
   "game": {
@@ -130,11 +134,14 @@
     "fewSeconds": "Câteva secunde",
     "preparing": "SE PREGĂTEȘTE ARENA...",
     "chatPlaceholder": "SCRIE UN MESAJ...",
+    "sendMessage": "Trimite mesaj",
     "chatEmpty": "Liniște la masă...",
     "confirmLeave": "Ești sigur că vrei să ieși din meci?",
     "regionUnknown": "Necunoscut",
     "shareTitle": "Ciocnim.ro - Hai la duel!",
-    "shareInvite": "Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici:"
+    "shareInvite": "Hai la ciocnit ouă de Paște! 🥚⚔️ Intră aici:",
+    "online": "online",
+    "player": "Jucător"
   },
 
   "result": {
@@ -176,7 +183,13 @@
     "no": "Nu",
     "yes": "Da",
     "shareInvite": "Hai în grupul meu de ciocnit ouă! Intră pe {url} și arată-ne cine are cel mai tare ou 🥚⚔️",
-    "shareTitle": "Ciocnim.ro - Hai la ciocneală!"
+    "shareTitle": "Ciocnim.ro - Hai la ciocneală!",
+    "previousGroup": "Grupul anterior",
+    "nextGroup": "Grupul următor",
+    "cancelEdit": "Anulează",
+    "editName": "Editează numele grupului",
+    "challenge": "Provoacă la duel",
+    "kick": "Elimină din grup"
   },
 
   "joinModal": {

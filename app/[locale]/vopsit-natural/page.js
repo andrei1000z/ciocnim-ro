@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Script from "next/script";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
-import { useLocaleConfig } from "../../components/DictionaryProvider";
 import ContentNav from "../../components/ContentNav";
 
 // ─── Focus Mode Toggle ─────────────────────────────────────────────────────
@@ -51,7 +50,6 @@ const ArticleSection = ({ title, icon, children, delay = 0, focusMode }) => (
 
 export default function VopsitNaturalPage() {
   const t = useT();
-  const { locale } = useLocaleConfig();
   const dyeing = t('content.dyeing');
 
   const [focusMode, setFocusMode] = useState(false);
@@ -83,7 +81,7 @@ export default function VopsitNaturalPage() {
         <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
           <LocaleLink href="/" className="flex items-center gap-2 group">
             <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-heading">Trosc<span className="text-accent-red-strong">.gg</span></span>
+            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-accent-red-strong">.ro</span></span>
           </LocaleLink>
           <div className="flex items-center gap-3">
             <FocusModeToggle active={focusMode} onToggle={() => setFocusMode(f => !f)} dyeing={dyeing} />

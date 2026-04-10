@@ -14,13 +14,13 @@ const MessageCard = ({ text, index, greetings, locale }) => {
   const [copiat, setCopiat] = useState(false);
 
   const shareWhatsApp = (msg) => {
-    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} https://trosc.gg/${locale}`);
+    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} https://ciocnim.ro/${locale}`);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, "_blank", "noopener");
   };
 
   const handleCopy = async () => {
     try {
-      const textDeCopiat = `${text}\n${greetings.shareFooter} https://trosc.gg/${locale}`;
+      const textDeCopiat = `${text}\n${greetings.shareFooter} https://ciocnim.ro/${locale}`;
       await navigator.clipboard.writeText(textDeCopiat);
       setCopiat(true);
       setTimeout(() => setCopiat(false), 2000);
@@ -97,7 +97,7 @@ const GreetingGenerator = ({ greetings, locale }) => {
     : '';
 
   const shareWhatsApp = (msg) => {
-    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} https://trosc.gg/${locale}`);
+    const encoded = encodeURIComponent(`${msg}\n\n${greetings.shareFooter} https://ciocnim.ro/${locale}`);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, "_blank", "noopener");
   };
 
@@ -168,7 +168,7 @@ const GreetingGenerator = ({ greetings, locale }) => {
       // Footer
       ctx.fillStyle = 'rgba(220, 38, 38, 0.6)';
       ctx.font = 'bold 24px sans-serif';
-      ctx.fillText('trosc.gg', canvas.width / 2, canvas.height - 80);
+      ctx.fillText('ciocnim.ro', canvas.width / 2, canvas.height - 80);
 
       // Download or share
       canvas.toBlob(async (blob) => {
@@ -246,7 +246,7 @@ const GreetingGenerator = ({ greetings, locale }) => {
                 <p className="text-lg md:text-xl text-body font-medium italic leading-relaxed select-text">
                   &ldquo;{greetingText}&rdquo;
                 </p>
-                <p className="mt-4 text-right text-xs text-muted">— trosc.gg</p>
+                <p className="mt-4 text-right text-xs text-muted">— ciocnim.ro</p>
               </div>
             </div>
 

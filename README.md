@@ -1,54 +1,40 @@
 # 🥚 Ciocnim.ro
 
-Un joc online de ciocnit ouă de Paște — joacă cu prietenii, familia, sau cu cineva aleatoriu din toată țara.
+Joc multiplayer de ciocnit oua de Paste -- traditia romaneasca, acum online.
+Joaca cu prietenii, familia sau cu cineva aleatoriu din toata tara, in timp real.
 
-**[→ ciocnim.ro](https://ciocnim.ro)**
+**[ciocnim.ro](https://ciocnim.ro)**
 
----
+## Tech Stack
 
-## Ce e asta?
+- **Next.js 16** + **React 19** -- App Router, React Compiler
+- **Tailwind CSS 4** -- styling
+- **Pusher** -- WebSocket real-time multiplayer
+- **Upstash Redis** -- leaderboards, sessions, persistence
+- **Framer Motion** -- animatii
+- **Vitest** -- testing
 
-De Paște, românii ciocnesc ouă roșii — o tradiție veche de sute de ani. Ciocnim.ro aduce tradiția online: poți juca cu oricine, de oriunde, în timp real.
+## Features
 
-- **Arena Națională** — intri și în câteva secunde ești conectat cu un alt jucător din România
-- **Cameră Privată** — trimiți un link prietenului și jucați față în față
-- **Grupuri** — creezi un grup cu familia sau colegii, fiecare cu clasament propriu
-- **Bot fallback** — dacă nu găsești adversar în 7 secunde, te joci cu un bot
+- Multiplayer real-time (arena publica + camere private)
+- 3 limbi: romana (RO), bulgara (BG), greaca (EL)
+- Achievements si statistici per jucator
+- Clasament national si pe regiuni
+- Echipe / grupuri cu clasament propriu
+- Retete traditionale de Paste
+- Traditii si obiceiuri de Paste
+- PWA -- instalabil pe telefon
 
----
-
-## Cum funcționează
-
-1. Îți pui o poreclă și alegi culoarea oului
-2. Alegi regiunea ta (Muntenia, Moldova, Transilvania, Diaspora...)
-3. Intri în arenă sau trimiți un link unui prieten
-4. Unul ciocnește, celălalt apără — 50/50 aleator
-5. Câștigătorul urcă în clasamentul național
-
----
-
-## Tech stack
-
-| Componentă | Tehnologie |
-|---|---|
-| Frontend | Next.js 16, React 19, Tailwind CSS 4 |
-| Animații | Framer Motion 12 |
-| Real-time | Pusher (WebSocket) |
-| Bază de date | Upstash Redis |
-| Hosting | Vercel |
-
----
-
-## Rulare locală
+## Getting Started
 
 ```bash
+git clone https://github.com/your-user/ciocnim-ro.git
+cd ciocnim-ro
 npm install
 npm run dev
 ```
 
-Deschide [http://localhost:3000](http://localhost:3000).
-
-Ai nevoie de un fișier `.env.local` cu:
+Creaza un fisier `.env.local`:
 
 ```
 NEXT_PUBLIC_PUSHER_KEY=...
@@ -58,29 +44,44 @@ NEXT_PUBLIC_PUSHER_CLUSTER=...
 REDIS_URL=...
 ```
 
----
+Deschide [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+| Comanda          | Descriere                  |
+| ---------------- | -------------------------- |
+| `npm run dev`    | Server de dezvoltare       |
+| `npm run build`  | Build productie            |
+| `npm start`      | Porneste serverul prod     |
+| `npm test`       | Ruleaza testele (Vitest)   |
+| `npm run lint`   | Lint cu ESLint             |
+
+## Project Structure
+
+```
+app/
+  [locale]/    -- pagini per limba (ro, bg, el)
+  api/         -- API routes (Pusher, Redis, auth)
+  components/  -- componente React partajate
+  i18n/        -- traduceri si configurare i18n
+  lib/         -- utilitare, helpers, constante
+public/        -- assets statice, manifest, icons
+tests/         -- teste Vitest
+```
+
+## i18n
+
+Limbi suportate: **RO** (romana), **BG** (bulgara), **EL** (greaca).
+Rutele sunt prefixate cu locale: `/ro/clasament`, `/bg/klasirane`, `/el/katataxi`.
 
 ## Deploy
+
+Proiectul se deployeaza automat pe **Vercel** la push pe `main`.
 
 ```bash
 git push origin main
 ```
 
-Vercel preia automat și deployează.
-
 ---
 
-## Pagini
-
-| Rută | Ce e |
-|---|---|
-| `/` | Pagina principală — joc, clasamente, setări |
-| `/joc/[room]` | Camera de joc live |
-| `/traditii` | Istoria și obiceiurile de Paște |
-| `/vopsit-natural` | Cum vopsești ouă natural |
-| `/urari` | Urări tradiționale de Paște |
-| `/calendar` | Datele Paștelui 2026–2030 |
-
----
-
-**Hristos a Înviat!** 🥚
+**Hristos a Inviat!**
