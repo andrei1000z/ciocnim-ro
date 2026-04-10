@@ -327,10 +327,22 @@ function HomeContent() {
       <motion.div {...fadeUp(0.08, prefersReducedMotion)}>
         {nume ? (
           <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-card border border-edge">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <span className="text-lg">🥚</span>
               <span className="font-bold text-body text-sm">{nume}</span>
-              {userStats.regiune && <span className="text-xs text-muted">· {userStats.regiune}</span>}
+              {userStats.regiune && (
+                <button
+                  onClick={() => {
+                    const newStats = { ...userStats, regiuneSet: false };
+                    safeLS.set("c_stats", JSON.stringify(newStats));
+                    window.location.reload();
+                  }}
+                  className="text-xs text-muted hover:text-red-400 transition-colors underline decoration-dotted underline-offset-2"
+                  title="Click pentru a schimba regiunea"
+                >
+                  · {userStats.regiune} ✏️
+                </button>
+              )}
               {(parseInt(userStats.wins) || 0) > 0 && (
                 <span className="text-xs text-green-400 font-bold">{parseInt(userStats.wins) || 0} 🏆</span>
               )}
