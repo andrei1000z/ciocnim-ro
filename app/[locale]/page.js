@@ -405,7 +405,7 @@ function HomeContent() {
                 </AnimatePresence>
               </div>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!navigator.geolocation) {
                     setToastMsg("Browserul nu suportă GPS");
                     return;
@@ -415,6 +415,16 @@ function HomeContent() {
                   if (!isSecure) {
                     setToastMsg("GPS funcționează doar pe HTTPS");
                     return;
+                  }
+                  // Verifică starea permisiunii (Chrome/Edge/Firefox modern)
+                  if (navigator.permissions && navigator.permissions.query) {
+                    try {
+                      const status = await navigator.permissions.query({ name: 'geolocation' });
+                      if (status.state === 'denied') {
+                        setToastMsg("Permisiune blocată. Click pe 🔒 lângă URL → Locație → Permite");
+                        return;
+                      }
+                    } catch {}
                   }
                   setToastMsg("Caut locația...");
                   navigator.geolocation.getCurrentPosition(
