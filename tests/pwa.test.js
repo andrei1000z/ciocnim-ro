@@ -29,18 +29,14 @@ describe('PWA Configuration', () => {
   });
 
   it('manifest has all required icons', () => {
-    const manifest = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../public/manifest.json'), 'utf-8')
-    );
-    expect(manifest.icons.length).toBeGreaterThanOrEqual(2);
+    const manifestSrc = fs.readFileSync(path.join(__dirname, '../app/manifest.js'), 'utf-8');
+    expect(manifestSrc).toContain('180x180');
+    expect(manifestSrc).toContain('512x512');
   });
 
   it('manifest has shortcuts', () => {
-    const manifest = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../public/manifest.json'), 'utf-8')
-    );
-    expect(manifest.shortcuts).toBeInstanceOf(Array);
-    expect(manifest.shortcuts.length).toBeGreaterThanOrEqual(1);
+    const manifestSrc = fs.readFileSync(path.join(__dirname, '../app/manifest.js'), 'utf-8');
+    expect(manifestSrc).toContain('shortcuts');
   });
 });
 

@@ -293,6 +293,10 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (!nume || opponent || isBotMatch) return;
     const pollRoom = async () => {
+      // B7: Skip if Pusher is connected — join events arrive via WebSocket.
+      // The interval stays alive as a fallback, but becomes a no-op when healthy.
+      const pusherState = pusherRef?.current?.connection?.state;
+      if (pusherState === 'connected') return;
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -322,13 +326,16 @@ function ArenaMaster({ room }) {
     const interval = setInterval(pollRoom, pollInterval);
     pollRoom(); // poll immediately
     return () => clearInterval(interval);
-  }, [nume, opponent, isBotMatch, room, isPrivate, isProvocare, connectionState]);
+  }, [nume, opponent, isBotMatch, room, isPrivate, isProvocare, connectionState, pusherRef]);
 
   // LOVITURA POLLING — defender discovers battle result when Pusher is unreliable
   useEffect(() => {
     if (!opponent || rezultat || isBotMatch || !atacantName) return;
     if (atacantName === nume) return; // attacker gets result from API response
     const poll = async () => {
+      // B7: skip when Pusher is connected — lovitura events arrive via WebSocket
+      const pusherState = pusherRef?.current?.connection?.state;
+      if (pusherState === 'connected') return;
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -343,12 +350,15 @@ function ArenaMaster({ room }) {
     const pollInterval = connectionState === 'connected' ? 6000 : 2000;
     const interval = setInterval(poll, pollInterval);
     return () => clearInterval(interval);
-  }, [opponent, rezultat, isBotMatch, atacantName, nume, room, connectionState]);
+  }, [opponent, rezultat, isBotMatch, atacantName, nume, room, connectionState, pusherRef]);
 
   // REVANSA POLLING — discover opponent's revansa request when Pusher fails
   useEffect(() => {
     if (!rezultat || isBotMatch || !opponent) return;
     const poll = async () => {
+      // B7: skip when Pusher is connected — revansa events arrive via WebSocket
+      const pusherState = pusherRef?.current?.connection?.state;
+      if (pusherState === 'connected') return;
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -372,7 +382,7 @@ function ArenaMaster({ room }) {
     const pollInterval = connectionState === 'connected' ? 5000 : 1500;
     const interval = setInterval(poll, pollInterval);
     return () => clearInterval(interval);
-  }, [rezultat, isBotMatch, opponent, room, connectionState]);
+  }, [rezultat, isBotMatch, opponent, room, connectionState, pusherRef]);
 
   // LOGICĂ BOT — fallback to bot if no opponent found after timeout
   useEffect(() => {
@@ -475,17 +485,27 @@ function ArenaMaster({ room }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
 
-  // Warn before leaving during active game
+  // Warn before leaving during active game — stable handler via ref to avoid
+  // leaks when deps change (B3). The ref tracks whether the game is active,
+  // and the listener is attached/removed exactly once.
+  const beforeUnloadActiveRef = useRef(false);
+  const beforeUnloadMsgRef = useRef('');
   useEffect(() => {
-    if (!opponent || rezultat) return;
+    beforeUnloadActiveRef.current = !!opponent && !rezultat;
+  }, [opponent, rezultat]);
+  useEffect(() => {
+    beforeUnloadMsgRef.current = t('game.confirmLeave');
+  }, [t]);
+  useEffect(() => {
     const handler = (e) => {
+      if (!beforeUnloadActiveRef.current) return;
       e.preventDefault();
-      e.returnValue = t('game.confirmLeave');
+      e.returnValue = beforeUnloadMsgRef.current;
       return e.returnValue;
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [opponent, rezultat]);
+  }, []);
 
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -564,8 +584,12 @@ function ArenaMaster({ room }) {
     }, 450);
   };
 
-  // Ref actualizat la fiecare render — Pusher handler-ul apelează mereu versiunea curentă
-  executeBattleRef.current = executeBattle;
+  // B4: assign in useEffect instead of component body so Pusher handlers
+  // (which read via .current) always get the latest executeBattle without
+  // racing against renders.
+  useEffect(() => {
+    executeBattleRef.current = executeBattle;
+  }, [executeBattle]);
 
   const resetForRevansa = () => {
     if (!rezultatRef.current) return; // already reset
@@ -599,27 +623,29 @@ function ArenaMaster({ room }) {
     if (now - lastStrikeRef.current < 150) return;
     lastStrikeRef.current = now;
     strikePendingRef.current = true;
-
-    if (isBotMatch) {
-      const castigaCelCareDaRandom = Math.random() < 0.5;
-      executeBattleRef.current({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
-      strikePendingRef.current = false;
-    } else {
-      // Await server result — API is fast (fire-and-forget Pusher, just Redis + random)
-      try {
-        const res = await fetch('/api/ciocnire', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ roomId: room, actiune: 'lovitura', jucator: nume, atacant: nume })
-        });
-        const data = await res.json();
-        if (data.success && data.castigaCelCareDa !== undefined) {
-          executeBattleRef.current({ castigaCelCareDa: data.castigaCelCareDa, atacant: nume });
+    try {
+      if (isBotMatch) {
+        const castigaCelCareDaRandom = Math.random() < 0.5;
+        executeBattleRef.current({ castigaCelCareDa: castigaCelCareDaRandom, atacant: nume });
+      } else {
+        // Await server result — API is fast (fire-and-forget Pusher, just Redis + random)
+        try {
+          const res = await fetch('/api/ciocnire', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId: room, actiune: 'lovitura', jucator: nume, atacant: nume })
+          });
+          const data = await res.json();
+          if (data.success && data.castigaCelCareDa !== undefined) {
+            executeBattleRef.current({ castigaCelCareDa: data.castigaCelCareDa, atacant: nume });
+          }
+        } catch {
+          // Fallback: local random if server unreachable
+          executeBattleRef.current({ castigaCelCareDa: Math.random() < 0.5, atacant: nume });
         }
-      } catch {
-        // Fallback: local random if server unreachable
-        executeBattleRef.current({ castigaCelCareDa: Math.random() < 0.5, atacant: nume });
       }
+    } finally {
+      // B5: always clear pending flag, regardless of sync/async path or thrown errors
       strikePendingRef.current = false;
     }
   }, [canStrike, isBotMatch, nume, room]);

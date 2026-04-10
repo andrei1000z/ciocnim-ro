@@ -137,7 +137,7 @@ export default async function LocaleLayout({ children, params }) {
     <html lang={validLocale} suppressHydrationWarning className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
         {verificationCode && <meta name="google-site-verification" content={verificationCode} />}
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

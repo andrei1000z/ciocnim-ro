@@ -414,7 +414,15 @@ function HomeContent() {
                         const data = await res.json();
                         const county = data.address?.county || data.address?.state || '';
                         const regions = localeConfig[locale]?.regions || [];
-                        const match = regions.find(r => county.toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes(county.toLowerCase().replace(' county', '').replace(' province', '')));
+                        const normalize = (s) => s.toLowerCase()
+                          .normalize('NFD')
+                          .replace(/[\u0300-\u036f]/g, '')
+                          .trim();
+                        const countyN = normalize(county);
+                        const match = regions.find(r => {
+                          const rN = normalize(r);
+                          return countyN.includes(rN) || rN.includes(countyN.replace(/ (county|province|district)/g, ''));
+                        });
                         if (match) {
                           const newStats = { ...userStats, regiune: match };
                           safeLS.set("c_stats", JSON.stringify(newStats));

@@ -127,14 +127,19 @@ export async function POST(request) {
         const cleanName = jucator.toUpperCase();
         let serverIsHost = false;
         const playerSetKey = `room:${roomId}:players`;
-        const added = await redis.sadd(playerSetKey, cleanName);
-        await redis.expire(playerSetKey, 7200);
-        if (added === 1) {
-          const count = await redis.scard(playerSetKey);
-          if (count > 2) {
-            await redis.srem(playerSetKey, cleanName);
-            return NextResponse.json({ success: false, error: "Camera este ocupată!" }, { status: 409 });
-          }
+        const joinLua = `
+local count = redis.call('SCARD', KEYS[1])
+local exists = redis.call('SISMEMBER', KEYS[1], ARGV[1])
+if count >= 2 and exists == 0 then
+  return -1
+end
+redis.call('SADD', KEYS[1], ARGV[1])
+redis.call('EXPIRE', KEYS[1], 7200)
+return redis.call('SCARD', KEYS[1])
+`;
+        const joinResult = await redis.eval(joinLua, 1, playerSetKey, cleanName);
+        if (joinResult === -1) {
+          return NextResponse.json({ success: false, error: "Camera este ocupată!" }, { status: 409 });
         }
         await redis.setex(`room:${roomId}:skin:${cleanName}`, 7200, JSON.stringify({ skin, isGolden, hasStar, regiune }));
 

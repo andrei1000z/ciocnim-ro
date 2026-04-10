@@ -101,20 +101,28 @@ export async function checkAndAwardAchievements(jucator, stats, teamId = null) {
   }
 
   if (achievementsToAward.length > 0) {
-    // SADD returns the number of newly added members (1 = new, 0 = already existed)
-    // Only notify for truly new achievements to avoid race condition duplicates
-    const newlyAwarded = [];
+    // Pipeline pentru SADD atomic + race-safe.
+    // SADD returnează 1 dacă elementul e nou adăugat, 0 dacă exista deja.
+    // Două cereri concurente nu pot ambele să adauge același element.
+    const pipe = redis.pipeline();
     for (const achKey of achievementsToAward) {
-      const added = await redis.sadd(userKey, achKey);
-      if (added === 1) newlyAwarded.push(achKey);
+      pipe.sadd(userKey, achKey);
     }
+    const results = await pipe.exec();
+    // results = [[null, 1], [null, 0], ...] — index 1 e count
+    const newlyAwarded = achievementsToAward.filter((_, i) => {
+      const r = results?.[i];
+      return Array.isArray(r) ? r[1] === 1 : r === 1;
+    });
+
     if (newlyAwarded.length > 0) {
       pusher.trigger(`user-notif-${jucator}`, 'achievement-unlocked', {
         achievements: newlyAwarded.map(key => ACHIEVEMENTS[key]),
         t: Date.now()
       }).catch(() => {});
     }
+    return newlyAwarded;
   }
 
-  return achievementsToAward;
+  return [];
 }

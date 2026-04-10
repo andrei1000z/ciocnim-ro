@@ -87,28 +87,30 @@ describe('sitemap.js', () => {
   });
 });
 
-describe('manifest.json', () => {
-  const manifest = JSON.parse(
-    fs.readFileSync(path.join(__dirname, '../public/manifest.json'), 'utf-8')
-  );
+describe('manifest.js (dynamic)', () => {
+  const manifestContent = fs.readFileSync(path.join(__dirname, '../app/manifest.js'), 'utf-8');
 
-  it('has required PWA fields', () => {
-    expect(manifest.name).toBeTruthy();
-    expect(manifest.short_name).toBeTruthy();
-    expect(manifest.start_url).toBe('/ro');
-    expect(manifest.display).toBe('standalone');
+  it('is host-aware (dual domain)', () => {
+    expect(manifestContent).toContain('headers');
+    expect(manifestContent).toContain('trosc.fun');
+  });
+
+  it('has required PWA fields for both domains', () => {
+    expect(manifestContent).toContain('start_url');
+    expect(manifestContent).toContain('/ro');
+    expect(manifestContent).toContain('/bg');
+    expect(manifestContent).toContain('display');
+    expect(manifestContent).toContain('standalone');
   });
 
   it('has icons with correct sizes', () => {
-    expect(manifest.icons).toBeInstanceOf(Array);
-    expect(manifest.icons.length).toBeGreaterThanOrEqual(2);
-    const sizes = manifest.icons.map(i => i.sizes);
-    expect(sizes).toContain('180x180');
-    expect(sizes).toContain('512x512');
+    expect(manifestContent).toContain('180x180');
+    expect(manifestContent).toContain('192x192');
+    expect(manifestContent).toContain('512x512');
   });
 
   it('has theme and background colors', () => {
-    expect(manifest.theme_color).toBeTruthy();
-    expect(manifest.background_color).toBeTruthy();
+    expect(manifestContent).toContain('theme_color');
+    expect(manifestContent).toContain('background_color');
   });
 });
