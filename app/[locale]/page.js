@@ -468,13 +468,18 @@ function HomeContent() {
                       }
                     },
                     (err) => {
-                      // Debug: arată EXACT eroarea ca să vedem cauza reală
-                      const errCode = err?.code ?? '?';
-                      const errMsg = err?.message || 'fără mesaj';
-                      setToastMsg(`Err ${errCode}: ${errMsg}`);
-                      console.log('[GPS ERROR]', err);
+                      // 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+                      if (err.code === 1) {
+                        setToastMsg("Permisiune refuzată — alege manual");
+                      } else if (err.code === 2) {
+                        setToastMsg("GPS indisponibil — verifică Wi-Fi/Date mobile");
+                      } else if (err.code === 3) {
+                        setToastMsg("GPS prea lent — încearcă din nou");
+                      } else {
+                        setToastMsg("Eroare locație — încearcă din nou");
+                      }
                     },
-                    { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
                   );
                 }}
                 className="px-3 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-1"
