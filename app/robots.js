@@ -1,6 +1,11 @@
-import { BASE_URL } from './lib/constants';
+import { headers } from 'next/headers';
 
-export default function robots() {
+export default async function robots() {
+  const h = await headers();
+  const host = h.get('host') || '';
+  const isIntl = host.includes('trosc.fun');
+  const baseUrl = isIntl ? 'https://trosc.fun' : 'https://ciocnim.ro';
+
   return {
     rules: [
       {
@@ -9,7 +14,7 @@ export default function robots() {
         disallow: ['/api/', '/ro/joc/', '/bg/joc/', '/el/joc/'],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
-    host: BASE_URL,
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

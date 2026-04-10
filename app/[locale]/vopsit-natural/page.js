@@ -6,6 +6,7 @@ import Script from "next/script";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import ContentNav from "../../components/ContentNav";
+import PageHeader from "../../components/PageHeader";
 
 // ─── Focus Mode Toggle ─────────────────────────────────────────────────────
 const FocusModeToggle = ({ active, onToggle, dyeing }) => (
@@ -76,21 +77,14 @@ export default function VopsitNaturalPage() {
   return (
     <>
       <Script id="schema-vopsit-natural" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }} />
-      <main className={`min-h-screen text-body transition-colors duration-300 bg-main`}>
+      <div className="text-body transition-colors duration-300 bg-main">
 
-        <div className="w-full flex justify-between items-center p-6 md:p-8 bg-elevated shadow-lg shadow-black/20 border-b border-red-900/20">
-          <LocaleLink href="/" className="flex items-center gap-2 group">
-            <span className="text-3xl group-hover:scale-110 transition-all">🥚</span>
-            <span className="font-bold text-xl md:text-2xl text-heading">Ciocnim<span className="text-accent-red-strong">.ro</span></span>
-          </LocaleLink>
-          <div className="flex items-center gap-3">
-            <FocusModeToggle active={focusMode} onToggle={() => setFocusMode(f => !f)} dyeing={dyeing} />
-            <LocaleLink href="/" className="px-6 py-3 bg-red-700 text-white font-bold rounded-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 hidden md:inline-block">
-              {dyeing.backHome || "Home"}
-            </LocaleLink>
-          </div>
-        </div>
+        <PageHeader />
         <ContentNav current="/vopsit-natural" />
+
+        <div className="w-full flex justify-end items-center px-6 md:px-8 pt-4">
+          <FocusModeToggle active={focusMode} onToggle={() => setFocusMode(f => !f)} dyeing={dyeing} />
+        </div>
 
         {/* Focus Mode Banner */}
         <AnimatePresence>
@@ -161,7 +155,7 @@ export default function VopsitNaturalPage() {
           </div>
 
         </div>
-      </main>
+      </div>
     </>
   );
 }

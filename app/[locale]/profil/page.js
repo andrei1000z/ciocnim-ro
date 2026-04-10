@@ -66,10 +66,10 @@ export default function ProfilPage() {
   const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
   return (
-    <main className="min-h-screen bg-main text-body">
+    <div className="bg-main text-body">
       <PageHeader />
 
-      <div className="w-full max-w-2xl mx-auto pt-8 pb-16 px-6 space-y-8">
+      <div className="w-full max-w-2xl mx-auto pt-6 pb-12 px-6 space-y-6">
         <header className="text-center space-y-3">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-2 shadow-lg">
             <span className="text-4xl">🥚</span>
@@ -171,6 +171,6 @@ export default function ProfilPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

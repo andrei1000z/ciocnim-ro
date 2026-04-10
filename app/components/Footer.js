@@ -12,7 +12,7 @@ export default function Footer() {
         <LocaleLink href="/privacy" className="text-xs text-red-400/60 hover:text-red-400 transition-colors">{t('footer.privacy')}</LocaleLink>
       </nav>
       <p className="text-center text-xs text-muted">
-        &copy; {new Date().getFullYear()} Ciocnim.ro
+        &copy; {new Date().getFullYear()} {t('footer.copyright')}
       </p>
     </footer>
   );

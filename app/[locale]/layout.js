@@ -9,7 +9,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import DictionaryProvider from "../components/DictionaryProvider";
 import { getDictionary } from "../i18n/getDictionary";
 import { locales, localeConfig } from "../i18n/config";
-import { BASE_URL } from "../lib/constants";
+import { getBaseUrl, isIntlDomain, DOMAINS } from "../lib/constants";
 
 const outfit = Outfit({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
@@ -26,7 +26,9 @@ export async function generateMetadata({ params }) {
   const { locale } = await params;
   const dict = await getDictionary(locale);
   const config = localeConfig[locale] || localeConfig.ro;
-  const baseUrl = BASE_URL;
+  const baseUrl = await getBaseUrl();
+  const isIntl = await isIntlDomain();
+  const ogImage = isIntl ? '/og-image-trosc.jpg' : '/og-image.jpg';
 
   return {
     title: {
@@ -54,7 +56,7 @@ export async function generateMetadata({ params }) {
       description: dict.meta.ogDescription,
       url: `${baseUrl}/${locale}`,
       siteName: dict.meta.applicationName,
-      images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: dict.meta.title, type: "image/jpeg" }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: dict.meta.title, type: "image/jpeg" }],
       locale: config.ogLocale,
       type: "website",
     },
@@ -62,13 +64,17 @@ export async function generateMetadata({ params }) {
       card: "summary_large_image",
       title: dict.meta.twitterTitle,
       description: dict.meta.twitterDescription,
-      images: ["/og-image.jpg"],
+      images: [ogImage],
     },
     alternates: {
       canonical: `${baseUrl}/${locale}`,
-      languages: Object.fromEntries(
-        locales.map(l => [l, `${baseUrl}/${l}`])
-      ),
+      languages: {
+        // RO trăiește pe ciocnim.ro, BG/EL pe trosc.fun
+        'ro': `${DOMAINS.ro}/ro`,
+        'bg': `${DOMAINS.intl}/bg`,
+        'el': `${DOMAINS.intl}/el`,
+        'x-default': `${DOMAINS.ro}/ro`,
+      },
     },
     robots: {
       index: true,
@@ -102,7 +108,12 @@ export default async function LocaleLayout({ children, params }) {
   const validLocale = locales.includes(locale) ? locale : 'ro';
   const dictionary = await getDictionary(validLocale);
   const config = localeConfig[validLocale] || localeConfig.ro;
-  const baseUrl = BASE_URL;
+  const baseUrl = await getBaseUrl();
+  const isIntl = await isIntlDomain();
+  const ogImageUrl = isIntl ? `${baseUrl}/og-image-trosc.jpg` : `${baseUrl}/og-image.jpg`;
+  const verificationCode = isIntl
+    ? null // TODO: adaugă codul pentru trosc.fun din GSC după înregistrare
+    : 'gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU';
 
   const schemaMarkup = {
     "@context": "https://schema.org",
@@ -118,15 +129,14 @@ export default async function LocaleLayout({ children, params }) {
     "publisher": { "@type": "Organization", "name": dictionary.meta.applicationName },
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": config.currency },
     "inLanguage": validLocale,
-    "image": `${baseUrl}/og-image.jpg`,
-    "screenshot": `${baseUrl}/og-image.jpg`,
+    "image": ogImageUrl,
+    "screenshot": ogImageUrl,
   };
 
   return (
     <html lang={validLocale} suppressHydrationWarning className={`${outfit.variable} selection:bg-red-900/50 selection:text-amber-200 scroll-smooth`}>
       <head>
-        <meta name="google-site-verification" content="gKW3IdyucvuHkv_DkXS0gyehLrH7M7IPUfR9OGYijHU" />
-        <link rel="preconnect" href="https://ws-eu.pusher.com" />
+        {verificationCode && <meta name="google-site-verification" content={verificationCode} />}
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

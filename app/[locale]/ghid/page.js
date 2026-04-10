@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Script from "next/script";
 import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
+import ContentNav from "../../components/ContentNav";
 import { useT } from "../../i18n/useT";
 
 function FAQItem({ item, index }) {
@@ -81,10 +82,11 @@ export default function GhidPage() {
     <>
       <Script id="schema-ghid" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <Script id="schema-ghid-faq" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-      <main className="min-h-screen bg-main text-body">
+      <div className="bg-main text-body">
         <PageHeader />
+        <ContentNav current="/ghid" />
 
-        <div className="w-full max-w-3xl mx-auto pt-8 pb-16 px-6 space-y-8">
+        <div className="w-full max-w-3xl mx-auto pt-6 pb-12 px-6 space-y-8">
           <header className="text-center space-y-4">
             <h1 className="text-4xl md:text-6xl font-black text-heading leading-tight">
               {guide.pageTitle} <span className="text-red-500">{guide.pageHighlight}</span>
@@ -148,7 +150,7 @@ export default function GhidPage() {
             <p className="text-muted text-xs">{guide.pageSubtitle}</p>
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }

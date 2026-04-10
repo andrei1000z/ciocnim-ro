@@ -26,9 +26,9 @@ describe('Accessibility', () => {
     expect(cssContent).toContain('prefers-reduced-motion');
   });
 
-  it('has aria-labels on emoji elements in home page', () => {
-    expect(homeContent).toContain('role="img"');
-    expect(homeContent).toContain('aria-label');
+  it('emoji decorative elements are properly marked aria-hidden', () => {
+    // Decorative emoji should be aria-hidden, not have role="img" with localized aria-labels
+    expect(homeContent).toContain('aria-hidden="true"');
   });
 
   it('has aria-labels on emoji elements in game page', () => {

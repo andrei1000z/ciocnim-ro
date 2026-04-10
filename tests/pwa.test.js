@@ -58,8 +58,9 @@ describe('Loading Screen', () => {
     expect(clientWrapper).toContain('window.location.reload()');
   });
 
-  it('has error message', () => {
-    expect(clientWrapper).toContain('aria-label="Error"');
+  it('has error indicator', () => {
+    // Warning emoji as aria-hidden decorative element
+    expect(clientWrapper).toContain('⚠️');
   });
 });
 

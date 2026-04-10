@@ -271,6 +271,10 @@
   "regionChoose": "Επίλεξε...",
   "skipToContent": "Μετάβαση στο περιεχόμενο",
 
+  "languageSwitcher": {
+    "selectLanguage": "Επιλέξτε γλώσσα"
+  },
+
   "notFound": {
     "title": "404 – Η σελίδα δεν υπάρχει | Ciocnim.ro",
     "description": "Το αβγό που ψάχνεις έσπασε στο τσούγκρισμα. Γύρνα πίσω στην αρχική και δοκίμασε ξανά!",

@@ -271,6 +271,10 @@
   "regionChoose": "Избери...",
   "skipToContent": "Към съдържанието",
 
+  "languageSwitcher": {
+    "selectLanguage": "Избери език"
+  },
+
   "notFound": {
     "title": "404 – Страницата не съществува | Ciocnim.ro",
     "description": "Яйцето, което търсиш, се е счупило. Върни се у дома и опитай отново!",

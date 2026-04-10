@@ -1,32 +1,48 @@
-import { locales } from './i18n/config';
-import { BASE_URL } from './lib/constants';
+import { headers } from 'next/headers';
 
-export default function sitemap() {
-  const baseUrl = BASE_URL;
+const RO_DOMAIN = 'https://ciocnim.ro';
+const INTL_DOMAIN = 'https://trosc.fun';
+
+export default async function sitemap() {
+  const h = await headers();
+  const host = h.get('host') || '';
+  const isIntl = host.includes('trosc.fun');
+
   const pages = [
-    { path: '', changeFrequency: 'daily', priority: 1.0 },
-    { path: '/traditii', changeFrequency: 'monthly', priority: 0.9 },
-    { path: '/urari', changeFrequency: 'monthly', priority: 0.9 },
-    { path: '/retete', changeFrequency: 'monthly', priority: 0.9 },
-    { path: '/clasament', changeFrequency: 'daily', priority: 0.9 },
-    { path: '/vopsit-natural', changeFrequency: 'monthly', priority: 0.8 },
-    { path: '/ghid', changeFrequency: 'monthly', priority: 0.8 },
-    { path: '/despre', changeFrequency: 'monthly', priority: 0.7 },
-    { path: '/calendar', changeFrequency: 'yearly', priority: 0.7 },
-    { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },
-    { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },
+    { path: '', priority: 1.0, changeFrequency: 'daily' },
+    { path: '/traditii', priority: 0.9, changeFrequency: 'monthly' },
+    { path: '/urari', priority: 0.9, changeFrequency: 'monthly' },
+    { path: '/retete', priority: 0.9, changeFrequency: 'monthly' },
+    { path: '/clasament', priority: 0.9, changeFrequency: 'daily' },
+    { path: '/vopsit-natural', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/ghid', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/despre', priority: 0.7, changeFrequency: 'monthly' },
+    { path: '/calendar', priority: 0.7, changeFrequency: 'yearly' },
+    { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
+    { path: '/terms', priority: 0.3, changeFrequency: 'yearly' },
   ];
 
-  return locales.flatMap(locale =>
-    pages.map(page => ({
-      url: `${baseUrl}/${locale}${page.path}`,
-      changeFrequency: page.changeFrequency,
-      priority: page.priority,
-      alternates: {
-        languages: Object.fromEntries(
-          locales.map(l => [l, `${baseUrl}/${l}${page.path}`])
-        ),
+  const buildEntry = (locale, page, baseDomain) => ({
+    url: `${baseDomain}/${locale}${page.path}`,
+    changeFrequency: page.changeFrequency,
+    priority: page.priority,
+    alternates: {
+      languages: {
+        'ro': `${RO_DOMAIN}/ro${page.path}`,
+        'bg': `${INTL_DOMAIN}/bg${page.path}`,
+        'el': `${INTL_DOMAIN}/el${page.path}`,
+        'x-default': `${RO_DOMAIN}/ro${page.path}`,
       },
-    }))
-  );
+    },
+  });
+
+  if (isIntl) {
+    // trosc.fun: doar BG + EL
+    return ['bg', 'el'].flatMap(locale =>
+      pages.map(page => buildEntry(locale, page, INTL_DOMAIN))
+    );
+  }
+
+  // ciocnim.ro: doar RO
+  return pages.map(page => buildEntry('ro', page, RO_DOMAIN));
 }

@@ -64,12 +64,17 @@ describe('sitemap.js', () => {
   const sitemapContent = fs.readFileSync(path.join(__dirname, '../app/sitemap.js'), 'utf-8');
 
   it('includes main pages', () => {
-    expect(sitemapContent).toContain('baseUrl');
     expect(sitemapContent).toContain('/traditii');
     expect(sitemapContent).toContain('/retete');
     expect(sitemapContent).toContain('/urari');
     expect(sitemapContent).toContain('/calendar');
     expect(sitemapContent).toContain('/vopsit-natural');
+  });
+
+  it('is host-aware (dual domain support)', () => {
+    expect(sitemapContent).toContain('headers');
+    expect(sitemapContent).toContain('trosc.fun');
+    expect(sitemapContent).toContain('ciocnim.ro');
   });
 
   it('includes legal pages', () => {

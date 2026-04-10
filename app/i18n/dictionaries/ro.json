@@ -271,6 +271,10 @@
   "regionChoose": "Alege...",
   "skipToContent": "Salt la conținut",
 
+  "languageSwitcher": {
+    "selectLanguage": "Selectează limba"
+  },
+
   "notFound": {
     "title": "404 – Pagina nu există | Ciocnim.ro",
     "description": "Oul pe care îl cauți s-a spart la ciocnit. Întoarce-te acasă și încearcă din nou!",

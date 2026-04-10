@@ -20,15 +20,28 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // Skip if path already has a valid locale
+  const host = request.headers.get('host') || '';
   const segments = pathname.split('/');
   const firstSegment = segments[1];
+
+  // ═══ HARD SPLIT: redirect 301 cross-domain ═══
+  // Force RO content on ciocnim.ro
+  if (host.includes('trosc.fun') && firstSegment === 'ro') {
+    const url = new URL(`https://www.ciocnim.ro${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(url, 301);
+  }
+  // Force BG/EL content on trosc.fun
+  if (host.includes('ciocnim.ro') && (firstSegment === 'bg' || firstSegment === 'el')) {
+    const url = new URL(`https://www.trosc.fun${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(url, 301);
+  }
+
+  // Skip if path already has a valid locale
   if (locales.includes(firstSegment)) {
     return NextResponse.next();
   }
 
   // Domain-based locale: trosc.fun → bg/el, ciocnim.ro → ro
-  const host = request.headers.get('host') || '';
   let detected;
 
   if (host.includes('trosc.fun')) {

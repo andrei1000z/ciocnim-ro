@@ -268,7 +268,7 @@ function HomeContent() {
       <motion.div {...fadeUp(0, prefersReducedMotion)} className="text-center pt-5 pb-2">
         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.5, duration: 0.7 }}>
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-3 shadow-lg shadow-red-900/10">
-            <span className="text-3xl drop-shadow-lg" role="img" aria-label="Ou de Paște">🥚</span>
+            <span className="text-3xl drop-shadow-lg" aria-hidden="true">🥚</span>
           </div>
         </motion.div>
         <h1 className="text-4xl font-black text-heading tracking-tight drop-shadow-sm">{t('hero.title')}<span className="text-red-500">{t('hero.titleDot')}</span>{t('hero.titleSuffix')}</h1>
@@ -276,7 +276,7 @@ function HomeContent() {
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="mt-3 flex items-center justify-center gap-3 flex-wrap">
           <div className="inline-flex items-center gap-2 bg-card border border-red-500/15 text-heading px-4 py-2 rounded-2xl font-black shadow-lg shadow-black/20">
-            <span className="text-base" role="img" aria-label="Ou">🥚</span>
+            <span className="text-base" aria-hidden="true">🥚</span>
             <span className="tabular-nums text-heading text-lg">{totalGlobal?.toLocaleString(locale === 'bg' ? 'bg-BG' : 'ro-RO') || "…"}</span>
             <span className="font-semibold text-muted text-xs">{t('hero.crackCount')}</span>
           </div>
@@ -568,12 +568,12 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-main relative pattern-tradition">
+    <div className="min-h-screen bg-main relative pattern-tradition">
 
       <Suspense fallback={
         <div className="h-screen flex items-center justify-center">
           <div className="text-center space-y-3">
-            <div className="text-5xl animate-bounce" role="img" aria-label="Ou de Paște">🥚</div>
+            <div className="text-5xl animate-bounce" aria-hidden="true">🥚</div>
             <p className="text-xs font-bold text-red-500 animate-pulse uppercase tracking-widest">...</p>
           </div>
         </div>
@@ -582,6 +582,6 @@ export default function Home() {
       </Suspense>
 
       {/* SEO content — crawlable context for search engines */}
-    </main>
+    </div>
   );
 }

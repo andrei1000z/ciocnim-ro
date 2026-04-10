@@ -106,11 +106,11 @@ function LoadingScreen() {
     <div className="fixed inset-0 bg-main z-[100001] flex flex-col items-center justify-center">
       {!timedOut ? (
         <div className="flex flex-col items-center gap-5">
-          <span className="text-8xl animate-bounce" role="img" aria-label="Loading">🥚</span>
+          <span className="text-8xl animate-bounce" aria-hidden="true">🥚</span>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5 text-center px-6 max-w-sm">
-          <span className="text-6xl" role="img" aria-label="Error">⚠️</span>
+          <span className="text-6xl" aria-hidden="true">⚠️</span>
           <button
             onClick={() => window.location.reload()}
             className="mt-2 px-8 py-3 bg-red-700 hover:bg-red-600 text-white font-bold rounded-2xl transition-all active:scale-95 border border-red-600"
