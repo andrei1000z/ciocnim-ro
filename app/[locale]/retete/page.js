@@ -295,8 +295,6 @@ const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
   const [activeVariant, setActiveVariant] = useState(0);
   const [kitchenMode, setKitchenMode] = useState(false);
   const [healthyMode, setHealthyMode] = useState(false);
-  const [rapidMode, setRapidMode] = useState(false);
-  const [ieftinMode, setIeftinMode] = useState(false);
   const [copiedFeedback, setCopiedFeedback] = useState("");
   const targetServings = Math.max(1, parseInt(servingsInput) || recipe.servings);
   const multiplier = targetServings / recipe.servings;
@@ -307,30 +305,16 @@ const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
   const currentIngredients = (!isDefaultVariant && variant?.baseIngredients) ? variant.baseIngredients : recipe.baseIngredients;
   const currentFilling = (!isDefaultVariant && variant?.filling) ? variant.filling : recipe.filling;
 
-  // Rapid/Ieftin mode: override steps if available
-  const baseSteps = (rapidMode && recipe.rapidMode?.stepsOverride)
-    ? recipe.rapidMode.stepsOverride
-    : recipe.steps;
-  const currentSteps = baseSteps.map((step, idx) => {
-    if (!rapidMode && !isDefaultVariant && variant?.stepsOverride?.[idx]) {
+  // Steps come from variant override if active, otherwise from base recipe
+  const currentSteps = recipe.steps.map((step, idx) => {
+    if (!isDefaultVariant && variant?.stepsOverride?.[idx]) {
       return variant.stepsOverride[idx];
     }
     return step;
   });
 
-  // Apply ingredient swaps for rapidMode or ieftinMode
-  const getSwappedName = (nameText) => {
-    const swaps = [
-      ...(rapidMode && recipe.rapidMode?.swaps ? recipe.rapidMode.swaps : []),
-      ...(ieftinMode && recipe.ieftinMode?.swaps ? recipe.ieftinMode.swaps : []),
-    ];
-    for (const s of swaps) {
-      if (nameText.toLowerCase().includes(s.match.toLowerCase())) {
-        return s.swap;
-      }
-    }
-    return null;
-  };
+  // No rapidMode/ieftinMode swaps anymore — only healthy swaps remain (applied via healthyMode prop below)
+  const getSwappedName = () => null;
 
   const handleCopyIngredients = () => {
     const all = [...currentIngredients, ...(currentFilling || [])];
@@ -446,30 +430,6 @@ const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
           >
             🥗 {healthyMode ? recipesUI.healthyOn : recipesUI.healthyMode}
           </button>
-          {recipe.rapidMode && (
-            <button
-              onClick={() => setRapidMode(m => !m)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
-                rapidMode
-                  ? "bg-blue-900/25 text-blue-300 border-blue-700/40 shadow-lg shadow-blue-900/15"
-                  : "bg-card text-dim border-edge hover:border-blue-700/30 hover:text-blue-400"
-              }`}
-            >
-              ⚡ {rapidMode ? recipesUI.rapidOn : recipesUI.rapidMode}
-            </button>
-          )}
-          {recipe.ieftinMode && (
-            <button
-              onClick={() => setIeftinMode(m => !m)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border whitespace-nowrap ${
-                ieftinMode
-                  ? "bg-amber-900/25 text-amber-300 border-amber-700/40 shadow-lg shadow-amber-900/15"
-                  : "bg-card text-dim border-edge hover:border-amber-700/30 hover:text-amber-400"
-              }`}
-            >
-              💰 {ieftinMode ? recipesUI.cheapOn : recipesUI.cheapMode}
-            </button>
-          )}
         </div>
       </div>
 
@@ -488,25 +448,6 @@ const RecipeDetail = ({ recipe, onBack, recipesUI, locale, diff }) => {
           <p className="text-xs text-green-400/70 leading-relaxed">{recipe.healthyNote}</p>
         </div>
       )}
-      {rapidMode && recipe.rapidMode && (
-        <div className="rounded-xl bg-blue-900/15 border border-blue-700/25 px-4 py-3 flex items-start gap-2.5">
-          <span className="text-lg flex-shrink-0">⚡</span>
-          <div>
-            <p className="text-sm font-bold text-blue-300 mb-1">{recipesUI.rapidActive} — {recipe.rapidMode.totalLabel}</p>
-            <p className="text-xs text-blue-400/70 leading-relaxed">{recipe.rapidMode.note}</p>
-          </div>
-        </div>
-      )}
-      {ieftinMode && recipe.ieftinMode && (
-        <div className="rounded-xl bg-amber-900/15 border border-amber-700/25 px-4 py-3 flex items-start gap-2.5">
-          <span className="text-lg flex-shrink-0">💰</span>
-          <div>
-            <p className="text-sm font-bold text-amber-300 mb-1">{recipesUI.cheapActive}</p>
-            <p className="text-xs text-amber-400/70 leading-relaxed">{recipe.ieftinMode.note}</p>
-          </div>
-        </div>
-      )}
-
       {/* Variant selector */}
       {recipe.variants && recipe.variants.length > 1 && (
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
