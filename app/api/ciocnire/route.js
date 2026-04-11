@@ -112,7 +112,8 @@ export async function POST(request) {
           if (regiune && regiune !== "Alege regiunea...") pipeline.zincrby(k('leaderboard_regiuni'), 1, regiune);
           if (teamId) pipeline.zincrby(k(`team:${teamId}:membri`), 1, safeName);
         }
-        pipeline.zremrangebyrank(k('leaderboard_jucatori'), 0, -21);
+        // Cap leaderboard-uri: 100 jucători, 20 regiuni
+        pipeline.zremrangebyrank(k('leaderboard_jucatori'), 0, -101);
         pipeline.zremrangebyrank(k('leaderboard_regiuni'), 0, -21);
 
         const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([

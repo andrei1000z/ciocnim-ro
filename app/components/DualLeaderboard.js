@@ -68,7 +68,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
             <motion.div key="j" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="space-y-1.5">
               {topPlayers && topPlayers.length > 0 ? (
                 <>
-                  {topPlayers.map((p, i) => (
+                  {topPlayers.slice(0, 10).map((p, i) => (
                     <div key={i} className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl transition-all ${p.nume === myName?.toUpperCase().trim() ? "bg-amber-900/20 border border-amber-700/30" : "hover:bg-elevated"}`}>
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <span className="text-base w-6 text-center flex-shrink-0">{medals[i] || `${i + 1}.`}</span>
