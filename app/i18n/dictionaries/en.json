@@ -594,7 +594,20 @@
       "rarityEpic": "Epic",
       "rarityLegendary": "Legendary",
       "noName": "Anonymous",
-      "setNameFirst": "Pick a nickname on the homepage to see your profile."
+      "setNameFirst": "Pick a nickname on the homepage to see your profile.",
+      "editName": "Change nickname",
+      "newNamePlaceholder": "New nickname...",
+      "saveName": "Save",
+      "cancel": "Cancel",
+      "history": "Match History",
+      "noHistory": "No matches yet. Let's crack some eggs!",
+      "vs": "vs",
+      "winLabel": "Win",
+      "lossLabel": "Loss",
+      "minutesAgo": "{n} min ago",
+      "hoursAgo": "{n} h ago",
+      "daysAgo": "{n} d ago",
+      "justNow": "just now"
     },
     "despre": {
       "pageTitle": "About",

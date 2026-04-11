@@ -601,7 +601,20 @@
       "rarityEpic": "Epic",
       "rarityLegendary": "Legendar",
       "noName": "Anonim",
-      "setNameFirst": "Pune-ți o poreclă pe pagina principală pentru a-ți vedea profilul."
+      "setNameFirst": "Pune-ți o poreclă pe pagina principală pentru a-ți vedea profilul.",
+      "editName": "Schimbă porecla",
+      "newNamePlaceholder": "Porecla nouă...",
+      "saveName": "Salvează",
+      "cancel": "Anulează",
+      "history": "Istoric Meciuri",
+      "noHistory": "Niciun meci jucat încă. Hai la prima ciocneală!",
+      "vs": "vs",
+      "winLabel": "Victorie",
+      "lossLabel": "Înfrângere",
+      "minutesAgo": "{n} min în urmă",
+      "hoursAgo": "{n} ore în urmă",
+      "daysAgo": "{n} zile în urmă",
+      "justNow": "acum"
     },
     "despre": {
       "pageTitle": "Despre",

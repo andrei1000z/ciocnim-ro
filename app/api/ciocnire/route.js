@@ -105,12 +105,33 @@ export async function POST(request) {
           shouldCountGlobal = true;
         }
 
+        // Determine opponent name for match history
+        let opponentName = null;
+        if (safeName && roomId) {
+          try {
+            const players = await redis.smembers(k(`room:${roomId}:players`));
+            opponentName = players.find(p => p !== safeName) || null;
+          } catch {}
+        }
+
         const pipeline = redis.pipeline();
         if (shouldCountGlobal) pipeline.incr(k('global_ciocniri_total'));
         if (safeName && serverEsteCastigator) {
           pipeline.zincrby(k('leaderboard_jucatori'), 1, safeName);
           if (regiune && regiune !== "Alege regiunea...") pipeline.zincrby(k('leaderboard_regiuni'), 1, regiune);
           if (teamId) pipeline.zincrby(k(`team:${teamId}:membri`), 1, safeName);
+        }
+        // Match history — LPUSH + LTRIM pentru a păstra ultimele 50 meciuri per user
+        if (safeName && opponentName) {
+          const historyEntry = JSON.stringify({
+            opponent: opponentName,
+            win: serverEsteCastigator,
+            t: Date.now(),
+            room: roomId,
+          });
+          pipeline.lpush(k(`user:${safeName}:history`), historyEntry);
+          pipeline.ltrim(k(`user:${safeName}:history`), 0, 49);
+          pipeline.expire(k(`user:${safeName}:history`), 60 * 60 * 24 * 90);
         }
         // Cap leaderboard-uri: 100 jucători, 20 regiuni
         pipeline.zremrangebyrank(k('leaderboard_jucatori'), 0, -101);
@@ -304,6 +325,20 @@ return redis.call('SCARD', KEYS[1])
         redis.setex(k(`room:${roomId}:revansa-ok`), 120, String(revOkTs)).catch(() => {});
         await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs }).catch(() => {});
         return NextResponse.json({ success: true });
+      }
+
+      case 'get-history': {
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
+        const cleanName = jucator.toUpperCase();
+        try {
+          const raw = await redis.lrange(k(`user:${cleanName}:history`), 0, 49);
+          const history = raw.map(entry => {
+            try { return JSON.parse(entry); } catch { return null; }
+          }).filter(Boolean);
+          return NextResponse.json({ success: true, history });
+        } catch {
+          return NextResponse.json({ success: true, history: [] });
+        }
       }
 
       case 'get-room-revansa': {
