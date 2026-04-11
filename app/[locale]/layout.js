@@ -36,15 +36,8 @@ export async function generateMetadata({ params }) {
       template: dict.meta.titleTemplate,
     },
     description: dict.meta.description,
-    icons: {
-      icon: [
-        { url: '/favicon.ico', sizes: 'any' },
-        { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-      ],
-      apple: [
-        { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-      ],
-    },
+    // Icons auto-detected de Next.js din app/icon.svg + app/apple-icon.js
+    // (red egg — file convention). Nu mai facem override aici.
     applicationName: dict.meta.applicationName,
     authors: [{ name: dict.meta.applicationName }],
     creator: dict.meta.applicationName,

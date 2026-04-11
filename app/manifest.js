@@ -19,9 +19,8 @@ export default async function manifest() {
       orientation: 'portrait-primary',
       categories: ['games', 'entertainment'],
       icons: [
-        { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
-        { src: '/icon-512x512.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-        { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+        { src: '/apple-icon', sizes: '180x180', type: 'image/png', purpose: 'any' },
       ],
       shortcuts: [
         {
@@ -29,7 +28,7 @@ export default async function manifest() {
           short_name: 'Play',
           url: '/en?autoArena=true',
           description: 'Crack Easter eggs with someone online',
-          icons: [{ src: '/apple-touch-icon.png', sizes: '180x180' }],
+          icons: [{ src: '/icon.svg', sizes: 'any' }],
         },
         { name: 'Leaderboard', short_name: 'Leaderboard', url: '/en/leaderboard', description: 'Global leaderboard' },
         { name: 'Easter Recipes', short_name: 'Recipes', url: '/en/recipes', description: 'Traditional Easter recipes' },
@@ -51,9 +50,8 @@ export default async function manifest() {
     orientation: 'portrait-primary',
     categories: ['games', 'entertainment'],
     icons: [
-      { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
-      { src: '/icon-512x512.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+      { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: '/apple-icon', sizes: '180x180', type: 'image/png', purpose: 'any' },
     ],
     shortcuts: [
       {
@@ -61,7 +59,7 @@ export default async function manifest() {
         short_name: 'Joacă',
         url: '/ro?autoArena=true',
         description: 'Ciocnește ouă cu cineva din România',
-        icons: [{ src: '/apple-touch-icon.png', sizes: '180x180' }],
+        icons: [{ src: '/icon.svg', sizes: 'any' }],
       },
       { name: 'Clasament', short_name: 'Clasament', url: '/ro/clasament', description: 'Vezi clasamentul național' },
       { name: 'Rețete de Paște', short_name: 'Rețete', url: '/ro/retete', description: 'Rețete tradiționale de Paște' },

@@ -28,10 +28,10 @@ describe('PWA Configuration', () => {
     expect(sw).toContain("/api/");
   });
 
-  it('manifest has all required icons', () => {
+  it('manifest has icons (SVG + apple-icon 180x180)', () => {
     const manifestSrc = fs.readFileSync(path.join(__dirname, '../app/manifest.js'), 'utf-8');
+    expect(manifestSrc).toContain('/icon.svg');
     expect(manifestSrc).toContain('180x180');
-    expect(manifestSrc).toContain('512x512');
   });
 
   it('manifest has shortcuts', () => {

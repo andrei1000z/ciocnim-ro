@@ -30,8 +30,11 @@ describe('SEO & Metadata', () => {
     expect(layoutContent).toContain('manifest');
   });
 
-  it('has favicon configuration', () => {
-    expect(layoutContent).toContain('icons:');
+  it('has favicon auto-detected via app/icon.svg file convention', () => {
+    // Next.js auto-generates icon metadata din app/icon.svg + app/apple-icon.js
+    // Layout nu mai override-uiește `icons:` explicit.
+    expect(fs.existsSync(path.join(__dirname, '../app/icon.svg'))).toBe(true);
+    expect(fs.existsSync(path.join(__dirname, '../app/apple-icon.js'))).toBe(true);
   });
 
   it('has schema.org markup', () => {
@@ -107,10 +110,11 @@ describe('manifest.js (dynamic)', () => {
     expect(manifestContent).toContain('standalone');
   });
 
-  it('has icons with correct sizes', () => {
+  it('has icons defined (SVG + apple-icon)', () => {
+    // SVG icons don't need explicit sizes (scale to any)
+    expect(manifestContent).toContain('/icon.svg');
+    expect(manifestContent).toContain('/apple-icon');
     expect(manifestContent).toContain('180x180');
-    expect(manifestContent).toContain('192x192');
-    expect(manifestContent).toContain('512x512');
   });
 
   it('has theme and background colors', () => {
