@@ -87,11 +87,22 @@ export async function POST(request) {
         // Dedupe global counter: doar primul client dintre cei 2 din camera
         // bump-uie `global_ciocniri_total`. Stats per-user (wins/losses) sunt
         // oricum per-user, deci nu au nevoie de dedupe.
-        let shouldCountGlobal = true;
+        // IMPORTANT: dacă battleTimestamp lipsește (lovitura TTL expirat sau clear-round
+        // deja șters), folosim fallback roomId-based ca să evităm double count.
+        let shouldCountGlobal;
         if (battleTimestamp && roomId) {
           const dedupeKey = k(`counted:${roomId}:${battleTimestamp}`);
           const setResult = await redis.set(dedupeKey, '1', 'EX', 60, 'NX');
           shouldCountGlobal = setResult !== null;
+        } else if (roomId) {
+          // Fallback: folosim un counted marker per roomId care expiră rapid (5s).
+          // Astfel dacă Alice + Bob trimit increment-global very close în timp
+          // fără lovitura disponibilă, doar unul contează.
+          const fallbackKey = k(`counted-fallback:${roomId}`);
+          const setResult = await redis.set(fallbackKey, '1', 'EX', 5, 'NX');
+          shouldCountGlobal = setResult !== null;
+        } else {
+          shouldCountGlobal = true;
         }
 
         const pipeline = redis.pipeline();
