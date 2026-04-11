@@ -293,10 +293,8 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (!nume || opponent || isBotMatch) return;
     const pollRoom = async () => {
-      // B7: Skip if Pusher is connected — join events arrive via WebSocket.
-      // The interval stays alive as a fallback, but becomes a no-op when healthy.
-      const pusherState = pusherRef?.current?.connection?.state;
-      if (pusherState === 'connected') return;
+      // Polling safety net — rulează ÎNTOTDEAUNA (nu skip-uim pe connected) ca să
+      // prindem evenimentele Pusher pierdute din cauza race conditions la subscribe.
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -332,9 +330,7 @@ function ArenaMaster({ room }) {
     if (!opponent || rezultat || isBotMatch || !atacantName) return;
     if (atacantName === nume) return; // attacker gets result from API response
     const poll = async () => {
-      // B7: skip when Pusher is connected — lovitura events arrive via WebSocket
-      const pusherState = pusherRef?.current?.connection?.state;
-      if (pusherState === 'connected') return;
+      // Polling safety net — rulează ÎNTOTDEAUNA, nu skip pe connected.
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -355,9 +351,7 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (!rezultat || isBotMatch || !opponent) return;
     const poll = async () => {
-      // B7: skip when Pusher is connected — revansa events arrive via WebSocket
-      const pusherState = pusherRef?.current?.connection?.state;
-      if (pusherState === 'connected') return;
+      // Polling safety net — rulează ÎNTOTDEAUNA. Captură revansa-ok dacă Pusher o ratează.
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
