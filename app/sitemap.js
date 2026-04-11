@@ -43,14 +43,15 @@ export default async function sitemap() {
         'ro': `${RO_DOMAIN}/ro${pathFor('ro', page.canonicalSlug)}`,
         'bg': `${INTL_DOMAIN}/bg${pathFor('bg', page.canonicalSlug)}`,
         'el': `${INTL_DOMAIN}/el${pathFor('el', page.canonicalSlug)}`,
-        'x-default': `${RO_DOMAIN}/ro${pathFor('ro', page.canonicalSlug)}`,
+        'en': `${INTL_DOMAIN}/en${pathFor('en', page.canonicalSlug)}`,
+        'x-default': `${INTL_DOMAIN}/en${pathFor('en', page.canonicalSlug)}`,
       },
     },
   });
 
   if (isIntl) {
-    // trosc.fun: doar BG + EL
-    return ['bg', 'el'].flatMap(locale =>
+    // trosc.fun: en (default) + bg + el
+    return ['en', 'bg', 'el'].flatMap(locale =>
       pages.map(page => buildEntry(locale, page, INTL_DOMAIN))
     );
   }

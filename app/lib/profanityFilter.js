@@ -30,6 +30,11 @@ const PROFANITY_LISTS = {
     'μαλάκα','γαμώ','πούτανα','σκατά','αρχίδι',
     'μουνί','γαμημένε','πούστη','κωλο','βλάκα',
   ],
+  en: [
+    'fuck','fucker','fucking','shit','bitch','cunt',
+    'asshole','dick','cock','pussy','bastard','whore',
+    'slut','nigger','faggot','retard','motherfucker',
+  ],
 };
 
 // Combined list for backwards compatibility

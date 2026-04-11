@@ -19,6 +19,12 @@ const I18N = {
     startsOn: (date) => `Ξεκινά στις ${date}`,
     dateLocale: "el-GR",
   },
+  en: {
+    name: (year) => `Easter ${year}`,
+    active: "Active Season",
+    startsOn: (date) => `Starts on ${date}`,
+    dateLocale: "en-US",
+  },
 };
 
 export function getCurrentSeason(locale = "ro") {

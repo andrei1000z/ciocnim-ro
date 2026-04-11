@@ -101,7 +101,7 @@ function HomeContent() {
       const ch = pusher.subscribe(`${ns}-team-${tid}`);
       ch.bind("team-update", async () => {
         try {
-          const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) });
+          const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume, locale }) });
           const d = await r.json();
           if (d.success) {
             setLoadedTeams(prev => prev.map(t => t.details.id === tid ? { ...t, top: d.top || [] } : t));
@@ -147,7 +147,7 @@ function HomeContent() {
       if (!ids.length) { setLoadedTeams([]); return; }
       const results = [], valid = [];
       const fetches = await Promise.allSettled(
-        ids.map(tid => fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }), signal: ctrl.signal }).then(r => r.json()).then(d => ({ tid, d })))
+        ids.map(tid => fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume, locale }), signal: ctrl.signal }).then(r => r.json()).then(d => ({ tid, d })))
       );
       if (ctrl.signal.aborted) return;
       for (const f of fetches) {
@@ -186,7 +186,7 @@ function HomeContent() {
     }
     triggerVibrate(); setIsJoiningArena(true);
     try {
-      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-matchmaking' }) });
+      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-matchmaking', locale }) });
       const data = await res.json();
       if (data.success) {
         try { sessionStorage.setItem('room-host-token', data.isHost ? 'arena-host' : ''); } catch {}
@@ -200,7 +200,7 @@ function HomeContent() {
     if (!nume || nume.trim().length < 3) { setToastMsg(t('notifications.setNicknameFirst')); return; }
     setLoadingTeam(true); triggerVibrate();
     try {
-      const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "creeaza-echipa", creator: nume }) });
+      const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "creeaza-echipa", creator: nume, locale }) });
       const d = await r.json();
       if (d.success) {
         addStoredTeamId(d.teamId);
@@ -215,7 +215,7 @@ function HomeContent() {
     if (nouNume.length < 3) { setToastMsg(t('notifications.nameTooShort')); return; }
     triggerVibrate();
     setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, details: { ...t.details, nume: nouNume.toUpperCase().trim() } } : t));
-    fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "redenumeste-echipa", teamId, newName: nouNume, jucator: nume }) });
+    fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "redenumeste-echipa", teamId, newName: nouNume, jucator: nume, locale }) });
   };
 
   const showConfirm = (message, onYes) => setConfirmDialog({ message, onYes });
@@ -232,7 +232,7 @@ function HomeContent() {
     showConfirm(t('groups.kickConfirm', { name: member }), async () => {
       triggerVibrate();
       try {
-        await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume }) });
+        await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume, locale }) });
         setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, top: t.top.filter(m => m.member !== member) } : t));
       } catch { setToastMsg(t('notifications.errorKick')); }
     });
@@ -242,7 +242,7 @@ function HomeContent() {
     triggerVibrate([50, 50, 50]);
     const roomCode = `privat-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     try {
-      const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId }) });
+      const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId, locale }) });
       if (!res.ok) { setToastMsg(t('notifications.errorChallenge')); return; }
       try { sessionStorage.setItem('room-host-token', 'provocare-host'); } catch {}
       router.push(`/joc/${roomCode}?provocare=true&teamId=${teamId}`);
@@ -335,7 +335,7 @@ function HomeContent() {
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="text-lg">🥚</span>
               <span className="font-bold text-body text-sm">{nume}</span>
-              {userStats.regiune && (
+              {userStats.regiune && locale !== 'en' && (
                 <button
                   onClick={() => {
                     const newStats = { ...userStats, regiuneSet: false };
@@ -381,8 +381,8 @@ function HomeContent() {
             {numeError && <p className="text-orange-500 text-xs font-medium">{numeError}</p>}
           </div>
         )}
-        {/* Selector regiune — apare când ai poreclă dar nu ai regiune */}
-        {nume && !userStats.regiuneSet && (
+        {/* Selector regiune — apare când ai poreclă dar nu ai regiune (nu pe /en — global fără regiuni) */}
+        {nume && !userStats.regiuneSet && locale !== 'en' && (
           <div className="mt-2 rounded-2xl border border-amber-900/20 bg-card p-3 space-y-2">
             <p className="text-xs font-bold text-amber-400 text-center">{t('profile.regionRequired')}</p>
             <div className="flex gap-2">

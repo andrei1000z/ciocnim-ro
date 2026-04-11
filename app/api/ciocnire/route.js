@@ -37,8 +37,8 @@ export async function POST(request) {
     const oldName = sanitizeStr(body.oldName, 30);
     const teamIds = Array.isArray(body.teamIds) ? body.teamIds.slice(0, 20).map(id => sanitizeId(id)).filter(Boolean) : [];
 
-    // Per-domain namespace (ciocnim.ro → 'ro', trosc.fun → 'intl')
-    const ns = getNamespace(request);
+    // Per-locale namespace (ro/bg/el/en — each fully isolated in Redis)
+    const ns = getNamespace(request, body.locale);
     const k = (key) => `${ns}:${key}`;
     const ch = (channel) => `${ns}-${channel}`;
 

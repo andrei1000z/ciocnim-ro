@@ -1,0 +1,856 @@
+{
+  "meta": {
+    "title": "Trosc.fun – Easter Egg Battle Online",
+    "titleTemplate": "%s | Trosc.fun",
+    "description": "The traditional Easter game, now online! Crack eggs with friends across the world, customize your egg and climb the global leaderboard. Free, on any phone.",
+    "ogTitle": "Trosc.fun – Crack Easter Eggs Online with Friends Worldwide",
+    "ogDescription": "The traditional Easter egg battle, now online! Virtual egg cracking, global leaderboard, real-time duels. Free, no install. Happy Easter!",
+    "twitterTitle": "Trosc.fun – Crack Easter Eggs Online! Happy Easter!",
+    "twitterDescription": "Challenge your friends to a virtual Easter egg battle. Free, on any phone, no install. Happy Easter!",
+    "applicationName": "Trosc.fun",
+    "schemaDescription": "A traditional Easter online game where users crack virtual eggs with friends and family, customize their eggs, and compete on the global leaderboard."
+  },
+
+  "hero": {
+    "title": "TROSC",
+    "titleDot": ".",
+    "titleSuffix": "FUN",
+    "subtitle": "Crack Easter eggs online",
+    "crackCount": "cracks",
+    "online": "online"
+  },
+
+  "cta": {
+    "play": "🥚 PLAY WITH A FRIEND!",
+    "playIcon": "🥚",
+    "playText": "PLAY WITH A FRIEND!",
+    "arena": "Play with anyone →",
+    "createGroup": "Create group",
+    "creating": "..."
+  },
+
+  "profile": {
+    "optionalNickname": "Pick a nickname",
+    "placeholder": "Pick a nickname...",
+    "ok": "OK",
+    "profileLink": "Profile →",
+    "minChars": "Minimum 3 characters",
+    "wins": "wins",
+    "chooseRegion": "Choose your region",
+    "detectLocation": "Auto-detect",
+    "regionRequired": "Pick a region to show up on the leaderboard!"
+  },
+
+  "leaderboard": {
+    "label": "Leaderboard",
+    "seeAll": "See full leaderboard →",
+    "players": "🏆 Players",
+    "regions": "🗺️ Regions",
+    "champion": "🎉 You are the Global Champion!",
+    "rank": "Rank {rank} · you need {needed} more {victLabel} for rank {target}",
+    "needWins": "You need {needed} more {victLabel} to reach rank {target}",
+    "victory": "win",
+    "victories": "wins",
+    "noPlayers": "No players yet. Be the first!",
+    "noRegions": "Waiting for the first battle...",
+    "shareChampion": "I'm the Global Easter Egg Cracking Champion on trosc.fun! Dare to challenge me? 🥚🏆",
+    "shareRank": "I'm ranked #{rank} in the global Easter egg cracking leaderboard! Come join me on trosc.fun 🥚⚔️",
+    "shareGeneric": "Come crack some Easter eggs on trosc.fun! 🥚⚔️",
+    "shareBtn": "📲 Share your ranking"
+  },
+
+  "share": {
+    "sendFriends": "Send to friends",
+    "linkCopied": "Link copied! Send it to your friends.",
+    "shareText": "Come crack Easter eggs online! 🥚⚔️ Join me on trosc.fun"
+  },
+
+  "discover": {
+    "label": "Discover",
+    "traditions": "Traditions",
+    "recipes": "Recipes",
+    "greetings": "Greetings",
+    "dyeing": "Natural Dyeing",
+    "calendar": "Calendar",
+    "guide": "Guide",
+    "leaderboard": "Leaderboard"
+  },
+
+  "footer": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy",
+    "about": "About",
+    "donate": "☕ Donate",
+    "copyright": "Trosc.fun"
+  },
+
+  "seo": {
+    "description": "is the traditional Easter egg cracking game, now online. Play for free with friends and family no matter the distance. Happy Easter! 🥚",
+    "siteName": "Trosc.fun",
+    "traditionsLink": "Easter Traditions",
+    "greetingsLink": "Easter Greetings",
+    "recipesLink": "Easter Recipes",
+    "dyeingLink": "Natural Egg Dyeing",
+    "calendarLink": "Easter Calendar",
+    "guideLink": "Game Guide"
+  },
+
+  "playModal": {
+    "title": "Play with a Friend 🥚",
+    "subtitle": "Create a room and send the code to your friend",
+    "createRoom": "Create New Room",
+    "creating": "Creating...",
+    "or": "or",
+    "roomCodePlaceholder": "ROOM CODE",
+    "joinWithCode": "Join with Code",
+    "verifying": "Verifying...",
+    "code4chars": "The code must be exactly 4 characters!",
+    "serverError": "Server error. Please try again.",
+    "networkError": "Network error. Please try again.",
+    "cantCreate": "Could not create the room.",
+    "roomOccupied": "This room is already taken!",
+    "close": "Close"
+  },
+
+  "game": {
+    "vs": "VS",
+    "roomCode": "Room Code: ",
+    "copied": "COPIED!",
+    "shareRoom": "Send to friend",
+    "live": "LIVE",
+    "connecting": "CONNECTING...",
+    "disconnected": "DISCONNECTED",
+    "person": "person",
+    "persons": "people",
+    "totalCracks": "total cracks",
+    "yourTurn": "YOUR TURN! Tap the button below!",
+    "waitOpponent": "Wait... your opponent is striking!",
+    "strike": "💥 CRACK THE EGG!",
+    "defend": "🛡️ DEFEND THE EGG!",
+    "tapOrShake": "Tap or shake your phone",
+    "cracking": "⚡ CRACKING...",
+    "searching": "Searching...",
+    "sendCode": "Send the code!",
+    "fewSeconds": "A few seconds",
+    "preparing": "PREPARING THE ARENA...",
+    "chatPlaceholder": "TYPE A MESSAGE...",
+    "sendMessage": "Send message",
+    "chatEmpty": "Silence at the table...",
+    "confirmLeave": "Are you sure you want to leave the match?",
+    "regionUnknown": "Unknown",
+    "shareTitle": "Trosc.fun - Duel time!",
+    "shareInvite": "Come crack Easter eggs! 🥚⚔️ Join here:",
+    "online": "online",
+    "player": "Player"
+  },
+
+  "result": {
+    "victory": "Victory!",
+    "defeat": "Your egg cracked",
+    "winsCount": "wins",
+    "lossesCount": "losses",
+    "shareResult": "📲 Share Result",
+    "shareWhatsApp": "💬 Send on WhatsApp",
+    "revanche": "⚔️ Rematch",
+    "waiting": "⏳ Waiting",
+    "home": "← Back home",
+    "shareWinText": "I won an Easter egg battle on {site}! 🏆🥚 I have {wins} wins. Come challenge me!",
+    "shareLoseText": "I fought fair in an Easter egg battle on {site}! 🥚💥 Time for a rematch!",
+    "greetingWin": "Happy Easter!",
+    "greetingLose": "Happy Easter!"
+  },
+
+  "countdown": {
+    "untilOrthodox": "Until Orthodox Easter {year}",
+    "untilCatholic": "Until Catholic Easter {year}",
+    "risen": "Happy Easter! ✝️",
+    "happyEaster": "Happy Easter to everyone!",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Min",
+    "seconds": "Sec"
+  },
+
+  "groups": {
+    "label": "My Groups",
+    "myGroup": "👥 My Group",
+    "invite": "🔗 Invite",
+    "copied": "✅ Copied!",
+    "leave": "Leave",
+    "inviteFriends": "Invite friends to play!",
+    "leaveConfirm": "Are you sure you want to leave the group?",
+    "kickConfirm": "Are you sure you want to remove {name} from the group?",
+    "no": "No",
+    "yes": "Yes",
+    "shareInvite": "Join my Easter egg cracking group! Visit {url} and show us who has the strongest egg 🥚⚔️",
+    "shareTitle": "Trosc.fun - Let's crack some eggs!",
+    "previousGroup": "Previous group",
+    "nextGroup": "Next group",
+    "cancelEdit": "Cancel",
+    "editName": "Edit group name",
+    "challenge": "Challenge to a duel",
+    "kick": "Remove from group"
+  },
+
+  "joinModal": {
+    "title": "You've been invited to a group!",
+    "subtitle": "Pick a nickname to join",
+    "placeholder": "Your nickname...",
+    "join": "Join the group →"
+  },
+
+  "notifications": {
+    "challenge": "⚔️ Challenge",
+    "challengeText": "challenges you to a duel!",
+    "accept": "Accept",
+    "decline": "Decline",
+    "roomOccupied": "This room is taken! Try another code.",
+    "setNicknameFirst": "Pick a nickname first!",
+    "networkError": "Network error!",
+    "tooFast": "Too fast! Slow down a bit.",
+    "unstableConnection": "Unstable connection — the crack may not have been saved.",
+    "errorRetry": "Error. Please try again.",
+    "badNameJoke": "Nice try! Pick a different name.",
+    "nameTooShort": "Name too short.",
+    "errorCreateGroup": "Failed to create group.",
+    "errorKick": "Failed to remove.",
+    "errorChallenge": "Failed to send challenge.",
+    "errorNetwork": "Network error. Please try again.",
+    "nameMinChars": "The name must be at least 2 characters.",
+    "nameTaken": "This name is already taken! Pick another."
+  },
+
+  "loading": {
+    "text": "Loading...",
+    "errorTitle": "Something went wrong",
+    "errorDesc": "The page failed to load. Check your internet connection and try again.",
+    "retry": "Retry"
+  },
+
+  "cookie": {
+    "text": "We save your preferences (nickname, theme, stats) only in your browser — we don't send data to third parties and don't use tracking cookies.",
+    "privacyLink": "Privacy Policy",
+    "accept": "Got it"
+  },
+
+  "achievement": {
+    "unlocked": "Achievement unlocked!"
+  },
+
+  "quotes": {
+    "forgiveness": [
+      "Forgive, and you will be forgiven. Your egg was sacrificed for another's joy.",
+      "Forgiveness is the bridge to peace of soul.",
+      "Be kind, for everyone you meet is fighting a hard battle.",
+      "For if you forgive others their trespasses, your heavenly Father will also forgive you."
+    ],
+    "humility": [
+      "God opposes the proud but gives grace to the humble.",
+      "Whoever humbles himself will be exalted.",
+      "The greatest among you shall be a servant of all.",
+      "Victory is fleeting; tradition and kindness endure forever."
+    ]
+  },
+
+  "botChat": [
+    "Happy Easter! 🥚", "Good luck! 💪", "Nice hit!", "Our eggs are tough!",
+    "There you go! 🎯", "Let's crack some eggs!", "I don't duel with just anyone 😎", "Good game!",
+    "Happy Easter! 🐣", "You're good, but I'm better!", "My egg is made of steel 🛡️"
+  ],
+
+  "eggSkins": {
+    "red": "Traditional Red",
+    "blue": "Sapphire Blue",
+    "gold": "Imperial Gold",
+    "green": "Forest Green",
+    "golden": "Golden Egg"
+  },
+
+  "eggColor": "Egg Color",
+  "regionLabel": "Your Region",
+  "regionChoose": "Choose...",
+  "skipToContent": "Skip to content",
+
+  "languageSwitcher": {
+    "selectLanguage": "Select language"
+  },
+
+  "notFound": {
+    "title": "404 – Page not found | Trosc.fun",
+    "description": "The egg you're looking for has been cracked. Head back home and try again!",
+    "heading": "404",
+    "subtitle": "This egg got cracked too hard!",
+    "body": "The page you're looking for has cracked and no longer exists. Let's head back to the Easter table!",
+    "cta": "🥚 Crack eggs online",
+    "alt": "or discover Easter traditions →",
+    "homeButton": "🥚 Home"
+  },
+
+  "units": {
+    "buc": "pcs",
+    "linguri": "tbsp",
+    "lingurită": "tsp",
+    "lingurite": "tsp",
+    "legătură": "bunch",
+    "căței": "cloves",
+    "g": "g",
+    "kg": "kg",
+    "ml": "ml",
+    "l": "l"
+  },
+
+  "content": {
+    "traditions": {
+      "pageTitle": "The Tradition of",
+      "pageHighlight": "Egg Cracking",
+      "pageSubtitle": "Discover the Easter game that has united generations of families across the Christian world.",
+      "sections": [
+        {
+          "title": "Why Do We Crack Eggs?",
+          "icon": "🥚",
+          "paragraphs": [
+            "The tradition of cracking Easter eggs is one of the oldest Christian customs. Legend says that Saint Mary Magdalene went to the Roman Emperor Tiberius, offered him an egg and declared <strong class=\"text-red-400\">\"Christ is Risen!\"</strong>. The Emperor did not believe her, saying a dead man could no more rise than the white egg in her hand could turn red — and at that very moment, the egg turned crimson.",
+            "The red color symbolizes the blood shed by Christ on the cross, while the cracking of the egg represents the opening of the Holy Tomb. Today, this tradition is a joyful reason for families to gather around the Easter table, whether Orthodox or Catholic."
+          ]
+        },
+        {
+          "title": "The Rules of the Game",
+          "icon": "📜",
+          "paragraphs": [
+            "There is a simple protocol, passed down through generations, for how Easter eggs should be cracked:"
+          ],
+          "rules": [
+            {"label": "Top to Top", "desc": "The rule for Easter Sunday — always start with the pointy ends."},
+            {"label": "Top to Bottom", "desc": "Allowed from the second day onwards."},
+            {"label": "Bottom to Bottom", "desc": "Reserved strictly for the third day of celebration."}
+          ],
+          "highlight": "The striker says \"Christ is Risen!\" and the other responds \"Indeed He is Risen!\" or simply \"Happy Easter!\""
+        },
+        {
+          "title": "The Meaning of Colors",
+          "icon": "🎨",
+          "paragraphs": ["While red is the most iconic Easter egg color, other colors each carry their own meaning:"],
+          "colors": [
+            {"color": "text-red-600", "label": "RED", "desc": "Symbol of Christ's sacrifice, divine love and life."},
+            {"color": "text-yellow-600", "label": "YELLOW", "desc": "Represents the light of the Resurrection and the warmth of spring."},
+            {"color": "text-blue-600", "label": "BLUE", "desc": "Symbolizes the sky, faith and the infinite spiritual world."},
+            {"color": "text-green-600", "label": "GREEN", "desc": "The color of spring, renewal and the hope of a new beginning."}
+          ]
+        },
+        {
+          "title": "How to Pick the Strongest Egg",
+          "icon": "🛡️",
+          "paragraphs": ["The secret to winning an egg duel lies in picking the right egg from the basket:"],
+          "tips": [
+            "Look for an egg with a pointier tip — force concentrates better on a smaller surface.",
+            "Tap it lightly against your teeth — a dense, sharp sound means a thick, tough shell.",
+            "Squeeze it gently in your hand — it should feel firm, with no hidden micro-cracks under the paint.",
+            "Grandmothers say: hens that eat more calcium lay eggs with thicker shells!"
+          ]
+        },
+        {
+          "title": "Easter Superstitions",
+          "icon": "✨",
+          "paragraphs": ["The egg cracking game is not just a competition — it's tied to beliefs about luck and health:"],
+          "tips": [
+            "Whoever has the egg that survives all duels at the table will be healthy and strong all year.",
+            "The first red egg is kept behind the icon until next Easter — it protects the home from misfortune.",
+            "If you find an egg with two yolks, double luck awaits you this year.",
+            "The shells of Easter eggs are never thrown away — tradition asks you to bury them in the garden for a good harvest."
+          ]
+        }
+      ],
+      "faq": [
+        {"q": "Why do we crack eggs at Easter?", "a": "The tradition is one of the oldest Christian customs. The red color symbolizes Christ's blood, and the cracking of the egg represents the opening of the Holy Tomb. Legend ties it to Mary Magdalene's encounter with Emperor Tiberius."},
+        {"q": "What are the rules for cracking eggs?", "a": "Start top-to-top on Easter Sunday. Top-to-bottom from the second day onwards. The striker says 'Christ is Risen!' and the other responds 'Indeed He is Risen!'"},
+        {"q": "What do the egg colors mean?", "a": "Red — symbol of Christ's blood. Yellow — light and abundance. Blue — sky and faith. Green — spring and hope."},
+        {"q": "How do I pick the strongest egg?", "a": "Look for a pointy tip, tap it lightly against your teeth for a dense sound, and squeeze it gently — it should feel firm, with no hidden cracks."},
+        {"q": "What superstitions surround Easter eggs?", "a": "The surviving egg brings health. The first red egg is kept behind the icon. Shells are buried in the garden for a good harvest."}
+      ],
+      "ctaOnline": "🥚 Crack eggs online"
+    },
+    "greetings": {
+      "pageTitle": "Easter Messages",
+      "pageHighlight": "and Greetings",
+      "pageSubtitle": "Copy a message and share the Easter joy on WhatsApp or Facebook.",
+      "shareFooter": "🥚 Come for an online egg battle on",
+      "copyTitle": "Copy Message",
+      "whatsappTitle": "Send on WhatsApp",
+      "categories": [
+        {
+          "title": "Traditional & Family",
+          "icon": "🕊️",
+          "messages": [
+            "May the Holy Light of the Resurrection bring you peace, joy and health. Happy Easter!",
+            "On this Holy Easter, I wish you abundant health, happiness and peace of heart. Christ is Risen!",
+            "Let us rejoice together in the Light of Easter and keep faith, hope and love alive in our hearts.",
+            "May your Easter be filled with blessings, love and warm moments with those you love.",
+            "I wish you a bright Easter with a full table and open hearts. Happy Easter to you and yours!",
+            "For everyone dear: may this Holy Easter bring you all that is best. Happy Easter!"
+          ]
+        },
+        {
+          "title": "Short & For SMS",
+          "icon": "📱",
+          "messages": [
+            "Happy Easter! 🥚",
+            "Joyful Easter and strong eggs! 🥚💪",
+            "Bright and joyful Easter! ✨",
+            "Christ is Risen! Many blessings! 🌟"
+          ]
+        },
+        {
+          "title": "Funny & For Friends",
+          "icon": "😄",
+          "messages": [
+            "Happy Easter! My egg survived — how's yours doing? 😏🥚",
+            "Happy Easter! If your egg lasts longer than mine, I'll admit defeat — but the rematch is on trosc.fun! 🥊🥚",
+            "It's not about who strikes first — it's about whose egg stays whole! Happy Easter! 💪",
+            "May your egg be hard as diamond and your luck even harder! Happy Easter!"
+          ]
+        },
+        {
+          "title": "Spiritual & Religious",
+          "icon": "✝️",
+          "messages": [
+            "Christ is Risen! May the light of the Resurrection guide our path and bring peace to our souls.",
+            "On this Holy day, let us remember that love and forgiveness are the greatest gifts. Happy Easter!",
+            "Thank God for the gift of the Resurrection, and carry hope and faith in our hearts. Blessed Easter!",
+            "As the red eggs remind us of the Savior's sacrifice, may His Resurrection fill our souls with light and grace."
+          ]
+        }
+      ],
+      "generatorTitle": "Greeting Generator",
+      "generatorSubtitle": "Enter a name and generate a personalized card.",
+      "generatorPlaceholder": "Person's name...",
+      "generatorButton": "Generate ✨",
+      "generatorCopy": "📋 Copy",
+      "generatorShare": "📲 Send on WhatsApp",
+      "generatorNext": "Another message ↻",
+      "templates": [
+        "Dear {name}, may the Holy Light of the Resurrection bring you peace, joy and health. Happy Easter!",
+        "{name}, I wish you a bright Easter filled with love and beautiful moments with those close to you.",
+        "For {name}: May the Holy day of Resurrection bring you blessings and hope. Christ is Risen!",
+        "Dear {name}, may the red eggs bring you luck and happiness all year. A wonderful Easter to you!"
+      ]
+    },
+    "dyeing": {
+      "pageTitle": "Natural Dyeing",
+      "pageHighlight": "of Easter Eggs",
+      "pageSubtitle": "Bright colors from natural ingredients, just as grandmothers have done for centuries.",
+      "sections": [
+        {
+          "title": "Traditional Red (Onion Skins)",
+          "icon": "🧅",
+          "paragraphs": ["The oldest and most widespread method. The deep red from onion skins is the color of an authentic Easter. Tradition says the first egg should be dyed red on Holy Thursday, with a wax cross drawn on it before dipping — that cross protects the home."],
+          "steps": [
+            "Collect the dry skins from 10–15 onions and boil them in 2 liters of water with 2 tablespoons of white vinegar for 30 minutes.",
+            "Strain the liquid and let it cool slightly.",
+            "Immerse the raw eggs (washed beforehand) and simmer gently for 10–12 minutes.",
+            "Take them out and let them dry. For shine, rub a tiny bit of oil over each egg with a soft cloth."
+          ]
+        },
+        {
+          "title": "Golden Yellow (Turmeric)",
+          "icon": "✨",
+          "paragraphs": ["A warm, bright yellow — simple and spectacular."],
+          "steps": [
+            "Dissolve 3–4 tablespoons of turmeric powder in 3 cups of hot water.",
+            "Add 2 tablespoons of white vinegar (it fixes the color better).",
+            "Immerse boiled, cooled eggs and leave for 2–3 hours. For deep yellow, leave overnight in the fridge."
+          ]
+        },
+        {
+          "title": "Pastel Blue (Red Cabbage)",
+          "icon": "💧",
+          "paragraphs": ["Surprisingly, red cabbage produces blue! The method is slow, but the result is magical."],
+          "steps": [
+            "Chop half a red cabbage and boil it in 4 cups of water for 45 minutes.",
+            "Remove the cabbage and add 2–3 tablespoons of vinegar to the purple-blue water.",
+            "Immerse boiled eggs and leave them for several hours (4–8) or overnight."
+          ]
+        },
+        {
+          "title": "Important Tips",
+          "icon": "💡",
+          "paragraphs": [],
+          "tips": [
+            "Always use vinegar — it fixes the color and prevents cracking.",
+            "White eggs absorb color much better than brown ones.",
+            "Let the eggs reach room temperature 30 minutes before boiling — it prevents cracking.",
+            "For patterns, press parsley leaves onto the egg and wrap in an old stocking before dyeing!"
+          ]
+        }
+      ],
+      "ctaOnline": "🥚 Crack eggs online"
+    },
+    "calendar": {
+      "pageTitle": "Easter",
+      "pageHighlight": "Calendar",
+      "pageSubtitle": "Find out when Easter falls between {startYear} and {endYear}",
+      "orthodox": "Orthodox",
+      "catholic": "Catholic",
+      "sameDay": "Same day",
+      "currentYear": "Current year",
+      "showMore": "📅 See upcoming years (until {year}) →",
+      "howTitle": "How is Easter calculated?",
+      "howIcon": "🌕",
+      "howParagraphs": [
+        "Ever wondered why Easter falls on a different date each year, unlike Christmas? The rule was set at the Council of Nicaea in AD 325.",
+        "Easter is always celebrated on the <strong class=\"text-red-400\">first Sunday after the first full moon</strong> that falls on or after the spring equinox (March 21).",
+        "The difference between Orthodox and Catholic Easter comes from the different calendars used. The Catholic Church uses the Gregorian calendar, while the Orthodox Church still calculates Easter using the older Julian calendar."
+      ],
+      "ctaOnline": "🥚 Crack eggs online"
+    },
+    "guide": {
+      "pageTitle": "Game",
+      "pageHighlight": "Guide",
+      "pageSubtitle": "Everything you need to know to crack Easter eggs online.",
+      "stepsLabel": "Step by Step",
+      "steps": [
+        {"title": "Pick a Nickname", "icon": "✏️", "desc": "Go to the homepage and type a nickname between 3 and 21 characters. It will show up in the leaderboard and game rooms.", "tip": "Pick something memorable — your opponents will see it!"},
+        {"title": "Customize Your Egg", "icon": "🎨", "desc": "Tap your egg to choose a color: Red, Blue, Gold or Green. Each color carries a unique traditional pattern.", "tip": "Color doesn't affect your odds — it's purely aesthetic."},
+        {"title": "Pick a Game Mode", "icon": "🎮", "desc": "You have three options: Play with a Friend (private room with code), Play with Anyone (public arena), or create a Group for multiple players.", "tip": null},
+        {"title": "Crack!", "icon": "💥", "desc": "When both players are in the room, the crack happens automatically. One egg breaks, the other survives. The result is random, like in real life!", "tip": "The striker says 'Christ is Risen!' and the other responds 'Indeed He is Risen!'"},
+        {"title": "Climb the Leaderboard", "icon": "🏆", "desc": "Every win counts! Your wins are automatically added to the global leaderboard.", "tip": null},
+        {"title": "Unlock Achievements", "icon": "🏅", "desc": "The game has 16 achievements to unlock — from your first win to 1000 wins. Check them on your profile page!", "tip": "Some achievements are secret — discover them yourself!"}
+      ],
+      "faqLabel": "Frequently Asked Questions",
+      "faq": [
+        {"q": "Is it free?", "a": "Yes, completely free. No ads, no in-app purchases."},
+        {"q": "Do I need to create an account?", "a": "No. Pick a nickname and start playing instantly. Your stats are saved in your browser."},
+        {"q": "Can I play on my phone?", "a": "Yes! It works on any phone, tablet or computer with a browser. You can even install it as an app."},
+        {"q": "How do I invite a friend?", "a": "Tap 'Play with a Friend', create a room and send the 4-character code to your friend."},
+        {"q": "What are groups?", "a": "Groups let you create a team with friends or family. You can challenge group members directly to duels."},
+        {"q": "How does the leaderboard work?", "a": "Every win adds a point to your personal score and to the global leaderboard. Top 10 players are displayed."}
+      ],
+      "ctaOnline": "🥚 Crack eggs online"
+    },
+    "recipes": {
+      "pageTitle": "Easter Recipes {year}",
+      "pageSubtitle": "{count} traditional recipes with variations, step by step, with tips and adjustable quantities.",
+      "searchPlaceholder": "Search recipe...",
+      "allFilter": "All",
+      "openRecipe": "Open recipe",
+      "backToRecipes": "← Back to recipes",
+      "shareRecipe": "📲 Share recipe",
+      "ingredients": "🥄 Ingredients",
+      "copyList": "📋 Copy list",
+      "copied": "✅ Copied!",
+      "preparationSteps": "Preparation Steps",
+      "steps": "steps",
+      "reset": "Reset",
+      "tapToCheck": "Tap a step to mark it as done",
+      "recipeDone": "Congratulations! The recipe is ready!",
+      "recipeDoneSubtitle": "Bon appétit and Happy Easter!",
+      "chefTips": "💡 Chef's Tips",
+      "adjustedFor": "Quantities adjusted for {servings} {unit} (×{multiplier})",
+      "kitchenMode": "Kitchen",
+      "healthyMode": "Healthy",
+      "healthyOn": "Healthy ON",
+      "healthyActive": "Healthy mode active",
+      "noResults": "No recipe found. Try a different search term.",
+      "easyDiff": "Easy",
+      "mediumDiff": "Medium",
+      "advancedDiff": "Advanced",
+      "filling": "Filling",
+      "prep": "Prep",
+      "cook": "Cook",
+      "total": "Total",
+      "servings": "Servings",
+      "calories": "Calories",
+      "ctaOnline": "🥚 Crack eggs online"
+    },
+    "clasament": {
+      "pageTitle": "Global Leaderboard",
+      "pageHighlight": "Egg Cracking",
+      "pageSubtitle": "Top players from around the world.",
+      "players": "Players",
+      "regions": "Regions",
+      "season": "Season",
+      "wins": "wins",
+      "winRate": "Win rate",
+      "share": "📲 Share",
+      "shareText": "I'm ranked #{rank} in the global Easter egg cracking leaderboard!",
+      "noData": "Loading leaderboard...",
+      "myStats": "My Stats",
+      "totalMatches": "Total matches",
+      "victories": "Wins",
+      "defeats": "Losses"
+    },
+    "profil": {
+      "pageTitle": "My Profile",
+      "stats": "Stats",
+      "totalMatches": "Matches",
+      "victories": "Wins",
+      "defeats": "Losses",
+      "winRate": "Win rate",
+      "achievements": "Achievements",
+      "achievementsCount": "{earned}/{total} unlocked",
+      "locked": "Locked",
+      "rarityCommon": "Common",
+      "rarityUncommon": "Uncommon",
+      "rarityRare": "Rare",
+      "rarityEpic": "Epic",
+      "rarityLegendary": "Legendary",
+      "noName": "Anonymous",
+      "setNameFirst": "Pick a nickname on the homepage to see your profile."
+    },
+    "despre": {
+      "pageTitle": "About",
+      "pageHighlight": "Trosc.fun",
+      "pageSubtitle": "The story behind the traditional Easter game, moved online.",
+      "sections": [
+        {
+          "title": "Our Mission",
+          "icon": "🎯",
+          "paragraphs": [
+            "Trosc.fun was born from a simple idea: <strong class=\"text-red-400\">bring the tradition of Easter egg cracking into the digital age</strong>, without losing its charm.",
+            "Whether you're far from family or just want to have fun with friends in a new way, we bring you the authentic Easter egg battle experience — directly in your browser, on any device."
+          ]
+        },
+        {
+          "title": "How It Works",
+          "icon": "⚙️",
+          "paragraphs": ["Every game simulates a real egg duel:"],
+          "list": [
+            "Pick a nickname and customize your egg (color).",
+            "Create a private room or enter the Arena to find an opponent.",
+            "The eggs crack in real time — one breaks, the other survives.",
+            "Your wins climb the global leaderboard."
+          ]
+        },
+        {
+          "title": "Tradition & Technology",
+          "icon": "🔧",
+          "paragraphs": ["We blend tradition with modern technology:"],
+          "features": [
+            {"label": "Real-time", "desc": "WebSocket for instant duels", "icon": "⚡"},
+            {"label": "PWA", "desc": "Installable on your phone as an app", "icon": "📱"},
+            {"label": "Leaderboards", "desc": "Top players updated live", "icon": "🏆"},
+            {"label": "Achievements", "desc": "16 achievements to unlock", "icon": "🏅"},
+            {"label": "Groups", "desc": "Create teams and challenge friends", "icon": "👥"},
+            {"label": "Themes", "desc": "Dark and light mode", "icon": "🎨"}
+          ]
+        }
+      ],
+      "ctaOnline": "🥚 Crack eggs online"
+    },
+    "terms": {
+      "pageTitle": "Terms of Service",
+      "lastUpdated": "Last updated",
+      "lastUpdatedDate": "April 11, 2026",
+      "backHome": "← Home",
+      "backToGame": "← Back to game",
+      "sections": [
+        {
+          "title": "1. Service Description",
+          "body": "<p>Trosc.fun is a free online game that simulates the traditional Easter egg cracking custom. It's available through any browser, without installation, on any device.</p>"
+        },
+        {
+          "title": "2. Use of Service",
+          "body": "<ul class=\"list-disc list-inside space-y-1 text-dim\"><li>The game is free and does not require registration with real personal data.</li><li>You pick a nickname to play with. It must not contain vulgar or offensive language.</li><li>Using the game for harassment, spam or any malicious activity is forbidden.</li></ul>"
+        },
+        {
+          "title": "3. User-Generated Content",
+          "body": "<p>Chat messages and nicknames are user-generated content. We reserve the right to automatically filter vulgar content and restrict access for users who break the rules.</p>"
+        },
+        {
+          "title": "4. Intellectual Property",
+          "body": "<p>The design, source code, graphics and content of Trosc.fun are the property of the Trosc.fun team. The Easter traditions described belong to shared cultural heritage.</p>"
+        },
+        {
+          "title": "5. Limitation of Liability",
+          "body": "<p>Trosc.fun is provided \"as is\". We don't guarantee permanent availability of the service. Game outcomes are random (50/50) and don't involve real winnings.</p>"
+        },
+        {
+          "title": "6. Changes",
+          "body": "<p>We reserve the right to modify these terms. Continued use of the service after changes constitutes acceptance of the new terms.</p>"
+        },
+        {
+          "title": "7. Contact",
+          "body": "<p>For questions, write to us at <a href=\"mailto:ciocnim@mail.com\" class=\"text-red-400 hover:text-red-300 transition-colors\">ciocnim@mail.com</a>.</p>"
+        }
+      ]
+    },
+    "privacy": {
+      "pageTitle": "Privacy Policy",
+      "lastUpdated": "Last updated",
+      "lastUpdatedDate": "April 11, 2026",
+      "backHome": "← Home",
+      "backToGame": "← Back to game",
+      "sections": [
+        {
+          "title": "1. What Data We Collect",
+          "body": "<p>Trosc.fun is a free Easter game. We collect the bare minimum of data, strictly necessary for the game to work:</p><ul class=\"list-disc list-inside space-y-1 text-dim\"><li><strong class=\"text-body\">Nickname</strong> — chosen by you, stored locally and on the server for leaderboards.</li><li><strong class=\"text-body\">Game stats</strong> — wins, losses, achievements.</li><li><strong class=\"text-body\">Anonymous identifier</strong> — a randomly generated ID for counting online users (contains no personal data).</li></ul>"
+        },
+        {
+          "title": "2. How We Use the Data",
+          "body": "<p>Data is used exclusively for:</p><ul class=\"list-disc list-inside space-y-1 text-dim\"><li>Running the real-time multiplayer game.</li><li>Displaying leaderboards and achievements.</li><li>Counting online users.</li></ul>"
+        },
+        {
+          "title": "3. Data Storage",
+          "body": "<p>Local data (nickname, settings, theme) is saved in your browser's <code class=\"text-red-400\">localStorage</code>. Leaderboard data is stored on secure servers (Upstash Redis) with TTL (automatic expiration).</p>"
+        },
+        {
+          "title": "4. Cookies and Similar Technologies",
+          "body": "<p>Trosc.fun uses <code class=\"text-red-400\">localStorage</code> to save your settings (theme, nickname, stats). We don't use tracking cookies or third-party analytics.</p>"
+        },
+        {
+          "title": "5. Data Sharing",
+          "body": "<p>We don't sell, share or transmit personal data to third parties. The services we use (Pusher for WebSocket, Vercel for hosting) process technical data according to their own privacy policies.</p>"
+        },
+        {
+          "title": "6. Your Rights (GDPR)",
+          "body": "<p>Under GDPR, you have the right to:</p><ul class=\"list-disc list-inside space-y-1 text-dim\"><li>Access your data — see your profile in the app.</li><li>Delete data — clear localStorage from your browser or contact us.</li><li>Rectify data — change your nickname at any time.</li></ul>"
+        },
+        {
+          "title": "7. Contact",
+          "body": "<p>For privacy questions, write to us at <a href=\"mailto:ciocnim@mail.com\" class=\"text-red-400 hover:text-red-300 transition-colors\">ciocnim@mail.com</a>.</p>"
+        }
+      ]
+    },
+    "achievements": {
+      "first_win":         { "name": "First Win",                 "desc": "Win your first match" },
+      "wins_10":           { "name": "Amateur Cracker",           "desc": "Win 10 matches" },
+      "wins_50":           { "name": "Experienced Cracker",       "desc": "Win 50 matches" },
+      "wins_100":          { "name": "Master of Eggs",            "desc": "Win 100 matches" },
+      "wins_500":          { "name": "Living Legend",             "desc": "Win 500 matches" },
+      "wins_1000":         { "name": "God of Cracking",           "desc": "Win 1000 matches" },
+      "first_group":       { "name": "Good Friend",               "desc": "Play your first match in a group" },
+      "group_wins_25":     { "name": "Group Hero",                "desc": "Win 25 matches in a group" },
+      "regional_champion": { "name": "Regional Champion",         "desc": "Reach first place in your region" },
+      "golden_egg":        { "name": "Golden Egg",                "desc": "Use a golden egg in a match" },
+      "chat_master":       { "name": "Word Master",               "desc": "Send 100 chat messages" },
+      "streak_5":          { "name": "No Rest",                   "desc": "Win 5 matches in a row" },
+      "streak_10":         { "name": "Living Flame",              "desc": "Win 10 matches in a row" },
+      "provocator":        { "name": "The Challenger",            "desc": "Challenge 50 players to a duel" },
+      "tradition_keeper":  { "name": "Tradition Keeper",          "desc": "Visit every educational page" },
+      "social_butterfly":  { "name": "Social Butterfly",          "desc": "Join 10 different groups" }
+    },
+    "pageMeta": {
+      "home": "Home",
+      "traditii": {
+        "breadcrumb": "Easter Traditions",
+        "title": "Easter Egg Cracking Traditions {year} – Rules, Meaning & Customs",
+        "description": "Why do we crack Easter eggs? Discover the meaning of the tradition in {year}, the colors of the eggs, the rules of the game, and Easter customs passed down through generations.",
+        "keywords": ["easter egg cracking traditions {year}", "meaning of egg cracking", "easter egg rules", "easter traditions", "easter customs", "why crack easter eggs", "red egg meaning", "orthodox easter traditions", "ancient easter customs", "easter {year}"],
+        "ogTitle": "Easter Egg Cracking Traditions {year} – Origins, Rules & Meaning",
+        "ogDescription": "Who has the strongest egg? Everything you need to know about the Easter egg cracking tradition — from origins to the rules of the Easter table.",
+        "ogAlt": "Easter Traditions – Trosc.fun",
+        "twitterTitle": "Easter Egg Cracking Traditions {year} | Trosc.fun",
+        "twitterDescription": "Discover why we crack eggs, what the colors mean and how to win at the Easter table."
+      },
+      "retete": {
+        "breadcrumb": "Easter Recipes",
+        "title": "Traditional Easter Recipes – Cakes, Breads, Lamb & More",
+        "description": "The best traditional Easter recipes: fluffy sweet bread, lamb roast, cheese cakes. Step by step, with scalable ingredients and prep times.",
+        "keywords": ["easter recipes", "traditional easter food", "easter bread recipe", "easter lamb recipe", "easter menu", "easter baking", "simnel cake", "hot cross buns", "easter dishes", "easter sunday menu"],
+        "ogTitle": "Traditional Easter Recipes – Cakes, Breads, Lamb & More",
+        "ogDescription": "The classic Easter table: sweet breads, lamb, cheese cakes. Complete step-by-step guide.",
+        "ogAlt": "Easter Recipes – Trosc.fun",
+        "twitterTitle": "Easter Recipes | Trosc.fun",
+        "twitterDescription": "Traditional Easter recipes: sweet bread, lamb, cheese cake. Step by step!"
+      },
+      "urari": {
+        "breadcrumb": "Easter Greetings",
+        "title": "Easter Messages and Greetings {year} – Beautiful, Short & Ready to Send",
+        "description": "The most beautiful Easter messages {year} for family and friends. Copy and send traditional and modern greetings on WhatsApp, Instagram or Facebook. Happy Easter!",
+        "keywords": ["easter messages {year}", "easter greetings", "happy easter messages", "easter whatsapp messages", "short easter messages", "easter cards", "traditional easter greetings", "beautiful easter texts", "easter family messages", "easter status {year}"],
+        "ogTitle": "Easter Messages and Greetings {year} – Copy & Send Instantly",
+        "ogDescription": "Find the perfect Easter message {year} for your loved ones. Short, beautiful, heartfelt — ready to send on WhatsApp or Instagram.",
+        "ogAlt": "Easter Greetings – Trosc.fun",
+        "twitterTitle": "Easter Messages {year} – The Most Beautiful Greetings | Trosc.fun",
+        "twitterDescription": "Copy your Easter greetings and share the light with those you love. Happy Easter!"
+      },
+      "vopsit-natural": {
+        "breadcrumb": "Natural Egg Dyeing",
+        "title": "How to Dye Eggs Naturally {year} – Onion, Turmeric & Red Cabbage Recipes",
+        "description": "Complete step-by-step guide to dyeing eggs naturally at home in {year}, without chemicals. Red with onion skins, yellow with turmeric, blue with red cabbage. Grandma's recipes.",
+        "keywords": ["natural egg dyeing", "onion skin red eggs", "how to dye eggs at home", "turmeric egg dyeing", "red cabbage eggs", "natural easter eggs", "egg dye recipes {year}", "chemical free eggs", "easter egg tradition", "natural egg colors {year}"],
+        "ogTitle": "How to Dye Eggs Naturally – Complete Easter {year} Guide",
+        "ogDescription": "Grandma's secret: red eggs with onion skins, yellow with turmeric, blue with red cabbage. No chemicals, 100% natural!",
+        "ogAlt": "Natural Egg Dyeing – Trosc.fun",
+        "twitterTitle": "Natural Egg Dyeing {year} – Traditional Recipes Without Chemicals | Trosc.fun",
+        "twitterDescription": "Red eggs with onion skins, yellow with turmeric, blue with cabbage. Complete guide for Easter {year}."
+      },
+      "calendar": {
+        "breadcrumb": "Easter Calendar",
+        "title": "When is Easter in {year}, {year1}, {year2}? – Orthodox & Catholic Calendar",
+        "description": "The complete calendar of Orthodox and Catholic Easter until {year4}. Learn why the date changes each year, how it's calculated, and when both Easters fall on the same weekend.",
+        "keywords": ["when is easter {year}", "orthodox easter date {year}", "catholic easter {year}", "easter calendar", "easter date calculator", "easter {year1} date", "easter {year2} same day", "holy week {year}", "orthodox and catholic easter", "easter dates {year}"],
+        "ogTitle": "Easter Calendar {year}–{year4} – Orthodox & Catholic",
+        "ogDescription": "Check exactly when Easter falls each year and discover why the date changes. Complete Orthodox and Catholic calendar.",
+        "ogAlt": "Easter Calendar – Trosc.fun",
+        "twitterTitle": "When is Easter? Orthodox & Catholic Calendar {year}–{year4} | Trosc.fun",
+        "twitterDescription": "The exact Orthodox and Catholic Easter date for {year}, {year1}, {year2}, {year3} and {year4}."
+      },
+      "ghid": {
+        "breadcrumb": "Game Guide",
+        "title": "Game Guide – How to Play Egg Cracking Online",
+        "description": "Complete guide to playing egg cracking online on Trosc.fun. How to play, how to win, how to create groups, and how to unlock achievements.",
+        "keywords": ["how to play egg cracking online", "trosc guide", "easter egg game rules", "how to win egg cracking", "easter egg game online", "egg cracking rules"],
+        "ogTitle": "Game Guide – Trosc.fun",
+        "ogDescription": "Learn to play egg cracking online: rules, tricks and step-by-step guide.",
+        "ogAlt": "Game Guide – Trosc.fun",
+        "twitterTitle": "Egg Cracking Guide Online | Trosc.fun",
+        "twitterDescription": "Rules, tricks and step-by-step guide for the online egg cracking game."
+      },
+      "clasament": {
+        "breadcrumb": "Global Leaderboard",
+        "title": "Global Egg Cracking Leaderboard {year} – Top Players",
+        "description": "The complete leaderboard of the best egg cracking players for Easter {year}. See who dominates the competition on trosc.fun!",
+        "keywords": ["egg cracking leaderboard {year}", "top easter players", "easter leaderboard online", "best egg crackers", "global easter ranking"],
+        "ogTitle": "Global Egg Cracking Leaderboard {year} – Trosc.fun",
+        "ogDescription": "Top players for online egg cracking, Easter {year}.",
+        "ogAlt": "Leaderboard – Trosc.fun",
+        "twitterTitle": "Egg Cracking Leaderboard {year} | Trosc.fun",
+        "twitterDescription": "Who has the strongest egg in the world? See the global leaderboard."
+      },
+      "despre": {
+        "breadcrumb": "About",
+        "title": "About Trosc.fun",
+        "description": "The story of Trosc.fun — how the traditional egg cracking game moved online. The team, the mission and the technology behind the project.",
+        "keywords": ["about trosc", "trosc story", "who we are", "trosc team"],
+        "ogTitle": "About Trosc.fun – Our Story",
+        "ogDescription": "How we turned the tradition of egg cracking into an online game for the whole family.",
+        "ogAlt": "About – Trosc.fun",
+        "twitterTitle": "About Trosc.fun",
+        "twitterDescription": "The story behind the traditional Easter game, moved online."
+      },
+      "profil": {
+        "breadcrumb": "My Profile",
+        "title": "My Profile – Stats and Achievements | Trosc.fun",
+        "description": "See your achievements, match stats and badges earned in the Easter egg cracking game {year}. Trosc.fun - Keeping the tradition alive.",
+        "keywords": [],
+        "ogTitle": "My Profile – Trosc.fun",
+        "ogDescription": "Stats and achievements for online egg cracking.",
+        "ogAlt": "Profile – Trosc.fun",
+        "twitterTitle": "My Profile | Trosc.fun",
+        "twitterDescription": "Stats and achievements for online egg cracking."
+      },
+      "privacy": {
+        "breadcrumb": "Privacy",
+        "title": "Privacy Policy | Trosc.fun",
+        "description": "Trosc.fun privacy policy — how we collect and use data, GDPR compliance, user rights.",
+        "keywords": [],
+        "ogTitle": "Privacy Policy | Trosc.fun",
+        "ogDescription": "How we collect and use data, GDPR compliance.",
+        "ogAlt": "Privacy – Trosc.fun",
+        "twitterTitle": "Privacy Policy | Trosc.fun",
+        "twitterDescription": "How we collect and use data, GDPR compliance."
+      },
+      "terms": {
+        "breadcrumb": "Terms of Service",
+        "title": "Terms of Service | Trosc.fun",
+        "description": "The terms and conditions for using Trosc.fun — game rules, responsibilities and rights.",
+        "keywords": [],
+        "ogTitle": "Terms of Service | Trosc.fun",
+        "ogDescription": "Game rules, responsibilities and rights.",
+        "ogAlt": "Terms – Trosc.fun",
+        "twitterTitle": "Terms of Service | Trosc.fun",
+        "twitterDescription": "Game rules, responsibilities and rights."
+      }
+    }
+  }
+}

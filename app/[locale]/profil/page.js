@@ -49,7 +49,7 @@ export default function ProfilPage() {
         const res = await fetch('/api/ciocnire', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actiune: 'get-achievements', jucator: nume })
+          body: JSON.stringify({ actiune: 'get-achievements', jucator: nume, locale })
         });
         const data = await res.json();
         if (data.success) setAchievements(data.achievements || []);
@@ -57,7 +57,7 @@ export default function ProfilPage() {
       setLoading(false);
     };
     fetchAchievements();
-  }, [isHydrated, nume]);
+  }, [isHydrated, nume, locale]);
 
   if (!isHydrated) return null;
 
@@ -79,7 +79,7 @@ export default function ProfilPage() {
           <h1 className="text-3xl md:text-4xl font-black text-heading">
             {nume || t('content.profil.noName')}
           </h1>
-          {userStats.regiune && userStats.regiune !== "Alege regiunea..." && (
+          {userStats.regiune && userStats.regiune !== "Alege regiunea..." && locale !== 'en' && (
             <p className="text-sm font-bold text-red-400">{userStats.regiune}</p>
           )}
         </header>

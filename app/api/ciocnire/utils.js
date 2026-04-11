@@ -20,9 +20,20 @@ export function getClientIp(request) {
     || 'unknown';
 }
 
-export function getNamespace(request) {
+const VALID_LOCALES = ['ro', 'bg', 'el', 'en'];
+
+/**
+ * Returns the Redis namespace based on body.locale.
+ * Each locale has its own isolated namespace:
+ *   - ciocnim.ro serves only 'ro'
+ *   - trosc.fun serves 'bg', 'el', 'en'
+ * Fallback: if body.locale is missing/invalid, derive from host.
+ */
+export function getNamespace(request, bodyLocale) {
+  if (VALID_LOCALES.includes(bodyLocale)) return bodyLocale;
+  // Fallback for requests without locale in body
   const host = request.headers.get('host') || '';
-  return host.includes('trosc.fun') ? 'intl' : 'ro';
+  return host.includes('trosc.fun') ? 'en' : 'ro';
 }
 
 export async function checkRateLimit(ip, actiune, ns = 'ro') {
@@ -38,3 +49,5 @@ export async function checkRateLimit(ip, actiune, ns = 'ro') {
   const current = await redis.eval(luaScript, 1, key, windowSec);
   return current <= maxRequests;
 }
+
+export { VALID_LOCALES };

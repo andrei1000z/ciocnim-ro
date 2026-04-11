@@ -126,24 +126,29 @@ function LoadingScreen() {
 const emptySubscribe = () => () => {};
 
 // Client-side namespace must match server-side getNamespace() in app/api/ciocnire/utils.js
-// ciocnim.ro → 'ro', trosc.fun → 'intl'
-export function getClientNamespace() {
-  if (typeof window === 'undefined') return 'ro';
-  return window.location.host.includes('trosc.fun') ? 'intl' : 'ro';
+// Per-locale: ro/bg/el/en are each isolated in Redis.
+const VALID_LOCALES = ['ro', 'bg', 'el', 'en'];
+export function getClientNamespace(locale) {
+  return VALID_LOCALES.includes(locale) ? locale : 'ro';
 }
 
 /**
  * Returnează regiunea default pe baza locale-ului curent.
  * Folosită pentru inițializarea user-ului neînregistrat.
+ * Pentru `en` (international) nu avem regiuni — folosim "Global".
  */
 function getDefaultRegion(locale) {
   if (locale === 'bg') return 'София-град';
   if (locale === 'el') return 'Αττική';
+  if (locale === 'en') return 'Global';
   return 'Muntenia';
 }
 
 function buildDefaultStats(locale) {
-  return { nume: "", wins: 0, losses: 0, skin: "red", regiune: getDefaultRegion(locale) };
+  const base = { nume: "", wins: 0, losses: 0, skin: "red", regiune: getDefaultRegion(locale) };
+  // On /en we skip the region selector entirely
+  if (locale === 'en') base.regiuneSet = true;
+  return base;
 }
 
 // Data version — bump this to wipe all localStorage on next visit
@@ -265,10 +270,10 @@ export default function ClientWrapper({ children }) {
       await fetch('/api/ciocnire', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actiune: 'update-stats', jucator: nume, text: type })
+        body: JSON.stringify({ actiune: 'update-stats', jucator: nume, text: type, locale })
       });
     } catch (e) {}
-  }, [nume]);
+  }, [nume, locale]);
 
   // ==========================================================================
   // SCHIMBARE NUME (FIX PENTRU DUPLICATE ÎN GRUP)
@@ -291,7 +296,8 @@ export default function ClientWrapper({ children }) {
           actiune: 'schimba-porecla',
           oldName: nume,
           newName: cleanName,
-          teamIds: storedTeamIds
+          teamIds: storedTeamIds,
+          locale
         })
       });
       const data = await res.json();
@@ -314,7 +320,7 @@ export default function ClientWrapper({ children }) {
       setToastMsg(t('notifications.errorNetwork'));
       return false;
     }
-  }, [nume, setToastMsg, t]);
+  }, [nume, setToastMsg, t, locale]);
 
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)
@@ -328,7 +334,8 @@ export default function ClientWrapper({ children }) {
         jucator: nume,
         regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
         teamId: amCastigat ? teamIdToUpdate : null,
-        roomId: roomId
+        roomId: roomId,
+        locale
       };
 
       const res = await fetch('/api/ciocnire', {
@@ -352,7 +359,7 @@ export default function ClientWrapper({ children }) {
     } catch {
       setToastMsg(t('notifications.unstableConnection'));
     }
-  }, [userStats.regiune, nume, updateUserStats, t]);
+  }, [userStats.regiune, nume, updateUserStats, t, locale]);
 
   // HEARTBEAT: ping la fiecare 120s pentru a număra utilizatorii activi
   useEffect(() => {
@@ -372,7 +379,7 @@ export default function ClientWrapper({ children }) {
         const res = await fetch('/api/ciocnire', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actiune: 'arena-heartbeat', visitorId: visitorIdRef.current })
+          body: JSON.stringify({ actiune: 'arena-heartbeat', visitorId: visitorIdRef.current, locale })
         });
         const data = await res.json();
         if (data.success && typeof data.online === 'number') setOnlineCount(data.online);
@@ -380,7 +387,7 @@ export default function ClientWrapper({ children }) {
     };
     const sendDisconnect = () => {
       try {
-        const payload = JSON.stringify({ actiune: 'arena-disconnect', visitorId: visitorIdRef.current });
+        const payload = JSON.stringify({ actiune: 'arena-disconnect', visitorId: visitorIdRef.current, locale });
         if (navigator.sendBeacon) {
           navigator.sendBeacon('/api/ciocnire', new Blob([payload], { type: 'application/json' }));
         } else {
@@ -408,12 +415,12 @@ export default function ClientWrapper({ children }) {
       window.removeEventListener('pagehide', sendDisconnect);
       sendDisconnect();
     };
-  }, [isHydrated]);
+  }, [isHydrated, locale]);
 
   useEffect(() => {
     const getInitialData = async () => {
       try {
-        const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'get-counter' }) });
+        const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'get-counter', locale }) });
         const data = await res.json();
         if (data.success) {
           setTotalGlobal(parseInt(data.total) || 0);
@@ -424,7 +431,7 @@ export default function ClientWrapper({ children }) {
       } catch (err) {}
     };
     getInitialData();
-  }, []);
+  }, [locale]);
 
   // Sync stats from server when user has a name (handles new device / cleared localStorage)
   useEffect(() => {
@@ -433,7 +440,7 @@ export default function ClientWrapper({ children }) {
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actiune: 'get-user-stats', jucator: nume })
+          body: JSON.stringify({ actiune: 'get-user-stats', jucator: nume, locale })
         });
         const data = await res.json();
         if (data.success && data.stats) {
@@ -447,12 +454,12 @@ export default function ClientWrapper({ children }) {
         }
       } catch {}
     })();
-  }, [isHydrated, nume, updateUserStats]);
+  }, [isHydrated, nume, updateUserStats, locale]);
 
   useEffect(() => {
     if (!isHydrated || !pusherRef.current) return;
 
-    const ns = getClientNamespace();
+    const ns = getClientNamespace(locale);
     const globalChName = `${ns}-global`;
     const channel = pusherRef.current.subscribe(globalChName);
     channel.bind('update-complet', (data) => {
@@ -468,12 +475,12 @@ export default function ClientWrapper({ children }) {
       channel.unbind_all();
       pusherRef.current?.unsubscribe(globalChName);
     };
-  }, [isHydrated]);
+  }, [isHydrated, locale]);
 
   useEffect(() => {
     if (!isHydrated || !nume || !pusherRef.current) return;
 
-    const ns = getClientNamespace();
+    const ns = getClientNamespace(locale);
     const channelName = `${ns}-user-notif-${nume}`;
     const channel = pusherRef.current.subscribe(channelName);
     let notifTimer = null;
@@ -509,7 +516,7 @@ export default function ClientWrapper({ children }) {
       channel.unbind_all();
       pusherRef.current?.unsubscribe(channelName);
     };
-  }, [isHydrated, nume, playSound, triggerVibrate]);
+  }, [isHydrated, nume, locale, playSound, triggerVibrate]);
 
   const contextValue = {
     totalGlobal,

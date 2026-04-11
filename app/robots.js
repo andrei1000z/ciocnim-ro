@@ -13,7 +13,7 @@ export default async function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/ro/joc/', '/bg/joc/', '/el/joc/'],
+        disallow: ['/api/', '/ro/joc/', '/bg/joc/', '/el/joc/', '/en/play/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

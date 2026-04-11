@@ -27,13 +27,13 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ciocnim.ro = doar RO (niciun selector). trosc.fun = doar BG și EL.
+  // ciocnim.ro = doar RO (niciun selector). trosc.fun = EN (default), BG, EL.
   const visibleLocales = useMemo(() => {
-    return isIntl ? ["bg", "el"] : [];
+    return isIntl ? ["en", "bg", "el"] : [];
   }, [isIntl]);
 
   const switchLocale = (newLocale) => {
-    const pathWithoutLocale = pathname.replace(/^\/(ro|bg|el)/, "");
+    const pathWithoutLocale = pathname.replace(/^\/(ro|bg|el|en)/, "");
     window.location.href = `/${newLocale}${pathWithoutLocale}`;
     setOpen(false);
   };

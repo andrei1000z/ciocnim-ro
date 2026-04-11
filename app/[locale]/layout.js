@@ -69,11 +69,12 @@ export async function generateMetadata({ params }) {
     alternates: {
       canonical: `${baseUrl}/${locale}`,
       languages: {
-        // RO trăiește pe ciocnim.ro, BG/EL pe trosc.fun
+        // RO trăiește pe ciocnim.ro, EN/BG/EL pe trosc.fun
         'ro': `${DOMAINS.ro}/ro`,
+        'en': `${DOMAINS.intl}/en`,
         'bg': `${DOMAINS.intl}/bg`,
         'el': `${DOMAINS.intl}/el`,
-        'x-default': `${DOMAINS.ro}/ro`,
+        'x-default': `${DOMAINS.intl}/en`,
       },
     },
     robots: {

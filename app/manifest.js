@@ -7,11 +7,11 @@ export default async function manifest() {
 
   if (isIntl) {
     return {
-      name: 'Trosc.fun – Чукай Яйца Онлайн за Великден',
+      name: 'Trosc.fun – Easter Egg Battle Online',
       short_name: 'Trosc.fun',
-      description: 'Великденската игра онлайн! Чукай яйца с приятели, качвай се в класацията. Безплатно, на всеки телефон.',
+      description: 'The Easter egg cracking game, online! Play with friends around the world, climb the global leaderboard. Free, on any phone.',
       id: '/',
-      start_url: '/bg',
+      start_url: '/en',
       scope: '/',
       display: 'standalone',
       background_color: '#0c0a0a',
@@ -25,14 +25,14 @@ export default async function manifest() {
       ],
       shortcuts: [
         {
-          name: 'Играй Сега',
-          short_name: 'Играй',
-          url: '/bg?autoArena=true',
-          description: 'Чукай яйца с някого от България',
+          name: 'Play Now',
+          short_name: 'Play',
+          url: '/en?autoArena=true',
+          description: 'Crack Easter eggs with someone online',
           icons: [{ src: '/apple-touch-icon.png', sizes: '180x180' }],
         },
-        { name: 'Класация', short_name: 'Класация', url: '/bg/clasament', description: 'Виж националната класация' },
-        { name: 'Великденски Рецепти', short_name: 'Рецепти', url: '/bg/retete', description: 'Традиционни великденски рецепти' },
+        { name: 'Leaderboard', short_name: 'Leaderboard', url: '/en/leaderboard', description: 'Global leaderboard' },
+        { name: 'Easter Recipes', short_name: 'Recipes', url: '/en/recipes', description: 'Traditional Easter recipes' },
       ],
     };
   }

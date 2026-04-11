@@ -271,7 +271,7 @@ function ArenaMaster({ room }) {
         body: JSON.stringify({
           roomId: room, actiune: 'join', jucator: nume,
           skin: me.skin, hasStar: me.hasStar,
-          hostToken, regiune: regiuneRef.current
+          hostToken, regiune: regiuneRef.current, locale
         })
       });
       const data = await res.json();
@@ -286,7 +286,7 @@ function ArenaMaster({ room }) {
       }
     } catch {}
     if (me.hasStar) updateStats('star');
-  }, [room, nume, me, updateStats, router]);
+  }, [room, nume, me, updateStats, router, locale]);
 
   // POLLING FALLBACK — discover opponents via Redis when WebSocket is unreliable
   // Slower interval when Pusher is connected (fallback only), faster when disconnected
@@ -300,14 +300,15 @@ function ArenaMaster({ room }) {
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actiune: 'get-room-players', roomId: room })
+          body: JSON.stringify({ actiune: 'get-room-players', roomId: room, locale })
         });
         const data = await res.json();
         if (data.success && data.players) {
           const otherPlayer = data.players.find(p => p !== nume.toUpperCase());
           if (otherPlayer && !opponentRef.current) {
             const sd = data.skinData?.[otherPlayer] || {};
-            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', hasStar: sd.hasStar || false, regiune: sd.regiune || (locale === 'bg' ? 'България' : 'România') };
+            const defaultOppRegion = locale === 'bg' ? 'България' : locale === 'el' ? 'Ελλάδα' : locale === 'en' ? 'Global' : 'România';
+            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', hasStar: sd.hasStar || false, regiune: sd.regiune || defaultOppRegion };
             setOpponent(oppData);
             opponentRef.current = oppData;
             setAtacantName(prev => {
@@ -339,7 +340,7 @@ function ArenaMaster({ room }) {
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actiune: 'get-room-lovitura', roomId: room })
+          body: JSON.stringify({ actiune: 'get-room-lovitura', roomId: room, locale })
         });
         const data = await res.json();
         if (data.success && data.lovitura) {
@@ -362,7 +363,7 @@ function ArenaMaster({ room }) {
       try {
         const res = await fetch('/api/ciocnire', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actiune: 'get-room-revansa', roomId: room })
+          body: JSON.stringify({ actiune: 'get-room-revansa', roomId: room, locale })
         });
         const data = await res.json();
         if (data.success) {
@@ -394,13 +395,14 @@ function ArenaMaster({ room }) {
 
     const botTimeout = setTimeout(() => {
       if (isArenaRoom) {
-        fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
+        fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room, locale }) });
       }
       setIsBotMatch(true);
       const botName = "🤖 BOT";
       const culoriDisponibile = ['red', 'blue', 'gold', 'green'];
       const randomSkin = culoriDisponibile[Math.floor(Math.random() * culoriDisponibile.length)];
-      setOpponent({ jucator: botName, skin: randomSkin, isGolden: false, hasStar: false, regiune: locale === 'bg' ? 'България' : 'România' });
+      const botRegion = locale === 'bg' ? 'България' : locale === 'el' ? 'Ελλάδα' : locale === 'en' ? 'Global' : 'România';
+      setOpponent({ jucator: botName, skin: randomSkin, isGolden: false, hasStar: false, regiune: botRegion });
       const botLoveseste = Math.random() > 0.5;
       setAtacantName(botLoveseste ? botName : nume);
     }, waitTime);
@@ -424,7 +426,7 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (isBotMatch || !pusherRef?.current) return;
     const pusher = pusherRef.current;
-    const ns = (typeof window !== 'undefined' && window.location.host.includes('trosc.fun')) ? 'intl' : 'ro';
+    const ns = locale; // per-locale Redis/Pusher namespace (ro/bg/el/en)
     const arenaChannelName = `${ns}-arena-v22-${room}`;
     const arenaChannel = pusher.subscribe(arenaChannelName);
 
@@ -445,7 +447,7 @@ function ArenaMaster({ room }) {
         // Scoate camera din coada de matchmaking (o singură dată, doar host-ul)
         if (isHostRef.current && room.startsWith('arena-') && !matchmakingCancelledRef.current) {
           matchmakingCancelledRef.current = true;
-          fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room }) });
+          fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room, locale }) });
         }
 
         // Set attacker only ONCE — guard și pentru "" (stale closure cu nome gol)
@@ -616,7 +618,7 @@ function ArenaMaster({ room }) {
     // Clear stale Redis keys so lovitura/revansa-ok can't re-trigger next round
     fetch('/api/ciocnire', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomId: room, actiune: 'clear-round' })
+      body: JSON.stringify({ roomId: room, actiune: 'clear-round', locale })
     }).catch(() => {});
   };
   resetForRevansaRef.current = resetForRevansa;
@@ -638,7 +640,7 @@ function ArenaMaster({ room }) {
           const res = await fetch('/api/ciocnire', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomId: room, actiune: 'lovitura', jucator: nume, atacant: nume })
+            body: JSON.stringify({ roomId: room, actiune: 'lovitura', jucator: nume, atacant: nume, locale })
           });
           const data = await res.json();
           if (data.success && data.castigaCelCareDa !== undefined) {
@@ -653,7 +655,7 @@ function ArenaMaster({ room }) {
       // B5: always clear pending flag, regardless of sync/async path or thrown errors
       strikePendingRef.current = false;
     }
-  }, [canStrike, isBotMatch, nume, room]);
+  }, [canStrike, isBotMatch, nume, room, locale]);
 
   useEffect(() => {
     if (!canStrike) return;
@@ -694,7 +696,7 @@ function ArenaMaster({ room }) {
       fetch('/api/ciocnire', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: msg })
+          body: JSON.stringify({ roomId: room, actiune: 'arena-chat', jucator: nume, text: msg, locale })
       });
       setChatInput("");
       updateStats('message');
@@ -708,7 +710,7 @@ function ArenaMaster({ room }) {
     // Server stores request in Redis + auto-detects when both players want revansa
     fetch('/api/ciocnire', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume })
+      body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume, locale })
     }).then(r => r.json()).then(data => {
       if (data.revansaOk) resetForRevansaRef.current?.();
     }).catch(() => {});

@@ -4,6 +4,7 @@ import { memo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { useT } from "@/app/i18n/useT";
+import { useLocaleConfig } from "./DictionaryProvider";
 
 const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   const [roomCode, setRoomCode] = useState("");
@@ -11,6 +12,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   const [isJoining, setIsJoining] = useState(false);
   const [roomError, setRoomError] = useState("");
   const t = useT();
+  const { locale } = useLocaleConfig();
 
   useEffect(() => {
     if (isOpen) { document.body.style.overflow = "hidden"; setRoomError(""); }
@@ -23,7 +25,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   const createRoom = async () => {
     setIsCreating(true);
     try {
-      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'creeaza-camera-privata', gameMode: 'classic' }) });
+      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'creeaza-camera-privata', gameMode: 'classic', locale }) });
       if (!res.ok) { setRoomError(t('playModal.serverError')); return; }
       const data = await res.json();
       if (data.success) {
@@ -41,7 +43,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
     if (roomCode.length !== 4) { setRoomError(t('playModal.code4chars')); return; }
     setIsJoining(true); setRoomError("");
     try {
-      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'check-room', cod: roomCode }) });
+      const res = await fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'check-room', cod: roomCode, locale }) });
       if (!res.ok) { setRoomError(t('playModal.serverError')); return; }
       const data = await res.json();
       if (!data.success) { setRoomError(data.error || t('playModal.roomOccupied')); }

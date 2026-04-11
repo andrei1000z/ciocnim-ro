@@ -1,4 +1,4 @@
-export const locales = ['ro', 'bg', 'el'];
+export const locales = ['ro', 'bg', 'el', 'en'];
 export const defaultLocale = 'ro';
 
 /**
@@ -55,6 +55,20 @@ export const SLUG_MAP = {
     terms: 'oroi',
     profil: 'profil',
     joc: 'paichnidi',
+  },
+  en: {
+    traditii: 'traditions',
+    retete: 'recipes',
+    urari: 'greetings',
+    'vopsit-natural': 'natural-dyeing',
+    calendar: 'calendar',
+    ghid: 'guide',
+    clasament: 'leaderboard',
+    despre: 'about',
+    privacy: 'privacy',
+    terms: 'terms',
+    profil: 'profile',
+    joc: 'play',
   },
 };
 
@@ -142,6 +156,22 @@ export const localeConfig = {
     currency: 'EUR',
     gameName: 'Τσούγκρισμα',
     shareText: 'Πάμε να τσουγκρίσουμε αβγά! 🥚⚔️',
+  },
+  en: {
+    name: 'English',
+    flag: '\u{1F310}',
+    easterType: 'both',
+    defaultEggSkin: 'red',
+    greetingWin: 'Happy Easter!',
+    greetingLose: 'Happy Easter!',
+    defaultRegion: 'Global',
+    regions: [],
+    leaderboardKey: 'EN',
+    domain: 'trosc.fun/en',
+    ogLocale: 'en_US',
+    currency: 'USD',
+    gameName: 'Trosc',
+    shareText: 'Come crack Easter eggs online! 🥚⚔️',
   },
 };
 

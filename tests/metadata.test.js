@@ -102,7 +102,7 @@ describe('manifest.js (dynamic)', () => {
   it('has required PWA fields for both domains', () => {
     expect(manifestContent).toContain('start_url');
     expect(manifestContent).toContain('/ro');
-    expect(manifestContent).toContain('/bg');
+    expect(manifestContent).toContain('/en');
     expect(manifestContent).toContain('display');
     expect(manifestContent).toContain('standalone');
   });

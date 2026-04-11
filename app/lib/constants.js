@@ -36,8 +36,8 @@ export const BASE_URL = PRIMARY_DOMAIN_RO;
 
 /**
  * Helper client-side: returnează URL-ul corect pe baza locale-ului.
- * RO trăiește pe ciocnim.ro, BG/EL pe trosc.fun.
+ * RO trăiește pe ciocnim.ro, EN/BG/EL pe trosc.fun.
  */
 export function getSiteUrl(locale) {
-  return locale === 'bg' || locale === 'el' ? PRIMARY_DOMAIN_INTL : PRIMARY_DOMAIN_RO;
+  return (locale === 'bg' || locale === 'el' || locale === 'en') ? PRIMARY_DOMAIN_INTL : PRIMARY_DOMAIN_RO;
 }

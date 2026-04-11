@@ -57,7 +57,7 @@ export async function buildPageMetadata({ locale, slugKey, metaKey, noindex = fa
     const domain = l === 'ro' ? DOMAINS.ro : DOMAINS.intl;
     languages[l] = `${domain}/${l}/${localizeSlug(slugKey, l)}`;
   }
-  languages['x-default'] = `${DOMAINS.ro}/ro/${localizeSlug(slugKey, 'ro')}`;
+  languages['x-default'] = `${DOMAINS.intl}/en/${localizeSlug(slugKey, 'en')}`;
 
   const metadata = {
     title: noindex ? { absolute: title } : title,
