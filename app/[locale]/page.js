@@ -13,7 +13,6 @@ import { safeLS, safeCopy } from "../lib/utils";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
 import { localeConfig } from "../i18n/config";
-import { findRegionMatch } from "../lib/regionMatcher";
 import LocaleLink from "../components/LocaleLink";
 
 const fadeUp = (delay = 0, reduced = false) => reduced ? {} : ({
@@ -417,76 +416,6 @@ function HomeContent() {
                   )}
                 </AnimatePresence>
               </div>
-              <button
-                onClick={() => {
-                  // CRITIC: getCurrentPosition trebuie apelat SINCRON din user gesture.
-                  // NU folosim async/await ÎNAINTE de getCurrentPosition — altfel
-                  // Chrome pierde contextul user gesture și NU mai arată prompt-ul nativ.
-                  if (!navigator.geolocation) {
-                    setToastMsg("Browserul nu suportă locația");
-                    return;
-                  }
-
-                  setToastMsg("Permite locația în pop-up-ul browserului...");
-
-                  // APEL SINCRON — Chrome arată acum pop-up-ul nativ "Allow location"
-                  navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                      setToastMsg("Caut regiunea exactă...");
-                      try {
-                        // Reverse geocoding precis cu Nominatim (zoom 10 = nivel oraș)
-                        const res = await fetch(
-                          `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=${locale}&zoom=10&addressdetails=1`,
-                          { headers: { 'Accept': 'application/json' } }
-                        );
-                        const data = await res.json();
-                        const addr = data?.address || {};
-                        // Toate câmpurile posibile pe care Nominatim le poate întoarce
-                        const candidates = [
-                          addr.county,
-                          addr.state_district,
-                          addr.state,
-                          addr.region,
-                          addr.city,
-                          addr.town,
-                          addr.village,
-                          addr.municipality,
-                          addr.suburb,
-                          addr.city_district,
-                        ];
-                        const match = findRegionMatch(locale, ...candidates);
-                        if (match) {
-                          const newStats = { ...userStats, regiune: match, regiuneSet: true };
-                          safeLS.set("c_stats", JSON.stringify(newStats));
-                          setToastMsg(`📍 Regiunea ta: ${match}`);
-                          setTimeout(() => window.location.reload(), 700);
-                        } else {
-                          setToastMsg("Nu am identificat regiunea — alege manual");
-                        }
-                      } catch {
-                        setToastMsg("Eroare conexiune — alege manual");
-                      }
-                    },
-                    (err) => {
-                      // 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
-                      if (err.code === 1) {
-                        setToastMsg("Permisiune refuzată — alege manual");
-                      } else if (err.code === 2) {
-                        setToastMsg("GPS indisponibil — verifică Wi-Fi/Date mobile");
-                      } else if (err.code === 3) {
-                        setToastMsg("GPS prea lent — încearcă din nou");
-                      } else {
-                        setToastMsg("Eroare locație — încearcă din nou");
-                      }
-                    },
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
-                  );
-                }}
-                className="px-3 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-1"
-                aria-label={t('profile.detectLocation')}
-              >
-                📍
-              </button>
             </div>
           </div>
         )}
