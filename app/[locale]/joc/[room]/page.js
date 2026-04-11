@@ -210,6 +210,9 @@ function ArenaMaster({ room }) {
   // Dedupe pentru revansa-ok: păstrăm timestamp-ul ultimului reset ca să nu
   // triggerăm resetul de multiple ori pentru același eveniment (Pusher + polling).
   const lastRevansaAtRef = useRef(0);
+  // Seed server-side pentru a alege aleator atacantul la fiecare revansa.
+  // Ambii clienti folosesc același seed → aceeași decizie.
+  const nextAttackerSeedRef = useRef(0);
   const teamIdPreluat = searchParams.get("teamId");
   const [isHost, setIsHost] = useState(false);
   const isPrivate = room.includes("privat-");
@@ -376,6 +379,7 @@ function ArenaMaster({ room }) {
           // care persistă după reset (TTL 120s).
           if (data.revansaOk && data.revansaOkAt && data.revansaOkAt > lastRevansaAtRef.current) {
             lastRevansaAtRef.current = data.revansaOkAt;
+            nextAttackerSeedRef.current = data.seed || 0;
             resetForRevansaRef.current?.();
           } else if (data.players && data.players.length > 0) {
             setRevansaRequests(prev => {
@@ -514,6 +518,7 @@ function ArenaMaster({ room }) {
       const ts = data?.t || Date.now();
       if (ts > lastRevansaAtRef.current) {
         lastRevansaAtRef.current = ts;
+        nextAttackerSeedRef.current = data?.seed || 0;
         resetForRevansaRef.current?.();
       }
     });
@@ -652,11 +657,21 @@ function ArenaMaster({ room }) {
     setCollisionAnim(false);
     setRevansaRequests({});
     const currentNume = numeRef.current;
-    if (isPrivate || isBotMatch) {
+    const opp = opponentRef.current?.jucator;
+    if (isBotMatch) {
+      // Bot match: alternează simplu între player și bot
       setAtacantName(prev => {
-        if (!prev || !opponentRef.current) return prev;
-        return prev === currentNume ? opponentRef.current.jucator : currentNume;
+        if (!prev || !opp) return prev;
+        return prev === currentNume ? opp : currentNume;
       });
+    } else if (currentNume && opp) {
+      // PvP (private + arena): folosim seed-ul random de la server
+      // pentru a alege atacantul. Ambii clienti au același seed → aceeași decizie.
+      const sorted = [currentNume.toUpperCase(), opp.toUpperCase()].sort();
+      const seed = nextAttackerSeedRef.current || 0;
+      const chosenUpper = sorted[seed]; // 0 sau 1
+      const newAttacker = chosenUpper === currentNume.toUpperCase() ? currentNume : opp;
+      setAtacantName(newAttacker);
     }
     // Clear stale Redis keys so lovitura/revansa-ok can't re-trigger next round
     fetch('/api/ciocnire', {
@@ -759,6 +774,7 @@ function ArenaMaster({ room }) {
         if (data.revansaOkAt && data.revansaOkAt > lastRevansaAtRef.current) {
           lastRevansaAtRef.current = data.revansaOkAt;
         }
+        if (typeof data.seed === 'number') nextAttackerSeedRef.current = data.seed;
         resetForRevansaRef.current?.();
       }
     }).catch(() => {});

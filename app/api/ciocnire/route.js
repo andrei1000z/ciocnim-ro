@@ -276,11 +276,15 @@ return redis.call('SCARD', KEYS[1])
         if (revCount >= 2) {
           redis.del(k(`room:${roomId}:revansa`)).catch(() => {});
           redis.del(k(`room:${roomId}:lovitura`)).catch(() => {});
-          // Stocăm TIMESTAMP-ul ca valoare, nu '1'. Clienții folosesc comparație
-          // cu ref local ca să nu reseteze multiplu pentru același revansa-ok.
-          redis.setex(k(`room:${roomId}:revansa-ok`), 120, String(revTs)).catch(() => {});
-          await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: revTs }).catch(() => {});
-          return NextResponse.json({ success: true, revansaOk: true, revansaOkAt: revTs });
+          // Server-side seed aleator — ambii clienti îl folosesc ca să decidă
+          // cine atacă în noua rundă (altfel ar fi mereu același jucător).
+          // seed: 0 = primul alfabetic atacă, 1 = al doilea atacă
+          const attackerSeed = Math.random() < 0.5 ? 0 : 1;
+          // Stocăm { t, seed } ca valoare JSON.
+          const revokPayload = JSON.stringify({ t: revTs, seed: attackerSeed });
+          redis.setex(k(`room:${roomId}:revansa-ok`), 120, revokPayload).catch(() => {});
+          await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: revTs, seed: attackerSeed }).catch(() => {});
+          return NextResponse.json({ success: true, revansaOk: true, revansaOkAt: revTs, seed: attackerSeed });
         }
         return NextResponse.json({ success: true, revansaOk: false, count: revCount });
       }
@@ -310,8 +314,19 @@ return redis.call('SCARD', KEYS[1])
         ]);
         // NU mai ștergem flag-ul la read — lăsăm TTL 120s. Clienții filtrează
         // prin timestamp comparison ca să nu reseteze multiplu pentru același flag.
-        const revansaOkAt = revOkFlag ? parseInt(revOkFlag) || 0 : 0;
-        return NextResponse.json({ success: true, players: revPlayers, revansaOk: !!revOkFlag, revansaOkAt });
+        // Valoarea poate fi JSON {t, seed} (nou) sau număr simplu (compat vechi).
+        let revansaOkAt = 0, revansaOkSeed = 0;
+        if (revOkFlag) {
+          try {
+            const parsed = JSON.parse(revOkFlag);
+            revansaOkAt = parsed.t || 0;
+            revansaOkSeed = parsed.seed || 0;
+          } catch {
+            // Fallback pentru valori legacy (doar timestamp string)
+            revansaOkAt = parseInt(revOkFlag) || 0;
+          }
+        }
+        return NextResponse.json({ success: true, players: revPlayers, revansaOk: !!revOkFlag, revansaOkAt, seed: revansaOkSeed });
       }
 
       case 'creeaza-camera-privata': {
