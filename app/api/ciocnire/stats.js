@@ -119,7 +119,7 @@ export async function checkAndAwardAchievements(ns, jucator, stats, teamId = nul
     });
 
     if (newlyAwarded.length > 0) {
-      pusher.trigger(`${ns}-user-notif-${jucator}`, 'achievement-unlocked', {
+      pusher.trigger(`private-${ns}-user-notif-${jucator}`, 'achievement-unlocked', {
         // Clientul traduce name/desc din dicționar folosind `key`.
         achievements: newlyAwarded.map(key => ({ key, ...ACHIEVEMENTS_META[key] })),
         t: Date.now()

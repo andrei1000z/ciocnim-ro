@@ -97,25 +97,25 @@ function HomeContent() {
     if (!isHydrated || !teamIds || !globalPusherRef?.current) return;
     const pusher = globalPusherRef.current;
 
-    const ns = (typeof window !== 'undefined' && window.location.host.includes('trosc.fun')) ? 'intl' : 'ro';
+    const ns = ['ro','bg','el','en'].includes(locale) ? locale : 'ro';
     const channels = teamIds.split(",").map(tid => {
-      const ch = pusher.subscribe(`${ns}-team-${tid}`);
+      const channelName = `private-${ns}-team-${tid}`;
+      const ch = pusher.subscribe(channelName);
       ch.bind("team-update", async () => {
         try {
-          const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume, locale }) });
-          const d = await r.json();
+          const d = await apiPost({ actiune: "get-team-details", teamId: tid, jucator: nume, locale });
           if (d.success) {
             setLoadedTeams(prev => prev.map(t => t.details.id === tid ? { ...t, top: d.top || [] } : t));
           }
         } catch {}
       });
-      return { tid, ch };
+      return { tid, ch, channelName };
     });
 
     return () => {
-      channels.forEach(({ tid, ch }) => {
+      channels.forEach(({ ch, channelName }) => {
         ch.unbind_all();
-        pusher.unsubscribe(`${ns}-team-${tid}`);
+        pusher.unsubscribe(channelName);
       });
     };
   }, [isHydrated, teamIds, nume, globalPusherRef]);

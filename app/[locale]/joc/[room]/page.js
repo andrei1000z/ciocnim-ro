@@ -450,15 +450,23 @@ function ArenaMaster({ room }) {
   // connection-ul devine ready. Așteptarea introduce race condition unde celălalt
   // jucător broadcastJoin BEFORE noi subscribem, evenimentul se pierde.
   useEffect(() => {
-    if (isBotMatch || !pusherRef?.current) return;
+    if (isBotMatch || !pusherRef?.current || !nume) return;
     const pusher = pusherRef.current;
     const ns = locale; // per-locale Redis/Pusher namespace (ro/bg/el/en)
-    const arenaChannelName = `${ns}-arena-v22-${room}`;
-    const arenaChannel = pusher.subscribe(arenaChannelName);
+    const arenaChannelName = `private-${ns}-arena-v23-${room}`;
+    let arenaChannel = null;
+    let cancelled = false;
 
-    arenaChannel.bind("pusher:subscription_succeeded", async () => {
-      // Trimitem join imediat dacă avem deja nume (hidratat)
-      if (numeRef.current) broadcastJoinRef.current?.();
+    // CRITICAL: înainte de subscribe la canalul privat trebuie să facem JOIN API,
+    // ca să fim adăugați în room:{roomId}:players SET. Apoi /api/pusher/auth verifică
+    // membership-ul și răspunde 200. Fără asta → auth 403 → subscription_failed.
+    (async () => {
+      try { await broadcastJoinRef.current?.(); } catch {}
+      if (cancelled) return;
+      arenaChannel = pusher.subscribe(arenaChannelName);
+      arenaChannel.bind("pusher:subscription_error", () => {});
+
+      arenaChannel.bind("pusher:subscription_succeeded", async () => {
       // Catch-up: dacă oponentul a intrat deja înainte ca noi să fim subscribe
       // (race: Pusher subscribe după ce celălalt a dat broadcastJoin), îl găsim
       // prin get-room-players care citește direct din Redis.
@@ -538,16 +546,17 @@ function ArenaMaster({ room }) {
        // executeBattle handles incrementGlobal internally (guarded, runs once)
        executeBattleRef.current(data);
     });
+    })();
 
     return () => {
-      try { arenaChannel.unbind_all(); } catch {}
-      pusher.unsubscribe(arenaChannelName);
+      cancelled = true;
+      if (arenaChannel) {
+        try { arenaChannel.unbind_all(); } catch {}
+        try { pusher.unsubscribe(arenaChannelName); } catch {}
+      }
     };
-  // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // Subscription STABLE — nu re-subscriem la fiecare schimbare de nume/broadcastJoin.
-  // Folosim broadcastJoinRef + numeRef pentru a evita gap-urile în care events se pierd.
-  }, [room, isBotMatch, isPrivate, isProvocare, teamIdPreluat, pusherRef, locale]);
+  }, [room, isBotMatch, isPrivate, isProvocare, teamIdPreluat, pusherRef, locale, nume]);
 
   // Warn before leaving during active game — stable handler via ref to avoid
   // leaks when deps change (B3). The ref tracks whether the game is active,

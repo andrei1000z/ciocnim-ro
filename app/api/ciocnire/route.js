@@ -40,7 +40,10 @@ export async function POST(request) {
     // Per-locale namespace (ro/bg/el/en — each fully isolated in Redis)
     const ns = getNamespace(request, body.locale);
     const k = (key) => `${ns}:${key}`;
+    // ch = canal public (global, online-count) — anonim OK
+    // chPriv = canal privat (arena, team, user-notif) — necesită Pusher auth via /api/pusher/auth
     const ch = (channel) => `${ns}-${channel}`;
+    const chPriv = (channel) => `private-${ns}-${channel}`;
 
     // Rate limiting
     const ip = getClientIp(request);
@@ -162,13 +165,16 @@ export async function POST(request) {
           noulTotal = parseInt(await redis.get(k('global_ciocniri_total'))) || 0;
         }
 
-        // Fire update-complet la fiecare battle — fără throttle.
-        // Throttle-ul anterior 3s pierdea ~80% din update-uri la scale moderat
-        // (20 users × 5 battles/min = clienții vedeau leaderboard stale).
-        // La Pusher free tier 200k msgs/day supportăm >1000 battles/hour simple.
-        await pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
+        // Throttle minimal 2s pe broadcast leaderboard (Pusher free tier 200k/zi).
+        // La 33 battles/hour 100% trec. La burst > 1/2s salvăm ~50% din mesaje.
+        // Delay perceptibil < 2s, invizibil ochiului.
+        const broadcastThrottleKey = k('throttle:update-complet');
+        const broadcastOk = await redis.set(broadcastThrottleKey, '1', 'EX', 2, 'NX');
+        if (broadcastOk) {
+          await pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
+        }
         if (teamId) {
-          await pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
+          await pusher.trigger(chPriv(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
         }
 
         if (safeName && currentStats) {
@@ -231,7 +237,7 @@ return redis.call('SCARD', KEYS[1])
         }
         // AWAIT: fire-and-forget pe Vercel serverless = trigger pierdut. Așteptăm
         // finalizarea pentru a garanta livrarea instant către celălalt client.
-        await pusher.trigger(ch(`arena-v22-${roomId}`), 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(() => {});
+        await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true, isHost: serverIsHost });
       }
 
@@ -275,7 +281,7 @@ return redis.call('SCARD', KEYS[1])
         const castigaCelCareDa = Math.random() < 0.5;
         const lovituraData = { jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now() };
         redis.setex(k(`room:${roomId}:lovitura`), 120, JSON.stringify(lovituraData)).catch(() => {});
-        await pusher.trigger(ch(`arena-v22-${roomId}`), 'lovitura', lovituraData).catch(() => {});
+        await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'lovitura', lovituraData).catch(() => {});
         return NextResponse.json({ success: true, castigaCelCareDa });
       }
 
@@ -284,7 +290,7 @@ return redis.call('SCARD', KEYS[1])
         const chatRlKey = k(`ratelimit:chat:${jucator.toUpperCase()}`);
         const chatRl = await redis.set(chatRlKey, '1', 'EX', 1, 'NX');
         if (!chatRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
-        await pusher.trigger(ch(`arena-v22-${roomId}`), 'arena-chat', { jucator: jucator.toUpperCase(), text: text.trim().slice(0, 200), t: Date.now() }).catch(() => {});
+        await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'arena-chat', { jucator: jucator.toUpperCase(), text: text.trim().slice(0, 200), t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
@@ -298,7 +304,7 @@ return redis.call('SCARD', KEYS[1])
         const revCount = await redis.scard(k(`room:${roomId}:revansa`));
         const revTs = Date.now();
         // AWAIT pentru a garanta livrarea pe Vercel serverless.
-        await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa', { jucator: revClean, t: revTs }).catch(() => {});
+        await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'revansa', { jucator: revClean, t: revTs }).catch(() => {});
         if (revCount >= 2) {
           redis.del(k(`room:${roomId}:revansa`)).catch(() => {});
           redis.del(k(`room:${roomId}:lovitura`)).catch(() => {});
@@ -309,7 +315,7 @@ return redis.call('SCARD', KEYS[1])
           // Stocăm { t, seed } ca valoare JSON.
           const revokPayload = JSON.stringify({ t: revTs, seed: attackerSeed });
           redis.setex(k(`room:${roomId}:revansa-ok`), 120, revokPayload).catch(() => {});
-          await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: revTs, seed: attackerSeed }).catch(() => {});
+          await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'revansa-ok', { t: revTs, seed: attackerSeed }).catch(() => {});
           return NextResponse.json({ success: true, revansaOk: true, revansaOkAt: revTs, seed: attackerSeed });
         }
         return NextResponse.json({ success: true, revansaOk: false, count: revCount });
@@ -329,7 +335,7 @@ return redis.call('SCARD', KEYS[1])
         const revOkTs = Date.now();
         const seed = Math.floor(Math.random() * 1e9);
         redis.setex(k(`room:${roomId}:revansa-ok`), 120, JSON.stringify({ t: revOkTs, seed })).catch(() => {});
-        await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs, seed }).catch(() => {});
+        await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs, seed }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
@@ -561,7 +567,7 @@ return redis.call('SCARD', KEYS[1])
           if (exists === null) {
             await redis.zadd(k(`team:${teamId}:membri`), 0, cleanPlayer);
             await updateUserStats(ns, cleanPlayer, { teamsJoined: 1 });
-            pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
+            pusher.trigger(chPriv(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
           }
         }
         const membriRaw = await redis.zrevrange(k(`team:${teamId}:membri`), 0, 14, 'WITHSCORES');
@@ -614,7 +620,7 @@ return redis.call('SCARD', KEYS[1])
           return NextResponse.json({ success: false, error: "Doar creatorul poate elimina membri." }, { status: 403 });
         }
         await redis.zrem(k(`team:${teamId}:membri`), memberToKick.toUpperCase());
-        pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
+        pusher.trigger(chPriv(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
@@ -627,7 +633,7 @@ return redis.call('SCARD', KEYS[1])
         const duelRlKey = k(`ratelimit:duel:${auth.name}`);
         const duelRl = await redis.set(duelRlKey, '1', 'EX', 5, 'NX');
         if (!duelRl) return NextResponse.json({ success: false, error: "Așteaptă puțin între provocări." }, { status: 429 });
-        pusher.trigger(ch(`user-notif-${oponentNume.toUpperCase()}`), 'duel-request', {
+        pusher.trigger(chPriv(`user-notif-${oponentNume.toUpperCase()}`), 'duel-request', {
           deLa: auth.name, roomId, teamId: teamId || null, t: Date.now()
         }).catch(() => {});
         return NextResponse.json({ success: true });

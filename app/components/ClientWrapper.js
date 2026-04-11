@@ -232,6 +232,26 @@ export default function ClientWrapper({ children }) {
       enabledTransports: ['ws', 'wss'],
       activityTimeout: 30000,
       pongTimeout: 15000,
+      // Authorizer custom: citește c_session fresh la fiecare auth request
+      // (Pusher.config.auth e static la creation; authorizer permite dynamic).
+      authorizer: function(channel) {
+        return {
+          authorize: function(socketId, callback) {
+            const session = safeLS.get('c_session') || '';
+            fetch('/api/pusher/auth', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Session': session,
+              },
+              body: `socket_id=${encodeURIComponent(socketId)}&channel_name=${encodeURIComponent(channel.name)}`,
+            })
+              .then(r => r.ok ? r.json() : Promise.reject(new Error(`auth ${r.status}`)))
+              .then(data => callback(null, data))
+              .catch(err => callback(err, null));
+          },
+        };
+      },
     };
     if (customHost) {
       pusherConfig.wsHost = customHost;
@@ -524,7 +544,7 @@ export default function ClientWrapper({ children }) {
     if (!isHydrated || !nume || !pusherRef.current) return;
 
     const ns = getClientNamespace(locale);
-    const channelName = `${ns}-user-notif-${nume}`;
+    const channelName = `private-${ns}-user-notif-${nume}`;
     const channel = pusherRef.current.subscribe(channelName);
     let notifTimer = null;
     channel.bind('duel-request', (data) => {
