@@ -3,7 +3,7 @@ import { timingSafeEqual, randomBytes } from 'crypto';
 import redis from '@/app/lib/redis';
 import { esteNumeInterzis, valideazaNume } from '@/app/lib/profanityFilter';
 import pusher from './pusher';
-import { sanitizeStr, sanitizeId, checkRateLimit, getClientIp, getNamespace, NUME_INTERZISE, requireSession, createSession, hasSession } from './utils';
+import { sanitizeStr, sanitizeId, checkRateLimit, getClientIp, getNamespace, NUME_INTERZISE, requireSession, createSession } from './utils';
 import {
   getClasamentRegiuni, getClasamentJucatori,
   getUserStats, updateUserStats, getUserAchievements, checkAndAwardAchievements,
@@ -457,25 +457,19 @@ return redis.call('SCARD', KEYS[1])
 
         // Atomic reserve: SET NX previne race
         const reserved = await redis.set(nameKey, newClean, 'EX', NAME_TTL, 'NX');
-        let bootstrapLegacy = false;
         if (!reserved) {
+          // SECURITATE: ZERO bootstrap. Bootstrap legacy era exploitabil — orice atacator
+          // putea revendica un nume rezervat fără session. Acum: nume existent → 409 strict.
+          // Useri legacy fără session pierd profilul (sterge-cont, rename, get-history)
+          // dar continuă să joace (game endpoints nu sunt gated). Cleanup la TTL 90 zile.
           if (oldClean === newClean) {
-            // Self-noop: doar refresh TTL. Bootstrap session dacă lipsește (legacy user).
+            // Self-noop autentificat: refresh TTL.
+            const auth = await requireSession(request, ns, newClean);
+            if (!auth.ok) return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
             await redis.expire(nameKey, NAME_TTL);
-            if (!(await hasSession(ns, newClean))) bootstrapLegacy = true;
-          } else if (!isRename) {
-            // Claim nou pe nume deja rezervat. Dacă numele NU are încă session
-            // (legacy user vechi), permitem primul caller să-l revendice.
-            // Dacă session există → numele e cu adevărat luat → 409.
-            if (await hasSession(ns, newClean)) {
-              return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
-            }
-            bootstrapLegacy = true;
-            await redis.expire(nameKey, NAME_TTL);
-          } else {
-            // Rename target ocupat
-            return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
+            return NextResponse.json({ success: true });
           }
+          return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
         }
 
         const hasTeams = isRename && teamIds && teamIds.length > 0;
@@ -506,10 +500,10 @@ return redis.call('SCARD', KEYS[1])
         }
         await pipeline.exec();
 
-        // Issue session: pentru claim nou, rename, sau bootstrap legacy.
-        // Pentru self-noop CU session existentă, nu reîmprospătăm token-ul.
+        // Issue session: pentru claim nou (NX reușit) sau rename autentificat.
+        // Self-noop autentificat returnează deja success fără session nou (early-return mai sus).
         let session = null;
-        if (reserved || isRename || bootstrapLegacy) {
+        if (reserved || isRename) {
           session = await createSession(ns, newClean);
         }
 
