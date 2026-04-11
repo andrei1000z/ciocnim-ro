@@ -140,14 +140,16 @@ function HomeContent() {
       return;
     }
     setShowJoinModal(false);
+    const ctrl = new AbortController();
     const fetchTeams = async () => {
       let ids = getStoredTeamIds();
       if (pId && !ids.includes(pId)) { ids.push(pId); addStoredTeamId(pId); }
       if (!ids.length) { setLoadedTeams([]); return; }
       const results = [], valid = [];
       const fetches = await Promise.allSettled(
-        ids.map(tid => fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) }).then(r => r.json()).then(d => ({ tid, d })))
+        ids.map(tid => fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }), signal: ctrl.signal }).then(r => r.json()).then(d => ({ tid, d })))
       );
+      if (ctrl.signal.aborted) return;
       for (const f of fetches) {
         if (f.status === 'fulfilled' && f.value.d.success) {
           results.push({ details: f.value.d.details, top: f.value.d.top || [] });
@@ -159,6 +161,7 @@ function HomeContent() {
       if (pId) router.replace("/");
     };
     fetchTeams();
+    return () => ctrl.abort();
   }, [nume, searchParams, router, isHydrated, addStoredTeamId, getStoredTeamIds]);
 
   const handleJoinModalSubmit = async () => {

@@ -324,8 +324,19 @@ return redis.call('SCARD', KEYS[1])
         const oldClean = oldName ? oldName.toUpperCase() : null;
         if (NUME_INTERZISE.includes(newClean)) return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." }, { status: 400 });
 
-        const isTaken = await redis.get(k(`nume_rezervat:${newClean}`));
-        if (isTaken && isTaken !== oldClean) return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
+        // Atomic reserve: SET NX previne race între doi useri care încearcă același nume
+        const nameKey = k(`nume_rezervat:${newClean}`);
+        const NAME_TTL = 60 * 60 * 24 * 90;
+        const reserved = await redis.set(nameKey, newClean, 'EX', NAME_TTL, 'NX');
+        if (!reserved) {
+          const owner = await redis.get(nameKey);
+          const isOurs = owner === newClean || (owner && oldClean && owner === oldClean);
+          if (!isOurs) {
+            return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
+          }
+          // Self-rename sau legacy — refresh TTL + normalizează valoarea
+          await redis.set(nameKey, newClean, 'EX', NAME_TTL);
+        }
 
         const hasTeams = oldClean && oldClean !== newClean && teamIds && teamIds.length > 0;
         const [globalScore, ...teamScores] = (oldClean && oldClean !== newClean)
@@ -336,7 +347,6 @@ return redis.call('SCARD', KEYS[1])
           : [null];
 
         const pipeline = redis.pipeline();
-        pipeline.set(k(`nume_rezervat:${newClean}`), "1", 'EX', 60 * 60 * 24 * 90);
         if (oldClean && oldClean !== newClean) {
           pipeline.del(k(`nume_rezervat:${oldClean}`));
           pipeline.zrem(k('leaderboard_jucatori'), oldClean);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { memo, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { useT } from "@/app/i18n/useT";
@@ -118,4 +118,4 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
   return createPortal(modalContent, document.body);
 };
 
-export default PlayModal;
+export default memo(PlayModal);

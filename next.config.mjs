@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  poweredByHeader: false,
+  compress: true,
   async headers() {
     return [
       {
@@ -27,6 +29,18 @@ const nextConfig = {
               "frame-ancestors 'none'",
             ].join('; '),
           },
+        ],
+      },
+      {
+        source: '/:all*(ico|png|jpg|jpeg|svg|webp|woff|woff2)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
         ],
       },
     ];

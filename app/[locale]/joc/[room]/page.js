@@ -482,7 +482,10 @@ function ArenaMaster({ room }) {
        executeBattleRef.current(data);
     });
 
-    return () => { pusher.unsubscribe(arenaChannelName); };
+    return () => {
+      try { arenaChannel.unbind_all(); } catch {}
+      pusher.unsubscribe(arenaChannelName);
+    };
   // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef]);

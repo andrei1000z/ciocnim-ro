@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { memo, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { safeCopy } from "../lib/utils";
 import { getSiteUrl } from "../lib/constants";
@@ -142,4 +142,4 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
   );
 };
 
-export default DualLeaderboard;
+export default memo(DualLeaderboard);

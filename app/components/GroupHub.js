@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { memo, useState, useEffect } from "react";
 import { safeCopy } from "../lib/utils";
 import { useT } from "@/app/i18n/useT";
 
@@ -91,4 +91,4 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   );
 };
 
-export default GroupHub;
+export default memo(GroupHub);
