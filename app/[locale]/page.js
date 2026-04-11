@@ -300,9 +300,16 @@ function HomeContent() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.96 }}
-          onClick={() => {
-            if (!nume || nume.length < 3) { handleArena(); return; }
-            triggerVibrate(); setIsPlayModalOpen(true);
+          onClick={async () => {
+            triggerVibrate();
+            // Auto-generate o poreclă temporară dacă user-ul nu are
+            if (!nume || nume.length < 3) {
+              const prefix = locale === 'bg' ? 'ИГРАЧ' : locale === 'el' ? 'ΠΑΙΚΤΗΣ' : locale === 'en' ? 'PLAYER' : 'JUCATOR';
+              const tempName = prefix + Math.random().toString(36).substring(2, 6).toUpperCase();
+              const ok = await setNume(tempName);
+              if (!ok) { setToastMsg(t('notifications.errorRetry')); return; }
+            }
+            setIsPlayModalOpen(true);
           }}
           className="w-full py-5 md:py-6 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-2xl border border-red-600 shadow-2xl shadow-red-900/40 transition-all disabled:opacity-60 flex items-center justify-center gap-3 active:scale-[0.97]"
         >

@@ -431,9 +431,38 @@ function ArenaMaster({ room }) {
     const arenaChannelName = `${ns}-arena-v22-${room}`;
     const arenaChannel = pusher.subscribe(arenaChannelName);
 
-    arenaChannel.bind("pusher:subscription_succeeded", () => {
+    arenaChannel.bind("pusher:subscription_succeeded", async () => {
       // Trimitem join imediat dacă avem deja nume (hidratat)
       if (numeRef.current) broadcastJoin();
+      // Catch-up: dacă oponentul a intrat deja înainte ca noi să fim subscribe
+      // (race: Pusher subscribe după ce celălalt a dat broadcastJoin), îl găsim
+      // prin get-room-players care citește direct din Redis.
+      try {
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actiune: 'get-room-players', roomId: room, locale })
+        });
+        const data = await res.json();
+        if (data.success && data.players && !opponentRef.current) {
+          const currentNume = numeRef.current?.toUpperCase();
+          const otherPlayer = data.players.find(p => p !== currentNume);
+          if (otherPlayer) {
+            const sd = data.skinData?.[otherPlayer] || {};
+            const defaultOppRegion = locale === 'bg' ? 'България' : locale === 'el' ? 'Ελλάδα' : locale === 'en' ? 'Global' : 'România';
+            const oppData = { jucator: otherPlayer, skin: sd.skin || 'red', hasStar: sd.hasStar || false, regiune: sd.regiune || defaultOppRegion };
+            setOpponent(oppData);
+            opponentRef.current = oppData;
+            setAtacantName(prev => {
+              if (prev !== null && prev !== "") return prev;
+              const n = numeRef.current;
+              if (!n) return null;
+              if (!isPrivate && !isProvocare) return [n, otherPlayer].sort()[0];
+              const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+              return (roomSum % 2 === 0) ? (isHostRef.current ? n : otherPlayer) : (isHostRef.current ? otherPlayer : n);
+            });
+          }
+        }
+      } catch {}
     });
 
     arenaChannel.bind("join", (data) => {
