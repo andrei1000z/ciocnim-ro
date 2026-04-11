@@ -315,9 +315,7 @@ function ArenaMaster({ room }) {
               if (prev !== null && prev !== "") return prev;
               const n = numeRef.current;
               if (!n) return null;
-              if (!isPrivate && !isProvocare) return [n, otherPlayer].sort()[0];
-              const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
-              return (roomSum % 2 === 0) ? (isHostRef.current ? n : otherPlayer) : (isHostRef.current ? otherPlayer : n);
+              return [n.toUpperCase(), otherPlayer.toUpperCase()].sort()[0] === n.toUpperCase() ? n : otherPlayer;
             });
           }
         }
@@ -456,9 +454,8 @@ function ArenaMaster({ room }) {
               if (prev !== null && prev !== "") return prev;
               const n = numeRef.current;
               if (!n) return null;
-              if (!isPrivate && !isProvocare) return [n, otherPlayer].sort()[0];
-              const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
-              return (roomSum % 2 === 0) ? (isHostRef.current ? n : otherPlayer) : (isHostRef.current ? otherPlayer : n);
+              // Deterministic: sortare alfabetică. Ambii clienți calculează același atacant.
+              return [n.toUpperCase(), otherPlayer.toUpperCase()].sort()[0] === n.toUpperCase() ? n : otherPlayer;
             });
           }
         }
@@ -480,16 +477,12 @@ function ArenaMaster({ room }) {
           fetch('/api/ciocnire', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actiune: 'arena-cancel-matchmaking', roomId: room, locale }) });
         }
 
-        // Set attacker only ONCE — guard și pentru "" (stale closure cu nome gol)
+        // Set attacker only ONCE — deterministic via sortare alfabetică (ambii clienți = același atacant)
         setAtacantName(prev => {
           if (prev !== null && prev !== "") return prev;
           const n = numeRef.current;
           if (!n) return null;
-          if (!isPrivate && !isProvocare) return [n, data.jucator].sort()[0];
-          const roomSum = room.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
-          const hostAttacks = roomSum % 2 === 0;
-          const myHost = isHostRef.current;
-          return hostAttacks ? (myHost ? n : data.jucator) : (myHost ? data.jucator : n);
+          return [n.toUpperCase(), data.jucator.toUpperCase()].sort()[0] === n.toUpperCase() ? n : data.jucator;
         });
 
         // Răspundem cu join-ul nostru DOAR prima dată — previne loop infinit
