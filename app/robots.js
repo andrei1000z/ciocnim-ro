@@ -4,7 +4,9 @@ export default async function robots() {
   const h = await headers();
   const host = h.get('host') || '';
   const isIntl = host.includes('trosc.fun');
-  const baseUrl = isIntl ? 'https://trosc.fun' : 'https://ciocnim.ro';
+  // Folosim domeniul www ca să NU avem redirect 308 pe sitemap
+  // (Google prefera link-uri directe, fără hops)
+  const baseUrl = isIntl ? 'https://www.trosc.fun' : 'https://www.ciocnim.ro';
 
   return {
     rules: [

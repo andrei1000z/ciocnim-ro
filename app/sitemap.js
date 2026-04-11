@@ -1,7 +1,11 @@
 import { headers } from 'next/headers';
 
-const RO_DOMAIN = 'https://ciocnim.ro';
-const INTL_DOMAIN = 'https://trosc.fun';
+// Folosim www ca să NU avem redirect 308 (Google preferă URL-uri canonice directe)
+const RO_DOMAIN = 'https://www.ciocnim.ro';
+const INTL_DOMAIN = 'https://www.trosc.fun';
+
+// Ultima actualizare majoră — bump când faci modificări importante de conținut
+const LAST_MODIFIED = new Date('2026-04-11');
 
 export default async function sitemap() {
   const h = await headers();
@@ -24,6 +28,7 @@ export default async function sitemap() {
 
   const buildEntry = (locale, page, baseDomain) => ({
     url: `${baseDomain}/${locale}${page.path}`,
+    lastModified: LAST_MODIFIED,
     changeFrequency: page.changeFrequency,
     priority: page.priority,
     alternates: {

@@ -1,5 +1,6 @@
-const PRIMARY_DOMAIN_RO = 'https://ciocnim.ro';
-const PRIMARY_DOMAIN_INTL = 'https://trosc.fun';
+// Folosim www ca să evităm redirect-ul 308 pe toate link-urile canonical/og/sitemap
+const PRIMARY_DOMAIN_RO = 'https://www.ciocnim.ro';
+const PRIMARY_DOMAIN_INTL = 'https://www.trosc.fun';
 
 /**
  * Returnează URL-ul corect pe baza host-ului request-ului curent.
