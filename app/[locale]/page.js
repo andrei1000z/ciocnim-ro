@@ -172,10 +172,11 @@ function HomeContent() {
   };
 
   const handleArena = async () => {
-    // Zero fricțiune: dacă nu are poreclă, generează una temporară
+    // Zero fricțiune: dacă nu are poreclă, generează una temporară localizată
     let playerName = nume;
     if (!playerName || playerName.length < 3) {
-      const tempName = "JUCATOR" + Math.random().toString(36).substring(2, 6).toUpperCase();
+      const prefix = locale === 'bg' ? 'ИГРАЧ' : locale === 'el' ? 'ΠΑΙΚΤΗΣ' : 'JUCATOR';
+      const tempName = prefix + Math.random().toString(36).substring(2, 6).toUpperCase();
       const ok = await setNume(tempName);
       if (!ok) { setToastMsg(t('notifications.errorRetry')); return; }
       playerName = tempName;

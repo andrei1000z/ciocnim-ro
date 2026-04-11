@@ -123,7 +123,6 @@ function LoadingScreen() {
   );
 }
 
-const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", regiune: "Muntenia" };
 const emptySubscribe = () => () => {};
 
 // Client-side namespace must match server-side getNamespace() in app/api/ciocnire/utils.js
@@ -131,6 +130,20 @@ const emptySubscribe = () => () => {};
 export function getClientNamespace() {
   if (typeof window === 'undefined') return 'ro';
   return window.location.host.includes('trosc.fun') ? 'intl' : 'ro';
+}
+
+/**
+ * Returnează regiunea default pe baza locale-ului curent.
+ * Folosită pentru inițializarea user-ului neînregistrat.
+ */
+function getDefaultRegion(locale) {
+  if (locale === 'bg') return 'София-град';
+  if (locale === 'el') return 'Αττική';
+  return 'Muntenia';
+}
+
+function buildDefaultStats(locale) {
+  return { nume: "", wins: 0, losses: 0, skin: "red", regiune: getDefaultRegion(locale) };
 }
 
 // Data version — bump this to wipe all localStorage on next visit
@@ -164,12 +177,13 @@ export default function ClientWrapper({ children }) {
   useEffect(() => { checkDataReset(); }, []);
 
   const [userStats, setUserStats] = useState(() => {
+    const DS = buildDefaultStats(locale);
     const savedStats = safeLS.get("c_stats");
     const savedName = safeLS.get("c_nume");
     if (savedStats) {
       try {
         const parsed = JSON.parse(savedStats);
-        const safeStats = { ...DEFAULT_STATS, ...parsed };
+        const safeStats = { ...DS, ...parsed };
         if (savedName && safeStats.nume !== savedName) {
           const healed = { ...safeStats, nume: savedName };
           safeLS.set("c_stats", JSON.stringify(healed));
@@ -178,8 +192,8 @@ export default function ClientWrapper({ children }) {
         return safeStats;
       } catch {}
     }
-    if (savedName) return { ...DEFAULT_STATS, nume: savedName };
-    return DEFAULT_STATS;
+    if (savedName) return { ...DS, nume: savedName };
+    return DS;
   });
   const [totalGlobal, setTotalGlobal] = useState(0);
   const [topRegiuni, setTopRegiuni] = useState([]);
@@ -428,7 +442,7 @@ export default function ClientWrapper({ children }) {
             ...prev,
             wins: Math.max(prev.wins || 0, server.wins || 0),
             losses: Math.max(prev.losses || 0, server.losses || 0),
-            regiune: prev.regiune || server.regiune || 'Muntenia'
+            regiune: prev.regiune || server.regiune || getDefaultRegion(locale)
           }));
         }
       } catch {}
