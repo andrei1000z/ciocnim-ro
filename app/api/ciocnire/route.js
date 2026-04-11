@@ -137,14 +137,14 @@ export async function POST(request) {
         const throttleKey = k('pusher:update-complet:throttle');
         const canFireGlobal = await redis.set(throttleKey, '1', 'EX', 3, 'NX');
         if (canFireGlobal) {
-          pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
+          await pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
         }
         if (teamId) {
           // Team updates — throttle per team la max 1/2s
           const teamThrottleKey = k(`pusher:team-update:${teamId}:throttle`);
           const canFireTeam = await redis.set(teamThrottleKey, '1', 'EX', 2, 'NX');
           if (canFireTeam) {
-            pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
+            await pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
           }
         }
 
@@ -206,7 +206,9 @@ return redis.call('SCARD', KEYS[1])
             serverIsHost = members.length <= 1 || members[0] === cleanName;
           }
         }
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(() => {});
+        // AWAIT: fire-and-forget pe Vercel serverless = trigger pierdut. Așteptăm
+        // finalizarea pentru a garanta livrarea instant către celălalt client.
+        await pusher.trigger(ch(`arena-v22-${roomId}`), 'join', { jucator: cleanName, skin, isGolden, hasStar, regiune, isHost: serverIsHost, t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true, isHost: serverIsHost });
       }
 
@@ -246,7 +248,7 @@ return redis.call('SCARD', KEYS[1])
         const castigaCelCareDa = Math.random() < 0.5;
         const lovituraData = { jucator: jucator.toUpperCase(), castigaCelCareDa, atacant: atacant.toUpperCase(), t: Date.now() };
         redis.setex(k(`room:${roomId}:lovitura`), 120, JSON.stringify(lovituraData)).catch(() => {});
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'lovitura', lovituraData).catch(() => {});
+        await pusher.trigger(ch(`arena-v22-${roomId}`), 'lovitura', lovituraData).catch(() => {});
         return NextResponse.json({ success: true, castigaCelCareDa });
       }
 
@@ -255,7 +257,7 @@ return redis.call('SCARD', KEYS[1])
         const chatRlKey = k(`ratelimit:chat:${jucator.toUpperCase()}`);
         const chatRl = await redis.set(chatRlKey, '1', 'EX', 1, 'NX');
         if (!chatRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'arena-chat', { jucator: jucator.toUpperCase(), text: text.trim().slice(0, 200), t: Date.now() }).catch(() => {});
+        await pusher.trigger(ch(`arena-v22-${roomId}`), 'arena-chat', { jucator: jucator.toUpperCase(), text: text.trim().slice(0, 200), t: Date.now() }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
@@ -268,14 +270,15 @@ return redis.call('SCARD', KEYS[1])
         await redis.expire(k(`room:${roomId}:revansa`), 300);
         const revCount = await redis.scard(k(`room:${roomId}:revansa`));
         const revTs = Date.now();
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa', { jucator: revClean, t: revTs }).catch(() => {});
+        // AWAIT pentru a garanta livrarea pe Vercel serverless.
+        await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa', { jucator: revClean, t: revTs }).catch(() => {});
         if (revCount >= 2) {
           redis.del(k(`room:${roomId}:revansa`)).catch(() => {});
           redis.del(k(`room:${roomId}:lovitura`)).catch(() => {});
           // Stocăm TIMESTAMP-ul ca valoare, nu '1'. Clienții folosesc comparație
           // cu ref local ca să nu reseteze multiplu pentru același revansa-ok.
           redis.setex(k(`room:${roomId}:revansa-ok`), 120, String(revTs)).catch(() => {});
-          pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: revTs }).catch(() => {});
+          await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: revTs }).catch(() => {});
           return NextResponse.json({ success: true, revansaOk: true, revansaOkAt: revTs });
         }
         return NextResponse.json({ success: true, revansaOk: false, count: revCount });
@@ -294,7 +297,7 @@ return redis.call('SCARD', KEYS[1])
         redis.del(k(`room:${roomId}:revansa`), k(`room:${roomId}:lovitura`)).catch(() => {});
         const revOkTs = Date.now();
         redis.setex(k(`room:${roomId}:revansa-ok`), 120, String(revOkTs)).catch(() => {});
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs }).catch(() => {});
+        await pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
