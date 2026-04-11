@@ -152,22 +152,13 @@ export async function POST(request) {
           noulTotal = parseInt(await redis.get(k('global_ciocniri_total'))) || 0;
         }
 
-        // Throttle update-complet broadcast: max 1 fire per 3s globally.
-        // La mii de battles concurrente asta previne Pusher fanout blow-up
-        // (1000 subscribers × 1000 battles/min = 1M msgs/min fără throttle).
-        // Clienții primesc update-uri cel puțin la 3s, suficient pentru UI.
-        const throttleKey = k('pusher:update-complet:throttle');
-        const canFireGlobal = await redis.set(throttleKey, '1', 'EX', 3, 'NX');
-        if (canFireGlobal) {
-          await pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
-        }
+        // Fire update-complet la fiecare battle — fără throttle.
+        // Throttle-ul anterior 3s pierdea ~80% din update-uri la scale moderat
+        // (20 users × 5 battles/min = clienții vedeau leaderboard stale).
+        // La Pusher free tier 200k msgs/day supportăm >1000 battles/hour simple.
+        await pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
         if (teamId) {
-          // Team updates — throttle per team la max 1/2s
-          const teamThrottleKey = k(`pusher:team-update:${teamId}:throttle`);
-          const canFireTeam = await redis.set(teamThrottleKey, '1', 'EX', 2, 'NX');
-          if (canFireTeam) {
-            await pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
-          }
+          await pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
         }
 
         if (safeName && currentStats) {
