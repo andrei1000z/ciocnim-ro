@@ -36,8 +36,8 @@ const MessageCard = ({ text, index, greetings, locale }) => {
       transition={{ duration: 0.3, delay: index * 0.03 }}
       className="bg-card p-5 rounded-xl border border-edge hover:border-red-900/30 transition-all group relative"
     >
-      <p className="text-body text-sm md:text-base font-medium italic pr-24 leading-relaxed select-text">
-        &ldquo;{text}&rdquo;
+      <p className="text-body text-sm md:text-base font-medium pr-24 leading-relaxed select-text">
+        {text}
       </p>
       <div className="absolute top-4 right-4 flex gap-1.5">
         <button
@@ -146,9 +146,9 @@ const GreetingGenerator = ({ greetings, locale }) => {
       ctx.font = 'bold 28px sans-serif';
       ctx.fillText(greetings.generatorTitle, canvas.width / 2, 280);
 
-      // Message text (word-wrapped)
+      // Message text (word-wrapped) — modern, no italic
       ctx.fillStyle = '#e5e5e5';
-      ctx.font = 'italic 36px sans-serif';
+      ctx.font = '500 36px sans-serif';
       ctx.textAlign = 'center';
       const words = greetingText.split(' ');
       let line = '';
@@ -244,8 +244,8 @@ const GreetingGenerator = ({ greetings, locale }) => {
 
               <div className="relative z-10">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-red-400 mb-3">{greetings.generatorTitle}</p>
-                <p className="text-lg md:text-xl text-body font-medium italic leading-relaxed select-text">
-                  &ldquo;{greetingText}&rdquo;
+                <p className="text-lg md:text-xl text-body font-medium leading-relaxed select-text">
+                  {greetingText}
                 </p>
                 <p className="mt-4 text-right text-xs text-muted">— ciocnim.ro</p>
               </div>
