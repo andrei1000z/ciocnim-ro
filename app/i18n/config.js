@@ -1,6 +1,85 @@
 export const locales = ['ro', 'bg', 'el'];
 export const defaultLocale = 'ro';
 
+/**
+ * Slug-uri localizate per locale.
+ * Cheia e slug-ul canonic (RO, folosit în folder structure app/[locale]/traditii/ etc.)
+ * Valoarea e slug-ul vizibil în URL pentru locale-ul respectiv.
+ *
+ * Exemple:
+ *   /ro/traditii    → slug canonic
+ *   /bg/tradicii    → slug localizat BG (transliterat)
+ *   /el/paradoseis  → slug localizat EL (transliterat)
+ *
+ * Middleware-ul face rewrite intern: /bg/tradicii → /bg/traditii (canonic).
+ */
+export const SLUG_MAP = {
+  ro: {
+    traditii: 'traditii',
+    retete: 'retete',
+    urari: 'urari',
+    'vopsit-natural': 'vopsit-natural',
+    calendar: 'calendar',
+    ghid: 'ghid',
+    clasament: 'clasament',
+    despre: 'despre',
+    privacy: 'privacy',
+    terms: 'terms',
+    profil: 'profil',
+    joc: 'joc',
+  },
+  bg: {
+    traditii: 'tradicii',
+    retete: 'recepti',
+    urari: 'pojelania',
+    'vopsit-natural': 'bojadisvane',
+    calendar: 'kalendar',
+    ghid: 'rakovodstvo',
+    clasament: 'klasacia',
+    despre: 'za-nas',
+    privacy: 'poveritelnost',
+    terms: 'uslovia',
+    profil: 'profil',
+    joc: 'igra',
+  },
+  el: {
+    traditii: 'paradoseis',
+    retete: 'sintages',
+    urari: 'efches',
+    'vopsit-natural': 'vafi-fisiki',
+    calendar: 'imerologio',
+    ghid: 'odigos',
+    clasament: 'katataxi',
+    despre: 'schetika',
+    privacy: 'aporrito',
+    terms: 'oroi',
+    profil: 'profil',
+    joc: 'paichnidi',
+  },
+};
+
+/**
+ * Returnează slug-ul localizat pentru un slug canonic într-un locale dat.
+ * Ex: localizeSlug('traditii', 'bg') → 'tradicii'
+ */
+export function localizeSlug(canonicalSlug, locale) {
+  return SLUG_MAP[locale]?.[canonicalSlug] || canonicalSlug;
+}
+
+/**
+ * Face reverse lookup: dintr-un slug localizat înapoi la cel canonic.
+ * Ex: canonicalizeSlug('tradicii', 'bg') → 'traditii'
+ * Folosit în middleware pentru rewrite.
+ */
+export function canonicalizeSlug(localizedSlug, locale) {
+  const map = SLUG_MAP[locale];
+  if (!map) return localizedSlug;
+  for (const [canonical, localized] of Object.entries(map)) {
+    if (localized === localizedSlug) return canonical;
+  }
+  return localizedSlug;
+}
+
 export const localeConfig = {
   ro: {
     name: 'Romana',

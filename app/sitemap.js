@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { localizeSlug } from './i18n/config';
 
 // Folosim www ca să NU avem redirect 308 (Google preferă URL-uri canonice directe)
 const RO_DOMAIN = 'https://www.ciocnim.ro';
@@ -12,31 +13,37 @@ export default async function sitemap() {
   const host = h.get('host') || '';
   const isIntl = host.includes('trosc.fun');
 
+  // canonicalSlug = numele folder-ului în app/[locale]/
   const pages = [
-    { path: '', priority: 1.0, changeFrequency: 'daily' },
-    { path: '/traditii', priority: 0.9, changeFrequency: 'monthly' },
-    { path: '/urari', priority: 0.9, changeFrequency: 'monthly' },
-    { path: '/retete', priority: 0.9, changeFrequency: 'monthly' },
-    { path: '/clasament', priority: 0.9, changeFrequency: 'daily' },
-    { path: '/vopsit-natural', priority: 0.8, changeFrequency: 'monthly' },
-    { path: '/ghid', priority: 0.8, changeFrequency: 'monthly' },
-    { path: '/despre', priority: 0.7, changeFrequency: 'monthly' },
-    { path: '/calendar', priority: 0.7, changeFrequency: 'yearly' },
-    { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
-    { path: '/terms', priority: 0.3, changeFrequency: 'yearly' },
+    { canonicalSlug: '', priority: 1.0, changeFrequency: 'daily' },
+    { canonicalSlug: 'traditii', priority: 0.9, changeFrequency: 'monthly' },
+    { canonicalSlug: 'urari', priority: 0.9, changeFrequency: 'monthly' },
+    { canonicalSlug: 'retete', priority: 0.9, changeFrequency: 'monthly' },
+    { canonicalSlug: 'clasament', priority: 0.9, changeFrequency: 'daily' },
+    { canonicalSlug: 'vopsit-natural', priority: 0.8, changeFrequency: 'monthly' },
+    { canonicalSlug: 'ghid', priority: 0.8, changeFrequency: 'monthly' },
+    { canonicalSlug: 'despre', priority: 0.7, changeFrequency: 'monthly' },
+    { canonicalSlug: 'calendar', priority: 0.7, changeFrequency: 'yearly' },
+    { canonicalSlug: 'privacy', priority: 0.3, changeFrequency: 'yearly' },
+    { canonicalSlug: 'terms', priority: 0.3, changeFrequency: 'yearly' },
   ];
 
+  const pathFor = (locale, canonicalSlug) => {
+    if (!canonicalSlug) return '';
+    return '/' + localizeSlug(canonicalSlug, locale);
+  };
+
   const buildEntry = (locale, page, baseDomain) => ({
-    url: `${baseDomain}/${locale}${page.path}`,
+    url: `${baseDomain}/${locale}${pathFor(locale, page.canonicalSlug)}`,
     lastModified: LAST_MODIFIED,
     changeFrequency: page.changeFrequency,
     priority: page.priority,
     alternates: {
       languages: {
-        'ro': `${RO_DOMAIN}/ro${page.path}`,
-        'bg': `${INTL_DOMAIN}/bg${page.path}`,
-        'el': `${INTL_DOMAIN}/el${page.path}`,
-        'x-default': `${RO_DOMAIN}/ro${page.path}`,
+        'ro': `${RO_DOMAIN}/ro${pathFor('ro', page.canonicalSlug)}`,
+        'bg': `${INTL_DOMAIN}/bg${pathFor('bg', page.canonicalSlug)}`,
+        'el': `${INTL_DOMAIN}/el${pathFor('el', page.canonicalSlug)}`,
+        'x-default': `${RO_DOMAIN}/ro${pathFor('ro', page.canonicalSlug)}`,
       },
     },
   });

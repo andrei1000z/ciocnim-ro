@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { locales, defaultLocale, detectLocaleFromHeader } from './app/i18n/config';
+import { locales, defaultLocale, detectLocaleFromHeader, canonicalizeSlug, SLUG_MAP } from './app/i18n/config';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
@@ -38,6 +38,28 @@ export function middleware(request) {
 
   // Skip if path already has a valid locale
   if (locales.includes(firstSegment)) {
+    // Pentru BG/EL: dacă slug-ul e localizat, rewrite intern la slug canonic
+    // ca folder structure app/[locale]/traditii/ să se potrivească.
+    // Ex: /bg/tradicii → rewrite intern → /bg/traditii
+    //     /el/paradoseis → rewrite intern → /el/traditii
+    if ((firstSegment === 'bg' || firstSegment === 'el') && segments[2]) {
+      const localizedSlug = segments[2];
+      const canonicalSlug = canonicalizeSlug(localizedSlug, firstSegment);
+      // Dacă slug-ul era deja cel canonic (ex: /bg/traditii), lasă cum e
+      if (canonicalSlug !== localizedSlug) {
+        // Rewrite intern → serverul randerizează /bg/traditii dar URL-ul rămâne /bg/tradicii
+        const rewriteUrl = request.nextUrl.clone();
+        rewriteUrl.pathname = `/${firstSegment}/${canonicalSlug}${segments.slice(3).map(s => '/' + s).join('')}`;
+        return NextResponse.rewrite(rewriteUrl);
+      }
+      // Dacă userul tastează slug-ul canonic RO (ex: /bg/traditii), redirect 301 la slug-ul localizat
+      // ca să avem un singur URL canonic per limbă (SEO)
+      if (SLUG_MAP[firstSegment] && SLUG_MAP[firstSegment][localizedSlug] && SLUG_MAP[firstSegment][localizedSlug] !== localizedSlug) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = `/${firstSegment}/${SLUG_MAP[firstSegment][localizedSlug]}${segments.slice(3).map(s => '/' + s).join('')}`;
+        return NextResponse.redirect(redirectUrl, 301);
+      }
+    }
     return NextResponse.next();
   }
 

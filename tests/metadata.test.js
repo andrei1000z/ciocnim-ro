@@ -64,11 +64,11 @@ describe('sitemap.js', () => {
   const sitemapContent = fs.readFileSync(path.join(__dirname, '../app/sitemap.js'), 'utf-8');
 
   it('includes main pages', () => {
-    expect(sitemapContent).toContain('/traditii');
-    expect(sitemapContent).toContain('/retete');
-    expect(sitemapContent).toContain('/urari');
-    expect(sitemapContent).toContain('/calendar');
-    expect(sitemapContent).toContain('/vopsit-natural');
+    expect(sitemapContent).toContain('traditii');
+    expect(sitemapContent).toContain('retete');
+    expect(sitemapContent).toContain('urari');
+    expect(sitemapContent).toContain('calendar');
+    expect(sitemapContent).toContain('vopsit-natural');
   });
 
   it('is host-aware (dual domain support)', () => {
@@ -78,8 +78,12 @@ describe('sitemap.js', () => {
   });
 
   it('includes legal pages', () => {
-    expect(sitemapContent).toContain('/privacy');
-    expect(sitemapContent).toContain('/terms');
+    expect(sitemapContent).toContain('privacy');
+    expect(sitemapContent).toContain('terms');
+  });
+
+  it('uses localizeSlug for localized URLs', () => {
+    expect(sitemapContent).toContain('localizeSlug');
   });
 
   it('does not include game room pages', () => {
