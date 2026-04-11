@@ -1,6 +1,52 @@
 import redis from '@/app/lib/redis';
+import { randomBytes } from 'crypto';
 
 export const NUME_INTERZISE = ["BOT", "SISTEM", "ADMIN", "ANONIM"];
+
+const SESSION_TTL = 60 * 60 * 24 * 90; // 90 zile
+
+/**
+ * Validează că request-ul vine de la owner-ul real al numelui.
+ * Pentru acțiuni sensibile (sterge-cont, update-stats, get-user-stats etc.)
+ * Returnează { ok: true, name } sau { ok: false, status, error }.
+ *
+ * Backwards-compat: dacă numele NU are încă session reservat (legacy user),
+ * rezultă 401 cu hint să facă re-claim via schimba-porecla.
+ */
+export async function requireSession(request, ns, claimedName) {
+  if (!claimedName) return { ok: false, status: 400, error: "Nume lipsă" };
+  const token = request.headers.get('x-session');
+  if (!token || token.length < 32) return { ok: false, status: 401, error: "session-required" };
+  const cleanName = claimedName.toUpperCase();
+  const sessionName = await redis.get(`${ns}:session:${token}`);
+  if (!sessionName) return { ok: false, status: 401, error: "session-invalid" };
+  if (sessionName !== cleanName) return { ok: false, status: 403, error: "session-mismatch" };
+  // Refresh TTL pe fiecare hit
+  redis.expire(`${ns}:session:${token}`, SESSION_TTL).catch(() => {});
+  return { ok: true, name: cleanName };
+}
+
+/**
+ * Creează o sesiune nouă pentru un nume. Folosit doar din schimba-porecla
+ * după ce reservation NX a reușit sau e self-noop confirmat.
+ */
+export async function createSession(ns, name) {
+  const token = randomBytes(32).toString('hex');
+  const cleanName = name.toUpperCase();
+  await Promise.all([
+    redis.setex(`${ns}:session:${token}`, SESSION_TTL, cleanName),
+    redis.setex(`${ns}:session:byname:${cleanName}`, SESSION_TTL, token),
+  ]);
+  return token;
+}
+
+/**
+ * Verifică dacă un nume are deja sesiune (legacy detection).
+ */
+export async function hasSession(ns, name) {
+  const cleanName = name.toUpperCase();
+  return (await redis.exists(`${ns}:session:byname:${cleanName}`)) === 1;
+}
 
 export function sanitizeStr(val, maxLen = 100) {
   if (typeof val !== 'string') return '';
@@ -15,9 +61,12 @@ export function sanitizeId(val) {
 }
 
 export function getClientIp(request) {
-  return request.headers.get('x-real-ip')
-    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || 'unknown';
+  // Pe Vercel, x-forwarded-for e rescris autoritativ (clientul nu poate seta).
+  // x-real-ip era acceptat dar e user-spoofable → bypass total al rate limits.
+  // Citim DOAR x-forwarded-for, primul element (clientul real).
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) return xff.split(',')[0].trim();
+  return 'unknown';
 }
 
 const VALID_LOCALES = ['ro', 'bg', 'el', 'en'];

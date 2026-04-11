@@ -295,9 +295,11 @@ export default function ClientWrapper({ children }) {
   const updateStats = useCallback(async (type) => {
     if (!nume) return;
     try {
+      const session = safeLS.get('c_session');
+      if (!session) return; // no session = bootstrap pending, skip silently
       await fetch('/api/ciocnire', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Session': session },
         body: JSON.stringify({ actiune: 'update-stats', jucator: nume, text: type, locale })
       });
     } catch (e) {}
@@ -316,10 +318,13 @@ export default function ClientWrapper({ children }) {
 
     try {
       const storedTeamIds = JSON.parse(safeLS.get("c_teamIds") || "[]");
+      const existingSession = safeLS.get("c_session");
+      const headers = { 'Content-Type': 'application/json' };
+      if (existingSession) headers['X-Session'] = existingSession;
 
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           actiune: 'schimba-porecla',
           oldName: nume,
@@ -335,6 +340,9 @@ export default function ClientWrapper({ children }) {
         return false;
       }
 
+      // Salvează noul session token (dacă serverul îl emite)
+      if (data.session) safeLS.set("c_session", data.session);
+
       setNumeLocal(cleanName);
       safeLS.set("c_nume", cleanName);
       setUserStats(prev => {
@@ -349,6 +357,34 @@ export default function ClientWrapper({ children }) {
       return false;
     }
   }, [nume, setToastMsg, t, locale]);
+
+  // Bootstrap legacy: useri vechi au nume în localStorage dar fără c_session.
+  // La hydrate, încearcă să ia sesiunea pentru numele existent (server permite
+  // bootstrap dacă numele e rezervat dar fără owner-session încă).
+  useEffect(() => {
+    if (!isHydrated || !nume) return;
+    if (safeLS.get('c_session')) return;
+    (async () => {
+      try {
+        const storedTeamIds = JSON.parse(safeLS.get('c_teamIds') || '[]');
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            actiune: 'schimba-porecla',
+            oldName: null,
+            newName: nume,
+            teamIds: storedTeamIds,
+            locale,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.session) {
+          safeLS.set('c_session', data.session);
+        }
+      } catch {}
+    })();
+  }, [isHydrated, nume, locale]);
 
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)

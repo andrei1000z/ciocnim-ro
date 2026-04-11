@@ -11,6 +11,7 @@ import { useT } from "../../i18n/useT";
 import { useDictionary, useLocaleConfig } from "../../components/DictionaryProvider";
 import { esteNumeInterzis } from "../../lib/profanityFilter";
 import { safeLS } from "../../lib/utils";
+import { apiPost } from "../../lib/api";
 
 const RARITY_COLORS = {
   common: 'border-gray-600/30 bg-gray-900/20',
@@ -69,16 +70,8 @@ export default function ProfilPage() {
     const fetchData = async () => {
       try {
         const [achRes, histRes] = await Promise.all([
-          fetch('/api/ciocnire', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ actiune: 'get-achievements', jucator: nume, locale })
-          }).then(r => r.json()),
-          fetch('/api/ciocnire', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ actiune: 'get-history', jucator: nume, locale })
-          }).then(r => r.json()),
+          apiPost({ actiune: 'get-achievements', jucator: nume, locale }),
+          apiPost({ actiune: 'get-history', jucator: nume, locale }),
         ]);
         if (achRes.success) setAchievements(achRes.achievements || []);
         if (histRes.success) setHistory(histRes.history || []);
@@ -119,7 +112,7 @@ export default function ProfilPage() {
       const teamIds = JSON.parse(safeLS.get('c_teamIds') || '[]');
       const res = await fetch('/api/ciocnire', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(safeLS.get('c_session') ? { 'X-Session': safeLS.get('c_session') } : {}) },
         body: JSON.stringify({ actiune: 'sterge-cont', jucator: nume, teamIds, locale }),
       });
       const data = await res.json();

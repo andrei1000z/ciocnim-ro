@@ -10,6 +10,7 @@ import DualLeaderboard from "../components/DualLeaderboard";
 import GroupHub from "../components/GroupHub";
 import PlayModal from "../components/PlayModal";
 import { safeLS, safeCopy } from "../lib/utils";
+import { apiPost } from "../lib/api";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
 import { localeConfig } from "../i18n/config";
@@ -233,7 +234,7 @@ function HomeContent() {
     showConfirm(t('groups.kickConfirm', { name: member }), async () => {
       triggerVibrate();
       try {
-        await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "kick-member", teamId, member, jucator: nume, locale }) });
+        await apiPost({ actiune: "kick-member", teamId, member, jucator: nume, locale });
         setLoadedTeams(prev => prev.map(t => t.details.id === teamId ? { ...t, top: t.top.filter(m => m.member !== member) } : t));
       } catch { setToastMsg(t('notifications.errorKick')); }
     });
@@ -243,8 +244,8 @@ function HomeContent() {
     triggerVibrate([50, 50, 50]);
     const roomCode = `privat-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     try {
-      const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId, locale }) });
-      if (!res.ok) { setToastMsg(t('notifications.errorChallenge')); return; }
+      const data = await apiPost({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId, locale });
+      if (!data.success) { setToastMsg(t('notifications.errorChallenge')); return; }
       try { sessionStorage.setItem('room-host-token', 'provocare-host'); } catch {}
       const pfx = locale === 'ro' ? '' : `/${locale}`;
       router.push(`${pfx}/joc/${roomCode}?provocare=true&teamId=${teamId}`);
