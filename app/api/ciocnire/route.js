@@ -428,18 +428,19 @@ return redis.call('SCARD', KEYS[1])
         const oldClean = oldName ? oldName.toUpperCase() : null;
         if (NUME_INTERZISE.includes(newClean)) return NextResponse.json({ success: false, error: "Acest nume este rezervat de sistem." }, { status: 400 });
 
-        // Atomic reserve: SET NX previne race între doi useri care încearcă același nume
+        // Atomic reserve: SET NX previne race între doi useri care încearcă același nume.
+        // SECURITATE: reservation store = {name}, deci `owner === newClean` era mereu true
+        // și oricine putea "fura" numele #1 din top scriind schimba-porecla cu newName=X.
+        // Rule corectă: dacă NX eșuează → name e LUAT, 409 fără excepție (except self-noop).
         const nameKey = k(`nume_rezervat:${newClean}`);
         const NAME_TTL = 60 * 60 * 24 * 90;
         const reserved = await redis.set(nameKey, newClean, 'EX', NAME_TTL, 'NX');
         if (!reserved) {
-          const owner = await redis.get(nameKey);
-          const isOurs = owner === newClean || (owner && oldClean && owner === oldClean);
-          if (!isOurs) {
+          if (oldClean === newClean) {
+            await redis.expire(nameKey, NAME_TTL);
+          } else {
             return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
           }
-          // Self-rename sau legacy — refresh TTL + normalizează valoarea
-          await redis.set(nameKey, newClean, 'EX', NAME_TTL);
         }
 
         const hasTeams = oldClean && oldClean !== newClean && teamIds && teamIds.length > 0;
@@ -463,6 +464,29 @@ return redis.call('SCARD', KEYS[1])
           }
         }
         await pipeline.exec();
+        getClasamentJucatori(ns).then(top => pusher.trigger(ch('global'), 'update-complet', { topJucatori: top })).catch(() => {});
+        return NextResponse.json({ success: true });
+      }
+
+      case 'sterge-cont': {
+        if (!jucator) return NextResponse.json({ success: false, error: "Jucător lipsă" }, { status: 400 });
+        const delRlIp = getClientIp(request);
+        const delRlKey = k(`ratelimit:del:${delRlIp}`);
+        const delRl = await redis.set(delRlKey, '1', 'EX', 30, 'NX');
+        if (!delRl) return NextResponse.json({ success: false, error: "Așteaptă puțin." }, { status: 429 });
+
+        const cleanName = jucator.toUpperCase();
+        const delPipeline = redis.pipeline();
+        delPipeline.del(k(`nume_rezervat:${cleanName}`));
+        delPipeline.zrem(k('leaderboard_jucatori'), cleanName);
+        delPipeline.del(k(`user:${cleanName}:stats`));
+        delPipeline.del(k(`user:${cleanName}:history`));
+        delPipeline.del(k(`user:${cleanName}:achievements`));
+        delPipeline.del(k(`user:${cleanName}:visited_pages`));
+        if (Array.isArray(teamIds)) {
+          teamIds.forEach(tId => delPipeline.zrem(k(`team:${tId}:membri`), cleanName));
+        }
+        await delPipeline.exec();
         getClasamentJucatori(ns).then(top => pusher.trigger(ch('global'), 'update-complet', { topJucatori: top })).catch(() => {});
         return NextResponse.json({ success: true });
       }

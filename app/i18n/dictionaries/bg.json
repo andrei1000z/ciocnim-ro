@@ -621,7 +621,11 @@
       "minutesAgo": "преди {n} мин",
       "hoursAgo": "преди {n} ч",
       "daysAgo": "преди {n} дни",
-      "justNow": "току-що"
+      "justNow": "току-що",
+      "deleteAccount": "Изтрий акаунта",
+      "deleteAccountConfirm": "Сигурен ли си? Всички статистики, постижения и история ще бъдат изтрити завинаги. Името ще бъде освободено.",
+      "deleteAccountSuccess": "Акаунтът е изтрит.",
+      "deleteAccountError": "Грешка при изтриване. Опитай отново."
     },
     "despre": {
       "pageTitle": "За",

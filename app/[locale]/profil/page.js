@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import LocaleLink from "../../components/LocaleLink";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import PageHeader from "../../components/PageHeader";
@@ -9,6 +10,7 @@ import { getAchievements } from "../../lib/achievements";
 import { useT } from "../../i18n/useT";
 import { useDictionary, useLocaleConfig } from "../../components/DictionaryProvider";
 import { esteNumeInterzis } from "../../lib/profanityFilter";
+import { safeLS } from "../../lib/utils";
 
 const RARITY_COLORS = {
   common: 'border-gray-600/30 bg-gray-900/20',
@@ -42,6 +44,8 @@ export default function ProfilPage() {
   const [newName, setNewName] = useState("");
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
 
   const handleSkinChange = (newSkin) => {
     if (newSkin === userStats.skin) return;
@@ -104,6 +108,31 @@ export default function ProfilPage() {
       setNewName("");
     } else {
       setNameError(t('notifications.nameTaken'));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!nume || deleting) return;
+    if (!window.confirm(t('content.profil.deleteAccountConfirm'))) return;
+    setDeleting(true);
+    try {
+      const teamIds = JSON.parse(safeLS.get('c_teamIds') || '[]');
+      const res = await fetch('/api/ciocnire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actiune: 'sterge-cont', jucator: nume, teamIds, locale }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(t('content.profil.deleteAccountError'));
+        setDeleting(false);
+        return;
+      }
+      ['c_nume', 'c_stats', 'c_teamIds', 'c_visitorId'].forEach(key => safeLS.del(key));
+      window.location.href = locale === 'ro' ? '/' : `/${locale}`;
+    } catch {
+      alert(t('content.profil.deleteAccountError'));
+      setDeleting(false);
     }
   };
 
@@ -333,6 +362,18 @@ export default function ProfilPage() {
             </div>
           )}
         </section>
+
+        {nume && (
+          <div className="pt-4 border-t border-edge">
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="w-full px-4 py-3 bg-red-950/40 hover:bg-red-900/50 border border-red-900/40 text-red-300 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
+            >
+              {deleting ? "…" : `🗑 ${t('content.profil.deleteAccount')}`}
+            </button>
+          </div>
+        )}
 
         {!nume && (
           <div className="text-center bg-red-900/10 border border-red-900/20 rounded-2xl p-6">

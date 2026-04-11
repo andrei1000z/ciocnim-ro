@@ -614,7 +614,11 @@
       "minutesAgo": "{n} min în urmă",
       "hoursAgo": "{n} ore în urmă",
       "daysAgo": "{n} zile în urmă",
-      "justNow": "acum"
+      "justNow": "acum",
+      "deleteAccount": "Șterge contul",
+      "deleteAccountConfirm": "Sigur vrei să ștergi contul? Toate statisticile, realizările și istoricul vor fi șterse definitiv. Numele va fi eliberat.",
+      "deleteAccountSuccess": "Contul a fost șters.",
+      "deleteAccountError": "Nu am putut șterge contul. Încearcă din nou."
     },
     "despre": {
       "pageTitle": "Despre",
