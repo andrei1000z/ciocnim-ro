@@ -216,23 +216,33 @@ export default function ClientWrapper({ children }) {
   const visitorIdRef = useRef(null);
   const [connectionState, setConnectionState] = useState('connecting');
 
-  // Inițializare Pusher o singură dată — disconnect la unmount
+  // Inițializare Pusher o singură dată — disconnect la unmount.
+  // IMPORTANT: folosim DEFAULT-urile Pusher Cloud pentru wsHost/wsPort (port 443 cu
+  // cluster EU) — CSP-ul nostru permite DOAR port 443 pe *.pusher.com.
+  // Override-urile pentru wsPort/wsHost se aplică DOAR dacă sunt setate explicit prin env
+  // (ex: soketi self-hosted pe dev).
   useEffect(() => {
     const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS !== 'false';
-    const wsPort = parseInt(process.env.NEXT_PUBLIC_PUSHER_PORT || '6001');
-    const customHost = process.env.NEXT_PUBLIC_PUSHER_HOST || undefined;
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+    const customHost = process.env.NEXT_PUBLIC_PUSHER_HOST;
+    const customPort = process.env.NEXT_PUBLIC_PUSHER_PORT;
+    const pusherConfig = {
       cluster: 'eu',
-      wsHost: customHost,
-      httpHost: customHost,
-      wsPort: wsPort,
-      wssPort: wsPort,
       forceTLS: forceTLS,
       disableStats: true,
       enabledTransports: ['ws', 'wss'],
       activityTimeout: 30000,
       pongTimeout: 15000,
-    });
+    };
+    if (customHost) {
+      pusherConfig.wsHost = customHost;
+      pusherConfig.httpHost = customHost;
+    }
+    if (customPort) {
+      const p = parseInt(customPort);
+      pusherConfig.wsPort = p;
+      pusherConfig.wssPort = p;
+    }
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, pusherConfig);
     pusherRef.current = pusher;
 
     // Track connection state for visual indicator
