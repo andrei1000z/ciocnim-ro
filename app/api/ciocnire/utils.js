@@ -20,11 +20,16 @@ export function getClientIp(request) {
     || 'unknown';
 }
 
-export async function checkRateLimit(ip, actiune) {
+export function getNamespace(request) {
+  const host = request.headers.get('host') || '';
+  return host.includes('trosc.fun') ? 'intl' : 'ro';
+}
+
+export async function checkRateLimit(ip, actiune, ns = 'ro') {
   const isWrite = ['increment-global', 'lovitura', 'provocare-duel', 'creeaza-echipa'].includes(actiune);
   const maxRequests = isWrite ? 10 : 60;
   const windowSec = 60;
-  const key = `ratelimit:${ip}:${isWrite ? 'write' : 'read'}`;
+  const key = `${ns}:ratelimit:${ip}:${isWrite ? 'write' : 'read'}`;
   const luaScript = `
     local current = redis.call('incr', KEYS[1])
     if current == 1 then redis.call('expire', KEYS[1], ARGV[1]) end

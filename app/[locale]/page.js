@@ -96,8 +96,9 @@ function HomeContent() {
     if (!isHydrated || !teamIds || !globalPusherRef?.current) return;
     const pusher = globalPusherRef.current;
 
+    const ns = (typeof window !== 'undefined' && window.location.host.includes('trosc.fun')) ? 'intl' : 'ro';
     const channels = teamIds.split(",").map(tid => {
-      const ch = pusher.subscribe(`team-${tid}`);
+      const ch = pusher.subscribe(`${ns}-team-${tid}`);
       ch.bind("team-update", async () => {
         try {
           const r = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "get-team-details", teamId: tid, jucator: nume }) });
@@ -113,7 +114,7 @@ function HomeContent() {
     return () => {
       channels.forEach(({ tid, ch }) => {
         ch.unbind_all();
-        pusher.unsubscribe(`team-${tid}`);
+        pusher.unsubscribe(`${ns}-team-${tid}`);
       });
     };
   }, [isHydrated, teamIds, nume, globalPusherRef]);

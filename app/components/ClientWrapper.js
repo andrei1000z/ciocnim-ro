@@ -126,6 +126,13 @@ function LoadingScreen() {
 const DEFAULT_STATS = { nume: "", wins: 0, losses: 0, skin: "red", regiune: "Muntenia" };
 const emptySubscribe = () => () => {};
 
+// Client-side namespace must match server-side getNamespace() in app/api/ciocnire/utils.js
+// ciocnim.ro → 'ro', trosc.fun → 'intl'
+export function getClientNamespace() {
+  if (typeof window === 'undefined') return 'ro';
+  return window.location.host.includes('trosc.fun') ? 'intl' : 'ro';
+}
+
 // Data version — bump this to wipe all localStorage on next visit
 const DATA_VERSION = "2";
 
@@ -431,7 +438,9 @@ export default function ClientWrapper({ children }) {
   useEffect(() => {
     if (!isHydrated || !pusherRef.current) return;
 
-    const channel = pusherRef.current.subscribe('global');
+    const ns = getClientNamespace();
+    const globalChName = `${ns}-global`;
+    const channel = pusherRef.current.subscribe(globalChName);
     channel.bind('update-complet', (data) => {
       if (data.total !== undefined) setTotalGlobal(parseInt(data.total));
       if (data.topRegiuni) setTopRegiuni(data.topRegiuni);
@@ -443,14 +452,15 @@ export default function ClientWrapper({ children }) {
 
     return () => {
       channel.unbind_all();
-      pusherRef.current?.unsubscribe('global');
+      pusherRef.current?.unsubscribe(globalChName);
     };
   }, [isHydrated]);
 
   useEffect(() => {
     if (!isHydrated || !nume || !pusherRef.current) return;
 
-    const channelName = `user-notif-${nume}`;
+    const ns = getClientNamespace();
+    const channelName = `${ns}-user-notif-${nume}`;
     const channel = pusherRef.current.subscribe(channelName);
     let notifTimer = null;
     channel.bind('duel-request', (data) => {

@@ -424,7 +424,9 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (isBotMatch || !pusherRef?.current) return;
     const pusher = pusherRef.current;
-    const arenaChannel = pusher.subscribe(`arena-v22-${room}`);
+    const ns = (typeof window !== 'undefined' && window.location.host.includes('trosc.fun')) ? 'intl' : 'ro';
+    const arenaChannelName = `${ns}-arena-v22-${room}`;
+    const arenaChannel = pusher.subscribe(arenaChannelName);
 
     arenaChannel.bind("pusher:subscription_succeeded", () => {
       // Trimitem join imediat dacă avem deja nume (hidratat)
@@ -480,7 +482,7 @@ function ArenaMaster({ room }) {
        executeBattleRef.current(data);
     });
 
-    return () => { pusher.unsubscribe(`arena-v22-${room}`); };
+    return () => { pusher.unsubscribe(arenaChannelName); };
   // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
