@@ -108,89 +108,20 @@ const GreetingGenerator = ({ greetings, locale }) => {
     setGenerated(true);
   };
 
+  const handleNativeShare = () => {
+    const text = `${greetingText}\n\n${greetings.shareFooter} ${getSiteUrl(locale)}/${locale}`;
+    if (navigator.share) {
+      navigator.share({ title: greetings.generatorTitle, text }).catch(() => {});
+    } else {
+      try { navigator.clipboard.writeText(text); } catch {}
+    }
+  };
+
   const handleShareWhatsApp = () => shareWhatsApp(greetingText);
 
   const handleCopyCard = async () => {
     try {
       await navigator.clipboard.writeText(greetingText);
-    } catch {}
-  };
-
-  const handleDownloadImage = async () => {
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 1080;
-      canvas.height = 1080;
-
-      // Background gradient
-      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      grad.addColorStop(0, '#1a0808');
-      grad.addColorStop(0.5, '#0c0a0a');
-      grad.addColorStop(1, '#1a0f05');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Decorative border
-      ctx.strokeStyle = 'rgba(220, 38, 38, 0.3)';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
-
-      // Egg emoji (text)
-      ctx.font = '120px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🥚', canvas.width / 2, 200);
-
-      // Title
-      ctx.fillStyle = '#dc2626';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.fillText(greetings.generatorTitle, canvas.width / 2, 280);
-
-      // Message text (word-wrapped) — modern, no italic
-      ctx.fillStyle = '#e5e5e5';
-      ctx.font = '500 36px sans-serif';
-      ctx.textAlign = 'center';
-      const words = greetingText.split(' ');
-      let line = '';
-      let y = 380;
-      const maxWidth = canvas.width - 160;
-      for (const word of words) {
-        const testLine = line + word + ' ';
-        if (ctx.measureText(testLine).width > maxWidth && line) {
-          ctx.fillText(line.trim(), canvas.width / 2, y);
-          line = word + ' ';
-          y += 50;
-        } else {
-          line = testLine;
-        }
-      }
-      if (line.trim()) ctx.fillText(line.trim(), canvas.width / 2, y);
-
-      // Footer
-      ctx.fillStyle = 'rgba(220, 38, 38, 0.6)';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.fillText('ciocnim.ro', canvas.width / 2, canvas.height - 80);
-
-      // Download or share
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        if (navigator.share && navigator.canShare) {
-          const file = new File([blob], 'felicitare-paste.png', { type: 'image/png' });
-          if (navigator.canShare({ files: [file] })) {
-            try {
-              await navigator.share({ files: [file], title: greetings.generatorTitle });
-              return;
-            } catch {}
-          }
-        }
-        // Fallback: download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'felicitare-paste.png';
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/png');
     } catch {}
   };
 
@@ -251,24 +182,24 @@ const GreetingGenerator = ({ greetings, locale }) => {
               </div>
             </div>
 
-            <div className="flex gap-2 mt-4 justify-center">
+            <div className="flex flex-wrap gap-2 mt-4 justify-center">
+              <button
+                onClick={handleNativeShare}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-900/20 text-red-400 hover:bg-red-900/30 border border-red-900/30 transition-all active:scale-95"
+              >
+                📤 {greetings.generatorShare}
+              </button>
               <button
                 onClick={handleShareWhatsApp}
                 className="px-5 py-2.5 rounded-xl text-sm font-bold bg-green-900/20 text-green-400 hover:bg-green-900/40 border border-green-900/30 transition-all active:scale-95"
               >
-                💬 {greetings.generatorShare}
+                💬 WhatsApp
               </button>
               <button
                 onClick={handleCopyCard}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-900/20 text-red-400 hover:bg-red-900/30 border border-red-900/30 transition-all active:scale-95"
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-elevated text-body hover:bg-overlay border border-edge-strong transition-all active:scale-95"
               >
                 📋 {greetings.generatorCopy}
-              </button>
-              <button
-                onClick={handleDownloadImage}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-900/20 text-amber-400 hover:bg-amber-900/30 border border-amber-900/30 transition-all active:scale-95"
-              >
-                🖼️ {greetings.generatorImage || "Image"}
               </button>
               <button
                 onClick={handleGenerate}

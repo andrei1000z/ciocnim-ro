@@ -1090,50 +1090,14 @@ function ArenaMaster({ room }) {
                 transition={{ delay: 0.55, duration: 0.4 }}
                 className="flex flex-col gap-2.5 px-5 pb-6"
               >
-                {/* Share Result Button */}
+                {/* Share Result Button — native share sheet (text only) */}
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     const siteName = t('seo.siteName');
                     const text = rezultat.win
                       ? t('result.shareWinText', { site: siteName, wins: userStats.wins || 0 })
                       : t('result.shareLoseText', { site: siteName });
                     const url = `https://${siteName.toLowerCase()}`;
-                    // Try to generate and share an image card
-                    try {
-                      const canvas = document.createElement('canvas');
-                      const ctx = canvas.getContext('2d');
-                      canvas.width = 1080; canvas.height = 1080;
-                      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                      if (rezultat.win) {
-                        grad.addColorStop(0, '#002810'); grad.addColorStop(1, '#0c0a0a');
-                      } else {
-                        grad.addColorStop(0, '#280808'); grad.addColorStop(1, '#0c0a0a');
-                      }
-                      ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                      ctx.strokeStyle = rezultat.win ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)';
-                      ctx.lineWidth = 3; ctx.strokeRect(40, 40, 1000, 1000);
-                      ctx.font = '120px serif'; ctx.textAlign = 'center';
-                      ctx.fillText(rezultat.win ? '👑' : '🥚', 540, 300);
-                      const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                      ctx.fillStyle = rezultat.win ? '#22c55e' : '#ef4444';
-                      ctx.font = `bold 72px ${fontFamily}`;
-                      ctx.fillText(rezultat.win ? t('result.victory').toUpperCase() : t('result.defeat'), 540, 450);
-                      ctx.fillStyle = '#e5e5e5'; ctx.font = `36px ${fontFamily}`;
-                      ctx.fillText(nume || t('game.player'), 540, 550);
-                      ctx.fillStyle = '#9ca3af'; ctx.font = `28px ${fontFamily}`;
-                      ctx.fillText(`${userStats.wins || 0} ${t('result.winsCount')}`, 540, 620);
-                      ctx.fillStyle = 'rgba(220,38,38,0.6)'; ctx.font = `bold 32px ${fontFamily}`;
-                      ctx.fillText(t('seo.siteName').toLowerCase(), 540, 950);
-                      const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-                      if (blob && navigator.share && navigator.canShare) {
-                        const file = new File([blob], 'rezultat-ciocnim.png', { type: 'image/png' });
-                        if (navigator.canShare({ files: [file] })) {
-                          await navigator.share({ files: [file], title: siteName, text });
-                          return;
-                        }
-                      }
-                    } catch {}
-                    // Fallback to text share
                     if (navigator.share) {
                       navigator.share({ title: siteName, text, url }).catch(() => {
                         safeCopy(`${text} ${url}`);
