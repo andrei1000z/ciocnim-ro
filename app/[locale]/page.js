@@ -190,7 +190,7 @@ function HomeContent() {
       const data = await res.json();
       if (data.success) {
         try { sessionStorage.setItem('room-host-token', data.isHost ? 'arena-host' : ''); } catch {}
-        router.push(`/joc/${data.roomId}`);
+        router.push(`/${locale}/joc/${data.roomId}`);
       }
     } catch { setToastMsg(t('notifications.networkError')); }
     finally { setIsJoiningArena(false); }
@@ -245,7 +245,7 @@ function HomeContent() {
       const res = await fetch("/api/ciocnire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ actiune: "provocare-duel", jucator: nume, oponentNume: oponent, roomId: roomCode, teamId, locale }) });
       if (!res.ok) { setToastMsg(t('notifications.errorChallenge')); return; }
       try { sessionStorage.setItem('room-host-token', 'provocare-host'); } catch {}
-      router.push(`/joc/${roomCode}?provocare=true&teamId=${teamId}`);
+      router.push(`/${locale}/joc/${roomCode}?provocare=true&teamId=${teamId}`);
     } catch { setToastMsg(t('notifications.errorNetwork')); }
   };
 

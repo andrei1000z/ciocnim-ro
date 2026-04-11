@@ -568,7 +568,7 @@ export default function ClientWrapper({ children }) {
                   <div className="flex flex-col gap-3 pt-6 relative z-50">
                     <button
                       className="w-full bg-red-700 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg shadow-red-900/30 active:scale-95 text-white cursor-pointer pointer-events-auto"
-                      onClick={() => { setNotificare(null); router.push(`/joc/${notificare.roomId}?provocare=true&teamId=${notificare.teamId || ''}`); }}
+                      onClick={() => { setNotificare(null); router.push(`/${locale}/joc/${notificare.roomId}?provocare=true&teamId=${notificare.teamId || ''}`); }}
                     >
                       {t('notifications.accept')}
                     </button>
