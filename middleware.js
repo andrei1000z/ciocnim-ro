@@ -68,12 +68,12 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // ═══ CIOCNIM.RO: rewrite intern /traditii → /ro/traditii ═══
-  // URL-ul rămâne clean (fără /ro) dar serverul randerizează cu locale=ro
+  // ═══ CIOCNIM.RO: rewrite /foo → /ro/foo se face acum la EDGE level prin
+  // next.config.mjs rewrites (beforeFiles). Middleware nu mai adaugă header-ul
+  // X-Nextjs-Rewritten-Path care pe iOS Safari declanșa CORS access-control.
+  // Pentru ciocnim.ro fără locale, lăsăm Next.js să gestioneze via config rewrite.
   if (isCiocnim) {
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = `/ro${pathname}`;
-    return NextResponse.rewrite(rewriteUrl);
+    return NextResponse.next();
   }
 
   // ═══ TROSC.FUN: default /en dacă user ajunge la root fără locale ═══

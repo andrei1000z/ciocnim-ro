@@ -878,7 +878,7 @@ function ArenaMaster({ room }) {
             <OuTitan skin={me.skin} spart={rezultat && !rezultat.win} hasStar={me.hasStar} isGolden={me.isGolden} />
             <div className="bg-elevated backdrop-blur-md p-3 md:p-4 rounded-2xl text-center border border-red-900/30 border-l-2 border-l-green-500/60 relative w-full shadow-lg shadow-black/30 overflow-hidden">
               <span suppressHydrationWarning className="text-xs md:text-xs font-black uppercase tracking-widest text-red-500/60 block mb-1 truncate relative z-10">{userStats.regiune || t('game.regionUnknown')}</span>
-              <span suppressHydrationWarning className="text-sm md:text-xl font-black text-heading italic relative z-10 truncate block">{nume}</span>
+              <span suppressHydrationWarning className="text-sm md:text-xl font-black text-heading relative z-10 truncate block">{nume}</span>
             </div>
           </motion.div>
 

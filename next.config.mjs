@@ -3,6 +3,33 @@ const nextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   compress: true,
+  // Edge-level rewrites: ciocnim.ro/foo → /ro/foo intern, fără headerul
+  // X-Nextjs-Rewritten-Path pe care iOS Safari îl trata ca problemă CORS
+  // la RSC prefetch. Transparent pentru client, fast path pe Vercel edge.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Homepage ciocnim.ro/ → /ro
+        {
+          source: '/',
+          destination: '/ro',
+          has: [{ type: 'host', value: 'www.ciocnim.ro' }],
+        },
+        // Orice altceva: ciocnim.ro/:path → /ro/:path
+        // Excludem /ro/* (ca să nu se rewrite-uie iar) și /api, /_next
+        {
+          source: '/:path((?!ro|api|_next|icon\\.svg|apple-icon|manifest|robots|sitemap|favicon|sw|og-).*)',
+          destination: '/ro/:path',
+          has: [{ type: 'host', value: 'www.ciocnim.ro' }],
+        },
+        {
+          source: '/:path((?!ro|api|_next|icon\\.svg|apple-icon|manifest|robots|sitemap|favicon|sw|og-).*)/:rest*',
+          destination: '/ro/:path/:rest*',
+          has: [{ type: 'host', value: 'www.ciocnim.ro' }],
+        },
+      ],
+    };
+  },
   async headers() {
     return [
       {
