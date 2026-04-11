@@ -72,6 +72,7 @@ export async function POST(request) {
 
         // Derive esteCastigator server-side from the lovitura stored in Redis
         let serverEsteCastigator = false;
+        let battleTimestamp = null;
         const safeName = jucator ? jucator.toUpperCase() : null;
         if (safeName) {
           const lovituraRaw = await redis.get(k(`room:${roomId}:lovitura`));
@@ -80,12 +81,23 @@ export async function POST(request) {
               const lovituraData = JSON.parse(lovituraRaw);
               const esteAtacant = lovituraData.atacant === safeName;
               serverEsteCastigator = esteAtacant ? lovituraData.castigaCelCareDa : !lovituraData.castigaCelCareDa;
+              battleTimestamp = lovituraData.t;
             } catch {}
           }
         }
 
+        // Dedupe global counter: doar primul client dintre cei 2 din camera
+        // bump-uie `global_ciocniri_total`. Stats per-user (wins/losses) sunt
+        // oricum per-user, deci nu au nevoie de dedupe.
+        let shouldCountGlobal = true;
+        if (battleTimestamp && roomId) {
+          const dedupeKey = k(`counted:${roomId}:${battleTimestamp}`);
+          const setResult = await redis.set(dedupeKey, '1', 'EX', 60, 'NX');
+          shouldCountGlobal = setResult !== null;
+        }
+
         const pipeline = redis.pipeline();
-        pipeline.incr(k('global_ciocniri_total'));
+        if (shouldCountGlobal) pipeline.incr(k('global_ciocniri_total'));
         if (safeName && serverEsteCastigator) {
           pipeline.zincrby(k('leaderboard_jucatori'), 1, safeName);
           if (regiune && regiune !== "Alege regiunea...") pipeline.zincrby(k('leaderboard_regiuni'), 1, regiune);
@@ -100,7 +112,14 @@ export async function POST(request) {
           getClasamentJucatori(ns),
           safeName ? getUserStats(ns, safeName) : Promise.resolve(null),
         ]);
-        const noulTotal = results[0][1];
+        // Dacă am contorizat global (primul client), primul rezultat e incr-ul.
+        // Altfel citim direct counter-ul (nu l-am incrementat, dar trebuie returnat).
+        let noulTotal;
+        if (shouldCountGlobal) {
+          noulTotal = results[0][1];
+        } else {
+          noulTotal = parseInt(await redis.get(k('global_ciocniri_total'))) || 0;
+        }
 
         pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
         if (teamId) pusher.trigger(ch(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
@@ -223,28 +242,34 @@ return redis.call('SCARD', KEYS[1])
         await redis.sadd(k(`room:${roomId}:revansa`), revClean);
         await redis.expire(k(`room:${roomId}:revansa`), 300);
         const revCount = await redis.scard(k(`room:${roomId}:revansa`));
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa', { jucator: revClean, t: Date.now() }).catch(() => {});
+        const revTs = Date.now();
+        pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa', { jucator: revClean, t: revTs }).catch(() => {});
         if (revCount >= 2) {
           redis.del(k(`room:${roomId}:revansa`)).catch(() => {});
           redis.del(k(`room:${roomId}:lovitura`)).catch(() => {});
-          redis.setex(k(`room:${roomId}:revansa-ok`), 60, '1').catch(() => {});
-          pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: Date.now() }).catch(() => {});
-          return NextResponse.json({ success: true, revansaOk: true });
+          // Stocăm TIMESTAMP-ul ca valoare, nu '1'. Clienții folosesc comparație
+          // cu ref local ca să nu reseteze multiplu pentru același revansa-ok.
+          redis.setex(k(`room:${roomId}:revansa-ok`), 120, String(revTs)).catch(() => {});
+          pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { t: revTs }).catch(() => {});
+          return NextResponse.json({ success: true, revansaOk: true, revansaOkAt: revTs });
         }
         return NextResponse.json({ success: true, revansaOk: false, count: revCount });
       }
 
       case 'clear-round': {
         if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
-        redis.del(k(`room:${roomId}:revansa-ok`), k(`room:${roomId}:lovitura`), k(`room:${roomId}:revansa`)).catch(() => {});
+        // NU ștergem revansa-ok aici — lăsăm TTL-ul de 120s. Clienții folosesc
+        // timestamp comparison ca să nu reseteze multiplu.
+        redis.del(k(`room:${roomId}:lovitura`), k(`room:${roomId}:revansa`)).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
       case 'revansa-ok': {
         if (!roomId || !jucator) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         redis.del(k(`room:${roomId}:revansa`), k(`room:${roomId}:lovitura`)).catch(() => {});
-        redis.setex(k(`room:${roomId}:revansa-ok`), 60, '1').catch(() => {});
-        pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: Date.now() }).catch(() => {});
+        const revOkTs = Date.now();
+        redis.setex(k(`room:${roomId}:revansa-ok`), 120, String(revOkTs)).catch(() => {});
+        pusher.trigger(ch(`arena-v22-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs }).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
@@ -254,8 +279,10 @@ return redis.call('SCARD', KEYS[1])
           redis.smembers(k(`room:${roomId}:revansa`)),
           redis.get(k(`room:${roomId}:revansa-ok`)),
         ]);
-        if (revOkFlag) redis.del(k(`room:${roomId}:revansa-ok`), k(`room:${roomId}:lovitura`)).catch(() => {});
-        return NextResponse.json({ success: true, players: revPlayers, revansaOk: !!revOkFlag });
+        // NU mai ștergem flag-ul la read — lăsăm TTL 120s. Clienții filtrează
+        // prin timestamp comparison ca să nu reseteze multiplu pentru același flag.
+        const revansaOkAt = revOkFlag ? parseInt(revOkFlag) || 0 : 0;
+        return NextResponse.json({ success: true, players: revPlayers, revansaOk: !!revOkFlag, revansaOkAt });
       }
 
       case 'creeaza-camera-privata': {

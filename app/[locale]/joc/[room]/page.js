@@ -207,6 +207,9 @@ function ArenaMaster({ room }) {
   const lastStrikeRef = useRef(0); // debounce: max 1 lovitură la 150ms
   const strikePendingRef = useRef(false);
   const resetForRevansaRef = useRef(null);
+  // Dedupe pentru revansa-ok: păstrăm timestamp-ul ultimului reset ca să nu
+  // triggerăm resetul de multiple ori pentru același eveniment (Pusher + polling).
+  const lastRevansaAtRef = useRef(0);
   const teamIdPreluat = searchParams.get("teamId");
   const [isHost, setIsHost] = useState(false);
   const isPrivate = room.includes("privat-");
@@ -359,7 +362,11 @@ function ArenaMaster({ room }) {
         });
         const data = await res.json();
         if (data.success) {
-          if (data.revansaOk) {
+          // Timestamp dedupe: resetăm DOAR dacă flag-ul e mai nou decât ultimul
+          // reset știut de clientul ăsta. Previne double-reset și flag-uri vechi
+          // care persistă după reset (TTL 120s).
+          if (data.revansaOk && data.revansaOkAt && data.revansaOkAt > lastRevansaAtRef.current) {
+            lastRevansaAtRef.current = data.revansaOkAt;
             resetForRevansaRef.current?.();
           } else if (data.players && data.players.length > 0) {
             setRevansaRequests(prev => {
@@ -492,8 +499,12 @@ function ArenaMaster({ room }) {
       setRevansaRequests(prev => ({ ...prev, [data.jucator]: true }));
     });
 
-    arenaChannel.bind("revansa-ok", () => {
-      resetForRevansaRef.current?.();
+    arenaChannel.bind("revansa-ok", (data) => {
+      const ts = data?.t || Date.now();
+      if (ts > lastRevansaAtRef.current) {
+        lastRevansaAtRef.current = ts;
+        resetForRevansaRef.current?.();
+      }
     });
 
     arenaChannel.bind("lovitura", (data) => {
@@ -729,7 +740,12 @@ function ArenaMaster({ room }) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ roomId: room, actiune: 'revansa', jucator: nume, locale })
     }).then(r => r.json()).then(data => {
-      if (data.revansaOk) resetForRevansaRef.current?.();
+      if (data.revansaOk) {
+        if (data.revansaOkAt && data.revansaOkAt > lastRevansaAtRef.current) {
+          lastRevansaAtRef.current = data.revansaOkAt;
+        }
+        resetForRevansaRef.current?.();
+      }
     }).catch(() => {});
   };
 
