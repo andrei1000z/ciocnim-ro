@@ -33,7 +33,8 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
           sessionStorage.setItem('room-host-token', data.hostToken || '');
         } catch {}
         onClose();
-        router.push(`/${locale}/joc/privat-${data.cod}`);
+        const prefix = locale === 'ro' ? '' : `/${locale}`;
+        router.push(`${prefix}/joc/privat-${data.cod}`);
       } else { setRoomError(data.error || t('playModal.cantCreate')); }
     } catch { setRoomError(t('playModal.networkError')); }
     finally { setIsCreating(false); }
@@ -47,7 +48,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
       if (!res.ok) { setRoomError(t('playModal.serverError')); return; }
       const data = await res.json();
       if (!data.success) { setRoomError(data.error || t('playModal.roomOccupied')); }
-      else { onClose(); router.push(`/${locale}/joc/privat-${roomCode}`); }
+      else { onClose(); const prefix = locale === 'ro' ? '' : `/${locale}`; router.push(`${prefix}/joc/privat-${roomCode}`); }
     } catch { setRoomError(t('playModal.networkError')); }
     finally { setIsJoining(false); }
   };

@@ -16,14 +16,17 @@ export default function LocaleLink({ href, ...props }) {
 
   let localizedHref = href;
   if (typeof href === 'string' && href.startsWith('/')) {
-    // Split path în segmente și localizează primul segment (dacă e un slug cunoscut)
-    const segments = href.split('/').filter(Boolean); // ["traditii"] sau ["joc", "ABCD"]
+    const segments = href.split('/').filter(Boolean);
     if (segments.length > 0) {
       segments[0] = localizeSlug(segments[0], locale);
     }
-    localizedHref = `/${locale}/${segments.join('/')}`;
-    // Edge case: href === "/" → /{locale}
-    if (href === '/') localizedHref = `/${locale}`;
+    // ro = mono-locale pe ciocnim.ro → URL-urile nu au prefix /ro
+    // bg/el/en = pe trosc.fun → URL-urile au prefix /{locale}
+    if (locale === 'ro') {
+      localizedHref = href === '/' ? '/' : `/${segments.join('/')}`;
+    } else {
+      localizedHref = href === '/' ? `/${locale}` : `/${locale}/${segments.join('/')}`;
+    }
   }
 
   return <Link href={localizedHref} {...props} />;

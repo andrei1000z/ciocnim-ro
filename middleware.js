@@ -29,7 +29,7 @@ export function middleware(request) {
   // ═══ HARD SPLIT: redirect 301 cross-domain ═══
   // Force RO content on ciocnim.ro
   if (isTrosc && firstSegment === 'ro') {
-    const url = new URL(`https://www.ciocnim.ro${pathname}${request.nextUrl.search}`);
+    const url = new URL(`https://www.ciocnim.ro${pathname.replace(/^\/ro/, '') || '/'}${request.nextUrl.search}`);
     return NextResponse.redirect(url, 301);
   }
   // Force international (bg/el/en) content on trosc.fun
@@ -38,21 +38,27 @@ export function middleware(request) {
     return NextResponse.redirect(url, 301);
   }
 
-  // Skip if path already has a valid locale
+  // ═══ CIOCNIM.RO: strip /ro prefix from URLs (mono-locale) ═══
+  // Canonical URL has no locale prefix. User-typed /ro/traditii → 301 to /traditii.
+  if (isCiocnim && firstSegment === 'ro') {
+    const strippedPath = pathname.replace(/^\/ro/, '') || '/';
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = strippedPath;
+    return NextResponse.redirect(redirectUrl, 301);
+  }
+
+  // Skip if path already has a valid locale (bg/el/en on trosc.fun)
   if (locales.includes(firstSegment)) {
     // Pentru BG/EL/EN: dacă slug-ul e localizat, rewrite intern la slug canonic
     // ca folder structure app/[locale]/traditii/ să se potrivească.
     if ((firstSegment === 'bg' || firstSegment === 'el' || firstSegment === 'en') && segments[2]) {
       const localizedSlug = segments[2];
       const canonicalSlug = canonicalizeSlug(localizedSlug, firstSegment);
-      // Dacă slug-ul era deja cel canonic (ex: /bg/traditii), lasă cum e
       if (canonicalSlug !== localizedSlug) {
-        // Rewrite intern → serverul randerizează /bg/traditii dar URL-ul rămâne /bg/tradicii
         const rewriteUrl = request.nextUrl.clone();
         rewriteUrl.pathname = `/${firstSegment}/${canonicalSlug}${segments.slice(3).map(s => '/' + s).join('')}`;
         return NextResponse.rewrite(rewriteUrl);
       }
-      // Dacă userul tastează slug-ul canonic RO (ex: /bg/traditii), redirect 301 la slug-ul localizat
       if (SLUG_MAP[firstSegment] && SLUG_MAP[firstSegment][localizedSlug] && SLUG_MAP[firstSegment][localizedSlug] !== localizedSlug) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = `/${firstSegment}/${SLUG_MAP[firstSegment][localizedSlug]}${segments.slice(3).map(s => '/' + s).join('')}`;
@@ -62,13 +68,17 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // Domain-based locale default
-  // trosc.fun → always /en (international, no browser detection)
-  // ciocnim.ro → always /ro
-  const detected = isTrosc ? 'en' : 'ro';
+  // ═══ CIOCNIM.RO: rewrite intern /traditii → /ro/traditii ═══
+  // URL-ul rămâne clean (fără /ro) dar serverul randerizează cu locale=ro
+  if (isCiocnim) {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = `/ro${pathname}`;
+    return NextResponse.rewrite(rewriteUrl);
+  }
 
+  // ═══ TROSC.FUN: default /en dacă user ajunge la root fără locale ═══
   const url = request.nextUrl.clone();
-  url.pathname = `/${detected}${pathname}`;
+  url.pathname = `/en${pathname}`;
   return NextResponse.redirect(url);
 }
 

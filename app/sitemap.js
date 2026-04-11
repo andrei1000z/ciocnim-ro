@@ -33,18 +33,27 @@ export default async function sitemap() {
     return '/' + localizeSlug(canonicalSlug, locale);
   };
 
+  // ro URL-uri NU au prefix /ro (mono-locale pe ciocnim.ro)
+  // bg/el/en URL-uri au prefix /{locale} (pe trosc.fun)
+  const urlFor = (locale, page, baseDomain) => {
+    if (locale === 'ro') {
+      return `${baseDomain}${pathFor(locale, page.canonicalSlug) || '/'}`;
+    }
+    return `${baseDomain}/${locale}${pathFor(locale, page.canonicalSlug)}`;
+  };
+
   const buildEntry = (locale, page, baseDomain) => ({
-    url: `${baseDomain}/${locale}${pathFor(locale, page.canonicalSlug)}`,
+    url: urlFor(locale, page, baseDomain),
     lastModified: LAST_MODIFIED,
     changeFrequency: page.changeFrequency,
     priority: page.priority,
     alternates: {
       languages: {
-        'ro': `${RO_DOMAIN}/ro${pathFor('ro', page.canonicalSlug)}`,
-        'bg': `${INTL_DOMAIN}/bg${pathFor('bg', page.canonicalSlug)}`,
-        'el': `${INTL_DOMAIN}/el${pathFor('el', page.canonicalSlug)}`,
-        'en': `${INTL_DOMAIN}/en${pathFor('en', page.canonicalSlug)}`,
-        'x-default': `${INTL_DOMAIN}/en${pathFor('en', page.canonicalSlug)}`,
+        'ro': urlFor('ro', page, RO_DOMAIN),
+        'bg': urlFor('bg', page, INTL_DOMAIN),
+        'el': urlFor('el', page, INTL_DOMAIN),
+        'en': urlFor('en', page, INTL_DOMAIN),
+        'x-default': urlFor('en', page, INTL_DOMAIN),
       },
     },
   });

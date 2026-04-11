@@ -276,7 +276,7 @@ function ArenaMaster({ room }) {
       });
       const data = await res.json();
       if (!data.success && data.error === "Camera este ocupată!") {
-        router.replace(`/${locale}?error=ocupata`);
+        router.replace(locale === 'ro' ? '/?error=ocupata' : `/${locale}?error=ocupata`);
         return;
       }
       // Server determines host status
@@ -558,7 +558,7 @@ function ArenaMaster({ room }) {
   useEffect(() => {
     if (!rezultat) return;
     const timeout = setTimeout(() => {
-      router.replace(`/${locale}`);
+      router.replace(locale === 'ro' ? '/' : `/${locale}`);
     }, 45000);
     return () => clearTimeout(timeout);
   }, [rezultat, router, locale]);
@@ -1123,7 +1123,7 @@ function ArenaMaster({ room }) {
                   }
                 </button>
                 <button
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push(locale === 'ro' ? '/' : `/${locale}`)}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto text-muted bg-card border-edge hover:bg-card-hover hover:text-dim"
                 >
                   {t('result.home')}

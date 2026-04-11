@@ -50,12 +50,14 @@ export async function buildPageMetadata({ locale, slugKey, metaKey, noindex = fa
   const twitterDescription = interp(raw.twitterDescription, params) || description;
 
   const currentSlug = localizeSlug(slugKey, locale);
-  const currentUrl = `${baseUrl}/${locale}/${currentSlug}`;
+  // ro e mono-locale pe ciocnim.ro (URL fără /ro). bg/el/en au prefix /{locale}.
+  const currentUrl = locale === 'ro' ? `${baseUrl}/${currentSlug}` : `${baseUrl}/${locale}/${currentSlug}`;
 
   const languages = {};
   for (const l of locales) {
     const domain = l === 'ro' ? DOMAINS.ro : DOMAINS.intl;
-    languages[l] = `${domain}/${l}/${localizeSlug(slugKey, l)}`;
+    const slugL = localizeSlug(slugKey, l);
+    languages[l] = l === 'ro' ? `${domain}/${slugL}` : `${domain}/${l}/${slugL}`;
   }
   languages['x-default'] = `${DOMAINS.intl}/en/${localizeSlug(slugKey, 'en')}`;
 
@@ -99,12 +101,15 @@ export async function buildBreadcrumb({ locale, slugKey, metaKey }) {
   const pageLabel = raw.breadcrumb || key;
   const currentSlug = localizeSlug(slugKey, locale);
 
+  const homeUrl = locale === 'ro' ? baseUrl : `${baseUrl}/${locale}`;
+  const pageUrl = locale === 'ro' ? `${baseUrl}/${currentSlug}` : `${baseUrl}/${locale}/${currentSlug}`;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: homeLabel, item: `${baseUrl}/${locale}` },
-      { '@type': 'ListItem', position: 2, name: pageLabel, item: `${baseUrl}/${locale}/${currentSlug}` },
+      { '@type': 'ListItem', position: 1, name: homeLabel, item: homeUrl },
+      { '@type': 'ListItem', position: 2, name: pageLabel, item: pageUrl },
     ],
   };
 }

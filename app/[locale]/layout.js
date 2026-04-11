@@ -54,7 +54,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: dict.meta.ogTitle,
       description: dict.meta.ogDescription,
-      url: `${baseUrl}/${locale}`,
+      url: locale === 'ro' ? baseUrl : `${baseUrl}/${locale}`,
       siteName: dict.meta.applicationName,
       images: [{ url: ogImage, width: 1200, height: 630, alt: dict.meta.title, type: "image/jpeg" }],
       locale: config.ogLocale,
@@ -67,10 +67,10 @@ export async function generateMetadata({ params }) {
       images: [ogImage],
     },
     alternates: {
-      canonical: `${baseUrl}/${locale}`,
+      canonical: locale === 'ro' ? baseUrl : `${baseUrl}/${locale}`,
       languages: {
-        // RO trăiește pe ciocnim.ro, EN/BG/EL pe trosc.fun
-        'ro': `${DOMAINS.ro}/ro`,
+        // RO trăiește pe ciocnim.ro (mono-locale, fără prefix). EN/BG/EL pe trosc.fun.
+        'ro': DOMAINS.ro,
         'en': `${DOMAINS.intl}/en`,
         'bg': `${DOMAINS.intl}/bg`,
         'el': `${DOMAINS.intl}/el`,
@@ -120,7 +120,7 @@ export default async function LocaleLayout({ children, params }) {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": dictionary.meta.applicationName,
-    "url": `${baseUrl}/${validLocale}`,
+    "url": validLocale === 'ro' ? baseUrl : `${baseUrl}/${validLocale}`,
     "description": dictionary.meta.schemaDescription,
     "applicationCategory": "GameApplication",
     "applicationSubCategory": "BrowserGame",

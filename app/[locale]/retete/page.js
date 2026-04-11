@@ -8,6 +8,7 @@ import { getSiteUrl } from "@/app/lib/constants";
 import { retete as reteteRo } from "./data";
 import { retete as reteteBg } from "./data-bg";
 import { retete as reteteEl } from "./data-el";
+import { localizeSlug } from "@/app/i18n/config";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import { useLocaleConfig } from "../../components/DictionaryProvider";
@@ -595,7 +596,7 @@ function RetePageContent() {
                 key={selectedRecipe.id}
                 recipe={selectedRecipe}
                 onBack={() => {
-                  router.push(`/${locale}/retete`, { scroll: false });
+                  router.push(locale === 'ro' ? '/retete' : `/${locale}/${localizeSlug('retete', locale)}`, { scroll: false });
                   window.scrollTo(0, 0);
                 }}
                 recipesUI={recipesUI}
@@ -662,7 +663,7 @@ function RetePageContent() {
                         recipesUI={recipesUI}
                         diff={diff}
                         onClick={() => {
-                          router.push(`/${locale}/retete?r=${recipe.id}`, { scroll: false });
+                          router.push(locale === 'ro' ? `/retete?r=${recipe.id}` : `/${locale}/${localizeSlug('retete', locale)}?r=${recipe.id}`, { scroll: false });
                           window.scrollTo(0, 0);
                         }}
                       />
