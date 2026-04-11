@@ -1,7 +1,7 @@
 "use client";
 
 
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalStats } from "../../../components/ClientWrapper";
 import { useT } from "../../../i18n/useT";
