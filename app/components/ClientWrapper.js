@@ -252,7 +252,25 @@ export default function ClientWrapper({ children }) {
     pusher.connection.bind('connected', () => setConnectionState('connected'));
     pusher.connection.bind('disconnected', () => setConnectionState('disconnected'));
 
+    // CRITICAL: sync initial state from pusher.connection.state.
+    // Race condition fix: dacă Pusher s-a conectat BEFORE noi am apucat să
+    // bind-uim 'connected' event, evenimentul e pierdut și React state
+    // rămâne blocat pe 'connecting' → pollings folosesc interval disconnected
+    // (rapide) + Pusher useEffect gate `if (connectionState !== 'connected')`
+    // nu trece niciodată → jocul rulează 100% pe polling, nu Pusher.
+    // Fix: sync explicit + re-check periodic pt primele 5s.
+    setConnectionState(pusher.connection.state);
+    const syncTimer = setInterval(() => {
+      const s = pusher.connection.state;
+      if (s === 'connected' || s === 'disconnected') {
+        setConnectionState(s);
+      }
+    }, 500);
+    const stopSync = setTimeout(() => clearInterval(syncTimer), 8000);
+
     return () => {
+      clearInterval(syncTimer);
+      clearTimeout(stopSync);
       pusher.disconnect();
       pusherRef.current = null;
     };
