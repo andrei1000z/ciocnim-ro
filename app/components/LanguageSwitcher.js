@@ -1,12 +1,9 @@
 "use client";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { locales, localeConfig } from "@/app/i18n/config";
+import { localeConfig } from "@/app/i18n/config";
 import { useLocaleConfig } from "./DictionaryProvider";
 import { useT } from "@/app/i18n/useT";
-
-const RO_DOMAIN = "https://www.ciocnim.ro";
-const INTL_DOMAIN = "https://www.trosc.fun";
 
 export default function LanguageSwitcher() {
   const { locale } = useLocaleConfig();
@@ -30,27 +27,22 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Pe trosc.fun arătăm BG/EL primele, RO la final. Pe ciocnim.ro invers.
+  // ciocnim.ro = doar RO (niciun selector). trosc.fun = doar BG și EL.
   const visibleLocales = useMemo(() => {
-    return isIntl ? ["bg", "el", "ro"] : ["ro", "bg", "el"];
+    return isIntl ? ["bg", "el"] : [];
   }, [isIntl]);
 
   const switchLocale = (newLocale) => {
-    const targetDomain = (newLocale === "bg" || newLocale === "el") ? INTL_DOMAIN : RO_DOMAIN;
     const pathWithoutLocale = pathname.replace(/^\/(ro|bg|el)/, "");
-    // Cross-domain switch dacă schimbăm domeniul, altfel router push
-    const currentHost = typeof window !== "undefined" ? window.location.host : "";
-    const targetHost = targetDomain.replace("https://", "");
-    if (currentHost !== targetHost) {
-      window.location.href = `${targetDomain}/${newLocale}${pathWithoutLocale}`;
-    } else {
-      window.location.href = `/${newLocale}${pathWithoutLocale}`;
-    }
+    window.location.href = `/${newLocale}${pathWithoutLocale}`;
     setOpen(false);
   };
 
   // Render NIMIC pe server și primul render client → zero hydration mismatch
   if (!mounted) return null;
+
+  // Pe ciocnim.ro NU arătăm selectorul deloc — site-ul e monolingv RO
+  if (!isIntl) return null;
 
   const current = localeConfig[locale];
 
