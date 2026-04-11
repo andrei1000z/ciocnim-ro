@@ -322,7 +322,9 @@ function ArenaMaster({ room }) {
         }
       } catch {}
     };
-    const pollInterval = connectionState === 'connected' ? 8000 : 3000;
+    // Pusher primary: 15s fallback când connected, 3s când disconnected.
+    // Reduce server load la ~2x mai puțin pentru scalabilitate.
+    const pollInterval = connectionState === 'connected' ? 15000 : 3000;
     const interval = setInterval(pollRoom, pollInterval);
     pollRoom(); // poll immediately
     return () => clearInterval(interval);
@@ -345,7 +347,7 @@ function ArenaMaster({ room }) {
         }
       } catch {}
     };
-    const pollInterval = connectionState === 'connected' ? 6000 : 2000;
+    const pollInterval = connectionState === 'connected' ? 10000 : 2000;
     const interval = setInterval(poll, pollInterval);
     return () => clearInterval(interval);
   }, [opponent, rezultat, isBotMatch, atacantName, nume, room, connectionState, pusherRef]);
@@ -379,7 +381,7 @@ function ArenaMaster({ room }) {
       } catch {}
     };
     poll(); // poll immediately for instant sync
-    const pollInterval = connectionState === 'connected' ? 5000 : 1500;
+    const pollInterval = connectionState === 'connected' ? 8000 : 1500;
     const interval = setInterval(poll, pollInterval);
     return () => clearInterval(interval);
   }, [rezultat, isBotMatch, opponent, room, connectionState, pusherRef]);
@@ -550,12 +552,13 @@ function ArenaMaster({ room }) {
   }, [messages]);
 
 
-  // Retry join for ALL room types — ensures registration in Redis even if Pusher is down
+  // Retry join — safety net pentru rețele flaky. Pusher handle most cases via
+  // subscription_succeeded. Retry la 15s (era 3s) pentru a reduce server load
+  // ×5 în scenariul de 1000+ useri simultani în camere awaiting opponent.
   useEffect(() => {
     if (opponent || rezultat || isStriking || isBotMatch || !nume) return;
     broadcastJoin();
-    // Retry every 3s in case first join failed (network error)
-    const interval = setInterval(broadcastJoin, 3000);
+    const interval = setInterval(broadcastJoin, 15000);
     return () => clearInterval(interval);
   }, [opponent, rezultat, isStriking, isBotMatch, nume, broadcastJoin]);
 
