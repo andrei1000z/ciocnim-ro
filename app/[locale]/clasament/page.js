@@ -75,9 +75,9 @@ function RegionRow({ region, index, maxScore }) {
 export default function ClasamentPage() {
   const { topRegiuni, topJucatori, nume, userStats, isHydrated } = useGlobalStats();
   const [tab, setTab] = useState("jucatori");
-  const season = getCurrentSeason();
   const t = useT();
   const { locale } = useLocaleConfig();
+  const season = getCurrentSeason(locale);
 
   const TABS = [
     { key: "jucatori", label: t('content.clasament.players'), icon: "🏆" },

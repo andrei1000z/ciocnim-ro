@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import LocaleLink from "../../components/LocaleLink";
 import { useGlobalStats } from "../../components/ClientWrapper";
 import PageHeader from "../../components/PageHeader";
-import { ACHIEVEMENTS as ALL_ACHIEVEMENTS } from "../../lib/achievements";
+import { getAchievements } from "../../lib/achievements";
 import { useT } from "../../i18n/useT";
-import { useLocaleConfig } from "../../components/DictionaryProvider";
+import { useDictionary, useLocaleConfig } from "../../components/DictionaryProvider";
 
 const RARITY_COLORS = {
   common: 'border-gray-600/30 bg-gray-900/20',
@@ -30,7 +30,9 @@ export default function ProfilPage() {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const t = useT();
+  const dict = useDictionary();
   const { locale } = useLocaleConfig();
+  const ALL_ACHIEVEMENTS = getAchievements(dict);
 
   const RARITY_LABELS = {
     common: t('content.profil.rarityCommon'),

@@ -113,12 +113,14 @@ describe('Privacy & Legal Pages', () => {
   });
 
   it('privacy page mentions GDPR', () => {
-    const content = fs.readFileSync(path.join(__dirname, '../app/[locale]/privacy/page.js'), 'utf-8');
-    expect(content).toContain('GDPR');
+    // Privacy content moved to i18n dictionaries
+    const roDict = fs.readFileSync(path.join(__dirname, '../app/i18n/dictionaries/ro.json'), 'utf-8');
+    expect(roDict).toContain('GDPR');
   });
 
   it('privacy page has contact email', () => {
-    const content = fs.readFileSync(path.join(__dirname, '../app/[locale]/privacy/page.js'), 'utf-8');
-    expect(content).toContain('ciocnim@mail.com');
+    // Privacy content moved to i18n dictionaries
+    const roDict = fs.readFileSync(path.join(__dirname, '../app/i18n/dictionaries/ro.json'), 'utf-8');
+    expect(roDict).toContain('ciocnim@mail.com');
   });
 });

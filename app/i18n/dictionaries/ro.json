@@ -282,7 +282,8 @@
     "subtitle": "Oul a fost ciocnit prea tare!",
     "body": "Pagina pe care o cauți s-a spart la ciocnit și nu mai există. Hai înapoi la masa de Paște!",
     "cta": "🥚 Ciocnește ouă online",
-    "alt": "sau descoperă tradițiile de Paște →"
+    "alt": "sau descoperă tradițiile de Paște →",
+    "homeButton": "🥚 Acasă"
   },
 
   "units": {
@@ -644,11 +645,219 @@
     },
     "terms": {
       "pageTitle": "Termeni și Condiții",
-      "lastUpdated": "Ultima actualizare"
+      "lastUpdated": "Ultima actualizare",
+      "lastUpdatedDate": "20 martie 2026",
+      "backHome": "← Acasă",
+      "backToGame": "← Înapoi la joc",
+      "sections": [
+        {
+          "title": "1. Descrierea serviciului",
+          "body": "<p>Ciocnim.ro este un joc online gratuit care simulează tradiția românească de ciocnit ouă de Paște. Jocul este disponibil prin browser, fără instalare, pe orice dispozitiv.</p>"
+        },
+        {
+          "title": "2. Utilizarea serviciului",
+          "body": "<ul class=\"list-disc list-inside space-y-1 text-dim\"><li>Jocul este gratuit și nu necesită înregistrare cu date personale reale.</li><li>Alegi o poreclă (pseudonim) pentru a juca. Aceasta nu trebuie să conțină limbaj vulgar sau ofensator.</li><li>Este interzisă utilizarea jocului pentru hărțuire, spam sau orice activitate malițioasă.</li></ul>"
+        },
+        {
+          "title": "3. Conținut generat de utilizatori",
+          "body": "<p>Mesajele din chat și poreclele sunt conținut generat de utilizatori. Ne rezervăm dreptul de a filtra automat conținutul vulgar și de a restricționa accesul utilizatorilor care încalcă regulile.</p>"
+        },
+        {
+          "title": "4. Proprietate intelectuală",
+          "body": "<p>Designul, codul sursă, grafica și conținutul Ciocnim.ro sunt proprietatea echipei Ciocnim.ro. Tradițiile de Paște descrise aparțin moștenirii culturale românești.</p>"
+        },
+        {
+          "title": "5. Limitarea responsabilității",
+          "body": "<p>Ciocnim.ro este oferit „așa cum este”. Nu garantăm disponibilitatea permanentă a serviciului. Rezultatele jocului sunt aleatorii (50/50) și nu implică câștiguri reale.</p>"
+        },
+        {
+          "title": "6. Modificări",
+          "body": "<p>Ne rezervăm dreptul de a modifica acești termeni. Continuarea utilizării serviciului după modificări constituie acceptarea noilor termeni.</p>"
+        },
+        {
+          "title": "7. Contact",
+          "body": "<p>Pentru întrebări, scrie-ne la <a href=\"mailto:ciocnim@mail.com\" class=\"text-red-400 hover:text-red-300 transition-colors\">ciocnim@mail.com</a>.</p>"
+        }
+      ]
     },
     "privacy": {
       "pageTitle": "Politica de Confidențialitate",
-      "lastUpdated": "Ultima actualizare"
+      "lastUpdated": "Ultima actualizare",
+      "lastUpdatedDate": "20 martie 2026",
+      "backHome": "← Acasă",
+      "backToGame": "← Înapoi la joc",
+      "sections": [
+        {
+          "title": "1. Ce date colectăm",
+          "body": "<p>Ciocnim.ro este un joc gratuit de Paște. Colectăm minimal de date, strict necesare funcționării jocului:</p><ul class=\"list-disc list-inside space-y-1 text-dim\"><li><strong class=\"text-body\">Porecla</strong> — aleasă de tine, stocată local și pe server pentru clasamente.</li><li><strong class=\"text-body\">Statistici de joc</strong> — victorii, înfrângeri, achievement-uri.</li><li><strong class=\"text-body\">Regiunea selectată</strong> — pentru clasamentul regional.</li><li><strong class=\"text-body\">Identificator anonim</strong> — un ID generat aleatoriu pentru numărarea utilizatorilor online (nu conține date personale).</li></ul>"
+        },
+        {
+          "title": "2. Cum folosim datele",
+          "body": "<p>Datele sunt folosite exclusiv pentru:</p><ul class=\"list-disc list-inside space-y-1 text-dim\"><li>Funcționarea jocului multiplayer în timp real.</li><li>Afișarea clasamentelor și achievement-urilor.</li><li>Numărarea utilizatorilor online.</li></ul>"
+        },
+        {
+          "title": "3. Stocarea datelor",
+          "body": "<p>Datele locale (porecla, preferințele, tema) sunt salvate în <code class=\"text-red-400\">localStorage</code> al browserului tău. Datele de clasament sunt stocate pe servere securizate (Upstash Redis) cu TTL (expirare automată).</p>"
+        },
+        {
+          "title": "4. Cookies și tehnologii similare",
+          "body": "<p>Ciocnim.ro folosește <code class=\"text-red-400\">localStorage</code> pentru a salva preferințele tale (tema, porecla, statistici). Nu folosim cookies de tracking sau analytics de la terți.</p>"
+        },
+        {
+          "title": "5. Partajarea datelor",
+          "body": "<p>Nu vindem, nu partajăm și nu transmitem date personale către terți. Serviciile folosite (Pusher pentru WebSocket, Vercel pentru hosting) procesează date tehnice conform propriilor politici de confidențialitate.</p>"
+        },
+        {
+          "title": "6. Drepturile tale (GDPR)",
+          "body": "<p>Conform regulamentului GDPR, ai dreptul de a:</p><ul class=\"list-disc list-inside space-y-1 text-dim\"><li>Accesa datele tale — vezi-ți profilul în aplicație.</li><li>Șterge datele — golește localStorage-ul din browser sau contactează-ne.</li><li>Rectifica datele — schimbă-ți porecla oricând.</li></ul>"
+        },
+        {
+          "title": "7. Contact",
+          "body": "<p>Pentru întrebări legate de confidențialitate, scrie-ne la <a href=\"mailto:ciocnim@mail.com\" class=\"text-red-400 hover:text-red-300 transition-colors\">ciocnim@mail.com</a>.</p>"
+        }
+      ]
+    },
+    "achievements": {
+      "first_win":         { "name": "Prima Victorie",            "desc": "Câștigă primul meci" },
+      "wins_10":           { "name": "Ciocnitor Amator",          "desc": "Câștigă 10 meciuri" },
+      "wins_50":           { "name": "Ciocnitor Experimentat",    "desc": "Câștigă 50 meciuri" },
+      "wins_100":          { "name": "Maestru al Ouălor",         "desc": "Câștigă 100 meciuri" },
+      "wins_500":          { "name": "Legendă Vie",               "desc": "Câștigă 500 meciuri" },
+      "wins_1000":         { "name": "Zeul Ciocnitului",          "desc": "Câștigă 1000 meciuri" },
+      "first_group":       { "name": "Prieten Bun",               "desc": "Joacă primul meci în grup" },
+      "group_wins_25":     { "name": "Eroul Grupului",            "desc": "Câștigă 25 meciuri în grup" },
+      "regional_champion": { "name": "Campion Regional",          "desc": "Ajunge pe primul loc în regiunea ta" },
+      "golden_egg":        { "name": "Ou de Aur",                 "desc": "Folosește un ou auriu în meci" },
+      "chat_master":       { "name": "Maestru al Vorbei",         "desc": "Trimite 100 de mesaje în chat" },
+      "streak_5":          { "name": "Fără Pauză",                "desc": "Câștigă 5 meciuri consecutive" },
+      "streak_10":         { "name": "Flamă Vie",                 "desc": "Câștigă 10 meciuri consecutive" },
+      "provocator":        { "name": "Provocatorul",              "desc": "Provoacă 50 de jucători la duel" },
+      "tradition_keeper":  { "name": "Păstrător al Tradiției",    "desc": "Vizitează toate paginile educaționale" },
+      "social_butterfly":  { "name": "Fluture Social",            "desc": "Alătură-te la 10 grupuri diferite" }
+    },
+    "pageMeta": {
+      "home": "Acasă",
+      "traditii": {
+        "breadcrumb": "Tradiții Pascale",
+        "title": "Tradiția Ciocnitului de Ouă {year} – Reguli, Semnificații și Obiceiuri de Paște",
+        "description": "De ce ciocnim ouă de Paște? Descoperă semnificația tradiției în {year}, culorile ouălor, regulile corecte ale jocului și obiceiurile pascale românești transmise din generație în generație.",
+        "keywords": ["traditii ciocnit oua {year}", "semnificatia ciocnitului", "reguli ciocnit oua", "obiceiuri paste romanesti", "traditii pascale", "de ce ciocnim oua", "ou rosu semnificatie", "paste ortodox traditii", "obiceiuri din stramosi", "traditii romanesti paste {year}"],
+        "ogTitle": "Tradiția Ciocnitului de Ouă {year} – Origini, Reguli și Semnificații",
+        "ogDescription": "Cine ține oul mai tare? Află tot ce trebuie să știi despre tradiția românească a ciocnitului de ouă — de la origini până la regulile mesei de Paște.",
+        "ogAlt": "Tradiții Paște – Ciocnim.ro",
+        "twitterTitle": "Tradiția Ciocnitului de Ouă {year} – Reguli și Semnificații | Ciocnim.ro",
+        "twitterDescription": "Descoperă de ce ciocnim ouă, ce semnifică culorile și cum câștigi la masa de Paște."
+      },
+      "retete": {
+        "breadcrumb": "Rețete de Paște",
+        "title": "Rețete Tradiționale de Paște – Cozonac, Drob, Pască, Miel",
+        "description": "Cele mai bune rețete tradiționale de Paște: cozonac pufos, drob de miel, pască cu brânză, friptură de miel. Pas cu pas, cu ingrediente scalabile și timp de preparare.",
+        "keywords": ["retete paste romanesti", "cozonac traditional reteta", "drob de miel reteta", "pasca cu branza reteta", "friptura de miel paste", "retete traditionale paste", "cozonac pufos reteta pas cu pas", "cum fac cozonac", "reteta drob traditional", "meniu de paste romanesc"],
+        "ogTitle": "Rețete Tradiționale de Paște – Cozonac, Drob, Pască, Miel",
+        "ogDescription": "Rețetele clasice ale mesei de Paște: cozonac, drob, pască și friptură de miel. Ghid complet pas cu pas.",
+        "ogAlt": "Rețete de Paște – Ciocnim.ro",
+        "twitterTitle": "Rețete de Paște – Cozonac, Drob, Pască | Ciocnim.ro",
+        "twitterDescription": "Rețete tradiționale românești de Paște: cozonac pufos, drob, pască, miel. Pas cu pas!"
+      },
+      "urari": {
+        "breadcrumb": "Urări de Paște",
+        "title": "Mesaje și Urări de Paște {year} – Frumoase, Scurte și Gata de Trimis",
+        "description": "Cele mai frumoase mesaje de Paște {year} pentru familie și prieteni. Copiază și trimite pe WhatsApp, Instagram sau Facebook urări tradiționale și moderne. Hristos a Înviat!",
+        "keywords": ["mesaje de paste {year}", "urari de paste", "mesaje hristos a inviat", "urari paste whatsapp", "mesaje scurte paste", "felicitari pascale", "urari traditionale romanesti", "texte frumoase de paste", "mesaje paste familie", "statusuri paste {year}"],
+        "ogTitle": "Mesaje și Urări de Paște {year} – Copiază și Trimite Instant",
+        "ogDescription": "Găsește mesajul perfect de Paște {year} pentru cei dragi. Scurte, frumoase, din suflet — gata de trimis pe WhatsApp sau Instagram.",
+        "ogAlt": "Urări de Paște – Ciocnim.ro",
+        "twitterTitle": "Mesaje de Paște {year} – Cele Mai Frumoase Urări | Ciocnim.ro",
+        "twitterDescription": "Copiază urările tale de Paște și trimite lumina celor dragi. Hristos a Înviat!"
+      },
+      "vopsit-natural": {
+        "breadcrumb": "Vopsit Natural Ouă",
+        "title": "Cum Vopsești Ouă Natural {year} – Rețete cu Foi de Ceapă, Curcumă și Varză",
+        "description": "Ghid complet pas cu pas pentru vopsit ouă natural acasă în {year}, fără chimicale. Ouă roșii cu foi de ceapă, galben cu curcumă, albastru cu varză roșie. Rețetele tradiționale ale bunicii.",
+        "keywords": ["vopsit oua natural", "oua rosii foi de ceapa", "cum vopsesti oua acasa", "vopsit oua curcuma", "vopsit oua varza rosie", "oua naturale paste", "retete vopsit oua {year}", "oua fara chimicale", "traditie vopsit oua romanesc", "culori naturale oua paste {year}"],
+        "ogTitle": "Cum Vopsești Ouă Natural – Ghid Complet Paște {year}",
+        "ogDescription": "Secretul bunicilor: ouă roșii cu foi de ceapă, galben cu curcumă, albastru cu varză roșie. Fără chimicale, 100% natural!",
+        "ogAlt": "Vopsit Natural Ouă – Ciocnim.ro",
+        "twitterTitle": "Vopsit Ouă Natural {year} – Rețete Tradiționale fără Chimicale | Ciocnim.ro",
+        "twitterDescription": "Ouă roșii cu foi de ceapă, galben cu curcumă, albastru cu varză. Ghid complet pentru Paștele {year}."
+      },
+      "calendar": {
+        "breadcrumb": "Calendar Paște",
+        "title": "Când Pică Paștele în {year}, {year1}, {year2}? – Calendar Ortodox și Catolic",
+        "description": "Calendarul complet al Paștelui Ortodox și Catolic până în {year4}. Află de ce data se schimbă în fiecare an, cum se calculează și când pică în același weekend. Planifică Paștele {year} din timp!",
+        "keywords": ["cand pica pastele {year}", "data pastele ortodox {year}", "pastele catolic {year}", "calendar paste ortodox", "calculator data paste", "paste {year1} data", "paste {year2} aceeasi zi", "cand e paste {year} romania", "saptamana mare {year}", "paste ortodox si catolic"],
+        "ogTitle": "Calendar Paște {year}–{year4} – Ortodox și Catolic",
+        "ogDescription": "Verifică exact când pică Paștele în fiecare an și descoperă de ce data se schimbă. Calendar ortodox și catolic complet.",
+        "ogAlt": "Calendar Paște – Ciocnim.ro",
+        "twitterTitle": "Când Pică Paștele? Calendar Ortodox și Catolic {year}–{year4} | Ciocnim.ro",
+        "twitterDescription": "Data exactă a Paștelui Ortodox și Catolic pentru {year}, {year1}, {year2}, {year3} și {year4}."
+      },
+      "ghid": {
+        "breadcrumb": "Ghid de Joc",
+        "title": "Ghid de Joc – Cum Joci Ciocnit Ouă Online",
+        "description": "Ghid complet pentru ciocnit ouă online pe Ciocnim.ro. Cum joci, cum câștigi, cum creezi grupuri și cum deblochezi achievement-uri.",
+        "keywords": ["cum se joaca ciocnit oua online", "ghid ciocnim", "reguli joc oua paste", "cum castigi ciocnit oua", "joc oua paste online", "ciocnit oua reguli"],
+        "ogTitle": "Ghid de Joc – Ciocnim.ro",
+        "ogDescription": "Învață să joci ciocnit ouă online: reguli, trucuri și ghid pas cu pas.",
+        "ogAlt": "Ghid Joc – Ciocnim.ro",
+        "twitterTitle": "Ghid Ciocnit Ouă Online | Ciocnim.ro",
+        "twitterDescription": "Reguli, trucuri și ghid pas cu pas pentru jocul de ciocnit ouă online."
+      },
+      "clasament": {
+        "breadcrumb": "Clasament Național",
+        "title": "Clasament Național Ciocnit Ouă {year} – Top Jucători și Regiuni",
+        "description": "Clasamentul complet al celor mai buni jucători și regiuni la ciocnit ouă de Paște {year}. Vezi cine domină competiția pe ciocnim.ro!",
+        "keywords": ["clasament ciocnit oua {year}", "top jucatori paste", "clasament paste online", "cei mai buni jucatori oua", "clasament regional paste romania"],
+        "ogTitle": "Clasament Național Ciocnit Ouă {year} – Ciocnim.ro",
+        "ogDescription": "Top jucători și regiuni la ciocnit ouă online, Paște {year}.",
+        "ogAlt": "Clasament – Ciocnim.ro",
+        "twitterTitle": "Clasament Ciocnit Ouă {year} | Ciocnim.ro",
+        "twitterDescription": "Cine are cel mai tare ou în România? Vezi clasamentul național."
+      },
+      "despre": {
+        "breadcrumb": "Despre",
+        "title": "Despre Ciocnim.ro",
+        "description": "Povestea Ciocnim.ro — cum a luat naștere jocul tradițional de ciocnit ouă online. Echipa, misiunea și tehnologia din spatele proiectului.",
+        "keywords": ["despre ciocnim", "povestea ciocnim", "cine suntem", "echipa ciocnim"],
+        "ogTitle": "Despre Ciocnim.ro – Povestea Noastră",
+        "ogDescription": "Cum am transformat tradiția ciocnitului de ouă într-un joc online pentru toată familia.",
+        "ogAlt": "Despre – Ciocnim.ro",
+        "twitterTitle": "Despre Ciocnim.ro",
+        "twitterDescription": "Povestea din spatele jocului tradițional de Paște, mutat în online."
+      },
+      "profil": {
+        "breadcrumb": "Profilul Meu",
+        "title": "Profilul Meu – Statistici și Realizări | Ciocnim.ro",
+        "description": "Vezi realizările tale, statisticile de meciuri și insignele câștigate în jocul de ciocnit ouă de Paște {year}. Ciocnim.ro - Păstrăm Tradiția.",
+        "keywords": [],
+        "ogTitle": "Profilul Meu – Ciocnim.ro",
+        "ogDescription": "Statistici și realizări la ciocnit ouă online.",
+        "ogAlt": "Profil – Ciocnim.ro",
+        "twitterTitle": "Profilul Meu | Ciocnim.ro",
+        "twitterDescription": "Statistici și realizări la ciocnit ouă online."
+      },
+      "privacy": {
+        "breadcrumb": "Confidențialitate",
+        "title": "Politica de Confidențialitate | Ciocnim.ro",
+        "description": "Politica de confidențialitate Ciocnim.ro — cum colectăm și folosim datele, conformitate GDPR, drepturile utilizatorilor.",
+        "keywords": [],
+        "ogTitle": "Politica de Confidențialitate | Ciocnim.ro",
+        "ogDescription": "Cum colectăm și folosim datele, conformitate GDPR.",
+        "ogAlt": "Confidențialitate – Ciocnim.ro",
+        "twitterTitle": "Politica de Confidențialitate | Ciocnim.ro",
+        "twitterDescription": "Cum colectăm și folosim datele, conformitate GDPR."
+      },
+      "terms": {
+        "breadcrumb": "Termeni și Condiții",
+        "title": "Termeni și Condiții | Ciocnim.ro",
+        "description": "Termenii și condițiile de utilizare a platformei Ciocnim.ro — regulile jocului, responsabilități și drepturi.",
+        "keywords": [],
+        "ogTitle": "Termeni și Condiții | Ciocnim.ro",
+        "ogDescription": "Regulile jocului, responsabilități și drepturi.",
+        "ogAlt": "Termeni – Ciocnim.ro",
+        "twitterTitle": "Termeni și Condiții | Ciocnim.ro",
+        "twitterDescription": "Regulile jocului, responsabilități și drepturi."
+      }
     }
   }
 }

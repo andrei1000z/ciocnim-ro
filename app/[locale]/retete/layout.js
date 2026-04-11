@@ -1,60 +1,27 @@
 import Script from "next/script";
-import { BASE_URL } from '../../lib/constants';
-import { locales } from '../../i18n/config';
-
-const path = '/retete';
+import { buildPageMetadata, buildBreadcrumb } from "../../lib/pageMeta";
+import { getBaseUrl } from "../../lib/constants";
+import { localizeSlug } from "../../i18n/config";
 
 export async function generateMetadata({ params }) {
   const { locale } = await params;
-  return {
-    title: "Rețete Tradiționale de Paște – Cozonac, Drob, Pască, Miel",
-    description: "Cele mai bune rețete tradiționale de Paște: cozonac pufos, drob de miel, pască cu brânză, friptură de miel. Pas cu pas, cu ingrediente scalabile și timp de preparare.",
-    keywords: [
-      "retete paste romanesti", "cozonac traditional reteta", "drob de miel reteta",
-      "pasca cu branza reteta", "friptura de miel paste", "retete traditionale paste",
-      "cozonac pufos reteta pas cu pas", "cum fac cozonac", "reteta drob traditional",
-      "meniu de paste romanesc"
-    ],
-    openGraph: {
-      title: "Rețete Tradiționale de Paște – Cozonac, Drob, Pască, Miel",
-      description: "Rețetele clasice ale mesei de Paște: cozonac, drob, pască și friptură de miel. Ghid complet pas cu pas.",
-      url: `${BASE_URL}/${locale}${path}`,
-      images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Rețete de Paște – Ciocnim.ro" }],
-      type: "article",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: "Rețete de Paște – Cozonac, Drob, Pască | Ciocnim.ro",
-      description: "Rețete tradiționale românești de Paște: cozonac pufos, drob, pască, miel. Pas cu pas!",
-      images: ["/og-image.jpg"],
-    },
-    alternates: {
-      canonical: `${BASE_URL}/${locale}${path}`,
-      languages: Object.fromEntries(
-        locales.map(l => [l, `${BASE_URL}/${l}${path}`])
-      ),
-    },
-  };
+  return buildPageMetadata({ locale, slugKey: 'retete' });
 }
 
 export default async function ReteteLayout({ children, params }) {
   const { locale } = await params;
+  const baseUrl = await getBaseUrl();
+  const slug = localizeSlug('retete', locale);
+  const url = `${baseUrl}/${locale}/${slug}`;
 
-  const breadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Acasă", "item": `${BASE_URL}/${locale}` },
-      { "@type": "ListItem", "position": 2, "name": "Rețete de Paște", "item": `${BASE_URL}/${locale}${path}` }
-    ]
-  };
+  const breadcrumb = await buildBreadcrumb({ locale, slugKey: 'retete' });
 
   const recipeListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Rețete Tradiționale de Paște",
-    "description": "Colecție de rețete tradiționale românești pentru masa de Paște",
-    "url": `${BASE_URL}/${locale}${path}`,
+    "description": "Colecție de rețete tradiționale pentru masa de Paște",
+    "url": url,
     "numberOfItems": 4,
     "itemListElement": [
       {
@@ -67,8 +34,8 @@ export default async function ReteteLayout({ children, params }) {
           "recipeYield": "2 cozonaci",
           "recipeCategory": "Cozonac", "recipeCuisine": "Română",
           "keywords": "cozonac, paste, traditional, romanesc",
-          "image": `${BASE_URL}/og-image.jpg`,
-          "url": `${BASE_URL}/${locale}${path}`,
+          "image": `${baseUrl}/og-image.jpg`,
+          "url": url,
           "author": { "@type": "Organization", "name": "Ciocnim.ro" },
           "inLanguage": locale
         }
@@ -83,8 +50,8 @@ export default async function ReteteLayout({ children, params }) {
           "recipeYield": "6-8 porții",
           "recipeCategory": "Aperitiv", "recipeCuisine": "Română",
           "keywords": "drob, miel, paste, traditional",
-          "image": `${BASE_URL}/og-image.jpg`,
-          "url": `${BASE_URL}/${locale}${path}`,
+          "image": `${baseUrl}/og-image.jpg`,
+          "url": url,
           "author": { "@type": "Organization", "name": "Ciocnim.ro" },
           "inLanguage": locale
         }
@@ -99,8 +66,8 @@ export default async function ReteteLayout({ children, params }) {
           "recipeYield": "1 pască mare",
           "recipeCategory": "Pască", "recipeCuisine": "Română",
           "keywords": "pasca, branza, paste, traditional romanesc",
-          "image": `${BASE_URL}/og-image.jpg`,
-          "url": `${BASE_URL}/${locale}${path}`,
+          "image": `${baseUrl}/og-image.jpg`,
+          "url": url,
           "author": { "@type": "Organization", "name": "Ciocnim.ro" },
           "inLanguage": locale
         }
@@ -115,8 +82,8 @@ export default async function ReteteLayout({ children, params }) {
           "recipeYield": "6-8 porții",
           "recipeCategory": "Fel principal", "recipeCuisine": "Română",
           "keywords": "friptura miel, paste, cuptor, traditional",
-          "image": `${BASE_URL}/og-image.jpg`,
-          "url": `${BASE_URL}/${locale}${path}`,
+          "image": `${baseUrl}/og-image.jpg`,
+          "url": url,
           "author": { "@type": "Organization", "name": "Ciocnim.ro" },
           "inLanguage": locale
         }

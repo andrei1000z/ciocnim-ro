@@ -52,8 +52,8 @@ function AchievementToast({ achievement, onDone }) {
     >
       <div className="text-3xl mb-1">{achievement.icon}</div>
       <div className="text-xs font-black uppercase tracking-widest text-amber-400 mb-0.5">{t('achievement.unlocked')}</div>
-      <div className="font-bold text-white text-sm">{achievement.name}</div>
-      <div className="text-[11px] text-amber-200/60 mt-0.5">{achievement.desc}</div>
+      <div className="font-bold text-white text-sm">{achievement.key ? t(`content.achievements.${achievement.key}.name`) : achievement.name}</div>
+      <div className="text-[11px] text-amber-200/60 mt-0.5">{achievement.key ? t(`content.achievements.${achievement.key}.desc`) : achievement.desc}</div>
     </motion.div>
   );
 }

@@ -1,6 +1,28 @@
 import { getOrthodoxEaster } from "./easterUtils";
 
-export function getCurrentSeason() {
+const I18N = {
+  ro: {
+    name: (year) => `Paște ${year}`,
+    active: "Sezon Activ",
+    startsOn: (date) => `Începe pe ${date}`,
+    dateLocale: "ro-RO",
+  },
+  bg: {
+    name: (year) => `Великден ${year}`,
+    active: "Активен Сезон",
+    startsOn: (date) => `Започва на ${date}`,
+    dateLocale: "bg-BG",
+  },
+  el: {
+    name: (year) => `Πάσχα ${year}`,
+    active: "Ενεργή Σαιζόν",
+    startsOn: (date) => `Ξεκινά στις ${date}`,
+    dateLocale: "el-GR",
+  },
+};
+
+export function getCurrentSeason(locale = "ro") {
+  const t = I18N[locale] || I18N.ro;
   const now = new Date();
   const year = now.getFullYear();
   const easter = getOrthodoxEaster(year);
@@ -20,31 +42,29 @@ export function getCurrentSeason() {
     nextStart.setDate(nextStart.getDate() - 14);
 
     const formatDate = (d) =>
-      d.toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
+      d.toLocaleDateString(t.dateLocale, { day: "numeric", month: "short" });
 
     return {
-      name: `Paște ${nextYear}`,
+      name: t.name(nextYear),
       year: nextYear,
       start: nextStart,
       end: new Date(nextEaster.getTime() + 7 * 86400000),
       easterDate: nextEaster,
       isActive: false,
-      label: `Începe pe ${formatDate(nextStart)}`,
+      label: t.startsOn(formatDate(nextStart)),
     };
   }
 
   const formatDate = (d) =>
-    d.toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
+    d.toLocaleDateString(t.dateLocale, { day: "numeric", month: "short" });
 
   return {
-    name: `Paște ${year}`,
+    name: t.name(year),
     year,
     start: seasonStart,
     end: easterEnd,
     easterDate: easter,
     isActive,
-    label: isActive
-      ? "Sezon Activ"
-      : `Începe pe ${formatDate(seasonStart)}`,
+    label: isActive ? t.active : t.startsOn(formatDate(seasonStart)),
   };
 }

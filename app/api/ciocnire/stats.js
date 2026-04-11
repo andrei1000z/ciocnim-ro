@@ -1,6 +1,6 @@
 import redis from '@/app/lib/redis';
 import pusher from './pusher';
-import { ACHIEVEMENTS } from '@/app/lib/achievements';
+import { ACHIEVEMENTS_META } from '@/app/lib/achievements';
 
 export async function getClasamentRegiuni(ns) {
   try {
@@ -53,7 +53,9 @@ export async function updateUserStats(ns, jucator, updates) {
 
 export async function getUserAchievements(ns, jucator) {
   const earnedKeys = await redis.smembers(`${ns}:user:${jucator}:achievements`);
-  return earnedKeys.map(key => ({ key, ...ACHIEVEMENTS[key], earned: true }));
+  // Returnăm doar metadata invariantă (icon+rarity) + key.
+  // Numele/descrierea sunt localizate client-side prin dicționar.
+  return earnedKeys.map(key => ({ key, ...ACHIEVEMENTS_META[key], earned: true }));
 }
 
 export async function checkAndAwardAchievements(ns, jucator, stats, teamId = null) {
@@ -117,7 +119,8 @@ export async function checkAndAwardAchievements(ns, jucator, stats, teamId = nul
 
     if (newlyAwarded.length > 0) {
       pusher.trigger(`${ns}-user-notif-${jucator}`, 'achievement-unlocked', {
-        achievements: newlyAwarded.map(key => ACHIEVEMENTS[key]),
+        // Clientul traduce name/desc din dicționar folosind `key`.
+        achievements: newlyAwarded.map(key => ({ key, ...ACHIEVEMENTS_META[key] })),
         t: Date.now()
       }).catch(() => {});
     }
