@@ -422,9 +422,10 @@ function ArenaMaster({ room }) {
       }
   }, [isBotMatch, atacantName, rezultat, isStriking]);
 
-  // PUSHER SYNC
+  // PUSHER SYNC — re-runs when Pusher connects (connectionState triggers retry)
   useEffect(() => {
     if (isBotMatch || !pusherRef?.current) return;
+    if (connectionState !== 'connected') return;
     const pusher = pusherRef.current;
     const ns = locale; // per-locale Redis/Pusher namespace (ro/bg/el/en)
     const arenaChannelName = `${ns}-arena-v22-${room}`;
@@ -490,7 +491,7 @@ function ArenaMaster({ room }) {
     };
   // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef]);
+  }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef, connectionState, locale]);
 
   // Warn before leaving during active game — stable handler via ref to avoid
   // leaks when deps change (B3). The ref tracks whether the game is active,
