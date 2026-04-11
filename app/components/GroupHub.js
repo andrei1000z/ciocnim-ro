@@ -23,13 +23,15 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
   const handleInvite = async () => {
     const url = `${window.location.origin}/?joinTeam=${currentTeam.details.id}`;
     const shareText = t('groups.shareInvite', { url });
-    if (navigator.share) {
-      try { await navigator.share({ title: t('groups.shareTitle'), text: shareText, url }); } catch {}
-    } else {
-      safeCopy(shareText);
-      setCopyText(t('groups.copied'));
-      setTimeout(() => setCopyText(t('groups.invite')), 2000);
-    }
+    safeCopy(shareText);
+    setCopyText(t('groups.copied'));
+    setTimeout(() => setCopyText(t('groups.invite')), 2000);
+  };
+
+  const handleWhatsApp = () => {
+    const url = `${window.location.origin}/?joinTeam=${currentTeam.details.id}`;
+    const shareText = t('groups.shareInvite', { url });
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener');
   };
 
   return (
@@ -61,6 +63,10 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
           )}
         </div>
         <div className="flex gap-2">
+          <button onClick={handleWhatsApp} className="flex-1 py-2.5 bg-green-700 text-white rounded-xl font-bold text-xs hover:bg-green-600 transition-all active:scale-95 flex items-center justify-center gap-1.5" title="WhatsApp">
+            <span>💬</span>
+            <span>WhatsApp</span>
+          </button>
           <button onClick={handleInvite} className="flex-1 py-2.5 bg-red-800 text-white rounded-xl font-bold text-xs hover:bg-red-900 transition-all active:scale-95">{copyText}</button>
           <button onClick={() => onLeave(currentTeam.details.id)} className="px-4 py-2.5 border border-red-900/30 text-red-400 rounded-xl font-bold text-xs hover:bg-red-900/20 transition-all active:scale-95">{t('groups.leave')}</button>
         </div>
