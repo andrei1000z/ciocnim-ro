@@ -65,10 +65,8 @@ export async function POST(request) {
 
       case 'increment-global': {
         if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
-        const rlIdentifier = jucator ? jucator.toUpperCase() : getClientIp(request);
-        const rlKey = k(`ratelimit:inc:${rlIdentifier}`);
-        const rlSet = await redis.set(rlKey, '1', 'EX', 2, 'NX');
-        if (!rlSet) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
+        // Dedupe pentru counter-ul global se face mai jos prin counted:{roomId}:{battleTs}.
+        // Per-user rate limit agresiv (2s) bloca rounduri rapide consecutive → eliminat.
 
         // Derive esteCastigator server-side from the lovitura stored in Redis
         let serverEsteCastigator = false;
@@ -235,9 +233,8 @@ return redis.call('SCARD', KEYS[1])
 
       case 'revansa': {
         if (!jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
-        const revRlKey = k(`ratelimit:rev:${jucator.toUpperCase()}`);
-        const revRl = await redis.set(revRlKey, '1', 'EX', 2, 'NX');
-        if (!revRl) return NextResponse.json({ success: false, error: "Prea rapid!" }, { status: 429 });
+        // SADD e idempotent, deci nu avem nevoie de rate limit agresiv.
+        // Lăsăm global checkRateLimit (60 req/min per IP) să gestioneze spam-ul.
         const revClean = jucator.toUpperCase();
         await redis.sadd(k(`room:${roomId}:revansa`), revClean);
         await redis.expire(k(`room:${roomId}:revansa`), 300);
