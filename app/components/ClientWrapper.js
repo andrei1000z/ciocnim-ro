@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore, createContext, useContext, useCallback, useRef } from "react";
+import { useEffect, useState, useSyncExternalStore, createContext, useContext, useCallback, useRef, useMemo } from "react";
 import Pusher from "pusher-js";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -463,7 +463,7 @@ export default function ClientWrapper({ children }) {
     };
     // Trimite heartbeat instant la montare
     sendHeartbeat();
-    const interval = setInterval(sendHeartbeat, 120000);
+    const interval = setInterval(sendHeartbeat, 300000);
 
     // Când user-ul revine pe tab → heartbeat instant (actualizare imediată)
     const onVisibility = () => { if (document.visibilityState === 'visible') sendHeartbeat(); };
@@ -584,7 +584,10 @@ export default function ClientWrapper({ children }) {
     };
   }, [isHydrated, nume, locale, playSound, triggerVibrate]);
 
-  const contextValue = {
+  // Memoize context value: previne re-randarea întregului subtree când
+  // doar toast/achievement/online se schimbă (fără memo, fiecare render
+  // crea object nou → toți consumerii se actualizau).
+  const contextValue = useMemo(() => ({
     totalGlobal,
     topRegiuni,
     topJucatori,
@@ -598,7 +601,11 @@ export default function ClientWrapper({ children }) {
     toastMsg, setToastMsg,
     pusherRef,
     connectionState,
-  };
+  }), [
+    totalGlobal, topRegiuni, topJucatori, nume, setNume, userStats,
+    updateUserStats, playSound, triggerVibrate, incrementGlobal,
+    isHydrated, updateStats, onlineCount, toastMsg, connectionState,
+  ]);
 
   return (
     <GlobalStatsContext.Provider value={contextValue}>

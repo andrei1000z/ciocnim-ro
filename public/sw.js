@@ -1,5 +1,7 @@
-const CACHE_VERSION = '3';
+const CACHE_VERSION = '4';
 const CACHE_NAME = `ciocnim-v${CACHE_VERSION}`;
+// Pre-cache: doar pagini cu conținut static. /clasament e exclus pentru că
+// arată leaderboard live → cache-ul ar servi top vechi ore în șir.
 const STATIC_ASSETS = [
   '/',
   '/traditii',
@@ -7,7 +9,6 @@ const STATIC_ASSETS = [
   '/urari',
   '/vopsit-natural',
   '/calendar',
-  '/clasament',
   '/despre',
   '/ghid',
   '/manifest.json',

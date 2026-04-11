@@ -57,10 +57,13 @@ export async function POST(request) {
           redis.get(k('global_ciocniri_total')),
           getClasamentRegiuni(ns),
           getClasamentJucatori(ns),
-          redis.zremrangebyscore(k('arena:online'), 0, now - 300000),
+          redis.zremrangebyscore(k('arena:online'), 0, now - 420000),
           redis.zcard(k('arena:online')),
         ]);
-        return NextResponse.json({ success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori, online: onlineCount });
+        return NextResponse.json(
+          { success: true, total: parseInt(totalCount) || 0, topRegiuni, topJucatori, online: onlineCount },
+          { headers: { 'Cache-Control': 'public, max-age=2, stale-while-revalidate=10' } }
+        );
       }
 
       case 'increment-global': {
