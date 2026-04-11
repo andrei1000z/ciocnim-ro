@@ -178,9 +178,20 @@ const OuTitan = ({ skin, spart = false, hasStar = false, isGolden = false }) => 
 function ArenaMaster({ room }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { nume, triggerVibrate, userStats, setUserStats, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef, connectionState } = useGlobalStats();
+  const { nume, setNume, triggerVibrate, userStats, setUserStats, isHydrated, incrementGlobal, updateStats, totalGlobal, onlineCount, pusherRef, connectionState } = useGlobalStats();
   const t = useT();
   const { locale } = useLocaleConfig();
+
+  // Auto-genereaza poreclă dacă user ajunge direct pe un link de cameră privată
+  // (de pe WhatsApp, etc.) fără să aibă nickname setat. Altfel broadcastJoin nu
+  // se execută niciodată și userul rămâne stuck pe ecranul "se așteaptă".
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (nume && nume.length >= 3) return;
+    const prefix = locale === 'bg' ? 'ИГРАЧ' : locale === 'el' ? 'ΠΑΙΚΤΗΣ' : locale === 'en' ? 'PLAYER' : 'JUCATOR';
+    const tempName = prefix + Math.random().toString(36).substring(2, 6).toUpperCase();
+    setNume(tempName).catch(() => {});
+  }, [isHydrated, nume, locale, setNume]);
 
   const [me] = useState({ skin: userStats.skin || 'red', hasStar: userStats.wins >= 10 });
   const [opponent, setOpponent] = useState(null);

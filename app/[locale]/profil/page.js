@@ -26,8 +26,15 @@ const RARITY_TEXT = {
   legendary: 'text-amber-400',
 };
 
+const SKIN_OPTIONS = [
+  { key: 'red',   label: 'Roșu',     grad: 'from-red-500 to-red-800',       ring: 'ring-red-400' },
+  { key: 'blue',  label: 'Albastru', grad: 'from-blue-500 to-blue-900',     ring: 'ring-blue-400' },
+  { key: 'gold',  label: 'Auriu',    grad: 'from-amber-400 to-amber-800',   ring: 'ring-amber-400' },
+  { key: 'green', label: 'Verde',    grad: 'from-green-600 to-green-900',   ring: 'ring-green-400' },
+];
+
 export default function ProfilPage() {
-  const { nume, setNume, userStats, isHydrated } = useGlobalStats();
+  const { nume, setNume, userStats, setUserStats, isHydrated } = useGlobalStats();
   const [achievements, setAchievements] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +42,11 @@ export default function ProfilPage() {
   const [newName, setNewName] = useState("");
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState("");
+
+  const handleSkinChange = (newSkin) => {
+    if (newSkin === userStats.skin) return;
+    setUserStats(prev => ({ ...prev, skin: newSkin }));
+  };
   const t = useT();
   const dict = useDictionary();
   const { locale } = useLocaleConfig();
@@ -206,6 +218,38 @@ export default function ProfilPage() {
               />
             </div>
           </div>
+        )}
+
+        {/* Egg Skin Picker */}
+        {nume && (
+          <section className="bg-card border border-edge rounded-2xl p-5">
+            <h2 className="text-sm font-black text-heading mb-4 flex items-center gap-2 uppercase tracking-wide">
+              <span>🥚</span> {t('eggColor')}
+            </h2>
+            <div className="grid grid-cols-4 gap-3">
+              {SKIN_OPTIONS.map(opt => {
+                const selected = userStats.skin === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => handleSkinChange(opt.key)}
+                    className={`group flex flex-col items-center gap-2 p-3 rounded-xl border transition-all active:scale-95 ${
+                      selected
+                        ? `bg-elevated border-red-600/40 ${opt.ring} ring-2`
+                        : 'border-edge hover:border-red-900/30'
+                    }`}
+                  >
+                    <div className={`w-12 h-14 rounded-full bg-gradient-to-br ${opt.grad} shadow-lg shadow-black/40 relative overflow-hidden`}>
+                      <div className="absolute top-2 left-2 w-3 h-4 bg-white/30 rounded-full blur-sm" />
+                    </div>
+                    <span className={`text-xs font-black uppercase tracking-wide ${selected ? 'text-heading' : 'text-muted'}`}>
+                      {t(`eggSkins.${opt.key}`)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         {/* Match History */}
