@@ -353,7 +353,7 @@ export default function ClientWrapper({ children }) {
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)
   // ==========================================================================
-  const incrementGlobal = useCallback(async (amCastigat = false, teamIdToUpdate = null, roomId = null) => {
+  const incrementGlobal = useCallback(async (amCastigat = false, teamIdToUpdate = null, roomId = null, isBot = false) => {
     try {
       if (!nume || nume.trim() === "") return;
 
@@ -363,6 +363,8 @@ export default function ClientWrapper({ children }) {
         regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
         teamId: amCastigat ? teamIdToUpdate : null,
         roomId: roomId,
+        bot: isBot,
+        amCastigat: amCastigat,
         locale
       };
 

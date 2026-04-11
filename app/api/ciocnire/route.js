@@ -72,7 +72,14 @@ export async function POST(request) {
         let serverEsteCastigator = false;
         let battleTimestamp = null;
         const safeName = jucator ? jucator.toUpperCase() : null;
-        if (safeName) {
+        // Bot match: clientul pretinde rezultatul via body.amCastigat + body.bot.
+        // Nu avem cum sa validam server-side (nu exista lovitura in Redis),
+        // dar trusted-input pentru bot e OK (game e casual, nu competitiv).
+        const isBotMatch = body.bot === true;
+        if (safeName && isBotMatch) {
+          serverEsteCastigator = body.amCastigat === true;
+          battleTimestamp = Date.now();
+        } else if (safeName) {
           const lovituraRaw = await redis.get(k(`room:${roomId}:lovitura`));
           if (lovituraRaw) {
             try {
