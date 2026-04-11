@@ -248,6 +248,10 @@ function ArenaMaster({ room }) {
   const executeBattleRef = useRef(null);
   const incrementGlobalRef = useRef(incrementGlobal);
   useEffect(() => { incrementGlobalRef.current = incrementGlobal; }, [incrementGlobal]);
+  // broadcastJoin ref — folosit ca să NU re-subscriem Pusher când broadcastJoin
+  // se schimbă (ceea ce se întâmplă la fiecare nume update). Re-subscribing
+  // crează gap unde Pusher events sunt pierdute → opponent apare cu delay.
+  const broadcastJoinRef = useRef(null);
 
   const canStrike = !rezultat && !isStriking && opponent && !collisionAnim && atacantName === nume;
 
@@ -264,7 +268,8 @@ function ArenaMaster({ room }) {
   };
 
   const broadcastJoin = useCallback(async () => {
-    if (!nume) return;
+    const currentNume = numeRef.current;
+    if (!currentNume) return;
     try {
       let hostToken = '';
       try { hostToken = sessionStorage.getItem('room-host-token') || ''; } catch {}
@@ -272,7 +277,7 @@ function ArenaMaster({ room }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          roomId: room, actiune: 'join', jucator: nume,
+          roomId: room, actiune: 'join', jucator: currentNume,
           skin: me.skin, hasStar: me.hasStar,
           hostToken, regiune: regiuneRef.current, locale
         })
@@ -289,7 +294,9 @@ function ArenaMaster({ room }) {
       }
     } catch {}
     if (me.hasStar) updateStats('star');
-  }, [room, nume, me, updateStats, router, locale]);
+  }, [room, me, updateStats, router, locale]); // nume scos din deps — folosim numeRef
+  // Update ref imediat
+  useEffect(() => { broadcastJoinRef.current = broadcastJoin; }, [broadcastJoin]);
 
   // POLLING FALLBACK — discover opponents via Redis when WebSocket is unreliable
   // Slower interval when Pusher is connected (fallback only), faster when disconnected
@@ -436,7 +443,7 @@ function ArenaMaster({ room }) {
 
     arenaChannel.bind("pusher:subscription_succeeded", async () => {
       // Trimitem join imediat dacă avem deja nume (hidratat)
-      if (numeRef.current) broadcastJoin();
+      if (numeRef.current) broadcastJoinRef.current?.();
       // Catch-up: dacă oponentul a intrat deja înainte ca noi să fim subscribe
       // (race: Pusher subscribe după ce celălalt a dat broadcastJoin), îl găsim
       // prin get-room-players care citește direct din Redis.
@@ -491,7 +498,7 @@ function ArenaMaster({ room }) {
         });
 
         // Răspundem cu join-ul nostru DOAR prima dată — previne loop infinit
-        if (!hadOpponent) broadcastJoin();
+        if (!hadOpponent) broadcastJoinRef.current?.();
       }
     });
 
@@ -522,7 +529,9 @@ function ArenaMaster({ room }) {
     };
   // incrementGlobal + setUserStats scoase din deps — folosim refs, previne reconectări Pusher
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, nume, isBotMatch, broadcastJoin, isPrivate, isProvocare, teamIdPreluat, pusherRef, locale]);
+  // Subscription STABLE — nu re-subscriem la fiecare schimbare de nume/broadcastJoin.
+  // Folosim broadcastJoinRef + numeRef pentru a evita gap-urile în care events se pierd.
+  }, [room, isBotMatch, isPrivate, isProvocare, teamIdPreluat, pusherRef, locale]);
 
   // Warn before leaving during active game — stable handler via ref to avoid
   // leaks when deps change (B3). The ref tracks whether the game is active,
@@ -559,10 +568,11 @@ function ArenaMaster({ room }) {
   // ×5 în scenariul de 1000+ useri simultani în camere awaiting opponent.
   useEffect(() => {
     if (opponent || rezultat || isStriking || isBotMatch || !nume) return;
-    broadcastJoin();
-    const interval = setInterval(broadcastJoin, 15000);
+    const callJoin = () => broadcastJoinRef.current?.();
+    callJoin();
+    const interval = setInterval(callJoin, 15000);
     return () => clearInterval(interval);
-  }, [opponent, rezultat, isStriking, isBotMatch, nume, broadcastJoin]);
+  }, [opponent, rezultat, isStriking, isBotMatch, nume]);
 
   // Auto-return to home after 45s of inactivity post-result
   useEffect(() => {
