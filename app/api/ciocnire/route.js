@@ -144,7 +144,9 @@ export async function POST(request) {
         const joinRlKey = k(`ratelimit:join:${joinIp}`);
         const joinCount = await redis.incr(joinRlKey);
         if (joinCount === 1) await redis.expire(joinRlKey, 60);
-        if (joinCount > 10) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
+        // 60 joins/min per IP = o familie cu 10 devices care toate reîncarcă pagina
+        // poate reintra în rooms fără să primească 429.
+        if (joinCount > 60) return NextResponse.json({ success: false, error: "Prea rapid! Așteaptă puțin." }, { status: 429 });
 
         const cleanName = jucator.toUpperCase();
         let serverIsHost = false;

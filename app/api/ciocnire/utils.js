@@ -38,7 +38,11 @@ export function getNamespace(request, bodyLocale) {
 
 export async function checkRateLimit(ip, actiune, ns = 'ro') {
   const isWrite = ['increment-global', 'lovitura', 'provocare-duel', 'creeaza-echipa'].includes(actiune);
-  const maxRequests = isWrite ? 10 : 60;
+  // 120 writes/min per IP = 2/s average. Suficient pentru:
+  // - gameplay rapid (un round = 2 writes, deci max ~60 runde/min)
+  // - familii cu multiple devices behind same NAT (5 useri × 12 runde/min = 60 writes/min)
+  // 240 reads/min per IP = 4/s average.
+  const maxRequests = isWrite ? 120 : 240;
   const windowSec = 60;
   const key = `${ns}:ratelimit:${ip}:${isWrite ? 'write' : 'read'}`;
   const luaScript = `
