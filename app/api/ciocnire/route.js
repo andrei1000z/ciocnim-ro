@@ -181,6 +181,10 @@ export async function POST(request) {
           const updates = serverEsteCastigator
             ? { wins: 1, currentStreak: String(parseInt(currentStats.currentStreak) + 1), ...(teamId ? { teamWins: 1 } : {}) }
             : { losses: 1, currentStreak: '0' };
+          // Persist regiune la fiecare battle (client trimite, server stochează)
+          if (regiune && regiune !== "Alege regiunea..." && regiune.length > 1) {
+            updates.regiune = regiune;
+          }
           await updateUserStats(ns, safeName, updates);
           const newStats = serverEsteCastigator
             ? { ...currentStats, wins: currentStats.wins + 1, currentStreak: currentStats.currentStreak + 1, ...(teamId ? { teamWins: (currentStats.teamWins || 0) + 1 } : {}) }
