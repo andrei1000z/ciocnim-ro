@@ -78,6 +78,7 @@ function RegionRow({ region, index, maxScore }) {
 export default function ClasamentPage() {
   const { topRegiuni, topJucatori, nume, userStats, isHydrated } = useGlobalStats();
   const [tab, setTab] = useState("jucatori");
+  const [showAll, setShowAll] = useState(false);
   const t = useT();
   const { locale } = useLocaleConfig();
   const season = getCurrentSeason(locale);
@@ -191,14 +192,24 @@ export default function ClasamentPage() {
                 className="divide-y divide-edge"
               >
                 {topJucatori && topJucatori.length > 0 ? (
-                  topJucatori.map((p, i) => (
-                    <PlayerRow
-                      key={i}
-                      player={p}
-                      index={i}
-                      isMe={p.nume === nume?.trim().toUpperCase()}
-                    />
-                  ))
+                  <>
+                    {(showAll ? topJucatori : topJucatori.slice(0, 10)).map((p, i) => (
+                      <PlayerRow
+                        key={i}
+                        player={p}
+                        index={i}
+                        isMe={p.nume === nume?.trim().toUpperCase()}
+                      />
+                    ))}
+                    {topJucatori.length > 10 && !showAll && (
+                      <button
+                        onClick={() => setShowAll(true)}
+                        className="w-full py-3.5 text-sm font-bold text-red-400 hover:text-red-300 hover:bg-elevated transition-all"
+                      >
+                        {t('content.profil.showAll', { count: topJucatori.length })}
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <span className="text-5xl mb-3">🥚</span>
@@ -236,13 +247,27 @@ export default function ClasamentPage() {
         </div>
 
         {/* Share */}
-        <button
-          onClick={shareRanking}
-          className="w-full py-4 rounded-2xl border-2 border-dashed border-red-900/30 bg-red-900/10 hover:bg-red-900/20 hover:border-red-800/50 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
-        >
-          <span className="text-xl">📲</span>
-          <span className="font-black text-red-400 text-sm">{t('content.clasament.share')}</span>
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={shareRanking}
+            className="flex-1 py-3.5 rounded-2xl border border-red-900/30 bg-red-900/10 hover:bg-red-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <span className="text-base">📲</span>
+            <span className="font-black text-red-400 text-sm">{t('content.clasament.share')}</span>
+          </button>
+          <button
+            onClick={() => {
+              const text = myRank
+                ? t('content.clasament.shareText', { rank: myRank })
+                : t('leaderboard.shareGeneric');
+              window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${getSiteUrl(locale)}/${locale === 'ro' ? '' : locale + '/'}clasament`)}`, '_blank');
+            }}
+            className="py-3.5 px-5 rounded-2xl border border-green-900/30 bg-green-900/10 hover:bg-green-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <img src="/whatsapp-icon.webp" alt="" width={16} height={16} className="brightness-0 invert" />
+            <span className="font-black text-green-400 text-sm">WhatsApp</span>
+          </button>
+        </div>
 
         {/* CTA */}
         <div className="text-center">
