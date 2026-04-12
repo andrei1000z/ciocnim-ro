@@ -170,6 +170,10 @@ export default function ProfilPage() {
                   placeholder={t('content.profil.newNamePlaceholder')}
                   maxLength={21}
                   autoFocus
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  name="nickname-edit"
                   className="flex-1 min-w-0 px-3 py-2.5 border border-edge-strong rounded-xl font-bold text-body text-base outline-none focus:border-red-800 bg-elevated"
                 />
                 <button

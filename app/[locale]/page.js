@@ -377,6 +377,10 @@ function HomeContent() {
                 onKeyDown={e => e.key === "Enter" && handleSaveNume()}
                 placeholder={t('profile.placeholder')}
                 maxLength={21}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                name="nickname-game"
                 className="flex-1 min-w-0 px-3 py-2.5 border border-edge-strong rounded-xl font-bold text-body outline-none focus:border-red-800 transition-all text-sm bg-elevated"
               />
               <motion.button
@@ -534,6 +538,10 @@ function HomeContent() {
                 placeholder={t('joinModal.placeholder')}
                 maxLength={21}
                 autoFocus
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                name="nickname-join"
                 className="w-full px-4 py-3 border-2 border-edge-strong rounded-2xl font-bold text-body outline-none focus:border-red-800 transition-all text-sm bg-elevated focus:bg-elevated-hover mb-3"
               />
               {joinModalNume.trim().length > 0 && joinModalNume.trim().length < 3 && (
