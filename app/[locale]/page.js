@@ -474,12 +474,6 @@ function HomeContent() {
             </LocaleLink>
           ))}
         </div>
-        <div className="flex items-center justify-center gap-3 mt-4 text-xs font-medium flex-wrap">
-          <LocaleLink href="/despre" className="text-muted hover:text-red-400 transition-colors">{t('footer.about')}</LocaleLink>
-          <span className="text-faint">·</span>
-          <a href="https://buymeacoffee.com/ciocnim" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 transition-colors font-bold">{t('footer.donate')}</a>
-        </div>
-
       </motion.div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
