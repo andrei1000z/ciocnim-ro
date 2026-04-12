@@ -73,6 +73,7 @@ const DualLeaderboard = ({ topRegiuni, topPlayers, myName, myScore }) => {
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <span className="text-base w-6 text-center flex-shrink-0">{medals[i] || `${i + 1}.`}</span>
                         <span className="font-bold text-body text-sm truncate">{p.nume}</span>
+                        {p.regiune && <span className="text-[10px] text-muted font-medium truncate hidden sm:inline">({p.regiune})</span>}
                       </div>
                       <span className="font-bold text-red-400 text-sm flex-shrink-0 whitespace-nowrap">{parseInt(p.scor) || 0} 🏆</span>
                     </div>

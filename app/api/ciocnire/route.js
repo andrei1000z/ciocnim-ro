@@ -59,7 +59,7 @@ export async function POST(request) {
         const [totalCount, topRegiuni, topJucatori, , onlineCount] = await Promise.all([
           redis.get(k('global_ciocniri_total')),
           getClasamentRegiuni(ns),
-          getClasamentJucatori(ns),
+          getClasamentJucatori(ns, true),
           redis.zremrangebyscore(k('arena:online'), 0, now - 420000),
           redis.zcard(k('arena:online')),
         ]);

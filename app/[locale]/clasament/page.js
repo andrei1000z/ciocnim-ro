@@ -32,6 +32,9 @@ function PlayerRow({ player, index, isMe }) {
         <p className={`font-bold text-sm truncate ${isMe ? "text-amber-300" : "text-body"}`}>
           {player.nume}
         </p>
+        {player.regiune && (
+          <p className="text-[10px] text-muted font-medium truncate">{player.regiune}</p>
+        )}
       </div>
       <span className="font-black text-red-400 text-sm flex-shrink-0">
         {parseInt(player.scor) || 0}

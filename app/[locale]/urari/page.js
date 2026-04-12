@@ -45,7 +45,7 @@ const MessageCard = ({ text, index, greetings, locale }) => {
           className="px-2.5 py-2 rounded-lg text-xs font-black transition-all bg-green-900/20 text-green-400 hover:bg-green-900/40 border border-green-900/30 active:scale-95"
           title={greetings.whatsappTitle}
         >
-          <img src="/whatsapp-icon.webp" alt="" width={14} height={14} />
+          <img src="/whatsapp-icon.webp" alt="" width={14} height={14} className="brightness-0 invert" />
         </button>
         <button
           onClick={handleCopy}
@@ -193,7 +193,7 @@ const GreetingGenerator = ({ greetings, locale }) => {
                 onClick={handleShareWhatsApp}
                 className="px-5 py-2.5 rounded-xl text-sm font-bold bg-green-900/20 text-green-400 hover:bg-green-900/40 border border-green-900/30 transition-all active:scale-95"
               >
-                <span className="flex items-center gap-1.5"><img src="/whatsapp-icon.webp" alt="" width={14} height={14} /> WhatsApp</span>
+                <span className="flex items-center gap-1.5"><img src="/whatsapp-icon.webp" alt="" width={14} height={14} className="brightness-0 invert" /> WhatsApp</span>
               </button>
               <button
                 onClick={handleCopyCard}

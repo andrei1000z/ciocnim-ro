@@ -4,6 +4,7 @@ import ClientWrapper from "../components/ClientWrapper";
 import ScrollToTop from "../components/ScrollToTop";
 import ThemeToggle from "../components/ThemeToggle";
 import Footer from "../components/Footer";
+import SiteFooter from "../components/SiteFooter";
 import SoundToggle from "../components/SoundToggle";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import DictionaryProvider from "../components/DictionaryProvider";
@@ -172,6 +173,7 @@ export default async function LocaleLayout({ children, params }) {
               <main id="main-content" className="flex-1 w-full max-w-[100vw] px-mobile-fix relative">
                 {children}
               </main>
+              <SiteFooter />
               <Footer />
             </div>
           </ClientWrapper>
