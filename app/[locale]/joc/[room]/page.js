@@ -689,7 +689,7 @@ function ArenaMaster({ room }) {
       // pentru a alege atacantul. Ambii clienti au același seed → aceeași decizie.
       const sorted = [currentNume.toUpperCase(), opp.toUpperCase()].sort();
       const seed = nextAttackerSeedRef.current || 0;
-      const chosenUpper = sorted[seed]; // 0 sau 1
+      const chosenUpper = sorted[seed % 2]; // seed poate fi 0-1e9, modulo 2 → 0 sau 1
       const newAttacker = chosenUpper === currentNume.toUpperCase() ? currentNume : opp;
       setAtacantName(newAttacker);
     }

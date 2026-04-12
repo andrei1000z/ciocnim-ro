@@ -337,7 +337,7 @@ return redis.call('SCARD', KEYS[1])
         if (!roomId || !jucator) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
         redis.del(k(`room:${roomId}:revansa`), k(`room:${roomId}:lovitura`)).catch(() => {});
         const revOkTs = Date.now();
-        const seed = Math.floor(Math.random() * 1e9);
+        const seed = Math.random() < 0.5 ? 0 : 1;
         redis.setex(k(`room:${roomId}:revansa-ok`), 120, JSON.stringify({ t: revOkTs, seed })).catch(() => {});
         await pusher.trigger(chPriv(`arena-v23-${roomId}`), 'revansa-ok', { jucator: jucator.toUpperCase(), t: revOkTs, seed }).catch(() => {});
         return NextResponse.json({ success: true });
