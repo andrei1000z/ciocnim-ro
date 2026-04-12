@@ -918,7 +918,7 @@ export const retete = [
     ],
     healthyCalories: 220,
     healthyNote: "Iaurtul grecesc aduce aceeași textură cremoasă dar cu mai puțin grăsimi saturate.",
-    ingredients: [
+    baseIngredients: [
       { qty: 1, unit: "kg", name: "burtă de vită curățată" },
       { qty: 1, unit: "buc", name: "os de vită" },
       { qty: 2, unit: "buc", name: "morcovi" },
@@ -964,7 +964,7 @@ export const retete = [
     healthySwaps: [],
     healthyCalories: 180,
     healthyNote: "Rețeta e deja sănătoasă — icre + ulei de floarea soarelui.",
-    ingredients: [
+    baseIngredients: [
       { qty: 200, unit: "g", name: "icre de crap sau știucă" },
       { qty: 200, unit: "ml", name: "ulei de floarea soarelui" },
       { qty: 1, unit: "buc", name: "lămâie (sucul)" },
@@ -1005,7 +1005,7 @@ export const retete = [
     ],
     healthyCalories: 160,
     healthyNote: "Varianta cu pui este mult mai ușoară dar se gelatinoasă la fel de bine.",
-    ingredients: [
+    baseIngredients: [
       { qty: 2, unit: "buc", name: "picioare de porc" },
       { qty: 500, unit: "g", name: "carne de porc (pulpă)" },
       { qty: 2, unit: "buc", name: "morcovi" },
@@ -1051,7 +1051,7 @@ export const retete = [
     ],
     healthyCalories: 240,
     healthyNote: "Ricotta light reduce grăsimile cu 30% fără a pierde textura cremoasă.",
-    ingredients: [
+    baseIngredients: [
       { qty: 500, unit: "g", name: "brânză de vaci" },
       { qty: 200, unit: "g", name: "brânză telemea" },
       { qty: 3, unit: "buc", name: "ouă" },
@@ -1096,7 +1096,7 @@ export const retete = [
     ],
     healthyCalories: 320,
     healthyNote: "Eritritolul reduce caloriile fără a pierde dulceața. Avocado aduce grăsimi sănătoase.",
-    ingredients: [
+    baseIngredients: [
       { qty: 200, unit: "g", name: "ciocolată neagră 70%" },
       { qty: 200, unit: "g", name: "unt" },
       { qty: 200, unit: "g", name: "zahăr" },
@@ -1142,7 +1142,7 @@ export const retete = [
     healthySwaps: [],
     healthyCalories: 120,
     healthyNote: "Rețeta e deja ușoară — vinete + ulei + ceapă.",
-    ingredients: [
+    baseIngredients: [
       { qty: 3, unit: "buc", name: "vinete mari" },
       { qty: 1, unit: "buc", name: "ceapă mare (tocată mărunt)" },
       { qty: 4, unit: "linguri", name: "ulei de floarea soarelui" },
@@ -1183,7 +1183,7 @@ export const retete = [
     ],
     healthyCalories: 220,
     healthyNote: "Curcanul afumat dă același gust dar cu 40% mai puțin grăsimi.",
-    ingredients: [
+    baseIngredients: [
       { qty: 500, unit: "g", name: "mazăre (proaspătă sau congelată)" },
       { qty: 300, unit: "g", name: "afumătură (costiță sau kaiser)" },
       { qty: 1, unit: "buc", name: "ceapă" },
