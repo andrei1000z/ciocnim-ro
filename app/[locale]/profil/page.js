@@ -10,6 +10,7 @@ import { getAchievements } from "../../lib/achievements";
 import { useT } from "../../i18n/useT";
 import { useDictionary, useLocaleConfig } from "../../components/DictionaryProvider";
 import { esteNumeInterzis } from "../../lib/profanityFilter";
+import { localeConfig } from "../../i18n/config";
 import { safeLS } from "../../lib/utils";
 import { apiPost } from "../../lib/api";
 
@@ -46,6 +47,8 @@ export default function ProfilPage() {
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+  const [editingRegion, setEditingRegion] = useState(false);
   const router = useRouter();
 
   const handleSkinChange = (newSkin) => {
@@ -202,8 +205,39 @@ export default function ProfilPage() {
               )}
             </div>
           )}
-          {userStats.regiune && userStats.regiune !== "Alege regiunea..." && locale !== 'en' && (
-            <p className="text-sm font-bold text-red-400">{userStats.regiune}</p>
+          {locale !== 'en' && (
+            <div className="relative">
+              {editingRegion ? (
+                <div className="bg-card border border-edge rounded-xl p-2 max-h-48 overflow-y-auto w-56 mx-auto">
+                  {(localeConfig[locale]?.regions || []).map(r => (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        setUserStats(prev => {
+                          const next = { ...prev, regiune: r, regiuneSet: true };
+                          safeLS.set("c_stats", JSON.stringify(next));
+                          return next;
+                        });
+                        setEditingRegion(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left text-sm font-bold rounded-lg transition-colors ${
+                        userStats.regiune === r ? 'bg-red-800 text-white' : 'text-body hover:bg-elevated'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setEditingRegion(true)}
+                  className="inline-flex items-center gap-1.5 text-sm font-bold text-red-400 hover:text-red-300 transition-colors"
+                >
+                  {userStats.regiune && userStats.regiune !== "Alege regiunea..." ? userStats.regiune : t('content.profil.chooseRegion')}
+                  <span className="text-xs text-muted">✏️</span>
+                </button>
+              )}
+            </div>
           )}
         </header>
 
@@ -289,24 +323,34 @@ export default function ProfilPage() {
                 <p className="text-dim text-sm">{t('content.profil.noHistory')}</p>
               </div>
             ) : (
-              <div className="bg-card border border-edge rounded-2xl overflow-hidden divide-y divide-edge">
-                {history.map((m, i) => (
-                  <div key={i} className="flex items-center justify-between px-4 py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className={`flex-shrink-0 w-2 h-2 rounded-full ${m.win ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <div className="min-w-0">
-                        <p className="font-bold text-body text-sm truncate">
-                          {t('content.profil.vs')} <span className="text-heading">{m.opponent}</span>
-                        </p>
-                        <p className="text-xs text-muted">{formatTimeAgo(m.t)}</p>
+              <>
+                <div className="bg-card border border-edge rounded-2xl overflow-hidden divide-y divide-edge">
+                  {(showAllHistory ? history : history.slice(0, 5)).map((m, i) => (
+                    <div key={i} className="flex items-center justify-between px-4 py-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className={`flex-shrink-0 w-2 h-2 rounded-full ${m.win ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <div className="min-w-0">
+                          <p className="font-bold text-body text-sm truncate">
+                            {t('content.profil.vs')} <span className="text-heading">{m.opponent}</span>
+                          </p>
+                          <p className="text-xs text-muted">{formatTimeAgo(m.t)}</p>
+                        </div>
                       </div>
+                      <span className={`text-xs font-black uppercase tracking-wide flex-shrink-0 ${m.win ? 'text-green-400' : 'text-red-400'}`}>
+                        {m.win ? t('content.profil.winLabel') : t('content.profil.lossLabel')}
+                      </span>
                     </div>
-                    <span className={`text-xs font-black uppercase tracking-wide flex-shrink-0 ${m.win ? 'text-green-400' : 'text-red-400'}`}>
-                      {m.win ? t('content.profil.winLabel') : t('content.profil.lossLabel')}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                {history.length > 5 && !showAllHistory && (
+                  <button
+                    onClick={() => setShowAllHistory(true)}
+                    className="w-full mt-2 py-2.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    {t('content.profil.showAll', { count: history.length })}
+                  </button>
+                )}
+              </>
             )}
           </section>
         )}

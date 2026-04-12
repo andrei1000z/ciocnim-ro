@@ -617,6 +617,8 @@
       "hoursAgo": "{n} ore în urmă",
       "daysAgo": "{n} zile în urmă",
       "justNow": "acum",
+      "showAll": "Arată toate ({count})",
+      "chooseRegion": "Alege regiunea",
       "deleteAccount": "Șterge contul",
       "deleteAccountConfirm": "Sigur vrei să ștergi contul? Toate statisticile, realizările și istoricul vor fi șterse definitiv. Numele va fi eliberat.",
       "deleteAccountSuccess": "Contul a fost șters.",

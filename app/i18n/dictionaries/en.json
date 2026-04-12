@@ -610,6 +610,8 @@
       "hoursAgo": "{n} h ago",
       "daysAgo": "{n} d ago",
       "justNow": "just now",
+      "showAll": "Show all ({count})",
+      "chooseRegion": "Choose region",
       "deleteAccount": "Delete account",
       "deleteAccountConfirm": "Are you sure? All stats, achievements and history will be permanently deleted. The name will be released.",
       "deleteAccountSuccess": "Account deleted.",
