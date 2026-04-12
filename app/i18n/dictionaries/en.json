@@ -508,21 +508,23 @@
       "pageSubtitle": "Everything you need to know to crack Easter eggs online.",
       "stepsLabel": "Step by Step",
       "steps": [
-        {"title": "Pick a Nickname", "icon": "✏️", "desc": "Go to the homepage and type a nickname between 3 and 21 characters. It will show up in the leaderboard and game rooms.", "tip": "Pick something memorable — your opponents will see it!"},
-        {"title": "Customize Your Egg", "icon": "🎨", "desc": "Tap your egg to choose a color: Red, Blue, Gold or Green. Each color carries a unique traditional pattern.", "tip": "Color doesn't affect your odds — it's purely aesthetic."},
-        {"title": "Pick a Game Mode", "icon": "🎮", "desc": "You have three options: Play with a Friend (private room with code), Play with Anyone (public arena), or create a Group for multiple players.", "tip": null},
-        {"title": "Crack!", "icon": "💥", "desc": "When both players are in the room, the crack happens automatically. One egg breaks, the other survives. The result is random, like in real life!", "tip": "The striker says 'Christ is Risen!' and the other responds 'Indeed He is Risen!'"},
-        {"title": "Climb the Leaderboard", "icon": "🏆", "desc": "Every win counts! Your wins are automatically added to the global leaderboard.", "tip": null},
-        {"title": "Unlock Achievements", "icon": "🏅", "desc": "The game has 16 achievements to unlock — from your first win to 1000 wins. Check them on your profile page!", "tip": "Some achievements are secret — discover them yourself!"}
+        {"title": "Pick a Nickname", "icon": "✏️", "desc": "Go to the homepage and type a nickname between 2 and 20 characters. It will show up in the leaderboard and game rooms.", "tip": "You can change your nickname anytime from your Profile page."},
+        {"title": "Customize Your Egg", "icon": "🎨", "desc": "From your Profile page, choose your egg color: Red, Blue, Gold or Green. Each color has a unique look.", "tip": "Color doesn't affect your odds — it's purely aesthetic."},
+        {"title": "Pick a Game Mode", "icon": "🎮", "desc": "You have multiple options: Play with a Friend (private room with a 4-character code), Play with Anyone (public arena — auto-matched), Play with a Bot (instant practice), or create a Group with friends.", "tip": "You can send the invite via WhatsApp directly from the room!"},
+        {"title": "Crack!", "icon": "💥", "desc": "When both players are in the room, the attacker taps the button or shakes their phone to strike. One egg breaks — the other survives. The result is random, like in real life!", "tip": "You can ask for a rematch after every game — as many times as you want!"},
+        {"title": "Climb the Leaderboard", "icon": "🏆", "desc": "Every win counts! Your wins are automatically added to the global leaderboard. The leaderboard shows all active players.", "tip": null},
+        {"title": "Unlock Achievements", "icon": "🏅", "desc": "The game has 16 achievements to unlock — from your first win to 1000 wins. Check them on your Profile page!", "tip": "Some achievements are secret — discover them yourself!"}
       ],
       "faqLabel": "Frequently Asked Questions",
       "faq": [
         {"q": "Is it free?", "a": "Yes, completely free. No ads, no in-app purchases."},
-        {"q": "Do I need to create an account?", "a": "No. Pick a nickname and start playing instantly. Your stats are saved in your browser."},
-        {"q": "Can I play on my phone?", "a": "Yes! It works on any phone, tablet or computer with a browser. You can even install it as an app."},
-        {"q": "How do I invite a friend?", "a": "Tap 'Play with a Friend', create a room and send the 4-character code to your friend."},
-        {"q": "What are groups?", "a": "Groups let you create a team with friends or family. You can challenge group members directly to duels."},
-        {"q": "How does the leaderboard work?", "a": "Every win adds a point to your personal score and to the global leaderboard. Top 10 players are displayed."}
+        {"q": "Do I need to create an account?", "a": "No. Pick a nickname and start playing instantly. Your stats are saved automatically."},
+        {"q": "Can I play on my phone?", "a": "Yes! It works on any phone, tablet or computer with a browser. You can even install it as an app from the browser."},
+        {"q": "How do I invite a friend?", "a": "Tap 'Play with a Friend', create a room, and send the 4-character code or direct link via WhatsApp."},
+        {"q": "What are groups?", "a": "Groups let you create a team with friends or family. You can challenge members to duels and see an internal group leaderboard."},
+        {"q": "How does the leaderboard work?", "a": "Every win adds a point to your personal score. The leaderboard shows all active players, not just a limited top."},
+        {"q": "Can I play solo?", "a": "Yes! Choose 'Play with a Bot' for instant practice. Bot wins also count in the leaderboard."},
+        {"q": "How do I change my nickname or egg?", "a": "From the Profile page you can change your nickname, egg color, view match history and unlocked achievements."}
       ],
       "ctaOnline": "🥚 Crack eggs online"
     },

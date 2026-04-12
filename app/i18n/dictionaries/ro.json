@@ -509,21 +509,23 @@
       "pageSubtitle": "Tot ce trebuie să știi ca să ciocnești ouă online.",
       "stepsLabel": "Pas cu Pas",
       "steps": [
-        {"title": "Pune-ți o Poreclă", "icon": "✏️", "desc": "Intră pe pagina principală și scrie-ți o poreclă de 3-21 caractere. Aceasta va apărea în clasament și în camerele de joc.", "tip": "Alege ceva memorabil — adversarii tăi o vor vedea!"},
-        {"title": "Personalizează-ți Oul", "icon": "🎨", "desc": "Apasă pe oul tău pentru a alege culoarea: Roșu, Albastru, Auriu sau Verde. Fiecare culoare are un model tradițional unic.", "tip": "Culoarea nu influențează șansele — este pur estetică."},
-        {"title": "Alege Modul de Joc", "icon": "🎮", "desc": "Ai trei opțiuni: Ciocnește cu un Prieten (cameră privată cu cod), Ciocnește cu Concetățenii (arena publică), sau creează un Grup pentru mai mulți jucători.", "tip": null},
-        {"title": "Ciocnește!", "icon": "💥", "desc": "Când ambii jucători sunt în cameră, ciocnirea se face automat. Un ou se sparge — celălalt supraviețuiește. Rezultatul este aleatoriu, ca în viața reală!", "tip": "Cel care lovește zice \"Hristos a Înviat!\", celălalt răspunde \"Adevărat a Înviat!\""},
-        {"title": "Urcă în Clasament", "icon": "🏆", "desc": "Fiecare victorie contează! Victoriile tale se adaugă automat în clasamentul național și regional.", "tip": null},
-        {"title": "Deblochează Achievement-uri", "icon": "🏅", "desc": "Jocul are 16 achievement-uri de deblocat, de la prima victorie până la 100 de victorii. Verifică-le pe pagina de profil!", "tip": "Unele achievement-uri sunt secrete — descoperă-le singur!"}
+        {"title": "Pune-ți o Poreclă", "icon": "✏️", "desc": "Intră pe pagina principală și scrie-ți o poreclă de 2-20 caractere. Aceasta va apărea în clasament și în camerele de joc.", "tip": "Poți să-ți schimbi porecla oricând din pagina de Profil."},
+        {"title": "Personalizează-ți Oul", "icon": "🎨", "desc": "Din pagina de Profil alegi culoarea oului: Roșu, Albastru, Auriu sau Verde. Fiecare culoare are un aspect unic.", "tip": "Culoarea nu influențează șansele — este pur estetică."},
+        {"title": "Alege Modul de Joc", "icon": "🎮", "desc": "Ai mai multe opțiuni: Ciocnește cu un Prieten (cameră privată cu cod de 4 caractere), Ciocnește cu Concetățenii (arena publică — se găsește un adversar automat), Ciocnește cu un Bot (antrenament instant), sau creează un Grup cu prietenii.", "tip": "Poți trimite invitația pe WhatsApp direct din cameră!"},
+        {"title": "Ciocnește!", "icon": "💥", "desc": "Când ambii jucători sunt în cameră, atacantul apasă butonul sau scutură telefonul pentru a lovi. Un ou se sparge — celălalt supraviețuiește. Rezultatul este aleatoriu, ca în viața reală!", "tip": "Poți cere revansă după fiecare meci — de câte ori vrei!"},
+        {"title": "Urcă în Clasament", "icon": "🏆", "desc": "Fiecare victorie contează! Victoriile tale se adaugă automat în clasamentul național și regional. Clasamentul arată toți jucătorii.", "tip": null},
+        {"title": "Deblochează Achievement-uri", "icon": "🏅", "desc": "Jocul are 16 achievement-uri de deblocat, de la prima victorie până la 1000 de victorii. Verifică-le pe pagina de Profil!", "tip": "Unele achievement-uri sunt secrete — descoperă-le singur!"}
       ],
       "faqLabel": "Întrebări Frecvente",
       "faq": [
         {"q": "Este gratuit?", "a": "Da, complet gratuit. Fără reclame, fără achiziții in-app."},
-        {"q": "Trebuie să-mi fac cont?", "a": "Nu. Pui o poreclă și joci instant. Statisticile se salvează în browser."},
-        {"q": "Pot juca de pe telefon?", "a": "Da! Funcționează pe orice telefon, tabletă sau computer cu browser. Poți chiar să-l instalezi ca aplicație."},
-        {"q": "Cum invit un prieten?", "a": "Apasă \"Ciocnește cu un Prieten\", creează o cameră, și trimite-i codul de 4 caractere prietenului tău."},
-        {"q": "Ce sunt grupurile?", "a": "Grupurile îți permit să creezi o echipă cu prietenii sau familia. Poți provoca membrii grupului la dueluri direct."},
-        {"q": "Cum funcționează clasamentul?", "a": "Fiecare victorie adaugă un punct la clasamentul tău personal și la regiunea ta. Top 10 jucători și top 20 regiuni sunt afișate."}
+        {"q": "Trebuie să-mi fac cont?", "a": "Nu. Pui o poreclă și joci instant. Statisticile se salvează automat."},
+        {"q": "Pot juca de pe telefon?", "a": "Da! Funcționează pe orice telefon, tabletă sau computer cu browser. Poți chiar să-l instalezi ca aplicație din browser."},
+        {"q": "Cum invit un prieten?", "a": "Apasă pe Ciocneste cu un Prieten, creează o cameră, și trimite codul de 4 caractere sau link-ul direct pe WhatsApp."},
+        {"q": "Ce sunt grupurile?", "a": "Grupurile îți permit să creezi o echipă cu prietenii sau familia. Poți provoca membrii la dueluri și vedeți un clasament intern al grupului."},
+        {"q": "Cum funcționează clasamentul?", "a": "Fiecare victorie adaugă un punct la clasamentul tău și la regiunea ta. Clasamentul arată toți jucătorii activi, nu doar un top limitat."},
+        {"q": "Pot juca singur?", "a": "Da! Alege Ciocneste cu un Bot pentru antrenament instant. Victoriile contra bot-ului contează și ele în clasament."},
+        {"q": "Cum îmi schimb porecla sau oul?", "a": "Din pagina de Profil poți schimba porecla, culoarea oului, vezi istoricul meciurilor și achievement-urile deblocate."}
       ],
       "ctaOnline": "🥚 Ciocnește ouă online"
     },
