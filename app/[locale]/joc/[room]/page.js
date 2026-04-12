@@ -849,7 +849,7 @@ function ArenaMaster({ room }) {
               <span className="text-base md:text-lg">📲</span>
             </button>
             <button onClick={shareWhatsApp} className="bg-green-700 hover:bg-green-600 text-white p-3 md:p-4 rounded-full border border-green-800 shadow-lg shadow-black/30 transition-all active:scale-95" title="WhatsApp" aria-label="WhatsApp">
-              <img src="/whatsapp-icon.png" alt="" width={20} height={20} className="brightness-0 invert" />
+              💬
             </button>
           </div>
         )}
@@ -1129,7 +1129,7 @@ function ArenaMaster({ room }) {
                   }}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-green-700 text-white border-green-600/30 hover:bg-green-600 shadow-lg shadow-green-900/30"
                 >
-                  <span className="flex items-center justify-center gap-2"><img src="/whatsapp-icon.png" alt="" width={16} height={16} className="brightness-0 invert" />{t('result.shareWhatsApp')}</span>
+                  <span className="flex items-center justify-center gap-2">💬{t('result.shareWhatsApp')}</span>
                 </button>
                 <button
                   onClick={handleRevansa}

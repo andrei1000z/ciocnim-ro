@@ -264,7 +264,7 @@ export default function ClasamentPage() {
             }}
             className="py-3.5 px-5 rounded-2xl border border-green-900/30 bg-green-900/10 hover:bg-green-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
           >
-            <img src="/whatsapp-icon.png" alt="" width={16} height={16} className="brightness-0 invert" />
+            💬
             <span className="font-black text-green-400 text-sm">WhatsApp</span>
           </button>
         </div>

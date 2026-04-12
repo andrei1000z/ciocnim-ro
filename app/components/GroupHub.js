@@ -64,7 +64,7 @@ const GroupHub = ({ teams, activeTeamIndex, setActiveTeamIndex, numePreluat, onL
         </div>
         <div className="flex gap-2">
           <button onClick={handleWhatsApp} className="flex-1 py-2.5 bg-green-700 text-white rounded-xl font-bold text-xs hover:bg-green-600 transition-all active:scale-95 flex items-center justify-center gap-1.5" title="WhatsApp">
-            <img src="/whatsapp-icon.png" alt="" width={14} height={14} className="brightness-0 invert" />
+            💬
             <span>WhatsApp</span>
           </button>
           <button onClick={handleInvite} className="flex-1 py-2.5 bg-red-800 text-white rounded-xl font-bold text-xs hover:bg-red-900 transition-all active:scale-95">{copyText}</button>
