@@ -46,7 +46,7 @@ export async function getUserStats(ns, jucator) {
     duelsSent: parseInt(stats.duelsSent) || 0,
     goldenUsed: stats.goldenUsed === 'true',
     teamsJoined: parseInt(stats.teamsJoined) || 0,
-    regiune: stats.regiune || 'Muntenia',
+    regiune: stats.regiune || null,
   };
 }
 

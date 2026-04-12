@@ -138,10 +138,8 @@ export function getClientNamespace(locale) {
  * Pentru `en` (international) nu avem regiuni — folosim "Global".
  */
 function getDefaultRegion(locale) {
-  if (locale === 'bg') return 'София-град';
-  if (locale === 'el') return 'Αττική';
   if (locale === 'en') return 'Global';
-  return 'Muntenia';
+  return 'Alege regiunea...';
 }
 
 function buildDefaultStats(locale) {
