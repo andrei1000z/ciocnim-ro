@@ -152,7 +152,7 @@ export default function ProfilPage() {
     <div className="bg-main text-body">
       <PageHeader />
 
-      <div className="w-full max-w-2xl mx-auto pt-6 pb-12 px-6 space-y-6">
+      <div className="w-full max-w-2xl mx-auto pt-4 pb-12 px-4 sm:px-6 space-y-5">
         <header className="text-center space-y-3">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600/20 to-red-900/10 border border-red-500/10 mb-2 shadow-lg">
             <span className="text-4xl">🥚</span>
@@ -248,20 +248,20 @@ export default function ProfilPage() {
             <h2 className="text-sm font-black text-heading mb-4 flex items-center gap-2 uppercase tracking-wide">
               <span>🥚</span> {t('eggColor')}
             </h2>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {SKIN_OPTIONS.map(opt => {
                 const selected = userStats.skin === opt.key;
                 return (
                   <button
                     key={opt.key}
                     onClick={() => handleSkinChange(opt.key)}
-                    className={`group flex flex-col items-center gap-2 p-3 rounded-xl border transition-all active:scale-95 ${
+                    className={`group flex flex-row sm:flex-col items-center gap-3 sm:gap-2 px-4 py-3 sm:p-3 rounded-xl border transition-all active:scale-95 ${
                       selected
                         ? `bg-elevated border-red-600/40 ${opt.ring} ring-2`
                         : 'border-edge hover:border-red-900/30'
                     }`}
                   >
-                    <div className={`w-12 h-14 rounded-full bg-gradient-to-br ${opt.grad} shadow-lg shadow-black/40 relative overflow-hidden`}>
+                    <div className={`w-10 h-12 sm:w-12 sm:h-14 rounded-full bg-gradient-to-br ${opt.grad} shadow-lg shadow-black/40 relative overflow-hidden flex-shrink-0`}>
                       <div className="absolute top-2 left-2 w-3 h-4 bg-white/30 rounded-full blur-sm" />
                     </div>
                     <span className={`text-xs font-black uppercase tracking-wide ${selected ? 'text-heading' : 'text-muted'}`}>
