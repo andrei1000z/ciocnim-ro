@@ -558,6 +558,7 @@ export default function ClientWrapper({ children }) {
     let achQueue = [];
     let achShowing = false;
     let achTimer = null;
+    const shownAchKeys = new Set(); // client-side dedup per sesiune
     const showNextAch = () => {
       if (achQueue.length === 0) { achShowing = false; return; }
       achShowing = true;
@@ -566,7 +567,10 @@ export default function ClientWrapper({ children }) {
     };
     channel.bind('achievement-unlocked', (data) => {
       if (!data.achievements || !Array.isArray(data.achievements)) return;
-      achQueue.push(...data.achievements);
+      const fresh = data.achievements.filter(a => !shownAchKeys.has(a.key));
+      if (fresh.length === 0) return;
+      fresh.forEach(a => shownAchKeys.add(a.key));
+      achQueue.push(...fresh);
       playSound('victorie');
       triggerVibrate([50, 30, 50, 30, 100]);
       if (!achShowing) showNextAch();
