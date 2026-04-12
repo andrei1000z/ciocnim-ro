@@ -481,7 +481,7 @@ export default function ClientWrapper({ children }) {
     };
     // Trimite heartbeat instant la montare
     sendHeartbeat();
-    const interval = setInterval(sendHeartbeat, 15000);
+    const interval = setInterval(sendHeartbeat, 1000);
 
     // Când user-ul revine pe tab → heartbeat instant (actualizare imediată)
     const onVisibility = () => { if (document.visibilityState === 'visible') sendHeartbeat(); };

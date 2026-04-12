@@ -60,7 +60,7 @@ export async function POST(request) {
           redis.get(k('global_ciocniri_total')),
           getClasamentRegiuni(ns),
           getClasamentJucatori(ns, true),
-          redis.zremrangebyscore(k('arena:online'), 0, now - 30000),
+          redis.zremrangebyscore(k('arena:online'), 0, now - 2000),
           redis.zcard(k('arena:online')),
         ]);
         return NextResponse.json(
@@ -692,7 +692,7 @@ return redis.call('SCARD', KEYS[1])
         const now = Date.now();
         const pipeline = redis.pipeline();
         pipeline.zadd(k('arena:online'), now, visitorId);
-        pipeline.expire(k('arena:online'), 120);
+        pipeline.expire(k('arena:online'), 5);
         pipeline.zcard(k('arena:online'));
         const results = await pipeline.exec();
         const count = results[2][1];
