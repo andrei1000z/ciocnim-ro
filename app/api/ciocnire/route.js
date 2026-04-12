@@ -60,7 +60,7 @@ export async function POST(request) {
           redis.get(k('global_ciocniri_total')),
           getClasamentRegiuni(ns),
           getClasamentJucatori(ns, true),
-          redis.zremrangebyscore(k('arena:online'), 0, now - 90000),
+          redis.zremrangebyscore(k('arena:online'), 0, now - 30000),
           redis.zcard(k('arena:online')),
         ]);
         return NextResponse.json(
@@ -695,9 +695,14 @@ return redis.call('SCARD', KEYS[1])
         pipeline.expire(k('arena:online'), 120);
         pipeline.zcard(k('arena:online'));
         const results = await pipeline.exec();
-        const isNew = results[0][1] === 1;
         const count = results[2][1];
-        if (isNew) pusher.trigger(ch('global'), 'online-count', { online: count }).catch(() => {});
+        // Broadcast la orice heartbeat dacă count-ul s-a schimbat de la ultimul broadcast
+        const lastCountKey = k('arena:online:last-count');
+        const lastCount = parseInt(await redis.get(lastCountKey)) || 0;
+        if (count !== lastCount) {
+          await redis.set(lastCountKey, String(count), 'EX', 120);
+          pusher.trigger(ch('global'), 'online-count', { online: count }).catch(() => {});
+        }
         return NextResponse.json({ success: true, online: count });
       }
 
