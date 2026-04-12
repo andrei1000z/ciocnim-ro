@@ -416,7 +416,7 @@ export default function ClientWrapper({ children }) {
       const payload = {
         actiune: 'increment-global',
         jucator: nume,
-        regiune: (amCastigat && userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
+        regiune: (userStats.regiune && userStats.regiune !== "Alege regiunea...") ? userStats.regiune.trim() : null,
         teamId: amCastigat ? teamIdToUpdate : null,
         roomId: roomId,
         bot: isBot,
