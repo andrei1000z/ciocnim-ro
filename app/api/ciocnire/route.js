@@ -153,7 +153,7 @@ export async function POST(request) {
         const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([
           pipeline.exec(),
           getClasamentRegiuni(ns),
-          getClasamentJucatori(ns),
+          getClasamentJucatori(ns, true),
           safeName ? getUserStats(ns, safeName) : Promise.resolve(null),
         ]);
         // Dacă am contorizat global (primul client), primul rezultat e incr-ul.
@@ -525,7 +525,7 @@ return redis.call('SCARD', KEYS[1])
           session = await createSession(ns, newClean);
         }
 
-        getClasamentJucatori(ns).then(top => pusher.trigger(ch('global'), 'update-complet', { topJucatori: top })).catch(() => {});
+        getClasamentJucatori(ns, true).then(top => pusher.trigger(ch('global'), 'update-complet', { topJucatori: top })).catch(() => {});
         return NextResponse.json({ success: true, session });
       }
 
@@ -556,7 +556,7 @@ return redis.call('SCARD', KEYS[1])
           teamIds.forEach(tId => delPipeline.zrem(k(`team:${tId}:membri`), cleanName));
         }
         await delPipeline.exec();
-        getClasamentJucatori(ns).then(top => pusher.trigger(ch('global'), 'update-complet', { topJucatori: top })).catch(() => {});
+        getClasamentJucatori(ns, true).then(top => pusher.trigger(ch('global'), 'update-complet', { topJucatori: top })).catch(() => {});
         return NextResponse.json({ success: true });
       }
 
