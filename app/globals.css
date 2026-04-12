@@ -42,30 +42,30 @@
 
 @layer base {
   :root {
-    /* ── Dark theme (default) ── */
-    --t-bg-main: #0c0a0a;
-    --t-bg-surface: #141111;
-    --t-bg-surface-hover: #1a1515;
-    --t-card-bg: rgba(255, 255, 255, 0.04);
-    --t-card-bg-hover: rgba(255, 255, 255, 0.06);
-    --t-elevated-bg: rgba(255, 255, 255, 0.05);
-    --t-elevated-bg-hover: rgba(255, 255, 255, 0.08);
-    --t-overlay-bg: rgba(255, 255, 255, 0.1);
+    /* ── Dark theme (default) — warm, less metallic ── */
+    --t-bg-main: #0e0b09;
+    --t-bg-surface: #161210;
+    --t-bg-surface-hover: #1c1714;
+    --t-card-bg: rgba(255, 240, 220, 0.035);
+    --t-card-bg-hover: rgba(255, 240, 220, 0.055);
+    --t-elevated-bg: rgba(255, 240, 220, 0.045);
+    --t-elevated-bg-hover: rgba(255, 240, 220, 0.07);
+    --t-overlay-bg: rgba(255, 240, 220, 0.09);
     --t-backdrop: rgba(0, 0, 0, 0.85);
 
-    --t-text-heading: #ffffff;
-    --t-text-body: #e5e5e5;
-    --t-text-dim: #9ca3af;
-    --t-text-muted: #8b95a3;
-    --t-text-faint: #6b7580;
+    --t-text-heading: #faf5f0;
+    --t-text-body: #e8e0d8;
+    --t-text-dim: #a89888;
+    --t-text-muted: #8a7d72;
+    --t-text-faint: #6d6058;
 
     --t-accent-red: #f87171;
     --t-accent-red-strong: #ef4444;
     --t-accent-green: #4ade80;
     --t-accent-amber: #fbbf24;
 
-    --t-border-subtle: rgba(255, 255, 255, 0.06);
-    --t-border-strong: rgba(255, 255, 255, 0.1);
+    --t-border-subtle: rgba(255, 230, 200, 0.06);
+    --t-border-strong: rgba(255, 230, 200, 0.10);
 
     /* Shared constants */
     --red-primary: #dc2626;
