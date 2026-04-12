@@ -147,7 +147,7 @@ export async function POST(request) {
           pipeline.expire(k(`user:${safeName}:history`), 60 * 60 * 24 * 90);
         }
         // Cap leaderboard-uri: 100 jucători, 20 regiuni
-        pipeline.zremrangebyrank(k('leaderboard_jucatori'), 0, -101);
+        pipeline.zremrangebyrank(k('leaderboard_jucatori'), 0, -1001);
         pipeline.zremrangebyrank(k('leaderboard_regiuni'), 0, -21);
 
         const [results, topActualizat, topJucatoriActualizat, currentStats] = await Promise.all([

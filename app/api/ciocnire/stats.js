@@ -15,8 +15,8 @@ export async function getClasamentRegiuni(ns) {
 
 export async function getClasamentJucatori(ns) {
   try {
-    // Returnăm top 100 jucători pentru full leaderboard pe pagina /clasament
-    const raw = await redis.zrevrange(`${ns}:leaderboard_jucatori`, 0, 99, 'WITHSCORES');
+    // Returnăm top 1000 jucători pentru full leaderboard pe pagina /clasament
+    const raw = await redis.zrevrange(`${ns}:leaderboard_jucatori`, 0, 999, 'WITHSCORES');
     const lista = [];
     for (let i = 0; i < raw.length; i += 2) {
       lista.push({ nume: raw[i], scor: parseInt(raw[i + 1]) || 0 });
