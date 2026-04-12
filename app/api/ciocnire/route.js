@@ -464,16 +464,24 @@ return redis.call('SCARD', KEYS[1])
         // Atomic reserve: SET NX previne race
         const reserved = await redis.set(nameKey, newClean, 'EX', NAME_TTL, 'NX');
         if (!reserved) {
-          // SECURITATE: ZERO bootstrap. Bootstrap legacy era exploitabil — orice atacator
-          // putea revendica un nume rezervat fără session. Acum: nume existent → 409 strict.
-          // Useri legacy fără session pierd profilul (sterge-cont, rename, get-history)
-          // dar continuă să joace (game endpoints nu sunt gated). Cleanup la TTL 90 zile.
-          if (oldClean === newClean) {
-            // Self-noop autentificat: refresh TTL.
-            const auth = await requireSession(request, ns, newClean);
-            if (!auth.ok) return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
+          // SECURITATE: bootstrap safe — permitem session DOAR dacă nimeni nu a luat-o încă.
+          // Dacă session deja există → 409 strict (cineva a revendicat deja contul).
+          // Dacă session NU există → primul caller primește (de regulă userul real care vizitează site-ul).
+          if (oldClean === newClean || !isRename) {
+            const existingSession = await redis.exists(`${ns}:session:byname:${newClean}`);
+            if (existingSession) {
+              // Session deja există: self-noop (dacă are session validă) sau 409 (alt user)
+              const auth = await requireSession(request, ns, newClean);
+              if (auth.ok) {
+                await redis.expire(nameKey, NAME_TTL);
+                return NextResponse.json({ success: true });
+              }
+              return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
+            }
+            // Bootstrap safe: nimeni nu are session → creăm pentru primul caller
             await redis.expire(nameKey, NAME_TTL);
-            return NextResponse.json({ success: true });
+            const session = await createSession(ns, newClean);
+            return NextResponse.json({ success: true, session });
           }
           return NextResponse.json({ success: false, error: "Acest nume este deja luat de alt jucător!" }, { status: 409 });
         }
@@ -628,13 +636,14 @@ return redis.call('SCARD', KEYS[1])
 
       case 'provocare-duel': {
         if (!oponentNume || !jucator || !roomId) return NextResponse.json({ success: false, error: "Date incomplete" }, { status: 400 });
-        const auth = await requireSession(request, ns, jucator);
-        if (!auth.ok) return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
-        const duelRlKey = k(`ratelimit:duel:${auth.name}`);
+        // NU cerem session — provocarea e non-distructivă (doar trimite notificare Pusher).
+        // Rate limit per IP previne spam. Session ar bloca useri legacy fără token.
+        const duelIp = getClientIp(request);
+        const duelRlKey = k(`ratelimit:duel:${duelIp}`);
         const duelRl = await redis.set(duelRlKey, '1', 'EX', 5, 'NX');
         if (!duelRl) return NextResponse.json({ success: false, error: "Așteaptă puțin între provocări." }, { status: 429 });
         pusher.trigger(chPriv(`user-notif-${oponentNume.toUpperCase()}`), 'duel-request', {
-          deLa: auth.name, roomId, teamId: teamId || null, t: Date.now()
+          deLa: jucator.toUpperCase(), roomId, teamId: teamId || null, t: Date.now()
         }).catch(() => {});
         return NextResponse.json({ success: true });
       }

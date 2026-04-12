@@ -378,10 +378,33 @@ export default function ClientWrapper({ children }) {
     }
   }, [nume, setToastMsg, t, locale]);
 
-  // NOTA: nu mai există bootstrap legacy. Useri vechi cu nume în localStorage
-  // dar fără session pierd accesul la profil/rename/sterge-cont (game endpoints
-  // continuă să meargă). Decizia e dictată de securitate — bootstrap-ul deschis
-  // permitea atacatorilor să fure conturi rezervate prin simplu curl request.
+  // Bootstrap safe: useri vechi cu nume în localStorage dar fără c_session.
+  // Server permite bootstrap DOAR dacă nimeni nu are deja session pe acel nume.
+  // Astfel primul vizitator (de regulă userul real) primește session-ul.
+  // Dacă un atacator a ajuns primul → userul real primește 409 (pierde profilul, nu contul).
+  useEffect(() => {
+    if (!isHydrated || !nume) return;
+    if (safeLS.get('c_session')) return;
+    (async () => {
+      try {
+        const res = await fetch('/api/ciocnire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            actiune: 'schimba-porecla',
+            oldName: null,
+            newName: nume,
+            teamIds: JSON.parse(safeLS.get('c_teamIds') || '[]'),
+            locale,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.session) {
+          safeLS.set('c_session', data.session);
+        }
+      } catch {}
+    })();
+  }, [isHydrated, nume, locale]);
 
   // ==========================================================================
   // INCREMENTARE SCOR (CLEAN & BULLETPROOF)

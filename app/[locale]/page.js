@@ -436,16 +436,7 @@ function HomeContent() {
         )}
       </motion.div>
 
-      {/* ═══ CLASAMENT ═══ */}
-      <motion.div {...fadeUp(0.12, prefersReducedMotion)}>
-        <SectionLabel>{t('leaderboard.label')}</SectionLabel>
-        <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
-        <LocaleLink href="/clasament" className="block text-center text-xs font-bold text-red-400/70 hover:text-red-400 mt-2 transition-colors">
-          {t('leaderboard.seeAll')}
-        </LocaleLink>
-      </motion.div>
-
-      {/* ═══ GRUPURI (condițional) ═══ */}
+      {/* ═══ GRUPURI (condițional) — DEASUPRA clasamentului ca userul să le vadă imediat ═══ */}
       <AnimatePresence>
         {loadedTeams.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
@@ -454,6 +445,15 @@ function HomeContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ═══ CLASAMENT ═══ */}
+      <motion.div {...fadeUp(0.12, prefersReducedMotion)}>
+        <SectionLabel>{t('leaderboard.label')}</SectionLabel>
+        <DualLeaderboard topRegiuni={topRegiuni} topPlayers={topJucatori} myName={nume} myScore={userStats.wins || 0} />
+        <LocaleLink href="/clasament" className="block text-center text-xs font-bold text-red-400/70 hover:text-red-400 mt-2 transition-colors">
+          {t('leaderboard.seeAll')}
+        </LocaleLink>
+      </motion.div>
 
       {/* ═══ NAVIGARE + SEO ═══ */}
       <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
