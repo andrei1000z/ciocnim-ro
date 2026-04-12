@@ -10,7 +10,22 @@ export default function SiteFooter() {
 
   const isHome = /^\/(ro|en|bg|el)?$/.test(pathname);
   const isGame = pathname.includes('/joc/');
-  if (isHome || isGame) return null;
+  if (isGame) return null;
+
+  if (isHome) {
+    return (
+      <footer className="w-full border-t border-edge mt-8">
+        <div className="max-w-3xl mx-auto px-4 py-6 text-center space-y-2">
+          <p className="text-xs text-muted leading-relaxed">
+            <strong className="text-body">Ciocnim.ro</strong> este jocul tradițional românesc de ciocnit ouă de Paște, acum online. Joacă gratuit cu prietenii și familia, indiferent de distanță. Hristos a Înviat! 🥚
+          </p>
+          <p className="text-xs text-dim">
+            Contact: <a href="mailto:ciocnim@mail.com" className="hover:text-red-400 transition-colors">ciocnim@mail.com</a>
+          </p>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className="w-full border-t border-edge mt-8">

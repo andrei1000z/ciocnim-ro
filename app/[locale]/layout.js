@@ -3,7 +3,6 @@ import Script from "next/script";
 import ClientWrapper from "../components/ClientWrapper";
 import ScrollToTop from "../components/ScrollToTop";
 import ThemeToggle from "../components/ThemeToggle";
-import Footer from "../components/Footer";
 import SiteFooter from "../components/SiteFooter";
 import SoundToggle from "../components/SoundToggle";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -174,7 +173,6 @@ export default async function LocaleLayout({ children, params }) {
                 {children}
               </main>
               <SiteFooter />
-              <Footer />
             </div>
           </ClientWrapper>
         </DictionaryProvider>
