@@ -457,9 +457,6 @@ function HomeContent() {
 
       {/* ═══ NAVIGARE + SEO ═══ */}
       <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
-        <p className="text-xs text-faint leading-relaxed text-center mb-4">
-          <strong className="text-muted">{t('seo.siteName')}</strong> {t('seo.description')}
-        </p>
         <SectionLabel>{t('discover.label')}</SectionLabel>
         <div className="flex gap-2 justify-center flex-wrap">
           {[
