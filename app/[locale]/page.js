@@ -482,6 +482,15 @@ function HomeContent() {
           <span className="text-faint">·</span>
           <a href="https://buymeacoffee.com/ciocnim" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:text-amber-300 transition-colors font-bold">{t('footer.donate')}</a>
         </div>
+
+        <div className="mt-6 pt-5 border-t border-edge text-center">
+          <p className="text-xs text-muted leading-relaxed">
+            <strong className="text-body">Ciocnim.ro</strong> este jocul tradițional românesc de ciocnit ouă de Paște, acum online. Joacă gratuit cu prietenii și familia, indiferent de distanță. Hristos a Înviat! 🥚
+          </p>
+          <p className="text-xs text-dim mt-2">
+            Contact: <a href="mailto:ciocnim@mail.com" className="hover:text-red-400 transition-colors">ciocnim@mail.com</a>
+          </p>
+        </div>
       </motion.div>
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
