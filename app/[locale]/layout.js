@@ -5,6 +5,7 @@ import ScrollToTop from "../components/ScrollToTop";
 import ThemeToggle from "../components/ThemeToggle";
 import SiteFooter from "../components/SiteFooter";
 import Analytics from "../components/Analytics";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import SoundToggle from "../components/SoundToggle";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import DictionaryProvider from "../components/DictionaryProvider";
@@ -176,6 +177,7 @@ export default async function LocaleLayout({ children, params }) {
               <SiteFooter />
             </div>
             <Analytics />
+            <VercelAnalytics />
           </ClientWrapper>
         </DictionaryProvider>
       </body>

@@ -4,10 +4,11 @@ import { locales, canonicalizeSlug, SLUG_MAP } from './app/i18n/config';
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Skip: static files, API, _next
+  // Skip: static files, API, _next, admin
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/favicon') ||
     pathname.startsWith('/icon') ||
     pathname.startsWith('/apple-touch') ||

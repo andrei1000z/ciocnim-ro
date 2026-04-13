@@ -19,12 +19,12 @@ const nextConfig = {
         // Excludem /ro/* (ca să nu se rewrite-uie iar) și /api, /_next
         // Excludem: /ro/*, /api/*, /_next/*, fișiere cu extensie (*.png, *.mp3, *.js etc.)
         {
-          source: '/:path((?!ro|api|_next|icon\\.svg|apple-icon|manifest|robots|sitemap|favicon|sw|og-|.*\\..+$).*)',
+          source: '/:path((?!ro|api|admin|_next|icon\\.svg|apple-icon|manifest|robots|sitemap|favicon|sw|og-|.*\\..+$).*)',
           destination: '/ro/:path',
           has: [{ type: 'host', value: 'www.ciocnim.ro' }],
         },
         {
-          source: '/:path((?!ro|api|_next|icon\\.svg|apple-icon|manifest|robots|sitemap|favicon|sw|og-|.*\\..+$).*)/:rest*',
+          source: '/:path((?!ro|api|admin|_next|icon\\.svg|apple-icon|manifest|robots|sitemap|favicon|sw|og-|.*\\..+$).*)/:rest*',
           destination: '/ro/:path/:rest*',
           has: [{ type: 'host', value: 'www.ciocnim.ro' }],
         },
