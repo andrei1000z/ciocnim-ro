@@ -7,7 +7,7 @@ import { trackEvent } from "./Analytics";
 
 const DISMISS_KEY = "c_pwa_dismissed";
 const VISIT_COUNT_KEY = "c_visit_count";
-const MIN_VISITS = 2; // arată prompt-ul după a 2-a vizită
+const MIN_VISITS = 3; // arată prompt-ul după a 3-a vizită (era 2)
 
 function isStandalone() {
   if (typeof window === "undefined") return false;
@@ -52,9 +52,11 @@ export default function PWAInstallPrompt() {
     const onBeforeInstall = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Arată banner după 8 secunde pe pagină (să nu deranjeze imediat)
-      setTimeout(() => setVisible(true), 8000);
-      try { trackEvent("pwa-prompt-shown"); } catch {}
+      // Arată banner după 5 secunde pe pagină
+      setTimeout(() => {
+        setVisible(true);
+        try { trackEvent("pwa-banner-shown"); } catch {}
+      }, 5000);
     };
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
 
@@ -63,8 +65,8 @@ export default function PWAInstallPrompt() {
       setTimeout(() => {
         setVisible(true);
         setShowIosHint(true);
-        try { trackEvent("pwa-prompt-shown"); } catch {}
-      }, 8000);
+        try { trackEvent("pwa-banner-shown"); } catch {}
+      }, 5000);
     }
 
     // Dacă user instalează, ascunde banner
@@ -82,12 +84,13 @@ export default function PWAInstallPrompt() {
 
   const install = async () => {
     if (!deferredPrompt) return;
+    try { trackEvent("pwa-banner-install-clicked"); } catch {}
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
       try { trackEvent("pwa-install"); } catch {}
     } else {
-      try { trackEvent("pwa-prompt-rejected"); } catch {}
+      try { trackEvent("pwa-banner-dismissed"); } catch {}
       safeLS.set(DISMISS_KEY, String(Date.now()));
     }
     setDeferredPrompt(null);
@@ -97,50 +100,58 @@ export default function PWAInstallPrompt() {
   const dismiss = () => {
     safeLS.set(DISMISS_KEY, String(Date.now()));
     setVisible(false);
-    try { trackEvent("pwa-prompt-rejected"); } catch {}
+    try { trackEvent("pwa-banner-dismissed"); } catch {}
   };
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 40 }}
-          transition={{ duration: 0.3 }}
-          className="fixed bottom-4 left-4 right-4 z-[1200] max-w-sm mx-auto"
+          initial={{ opacity: 0, y: 60, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 60, scale: 0.95 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed bottom-4 left-4 right-4 z-[1200] max-w-md mx-auto"
         >
-          <div className="bg-gradient-to-br from-red-900/95 via-red-800/95 to-amber-900/95 backdrop-blur-xl border border-red-500/40 rounded-2xl p-4 shadow-2xl shadow-black/50">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-2xl shadow-lg">
+          <div className="relative bg-gradient-to-br from-red-800 via-red-700 to-amber-700 border-2 border-red-400/60 rounded-3xl p-5 shadow-2xl shadow-red-900/60 overflow-hidden">
+            {/* Decorative glow */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
+
+            <button
+              onClick={dismiss}
+              className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-white/70 hover:text-white text-lg leading-none bg-black/20 hover:bg-black/40 rounded-full transition-all z-10"
+              aria-label="Închide"
+            >
+              ✕
+            </button>
+
+            <div className="relative flex items-center gap-3 mb-3">
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-3xl shadow-xl">
                 🥚
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-black text-white mb-0.5">Instalează Ciocnim.ro</h3>
-                {showIosHint ? (
-                  <p className="text-xs text-white/80 leading-snug">
-                    Apasă <span className="inline-block">⎙</span> jos și alege <strong>„Add to Home Screen"</strong>
-                  </p>
-                ) : (
-                  <p className="text-xs text-white/80 leading-snug">
-                    Joacă mai rapid, fără browser. Se instalează ca aplicație.
-                  </p>
-                )}
+              <div className="flex-1 min-w-0 pr-8">
+                <h3 className="text-base font-black text-white leading-tight">Instalează ca aplicație</h3>
+                <p className="text-xs text-white/90 leading-tight mt-0.5">Joacă direct de pe telefon — fără browser</p>
               </div>
-              <button
-                onClick={dismiss}
-                className="flex-shrink-0 text-white/60 hover:text-white text-lg leading-none"
-                aria-label="Închide"
-              >
-                ✕
-              </button>
             </div>
-            {!showIosHint && (
+
+            <ul className="relative text-xs text-white/95 space-y-1 mb-4 pl-1">
+              <li className="flex items-center gap-2">⚡ <span>Se deschide instant, fără reclame</span></li>
+              <li className="flex items-center gap-2">📱 <span>Icon pe ecran, ca o aplicație reală</span></li>
+              <li className="flex items-center gap-2">🎮 <span>Joacă offline conținutul tradițional</span></li>
+            </ul>
+
+            {showIosHint ? (
+              <div className="relative bg-white/15 border border-white/30 rounded-xl p-3 text-xs text-white">
+                <strong>Pe iPhone:</strong> Apasă butonul <span className="inline-block font-bold">⎙ Share</span> jos și alege <strong>„Add to Home Screen"</strong>
+              </div>
+            ) : (
               <button
                 onClick={install}
-                className="w-full mt-3 bg-white text-red-800 font-black text-sm py-2.5 rounded-xl hover:bg-red-50 transition-all active:scale-95"
+                className="relative w-full bg-white text-red-800 font-black text-base py-3 rounded-2xl hover:bg-amber-50 transition-all active:scale-95 shadow-lg"
               >
-                📲 Instalează
+                📲 Instalează acum
               </button>
             )}
           </div>

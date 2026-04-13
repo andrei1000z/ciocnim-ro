@@ -917,7 +917,7 @@ return redis.call('SCARD', KEYS[1])
         } else if (eventType === 'cta-click') {
           const ctaId = sanitizeStr(body.ctaId, 50) || 'unknown';
           pipe.hincrby('analytics:cta-clicks', ctaId, 1);
-        } else if (['battle-start', 'battle-win', 'battle-loss', 'room-private', 'room-arena', 'group-create', 'group-join', 'invite-sent', 'achievement-unlocked'].includes(eventType)) {
+        } else if (['nickname-set', 'nickname-auto', 'nickname-prompt-shown', 'nickname-prompt-accepted', 'nickname-prompt-dismissed', 'content-card-click', 'discover-click', 'pwa-banner-shown', 'pwa-banner-install-clicked', 'pwa-banner-dismissed', 'battle-start', 'battle-win', 'battle-loss', 'room-private', 'room-arena', 'group-create', 'group-join', 'invite-sent', 'achievement-unlocked'].includes(eventType)) {
           pipe.hincrby('analytics:events-total', eventType, 1);
           pipe.hincrby(`analytics:events-daily:${today}`, eventType, 1);
           pipe.expire(`analytics:events-daily:${today}`, 60 * 60 * 24 * 90);

@@ -633,6 +633,7 @@ function ArenaMaster({ room }) {
     // Analytics: battle event
     try {
       import("@/app/components/Analytics").then(m => m.trackEvent(amCastigat ? "battle-win" : "battle-loss"));
+      window.dispatchEvent(new CustomEvent("ciocnim:battle", { detail: { win: amCastigat } }));
     } catch {}
 
     const quotes = amCastigat ? t('quotes.humility') : t('quotes.forgiveness');

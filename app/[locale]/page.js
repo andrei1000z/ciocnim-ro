@@ -130,6 +130,7 @@ function HomeContent() {
     triggerVibrate(); setIsSavingName(true);
     const ok = await setNume(final);
     if (!ok) setLocalNume(nume || "");
+    else { try { import("../components/Analytics").then(m => m.trackEvent("nickname-set", { nickname: final })); } catch {} }
     setIsSavingName(false);
   };
 
@@ -184,6 +185,7 @@ function HomeContent() {
       const tempName = prefix + Math.random().toString(36).substring(2, 6).toUpperCase();
       const ok = await setNume(tempName);
       if (!ok) { setToastMsg(t('notifications.errorRetry')); return; }
+      try { import("../components/Analytics").then(m => m.trackEvent("nickname-auto", { nickname: tempName })); } catch {}
       playerName = tempName;
     }
     triggerVibrate(); setIsJoiningArena(true);
@@ -318,14 +320,17 @@ function HomeContent() {
               const tempName = prefix + Math.random().toString(36).substring(2, 6).toUpperCase();
               const ok = await setNume(tempName);
               if (!ok) { setToastMsg(t('notifications.errorRetry')); return; }
+              try { import("../components/Analytics").then(m => m.trackEvent("nickname-auto", { nickname: tempName })); } catch {}
             }
             setIsPlayModalOpen(true);
             try { import("../components/Analytics").then(m => m.trackCTA("play-main")); } catch {}
           }}
-          className="w-full py-5 md:py-6 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-2xl border border-red-600 shadow-2xl shadow-red-900/40 transition-all disabled:opacity-60 flex items-center justify-center gap-3 active:scale-[0.97]"
+          className="relative w-full py-6 md:py-7 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-3xl border-2 border-red-500/60 shadow-2xl shadow-red-900/60 transition-all disabled:opacity-60 flex items-center justify-center gap-3 active:scale-[0.97] overflow-hidden"
         >
-          <span className="text-3xl">🥚</span>
-          {t('cta.playText')}
+          <span className="absolute inset-0 rounded-3xl animate-ping bg-red-600/30 pointer-events-none" aria-hidden="true" />
+          <span className="absolute inset-0 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 pointer-events-none" aria-hidden="true" />
+          <span className="relative z-10 text-4xl">🥚</span>
+          <span className="relative z-10">{t('cta.playText')}</span>
         </motion.button>
         <div className="flex items-center justify-center gap-4 text-xs font-bold">
           <button
@@ -467,20 +472,46 @@ function HomeContent() {
         </LocaleLink>
       </motion.div>
 
-      {/* ═══ NAVIGARE + SEO ═══ */}
-      <motion.div {...fadeUp(0.22, prefersReducedMotion)}>
+      {/* ═══ DESCOPERĂ — FEATURED CARDS (prominent) ═══ */}
+      <motion.div {...fadeUp(0.18, prefersReducedMotion)}>
         <SectionLabel>{t('discover.label')}</SectionLabel>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          {[
+            { href: "/urari", icon: "🕊️", title: t('discover.greetings'), desc: 'Mesaje frumoase de Paște', gradient: 'from-red-900/40 to-amber-900/30 border-red-700/40' },
+            { href: "/retete", icon: "🍳", title: t('discover.recipes'), desc: '15 rețete tradiționale', gradient: 'from-amber-900/40 to-red-900/30 border-amber-700/40' },
+            { href: "/traditii", icon: "📖", title: t('discover.traditions'), desc: 'Obiceiuri românești', gradient: 'from-red-900/35 to-amber-900/35 border-red-700/35' },
+            { href: "/vopsit-natural", icon: "🧅", title: t('discover.dyeing'), desc: 'Culori naturale de Paște', gradient: 'from-amber-900/35 to-red-900/35 border-amber-700/35' },
+          ].map((card) => (
+            <LocaleLink
+              key={card.href}
+              href={card.href}
+              onClick={() => { try { import("../components/Analytics").then(m => m.trackEvent("content-card-click", { pathname: card.href })); } catch {} }}
+              className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${card.gradient} p-4 shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-[0.98]`}
+            >
+              <div className="relative z-10 flex flex-col h-full min-h-[100px] justify-between">
+                <span className="text-3xl">{card.icon}</span>
+                <div>
+                  <p className="font-black text-sm text-heading leading-tight">{card.title}</p>
+                  <p className="text-[10px] text-muted mt-1 leading-tight">{card.desc}</p>
+                </div>
+              </div>
+              <div className="absolute -bottom-4 -right-4 text-7xl opacity-10 select-none">{card.icon}</div>
+            </LocaleLink>
+          ))}
+        </div>
+        {/* Link-uri secundare: calendar, ghid, clasament */}
         <div className="flex gap-2 justify-center flex-wrap">
           {[
-            { href: "/traditii", icon: "📖", text: t('discover.traditions') },
-            { href: "/retete", icon: "🍳", text: t('discover.recipes') },
-            { href: "/urari", icon: "🕊️", text: t('discover.greetings') },
-            { href: "/vopsit-natural", icon: "🧅", text: t('discover.dyeing') },
             { href: "/calendar", icon: "📅", text: t('discover.calendar') },
             { href: "/ghid", icon: "🎮", text: t('discover.guide') },
             { href: "/clasament", icon: "🏆", text: t('discover.leaderboard') },
           ].map((item) => (
-            <LocaleLink key={item.href} href={item.href} className="flex flex-col items-center gap-1 p-3 rounded-2xl border border-edge bg-card hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[64px]">
+            <LocaleLink
+              key={item.href}
+              href={item.href}
+              onClick={() => { try { import("../components/Analytics").then(m => m.trackEvent("content-card-click", { pathname: item.href })); } catch {} }}
+              className="flex flex-col items-center gap-1 p-3 rounded-2xl border border-edge bg-card hover:bg-red-800 hover:border-red-800 group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-lg min-w-[64px]"
+            >
               <span className="text-xl">{item.icon}</span>
               <span className="font-bold text-xs text-dim group-hover:text-white transition-colors text-center">{item.text}</span>
             </LocaleLink>
