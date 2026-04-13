@@ -6,6 +6,7 @@ import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import ContentNav from "../../components/ContentNav";
 import ContentCTA from "../../components/ContentCTA";
+import RelatedContent from "../../components/RelatedContent";
 import PageHeader from "../../components/PageHeader";
 
 // ─── Article Section ────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export default function VopsitNaturalPage() {
             ))}
           </section>
 
+          <RelatedContent currentSlug="vopsit-natural" />
           <ContentCTA />
 
         </div>

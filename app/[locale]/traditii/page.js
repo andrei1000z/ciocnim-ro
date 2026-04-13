@@ -6,6 +6,7 @@ import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
 import ContentCTA from "../../components/ContentCTA";
+import RelatedContent from "../../components/RelatedContent";
 import { useT } from "../../i18n/useT";
 
 const ArticleSection = ({ title, icon, children, delay = 0 }) => (
@@ -94,6 +95,7 @@ export default function TraditiiPage() {
             ))}
           </section>
 
+          <RelatedContent currentSlug="traditii" />
           <ContentCTA />
 
         </div>

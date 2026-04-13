@@ -6,6 +6,8 @@ import Script from "next/script";
 import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
+import ContentCTA from "../../components/ContentCTA";
+import RelatedContent from "../../components/RelatedContent";
 import { useT } from "../../i18n/useT";
 
 function FAQItem({ item, index }) {
@@ -139,16 +141,8 @@ export default function GhidPage() {
             </div>
           </section>
 
-          {/* CTA */}
-          <div className="text-center space-y-3">
-            <LocaleLink
-              href="/"
-              className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg"
-            >
-              {guide.ctaOnline}
-            </LocaleLink>
-            <p className="text-muted text-xs">{guide.pageSubtitle}</p>
-          </div>
+          <RelatedContent currentSlug="ghid" />
+          <ContentCTA />
         </div>
       </div>
     </>

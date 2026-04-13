@@ -6,6 +6,7 @@ import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
 import ContentCTA from "../../components/ContentCTA";
+import RelatedContent from "../../components/RelatedContent";
 import { useT } from "../../i18n/useT";
 import { useLocaleConfig } from "../../components/DictionaryProvider";
 
@@ -153,6 +154,7 @@ export default function CalendarPage() {
             </div>
           </article>
 
+          <RelatedContent currentSlug="calendar" />
           <ContentCTA />
         </div>
       </main>

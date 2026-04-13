@@ -10,6 +10,7 @@ import { retete as reteteBg } from "./data-bg";
 import { retete as reteteEl } from "./data-el";
 import { localizeSlug } from "@/app/i18n/config";
 import ContentCTA from "@/app/components/ContentCTA";
+import RelatedContent from "@/app/components/RelatedContent";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import { useLocaleConfig } from "../../components/DictionaryProvider";
@@ -680,6 +681,7 @@ function RetePageContent() {
                   )}
                 </div>
 
+                <RelatedContent currentSlug="retete" />
                 <ContentCTA />
               </motion.div>
             )}

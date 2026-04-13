@@ -299,6 +299,16 @@
     "l": "l"
   },
 
+  "related": {
+    "title": "Vezi și",
+    "traditionsDesc": "Povestea și regulile ciocnitului de ouă",
+    "recipesDesc": "15 rețete tradiționale de Paște",
+    "greetingsDesc": "Mesaje frumoase pentru familie",
+    "dyeingDesc": "Vopsește ouă cu culori naturale",
+    "calendarDesc": "Datele importante de Paște",
+    "guideDesc": "Cum se joacă, pas cu pas"
+  },
+
   "content": {
     "cta": {
       "title": "Haide la ciocnit online!",

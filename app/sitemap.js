@@ -6,7 +6,7 @@ const RO_DOMAIN = 'https://www.ciocnim.ro';
 const INTL_DOMAIN = 'https://www.trosc.fun';
 
 // Ultima actualizare majoră — bump când faci modificări importante de conținut
-const LAST_MODIFIED = new Date('2026-04-11');
+const LAST_MODIFIED = new Date('2026-04-13');
 
 export default async function sitemap() {
   const h = await headers();

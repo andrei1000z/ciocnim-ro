@@ -10,6 +10,7 @@ import { getSiteUrl } from "../../lib/constants";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
 import ContentCTA from "../../components/ContentCTA";
+import RelatedContent from "../../components/RelatedContent";
 
 // ─── Message Card ───────────────────────────────────────────────────────────
 const MessageCard = ({ text, index, greetings, locale }) => {
@@ -282,6 +283,7 @@ export default function UrariPage() {
             })}
           </div>
 
+          <RelatedContent currentSlug="urari" />
           <ContentCTA />
 
         </div>

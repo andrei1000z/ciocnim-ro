@@ -299,6 +299,16 @@
     "l": "l"
   },
 
+  "related": {
+    "title": "See also",
+    "traditionsDesc": "The story and rules of egg cracking",
+    "recipesDesc": "15 traditional Easter recipes",
+    "greetingsDesc": "Beautiful messages for family",
+    "dyeingDesc": "Dye eggs with natural colors",
+    "calendarDesc": "Important Easter dates",
+    "guideDesc": "How to play, step by step"
+  },
+
   "content": {
     "cta": {
       "title": "Come play online!",
