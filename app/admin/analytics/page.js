@@ -287,24 +287,107 @@ export default function AdminAnalyticsPage() {
               <StatCard label="🐛 Bug-uri raportate" value={contactData.meta?.topic_bug} sub="din contact" accent="red" />
             </div>
 
+            {/* 📬 NEWSLETTER — lista completă emails */}
+            {contactData.newsletter && contactData.newsletter.length > 0 && (
+              <div className="bg-card border border-edge rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-heading">📬 Newsletter abonați ({contactData.newsletter.length})</h3>
+                  <button
+                    onClick={() => {
+                      const emails = contactData.newsletter.map(n => n.email).join(', ');
+                      try { navigator.clipboard.writeText(emails); } catch {}
+                    }}
+                    className="text-[10px] font-bold text-amber-400 hover:text-amber-300 px-2 py-1 bg-elevated rounded"
+                  >
+                    📋 Copiază toate
+                  </button>
+                </div>
+                <div className="space-y-1 max-h-80 overflow-y-auto">
+                  {contactData.newsletter.map((n, i) => {
+                    const when = n.joined ? new Date(n.joined).toLocaleString('ro-RO') : '—';
+                    return (
+                      <div key={n.email} className="flex items-center gap-2 px-3 py-2 bg-elevated rounded-lg text-xs">
+                        <span className="text-dim w-6 text-right">{i + 1}.</span>
+                        <a href={`mailto:${n.email}`} className="font-bold text-amber-300 hover:text-amber-200 flex-1 truncate">{n.email}</a>
+                        <span className="text-[10px] text-dim uppercase font-bold">{n.locale}</span>
+                        <span className="text-[10px] text-muted whitespace-nowrap">{when}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 🔒 REZERVĂRI 2027 */}
+            {contactData.reservations && contactData.reservations.length > 0 && (
+              <div className="bg-card border border-edge rounded-2xl p-5">
+                <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">🔒 Nume rezervate pentru Sezonul 2027 ({contactData.reservations.length})</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {contactData.reservations.map((r) => {
+                    const when = r.reservedAt ? new Date(r.reservedAt).toLocaleDateString('ro-RO') : '—';
+                    return (
+                      <div key={r.name} className="flex flex-col px-3 py-2 bg-elevated rounded-lg">
+                        <span className="font-black text-blue-300 text-sm truncate">{r.name}</span>
+                        <span className="text-[10px] text-muted">{when}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 💬 MESAJE CONTACT */}
             {contactData.messages && contactData.messages.length > 0 && (
               <div className="bg-card border border-edge rounded-2xl p-5">
-                <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">💬 Ultimele mesaje contact ({contactData.messages.length})</h3>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-heading">💬 Mesaje contact ({contactData.messages.length})</h3>
+                  <div className="flex gap-2 text-[10px]">
+                    <span className="px-2 py-0.5 bg-red-900/30 text-red-400 rounded">🐛 {contactData.meta?.topic_bug || 0}</span>
+                    <span className="px-2 py-0.5 bg-amber-900/30 text-amber-400 rounded">💡 {contactData.meta?.topic_suggestion || 0}</span>
+                    <span className="px-2 py-0.5 bg-green-900/30 text-green-400 rounded">❤️ {contactData.meta?.topic_compliment || 0}</span>
+                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-400 rounded">💭 {contactData.meta?.topic_other || 0}</span>
+                  </div>
+                </div>
+                <div className="space-y-2 max-h-[32rem] overflow-y-auto">
                   {contactData.messages.map((m, i) => {
                     const when = new Date(m.t).toLocaleString('ro-RO');
                     const topicIcon = m.topic === 'bug' ? '🐛' : m.topic === 'suggestion' ? '💡' : m.topic === 'compliment' ? '❤️' : '💭';
-                    const topicColor = m.topic === 'bug' ? 'text-red-400' : m.topic === 'suggestion' ? 'text-amber-400' : m.topic === 'compliment' ? 'text-green-400' : 'text-blue-400';
+                    const topicColor = m.topic === 'bug' ? 'text-red-400 border-red-800/40 bg-red-900/10' : m.topic === 'suggestion' ? 'text-amber-400 border-amber-800/40 bg-amber-900/10' : m.topic === 'compliment' ? 'text-green-400 border-green-800/40 bg-green-900/10' : 'text-blue-400 border-blue-800/40 bg-blue-900/10';
+                    // Parse browser din UA
+                    const ua = m.ua || '';
+                    let browserInfo = '';
+                    if (/Chrome/.test(ua) && !/Edg|OPR/.test(ua)) browserInfo = 'Chrome';
+                    else if (/Firefox/.test(ua)) browserInfo = 'Firefox';
+                    else if (/Safari/.test(ua) && !/Chrome/.test(ua)) browserInfo = 'Safari';
+                    else if (/Edg/.test(ua)) browserInfo = 'Edge';
+                    let deviceInfo = '';
+                    if (/Android/.test(ua)) deviceInfo = '🤖 Android';
+                    else if (/iPhone|iPad/.test(ua)) deviceInfo = '📱 iOS';
+                    else if (/Windows/.test(ua)) deviceInfo = '🪟 Windows';
+                    else if (/Mac/.test(ua)) deviceInfo = '🍎 macOS';
+                    else if (/Linux/.test(ua)) deviceInfo = '🐧 Linux';
                     return (
-                      <div key={i} className="p-3 bg-elevated rounded-xl border border-edge">
-                        <div className="flex items-center gap-2 text-[10px] mb-2">
+                      <div key={i} className={`p-3 rounded-xl border ${topicColor}`}>
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] mb-2">
                           <span className="text-base">{topicIcon}</span>
-                          <span className={`font-bold uppercase ${topicColor}`}>{m.topic}</span>
-                          <span className="text-dim">· {when}</span>
-                          <span className="text-dim">· {m.locale?.toUpperCase()}</span>
-                          {m.email && <a href={`mailto:${m.email}`} className="ml-auto text-red-400 hover:text-red-300">{m.email}</a>}
+                          <span className={`font-black uppercase ${topicColor.split(' ')[0]}`}>{m.topic}</span>
+                          <span className="text-dim">·</span>
+                          <span className="text-dim">{when}</span>
+                          {m.locale && <><span className="text-dim">·</span><span className="text-dim uppercase font-bold">{m.locale}</span></>}
+                          {deviceInfo && <><span className="text-dim">·</span><span className="text-dim">{deviceInfo}</span></>}
+                          {browserInfo && <><span className="text-dim">·</span><span className="text-dim">{browserInfo}</span></>}
+                          {m.email ? (
+                            <a href={`mailto:${m.email}?subject=Re: ${m.topic} pe Ciocnim.ro`} className="ml-auto text-red-400 hover:text-red-300 font-bold text-[11px]">
+                              ✉ {m.email}
+                            </a>
+                          ) : (
+                            <span className="ml-auto text-faint text-[10px] italic">fără email</span>
+                          )}
                         </div>
-                        <p className="text-xs text-body whitespace-pre-wrap break-words">{m.message}</p>
+                        <p className="text-xs text-body whitespace-pre-wrap break-words leading-relaxed">{m.message}</p>
+                        {m.ip && (
+                          <p className="text-[9px] text-faint mt-1.5 font-mono">IP: {m.ip}</p>
+                        )}
                       </div>
                     );
                   })}

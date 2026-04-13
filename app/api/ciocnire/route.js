@@ -1184,26 +1184,69 @@ return redis.call('SCARD', KEYS[1])
       }
 
       case 'contact-list': {
-        // Admin only — list contact messages
+        // Admin only — list contact messages + newsletter + reservations
         const secret = sanitizeStr(body.secret, 100);
         const expectedBuf = Buffer.from(process.env.ADMIN_SECRET || '');
         const secretBuf = Buffer.from(secret || '');
         if (!process.env.ADMIN_SECRET || secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
           return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
         }
-        const [rawList, meta, newsletterCount, reservations27] = await Promise.all([
-          redis.lrange('contact:messages', 0, 49),
+        const [rawList, meta, newsletterEmails, reservations27, newsletterMeta] = await Promise.all([
+          redis.lrange('contact:messages', 0, 99),
           redis.hgetall('contact:meta'),
-          redis.scard('newsletter:subscribers'),
-          redis.scard('reservations:2027'),
+          redis.smembers('newsletter:subscribers'),
+          redis.smembers('reservations:2027'),
+          redis.hgetall('newsletter:meta'),
         ]);
         const messages = rawList.map(m => { try { return JSON.parse(m); } catch { return null; }}).filter(Boolean);
+
+        // Fetch detailed newsletter data (joined timestamp + locale per email)
+        const newsletter = [];
+        if (newsletterEmails && newsletterEmails.length > 0) {
+          const pipe = redis.pipeline();
+          for (const email of newsletterEmails) {
+            pipe.hgetall(`newsletter:details:${email}`);
+          }
+          const details = await pipe.exec();
+          newsletterEmails.forEach((email, i) => {
+            const detail = details[i];
+            const data = Array.isArray(detail) ? (detail[1] || {}) : (detail || {});
+            newsletter.push({
+              email,
+              joined: parseInt(data.joined) || 0,
+              locale: data.locale || 'ro',
+            });
+          });
+          newsletter.sort((a, b) => b.joined - a.joined);
+        }
+
+        // Fetch reservation details (timestamp per name)
+        const reservations = [];
+        if (reservations27 && reservations27.length > 0) {
+          const pipe = redis.pipeline();
+          for (const name of reservations27) {
+            pipe.get(`${ns}:nume_rezervat_2027:${name}`);
+          }
+          const details = await pipe.exec();
+          reservations27.forEach((name, i) => {
+            const raw = details[i];
+            const val = Array.isArray(raw) ? raw[1] : raw;
+            let parsed = {};
+            try { parsed = val ? JSON.parse(val) : {}; } catch {}
+            reservations.push({ name, reservedAt: parseInt(parsed.t) || 0 });
+          });
+          reservations.sort((a, b) => b.reservedAt - a.reservedAt);
+        }
+
         return NextResponse.json({
           success: true,
           messages,
           meta: meta || {},
-          newsletterCount: newsletterCount || 0,
-          reservations2027Count: reservations27 || 0,
+          newsletterCount: newsletterEmails?.length || 0,
+          reservations2027Count: reservations27?.length || 0,
+          newsletter,
+          reservations,
+          newsletterMeta: newsletterMeta || {},
         });
       }
 
