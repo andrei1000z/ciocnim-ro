@@ -294,7 +294,8 @@ export default function AdminAnalyticsPage() {
           <BreakdownList title="📐 Viewports" data={data.viewports} />
           <BreakdownList title="🖥️ Rezoluții ecran" data={data.screens} />
           <BreakdownList title="📱 Top pagini" data={data.routes} />
-          <BreakdownList title="🔗 Surse trafic" data={data.referrers} />
+          <BreakdownList title="🚪 Landing pages" data={data.landingPages} />
+          <BreakdownList title="🔗 Surse trafic (domain)" data={data.referrers} />
           <div className="bg-card border border-edge rounded-2xl p-5 space-y-4">
             <div>
               <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-2">📲 Device</h3>
@@ -348,6 +349,52 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
         </div>
+
+        {/* Full referrer URLs */}
+        {data.referrersFull && Object.keys(data.referrersFull).length > 0 && (
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-1">🔗 URL-uri complete (referrer)</h3>
+            <p className="text-[10px] text-dim mb-3">URL-urile exacte de unde vin vizitatorii. Instagram/Facebook strip URL-ul → vezi doar wrapperul. Folosește UTM params pentru tracking precis.</p>
+            <div className="space-y-1.5 max-h-64 overflow-y-auto text-xs">
+              {Object.entries(data.referrersFull)
+                .map(([k, v]) => [k, parseInt(v) || 0])
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 30)
+                .map(([url, count]) => (
+                  <div key={url} className="flex items-center gap-2 px-2 py-1.5 hover:bg-elevated rounded">
+                    <a href={url} target="_blank" rel="noopener noreferrer" className="font-mono text-blue-400 hover:text-blue-300 truncate flex-1">{url}</a>
+                    <span className="font-black text-red-400 tabular-nums flex-shrink-0">{fmt(count)}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* UTM tracking */}
+        {(data.utmSource && Object.keys(data.utmSource).length > 0) && (
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-1">📣 UTM Campaigns</h3>
+            <p className="text-[10px] text-dim mb-3">Tracking precis cu link-uri UTM. Adaugă <code className="bg-elevated px-1 rounded">?utm_source=instagram&amp;utm_campaign=story1</code> la link-urile distribuite.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <h4 className="text-[10px] font-bold uppercase text-dim mb-1">utm_source</h4>
+                <BreakdownList title="" data={data.utmSource} />
+              </div>
+              <div>
+                <h4 className="text-[10px] font-bold uppercase text-dim mb-1">utm_medium</h4>
+                <BreakdownList title="" data={data.utmMedium} />
+              </div>
+              <div>
+                <h4 className="text-[10px] font-bold uppercase text-dim mb-1">utm_campaign</h4>
+                <BreakdownList title="" data={data.utmCampaign} />
+              </div>
+              <div>
+                <h4 className="text-[10px] font-bold uppercase text-dim mb-1">utm_content</h4>
+                <BreakdownList title="" data={data.utmContent} />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Errors */}
         {data.errors && Object.keys(data.errors).length > 0 && (

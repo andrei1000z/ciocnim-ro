@@ -738,6 +738,12 @@ return redis.call('SCARD', KEYS[1])
         const browser = sanitizeStr(body.browser, 30) || 'unknown';
         const os = sanitizeStr(body.os, 20) || 'unknown';
         const referrer = sanitizeStr(body.referrer, 100) || 'direct';
+        const referrerFull = sanitizeStr(body.referrerFull, 300) || '';
+        const utmSource = sanitizeStr(body.utmSource, 50) || '';
+        const utmMedium = sanitizeStr(body.utmMedium, 50) || '';
+        const utmCampaign = sanitizeStr(body.utmCampaign, 100) || '';
+        const utmContent = sanitizeStr(body.utmContent, 100) || '';
+        const utmTerm = sanitizeStr(body.utmTerm, 100) || '';
         const language = sanitizeStr(body.language, 10) || 'unknown';
         const timezone = sanitizeStr(body.timezone, 50) || 'unknown';
         const screenSize = sanitizeStr(body.screenSize, 20) || 'unknown';
@@ -773,6 +779,17 @@ return redis.call('SCARD', KEYS[1])
           pipe.hincrby('analytics:locales', ns, 1);
           pipe.hincrby('analytics:routes', pathname, 1);
           pipe.hincrby('analytics:referrers', referrer, 1);
+          if (referrerFull) pipe.hincrby('analytics:referrers-full', referrerFull, 1);
+          if (utmSource) pipe.hincrby('analytics:utm-source', utmSource, 1);
+          if (utmMedium) pipe.hincrby('analytics:utm-medium', utmMedium, 1);
+          if (utmCampaign) pipe.hincrby('analytics:utm-campaign', utmCampaign, 1);
+          if (utmContent) pipe.hincrby('analytics:utm-content', utmContent, 1);
+          if (utmTerm) pipe.hincrby('analytics:utm-term', utmTerm, 1);
+          // Landing page: SET NX → returnează 1 dacă e prima dată în 24h
+          const landingSet = await redis.set(`analytics:landing:${visitorId}`, pathname, 'EX', 60 * 60 * 24, 'NX');
+          if (landingSet) {
+            pipe.hincrby('analytics:landing-pages', pathname, 1);
+          }
           pipe.hincrby('analytics:countries', country, 1);
           pipe.hincrby('analytics:cities', `${city}, ${country}`, 1);
           pipe.hincrby('analytics:regions', `${region}, ${country}`, 1);
@@ -921,9 +938,10 @@ return redis.call('SCARD', KEYS[1])
         const month = today.slice(0, 7);
 
         const [
-          total, locales, routes, referrers, countries, cities, regions, timezones,
+          total, locales, routes, referrers, referrersFull, countries, cities, regions, timezones,
           languages, viewports, screens, hourly, perf, errors,
           eventsTotal, eventsToday,
+          utmSource, utmMedium, utmCampaign, utmContent, utmTerm, landingPages,
           todayDaily, yesterdayDaily,
           dauToday, dauYesterday, wau, mau,
           activeUsersToday, topUsersRaw, onlineNow, eventsStream,
@@ -933,6 +951,7 @@ return redis.call('SCARD', KEYS[1])
           redis.hgetall('analytics:locales'),
           redis.hgetall('analytics:routes'),
           redis.hgetall('analytics:referrers'),
+          redis.hgetall('analytics:referrers-full'),
           redis.hgetall('analytics:countries'),
           redis.hgetall('analytics:cities'),
           redis.hgetall('analytics:regions'),
@@ -945,6 +964,12 @@ return redis.call('SCARD', KEYS[1])
           redis.hgetall('analytics:errors'),
           redis.hgetall('analytics:events-total'),
           redis.hgetall(`analytics:events-daily:${today}`),
+          redis.hgetall('analytics:utm-source'),
+          redis.hgetall('analytics:utm-medium'),
+          redis.hgetall('analytics:utm-campaign'),
+          redis.hgetall('analytics:utm-content'),
+          redis.hgetall('analytics:utm-term'),
+          redis.hgetall('analytics:landing-pages'),
           redis.hgetall(`analytics:daily:${today}`),
           redis.hgetall(`analytics:daily:${yesterday}`),
           redis.scard(`analytics:dau:${today}`),
@@ -979,6 +1004,13 @@ return redis.call('SCARD', KEYS[1])
           locales: locales || {},
           routes: routes || {},
           referrers: referrers || {},
+          referrersFull: referrersFull || {},
+          utmSource: utmSource || {},
+          utmMedium: utmMedium || {},
+          utmCampaign: utmCampaign || {},
+          utmContent: utmContent || {},
+          utmTerm: utmTerm || {},
+          landingPages: landingPages || {},
           countries: countries || {},
           cities: cities || {},
           regions: regions || {},

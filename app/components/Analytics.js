@@ -100,6 +100,34 @@ function getReferrer() {
   }
 }
 
+function getReferrerFull() {
+  if (typeof document === "undefined" || !document.referrer) return "";
+  try {
+    const url = new URL(document.referrer);
+    if (url.hostname === window.location.hostname) return "";
+    // Limit la 280 chars
+    return document.referrer.slice(0, 280);
+  } catch {
+    return "";
+  }
+}
+
+function getUTM() {
+  if (typeof window === "undefined") return {};
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      utmSource: params.get("utm_source") || "",
+      utmMedium: params.get("utm_medium") || "",
+      utmCampaign: params.get("utm_campaign") || "",
+      utmContent: params.get("utm_content") || "",
+      utmTerm: params.get("utm_term") || "",
+    };
+  } catch {
+    return {};
+  }
+}
+
 function getNavigationTime() {
   if (typeof performance === "undefined" || !performance.getEntriesByType) return 0;
   try {
@@ -172,6 +200,7 @@ export default function Analytics() {
     pageEnterTimeRef.current = Date.now();
 
     // Pageview cu toate metadata posibile
+    const utm = getUTM();
     track({
       actiune: "analytics-track",
       eventType: "pageview",
@@ -184,6 +213,8 @@ export default function Analytics() {
       browser: detectBrowser(),
       os: detectOS(),
       referrer: getReferrer(),
+      referrerFull: getReferrerFull(),
+      ...utm,
       language: getLanguage(),
       timezone: getTimezone(),
       screenSize: getScreenSize(),
