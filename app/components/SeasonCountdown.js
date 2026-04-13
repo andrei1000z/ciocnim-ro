@@ -36,14 +36,17 @@ export default function SeasonCountdown() {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.4 }}
-      className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-br from-red-900/20 via-red-800/10 to-amber-900/15 border border-red-700/25 shadow shadow-black/20"
+      className="mt-2 inline-flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl bg-gradient-to-br from-red-900/20 via-red-800/10 to-amber-900/15 border border-red-700/25 shadow shadow-black/20 max-w-xs mx-auto"
     >
-      <span className="text-[10px] font-bold uppercase tracking-wider text-red-300/90">
-        🥚 Sezonul 2026
-      </span>
-      <span className="text-base font-black tabular-nums text-heading leading-none">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-red-300/90 text-center leading-tight">
+        🥚 Sezonul de ciocnit 2026 se încheie în curând
+      </p>
+      <span className="text-lg font-black tabular-nums text-heading leading-none">
         {pad(hours)}<span className="text-red-400/50">:</span>{pad(mins)}<span className="text-red-400/50">:</span><span className="text-amber-300">{pad(secs)}</span>
       </span>
+      <p className="text-[9px] text-amber-400/70 font-semibold italic leading-tight">
+        Ciocnește cât mai apuci! 🔥
+      </p>
     </motion.div>
   );
 }
