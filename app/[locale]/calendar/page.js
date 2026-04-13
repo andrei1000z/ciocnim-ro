@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
+import ContentCTA from "../../components/ContentCTA";
 import { useT } from "../../i18n/useT";
 import { useLocaleConfig } from "../../components/DictionaryProvider";
 
@@ -152,11 +153,7 @@ export default function CalendarPage() {
             </div>
           </article>
 
-          <div className="text-center">
-            <LocaleLink href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
-              {cal.ctaOnline}
-            </LocaleLink>
-          </div>
+          <ContentCTA />
         </div>
       </main>
     </>

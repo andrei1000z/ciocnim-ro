@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, Suspense } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { safeLS, safeCopy } from "@/app/lib/utils";
@@ -9,6 +9,7 @@ import { retete as reteteRo } from "./data";
 import { retete as reteteBg } from "./data-bg";
 import { retete as reteteEl } from "./data-el";
 import { localizeSlug } from "@/app/i18n/config";
+import ContentCTA from "@/app/components/ContentCTA";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import { useLocaleConfig } from "../../components/DictionaryProvider";
@@ -163,13 +164,13 @@ const IngredientList = ({ ingredients, multiplier, title, healthyMode = false, h
 // ─── Step-by-Step with Beautiful Design ─────────────────────────────────────
 const StepByStep = ({ steps, recipeId, tips, kitchenMode = false, recipesUI }) => {
   const storageKey = `c_recipe_${recipeId}`;
-  const [checked, setChecked] = useState(() => {
+  const [checked, setChecked] = useState([]);
+  useEffect(() => {
     const saved = safeLS.get(storageKey);
     if (saved) {
-      try { return JSON.parse(saved); } catch { return []; }
+      try { setChecked(JSON.parse(saved)); } catch {}
     }
-    return [];
-  });
+  }, [storageKey]);
 
   const toggle = useCallback((idx) => {
     setChecked(prev => {
@@ -679,11 +680,7 @@ function RetePageContent() {
                   )}
                 </div>
 
-                <div className="text-center">
-                  <LocaleLink href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
-                    {recipesUI.ctaOnline}
-                  </LocaleLink>
-                </div>
+                <ContentCTA />
               </motion.div>
             )}
           </AnimatePresence>

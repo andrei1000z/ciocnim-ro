@@ -12,6 +12,7 @@ import PlayModal from "../components/PlayModal";
 import { safeLS, safeCopy } from "../lib/utils";
 import { apiPost } from "../lib/api";
 import SeasonCountdown from "../components/SeasonCountdown";
+import LiveFeed from "../components/LiveFeed";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
 import { localeConfig } from "../i18n/config";
@@ -300,10 +301,25 @@ function HomeContent() {
             </span>
             <span className="tabular-nums">{onlineCount || 1} online</span>
           </div>
+          {userStats.currentStreak > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-900/40 to-red-900/40 border border-amber-600/40 text-amber-300 px-3 py-1.5 rounded-2xl font-black text-xs shadow-lg shadow-amber-900/20"
+              title="Seria ta curentă de victorii consecutive"
+            >
+              <span className="text-sm">🔥</span>
+              <span className="tabular-nums">{userStats.currentStreak}</span>
+              <span className="font-semibold text-amber-400/80">streak</span>
+            </motion.div>
+          )}
         </motion.div>
 
         <div className="mt-4 flex justify-center">
           <SeasonCountdown />
+        </div>
+        <div className="mt-3">
+          <LiveFeed />
         </div>
       </motion.div>
 

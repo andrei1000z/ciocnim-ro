@@ -173,6 +173,15 @@ export async function POST(request) {
         if (broadcastOk) {
           await pusher.trigger(ch('global'), 'update-complet', { total: noulTotal, topRegiuni: topActualizat, topJucatori: topJucatoriActualizat }).catch(() => {});
         }
+        // Battle feed: broadcast winner pentru LiveFeed pe homepage
+        if (safeName && serverEsteCastigator && opponentName) {
+          pusher.trigger(ch('global'), 'battle-feed', {
+            winner: safeName,
+            loser: opponentName,
+            regiune: regiune && regiune !== 'Alege regiunea...' ? regiune : null,
+            t: Date.now(),
+          }).catch(() => {});
+        }
         if (teamId) {
           await pusher.trigger(chPriv(`team-${teamId}`), 'team-update', { t: Date.now() }).catch(() => {});
         }
@@ -917,7 +926,15 @@ return redis.call('SCARD', KEYS[1])
         } else if (eventType === 'cta-click') {
           const ctaId = sanitizeStr(body.ctaId, 50) || 'unknown';
           pipe.hincrby('analytics:cta-clicks', ctaId, 1);
-        } else if (['nickname-set', 'nickname-auto', 'nickname-prompt-shown', 'nickname-prompt-accepted', 'nickname-prompt-dismissed', 'content-card-click', 'discover-click', 'pwa-banner-shown', 'pwa-banner-install-clicked', 'pwa-banner-dismissed', 'battle-start', 'battle-win', 'battle-loss', 'room-private', 'room-arena', 'group-create', 'group-join', 'invite-sent', 'achievement-unlocked'].includes(eventType)) {
+        } else if (eventType === 'invite-landed') {
+          // Un user a ajuns pe o cameră cu ?inv=NUMEX → incrementăm "invites_landed" pentru X
+          const invitedBy = sanitizeStr(body.invitedBy, 30).toUpperCase();
+          if (invitedBy) {
+            pipe.hincrby('analytics:total', 'invite_landed', 1);
+            pipe.hincrby(`analytics:user:${invitedBy}:meta`, 'invites_landed', 1);
+            pipe.zincrby('analytics:top-inviters', 1, invitedBy);
+          }
+        } else if (['nickname-set', 'nickname-auto', 'nickname-prompt-shown', 'nickname-prompt-accepted', 'nickname-prompt-dismissed', 'content-card-click', 'discover-click', 'pwa-banner-shown', 'pwa-banner-install-clicked', 'pwa-banner-dismissed', 'battle-start', 'battle-win', 'battle-loss', 'room-private', 'room-arena', 'group-create', 'group-join', 'invite-sent', 'invite-landed', 'achievement-unlocked', 'result-share'].includes(eventType)) {
           pipe.hincrby('analytics:events-total', eventType, 1);
           pipe.hincrby(`analytics:events-daily:${today}`, eventType, 1);
           pipe.expire(`analytics:events-daily:${today}`, 60 * 60 * 24 * 90);
@@ -955,7 +972,7 @@ return redis.call('SCARD', KEYS[1])
           scrollDepth, ctaClicks,
           todayDaily, yesterdayDaily,
           dauToday, dauYesterday, wau, mau,
-          activeUsersToday, topUsersRaw, onlineNow, eventsStream,
+          activeUsersToday, topUsersRaw, topInvitersRaw, onlineNow, eventsStream,
           totalCiocniri, totalJucatori,
         ] = await Promise.all([
           redis.hgetall('analytics:total'),
@@ -991,6 +1008,7 @@ return redis.call('SCARD', KEYS[1])
           redis.scard(`analytics:mau:${month}`),
           redis.scard(`analytics:active-users:${today}`),
           redis.zrevrange('analytics:top-users', 0, 19, 'WITHSCORES'),
+          redis.zrevrange('analytics:top-inviters', 0, 9, 'WITHSCORES'),
           redis.zcard(k('arena:online')),
           redis.lrange('analytics:events', 0, 49),
           redis.get(k('global_ciocniri_total')),
@@ -1001,6 +1019,12 @@ return redis.call('SCARD', KEYS[1])
         if (Array.isArray(topUsersRaw)) {
           for (let i = 0; i < topUsersRaw.length; i += 2) {
             topUsers.push({ nume: topUsersRaw[i], views: parseInt(topUsersRaw[i + 1]) || 0 });
+          }
+        }
+        const topInviters = [];
+        if (Array.isArray(topInvitersRaw)) {
+          for (let i = 0; i < topInvitersRaw.length; i += 2) {
+            topInviters.push({ nume: topInvitersRaw[i], invites: parseInt(topInvitersRaw[i + 1]) || 0 });
           }
         }
 
@@ -1043,6 +1067,7 @@ return redis.call('SCARD', KEYS[1])
           mau: mau || 0,
           stickiness: (mau > 0 && dauToday <= mau) ? Math.round((dauToday / mau) * 100) : 0,
           topUsers,
+          topInviters,
           onlineNow: onlineNow || 0,
           serverTime: Date.now(),
           eventsStream: events,

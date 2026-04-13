@@ -9,6 +9,7 @@ import { useLocaleConfig } from "../../components/DictionaryProvider";
 import { getSiteUrl } from "../../lib/constants";
 import PageHeader from "../../components/PageHeader";
 import ContentNav from "../../components/ContentNav";
+import ContentCTA from "../../components/ContentCTA";
 
 // ─── Message Card ───────────────────────────────────────────────────────────
 const MessageCard = ({ text, index, greetings, locale }) => {
@@ -281,11 +282,7 @@ export default function UrariPage() {
             })}
           </div>
 
-          <div className="text-center">
-            <LocaleLink href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
-              {greetings.ctaOnline || "🥚 Ciocneste oua online"}
-            </LocaleLink>
-          </div>
+          <ContentCTA />
 
         </div>
       </main>

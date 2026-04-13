@@ -210,7 +210,8 @@ function ArenaMaster({ room }) {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [copied, setCopied] = useState(false);
-  const [isMuted, setIsMuted] = useState(() => !isSoundEnabled());
+  const [isMuted, setIsMuted] = useState(false);
+  useEffect(() => { setIsMuted(!isSoundEnabled()); }, []);
   const chatContainerRef = useRef(null);
   const [revansaRequests, setRevansaRequests] = useState({});
   const opponentRef = useRef(null);
@@ -225,6 +226,19 @@ function ArenaMaster({ room }) {
   // Ambii clienti folosesc același seed → aceeași decizie.
   const nextAttackerSeedRef = useRef(0);
   const teamIdPreluat = searchParams.get("teamId");
+  const invitedBy = searchParams.get("inv");
+
+  // Track invite landing: dacă vii cu ?inv=X, informează serverul că X a invitat cu succes
+  useEffect(() => {
+    if (!invitedBy || !nume) return;
+    if (invitedBy.toUpperCase() === nume.toUpperCase()) return; // anti-self
+    try { sessionStorage.getItem('_invite_tracked') === room && (() => {})(); } catch {}
+    let alreadyTracked = false;
+    try { alreadyTracked = sessionStorage.getItem(`_invite_${room}`) === '1'; } catch {}
+    if (alreadyTracked) return;
+    try { sessionStorage.setItem(`_invite_${room}`, '1'); } catch {}
+    import('@/app/components/Analytics').then(m => m.trackEvent('invite-landed', { invitedBy: invitedBy.toUpperCase() })).catch(() => {});
+  }, [invitedBy, nume, room]);
   const [isHost, setIsHost] = useState(false);
   const isPrivate = room.includes("privat-");
   const isProvocare = searchParams.get("provocare") === "true";
@@ -812,12 +826,19 @@ function ArenaMaster({ room }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const buildShareUrl = () => {
+    const base = `${window.location.origin}/${locale}/joc/${room}`;
+    // ?inv=NUME permite tracking invitații — cine pe cine invită
+    const inv = nume ? `?inv=${encodeURIComponent(nume.toUpperCase().trim())}` : '';
+    return `${base}${inv}`;
+  };
+
   const shareRoom = () => {
-    const url = `${window.location.origin}/${locale}/joc/${room}`;
+    const url = buildShareUrl();
     const text = t('game.shareInvite');
+    try { import('@/app/components/Analytics').then(m => m.trackEvent('invite-sent', { method: 'native-share' })); } catch {}
     if (navigator.share) {
       navigator.share({ title: t('game.shareTitle'), text, url }).then(() => {}).catch(() => {
-        // Fallback if share was dismissed
         safeCopy(`${text} ${url}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -830,8 +851,9 @@ function ArenaMaster({ room }) {
   };
 
   const shareWhatsApp = () => {
-    const url = `${window.location.origin}/${locale}/joc/${room}`;
+    const url = buildShareUrl();
     const text = `${t('game.shareInvite')} ${url}`;
+    try { import('@/app/components/Analytics').then(m => m.trackEvent('invite-sent', { method: 'whatsapp' })); } catch {}
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -1105,21 +1127,29 @@ function ArenaMaster({ room }) {
                 transition={{ delay: 0.55, duration: 0.4 }}
                 className="flex flex-col gap-2.5 px-5 pb-6"
               >
-                {/* Share Result Button — native share sheet (text only) */}
+                {/* Share Result Button — Canvas image share (Wordle-style) */}
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     const siteName = t('seo.siteName');
-                    const text = rezultat.win
-                      ? t('result.shareWinText', { site: siteName, wins: userStats.wins || 0 })
-                      : t('result.shareLoseText', { site: siteName });
-                    const url = `https://${siteName.toLowerCase()}`;
-                    if (navigator.share) {
-                      navigator.share({ title: siteName, text, url }).catch(() => {
-                        safeCopy(`${text} ${url}`);
+                    try {
+                      const mod = await import('@/app/lib/shareImage');
+                      const res = await mod.shareResultImage({
+                        win: rezultat.win,
+                        playerName: nume || 'JUCATOR',
+                        wins: userStats.wins || 0,
+                        losses: userStats.losses || 0,
+                        site: siteName,
                       });
-                    } else {
-                      safeCopy(`${text} ${url}`);
-                    }
+                      if (!res.ok) {
+                        const text = rezultat.win
+                          ? t('result.shareWinText', { site: siteName, wins: userStats.wins || 0 })
+                          : t('result.shareLoseText', { site: siteName });
+                        const url = `https://${siteName.toLowerCase()}`;
+                        if (navigator.share) { navigator.share({ title: siteName, text, url }).catch(() => safeCopy(`${text} ${url}`)); }
+                        else safeCopy(`${text} ${url}`);
+                      }
+                      try { import('@/app/components/Analytics').then(m => m.trackEvent('result-share', { win: rezultat.win ? 1 : 0, method: res.method || 'fallback' })); } catch {}
+                    } catch {}
                   }}
                   className="w-full py-4 rounded-[1.5rem] font-black uppercase tracking-[0.25em] text-xs transition-all active:scale-95 border cursor-pointer relative z-50 pointer-events-auto bg-gradient-to-r from-red-700 to-red-600 text-white border-red-500/30 hover:from-red-600 hover:to-red-500 shadow-lg shadow-red-900/30"
                 >

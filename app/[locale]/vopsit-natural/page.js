@@ -5,6 +5,7 @@ import Script from "next/script";
 import LocaleLink from "../../components/LocaleLink";
 import { useT } from "../../i18n/useT";
 import ContentNav from "../../components/ContentNav";
+import ContentCTA from "../../components/ContentCTA";
 import PageHeader from "../../components/PageHeader";
 
 // ─── Article Section ────────────────────────────────────────────────────────
@@ -93,11 +94,7 @@ export default function VopsitNaturalPage() {
             ))}
           </section>
 
-          <div className="text-center">
-            <LocaleLink href="/" className="inline-block bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-lg border border-red-800 hover:bg-red-600 transition-all active:scale-95 shadow-lg">
-              {dyeing.ctaOnline || "🥚 Play online"}
-            </LocaleLink>
-          </div>
+          <ContentCTA />
 
         </div>
       </div>

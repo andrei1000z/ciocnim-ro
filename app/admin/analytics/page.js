@@ -253,6 +253,25 @@ export default function AdminAnalyticsPage() {
           </div>
         )}
 
+        {/* UTM generator */}
+        <UTMGenerator />
+
+        {/* Top inviters */}
+        {data.topInviters && data.topInviters.length > 0 && (
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">🎯 Top invitatori (useri care aduc alți jucători)</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {data.topInviters.map((u, i) => (
+                <div key={u.nume} className="flex items-center gap-2 px-3 py-2 bg-elevated rounded-lg">
+                  <span className="text-xs font-bold text-amber-400 w-5">{i + 1}.</span>
+                  <span className="text-xs font-bold text-body truncate flex-1">{u.nume}</span>
+                  <span className="text-xs font-black text-green-400 tabular-nums">{u.invites}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Top users — clickable pentru drill-down */}
         {data.topUsers && data.topUsers.length > 0 && (
           <div className="bg-card border border-edge rounded-2xl p-5">
@@ -415,6 +434,111 @@ export default function AdminAnalyticsPage() {
           Server time: {new Date(data.serverTime).toLocaleString('ro-RO')} · Auto-refresh 5s
         </p>
       </div>
+    </div>
+  );
+}
+
+function UTMGenerator() {
+  const [source, setSource] = useState("instagram");
+  const [medium, setMedium] = useState("story");
+  const [campaign, setCampaign] = useState("paste2026");
+  const [content, setContent] = useState("");
+  const [basePath, setBasePath] = useState("/");
+  const [copied, setCopied] = useState(false);
+
+  const url = (() => {
+    const params = new URLSearchParams();
+    if (source) params.set("utm_source", source);
+    if (medium) params.set("utm_medium", medium);
+    if (campaign) params.set("utm_campaign", campaign);
+    if (content) params.set("utm_content", content);
+    const qs = params.toString();
+    return `https://www.ciocnim.ro${basePath}${qs ? '?' + qs : ''}`;
+  })();
+
+  const copy = () => {
+    try {
+      navigator.clipboard?.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  const presets = [
+    { label: "📸 Instagram Story", source: "instagram", medium: "story", campaign: "paste2026" },
+    { label: "📷 Instagram Bio", source: "instagram", medium: "bio", campaign: "profile" },
+    { label: "💬 Instagram DM", source: "instagram", medium: "dm", campaign: "personal" },
+    { label: "📘 Facebook Post", source: "facebook", medium: "post", campaign: "paste2026" },
+    { label: "🎵 TikTok Bio", source: "tiktok", medium: "bio", campaign: "profile" },
+    { label: "💚 WhatsApp Grup", source: "whatsapp", medium: "group", campaign: "invite" },
+    { label: "🔴 Reddit Post", source: "reddit", medium: "post", campaign: "launch" },
+    { label: "📧 Email", source: "email", medium: "newsletter", campaign: "launch" },
+  ];
+
+  const paths = [
+    { label: "Homepage", value: "/" },
+    { label: "Clasament", value: "/clasament" },
+    { label: "Rețete", value: "/retete" },
+    { label: "Tradiții", value: "/traditii" },
+    { label: "Urări", value: "/urari" },
+  ];
+
+  return (
+    <div className="bg-card border border-edge rounded-2xl p-5">
+      <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-1">🔗 UTM Link Generator</h3>
+      <p className="text-[10px] text-dim mb-3">Generează link-uri cu tracking UTM pentru campanii (Instagram, Facebook, TikTok, etc.)</p>
+
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {presets.map((p) => (
+          <button
+            key={p.label}
+            onClick={() => { setSource(p.source); setMedium(p.medium); setCampaign(p.campaign); setContent(""); }}
+            className="px-2.5 py-1 bg-elevated hover:bg-elevated-hover rounded-lg text-[10px] font-bold text-body transition-all"
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <label className="text-[10px] font-bold text-dim uppercase">utm_source</label>
+          <input value={source} onChange={(e) => setSource(e.target.value)} className="w-full px-2 py-1.5 bg-elevated border border-edge rounded-lg text-xs font-mono text-body" />
+        </div>
+        <div>
+          <label className="text-[10px] font-bold text-dim uppercase">utm_medium</label>
+          <input value={medium} onChange={(e) => setMedium(e.target.value)} className="w-full px-2 py-1.5 bg-elevated border border-edge rounded-lg text-xs font-mono text-body" />
+        </div>
+        <div>
+          <label className="text-[10px] font-bold text-dim uppercase">utm_campaign</label>
+          <input value={campaign} onChange={(e) => setCampaign(e.target.value)} className="w-full px-2 py-1.5 bg-elevated border border-edge rounded-lg text-xs font-mono text-body" />
+        </div>
+        <div>
+          <label className="text-[10px] font-bold text-dim uppercase">utm_content (opt)</label>
+          <input value={content} onChange={(e) => setContent(e.target.value)} className="w-full px-2 py-1.5 bg-elevated border border-edge rounded-lg text-xs font-mono text-body" />
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <label className="text-[10px] font-bold text-dim uppercase">Pagina destinație</label>
+        <div className="flex flex-wrap gap-1 mt-1">
+          {paths.map(p => (
+            <button key={p.value} onClick={() => setBasePath(p.value)} className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${basePath === p.value ? 'bg-red-700 text-white' : 'bg-elevated text-dim'}`}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-elevated border border-edge rounded-xl p-3 mb-2">
+        <code className="text-[10px] text-amber-400 font-mono break-all">{url}</code>
+      </div>
+      <button
+        onClick={copy}
+        className="w-full py-2.5 bg-red-700 hover:bg-red-600 text-white font-black text-xs rounded-xl transition-all active:scale-95"
+      >
+        {copied ? "✅ Copiat!" : "📋 Copiază link"}
+      </button>
     </div>
   );
 }

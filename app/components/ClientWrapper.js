@@ -143,7 +143,7 @@ function getDefaultRegion(locale) {
 }
 
 function buildDefaultStats(locale) {
-  const base = { nume: "", wins: 0, losses: 0, skin: "red", regiune: getDefaultRegion(locale) };
+  const base = { nume: "", wins: 0, losses: 0, currentStreak: 0, skin: "red", regiune: getDefaultRegion(locale) };
   // On /en we skip the region selector entirely
   if (locale === 'en') base.regiuneSet = true;
   return base;
@@ -435,9 +435,18 @@ export default function ClientWrapper({ children }) {
         if (data.topJucatori) setTopJucatori(data.topJucatori);
 
         if (amCastigat) {
-            updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1}));
+            updateUserStats(prev => ({...prev, wins: (prev.wins || 0) + 1, currentStreak: (prev.currentStreak || 0) + 1}));
+            // Cerem permisiunea de notificări după primul win, o singură dată
+            try {
+              if (typeof Notification !== 'undefined' && Notification.permission === 'default' && !safeLS.get('c_notif_asked')) {
+                safeLS.set('c_notif_asked', '1');
+                setTimeout(() => {
+                  Notification.requestPermission().catch(() => {});
+                }, 2000);
+              }
+            } catch {}
         } else {
-            updateUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1}));
+            updateUserStats(prev => ({...prev, losses: (prev.losses || 0) + 1, currentStreak: 0}));
         }
       }
     } catch {
@@ -574,6 +583,18 @@ export default function ClientWrapper({ children }) {
       playSound('esec');
       if (notifTimer) clearTimeout(notifTimer);
       notifTimer = setTimeout(() => setNotificare(null), 20000);
+      // Web notification dacă tab-ul e inactiv + permisiune acordată
+      try {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+          const n = new Notification(`🥚 ${data.deLa} te provoacă!`, {
+            body: 'Apasă să accepți duelul',
+            icon: '/apple-icon',
+            tag: 'duel-' + data.roomId,
+            requireInteraction: false,
+          });
+          n.onclick = () => { window.focus(); n.close(); };
+        }
+      } catch {}
     });
 
     let achQueue = [];

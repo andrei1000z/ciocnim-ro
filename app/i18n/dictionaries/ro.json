@@ -300,6 +300,11 @@
   },
 
   "content": {
+    "cta": {
+      "title": "Haide la ciocnit online!",
+      "description": "Joacă gratuit cu prietenii și familia. Fără cont, fără reclame, direct din browser.",
+      "button": "Ciocnește ouă online"
+    },
     "traditions": {
       "pageTitle": "Tradiția Ciocnitului",
       "pageHighlight": "Ciocnitului",

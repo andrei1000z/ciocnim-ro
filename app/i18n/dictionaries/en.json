@@ -300,6 +300,11 @@
   },
 
   "content": {
+    "cta": {
+      "title": "Come play online!",
+      "description": "Play free with friends and family. No account, no ads, right in your browser.",
+      "button": "Crack eggs online"
+    },
     "traditions": {
       "pageTitle": "The Tradition of",
       "pageHighlight": "Egg Cracking",
