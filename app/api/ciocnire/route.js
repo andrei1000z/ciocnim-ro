@@ -775,6 +775,30 @@ return redis.call('SCARD', KEYS[1])
             pipe.zincrby('analytics:top-users', 1, trackedJucator);
             pipe.sadd(`analytics:active-users:${today}`, trackedJucator);
             pipe.expire(`analytics:active-users:${today}`, 60 * 60 * 24 * 90);
+
+            // Per-user detailed tracking
+            const userMetaKey = `analytics:user:${trackedJucator}:meta`;
+            pipe.hsetnx(userMetaKey, 'first_seen', now);
+            pipe.hset(userMetaKey, 'last_seen', now);
+            pipe.hset(userMetaKey, 'last_country', country);
+            pipe.hset(userMetaKey, 'last_device', deviceType);
+            pipe.hset(userMetaKey, 'last_os', os);
+            pipe.hset(userMetaKey, 'last_browser', browser);
+            pipe.hset(userMetaKey, 'last_locale', ns);
+            pipe.hset(userMetaKey, 'last_pathname', pathname);
+            pipe.hset(userMetaKey, 'last_referrer', referrer);
+            pipe.hset(userMetaKey, 'last_display_mode', displayMode);
+            pipe.hincrby(userMetaKey, 'views', 1);
+            pipe.expire(userMetaKey, 60 * 60 * 24 * 365);
+
+            pipe.hincrby(`analytics:user:${trackedJucator}:routes`, pathname, 1);
+            pipe.expire(`analytics:user:${trackedJucator}:routes`, 60 * 60 * 24 * 365);
+            pipe.hincrby(`analytics:user:${trackedJucator}:countries`, country, 1);
+            pipe.expire(`analytics:user:${trackedJucator}:countries`, 60 * 60 * 24 * 365);
+            pipe.hincrby(`analytics:user:${trackedJucator}:devices`, `${deviceType}/${os}/${browser}`, 1);
+            pipe.expire(`analytics:user:${trackedJucator}:devices`, 60 * 60 * 24 * 365);
+            pipe.hincrby(`analytics:user:${trackedJucator}:days`, today, 1);
+            pipe.expire(`analytics:user:${trackedJucator}:days`, 60 * 60 * 24 * 365);
           }
         } else if (eventType === 'pwa-install') {
           pipe.hincrby('analytics:total', 'pwa_installs', 1);
@@ -832,6 +856,37 @@ return redis.call('SCARD', KEYS[1])
           topUsers,
           onlineNow: onlineNow || 0,
           serverTime: Date.now(),
+        });
+      }
+
+      case 'analytics-user': {
+        const secret = sanitizeStr(body.secret, 100);
+        const expectedBuf = Buffer.from(process.env.ADMIN_SECRET || '');
+        const secretBuf = Buffer.from(secret || '');
+        if (!process.env.ADMIN_SECRET || secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
+        const targetUser = sanitizeStr(body.userName, 30).toUpperCase();
+        if (!targetUser) return NextResponse.json({ success: false, error: "User lipsă" }, { status: 400 });
+
+        const [meta, routes, countries, devices, days, gameStats] = await Promise.all([
+          redis.hgetall(`analytics:user:${targetUser}:meta`),
+          redis.hgetall(`analytics:user:${targetUser}:routes`),
+          redis.hgetall(`analytics:user:${targetUser}:countries`),
+          redis.hgetall(`analytics:user:${targetUser}:devices`),
+          redis.hgetall(`analytics:user:${targetUser}:days`),
+          redis.hgetall(k(`user:${targetUser}:stats`)),
+        ]);
+
+        return NextResponse.json({
+          success: true,
+          user: targetUser,
+          meta: meta || {},
+          routes: routes || {},
+          countries: countries || {},
+          devices: devices || {},
+          days: days || {},
+          gameStats: gameStats || {},
         });
       }
 

@@ -21,32 +21,36 @@ function StatCard({ label, value, sub, accent = 'red' }) {
   );
 }
 
-function BreakdownList({ title, data, total, color = 'red' }) {
+function BreakdownList({ title, data, total, color = 'red', wrap = true }) {
   if (!data || Object.keys(data).length === 0) return null;
   const entries = Object.entries(data)
     .map(([k, v]) => [k, parseInt(v) || 0])
     .sort((a, b) => b[1] - a[1])
     .slice(0, 15);
   const max = entries[0]?.[1] || 1;
+  const inner = (
+    <div className="space-y-2">
+      {entries.map(([key, val]) => (
+        <div key={key} className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span className="font-bold text-body truncate flex-1 mr-2">{key}</span>
+            <span className="font-black text-red-400 tabular-nums">{fmt(val)}</span>
+          </div>
+          <div className="w-full h-1.5 bg-edge rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-red-700 to-red-500 rounded-full"
+              style={{ width: `${(val / max) * 100}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  if (!title) return inner;
   return (
     <div className="bg-card border border-edge rounded-2xl p-5">
       <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">{title}</h3>
-      <div className="space-y-2">
-        {entries.map(([key, val]) => (
-          <div key={key} className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="font-bold text-body truncate flex-1 mr-2">{key}</span>
-              <span className="font-black text-red-400 tabular-nums">{fmt(val)}</span>
-            </div>
-            <div className="w-full h-1.5 bg-edge rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-red-700 to-red-500 rounded-full"
-                style={{ width: `${(val / max) * 100}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      {inner}
     </div>
   );
 }
@@ -57,6 +61,25 @@ export default function AdminAnalyticsPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
+  const [userLoading, setUserLoading] = useState(false);
+
+  async function loadUserDetails(userName) {
+    setSelectedUser(userName);
+    setUserDetails(null);
+    setUserLoading(true);
+    try {
+      const res = await fetch("/api/ciocnire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actiune: "analytics-user", secret, userName, locale: "ro" }),
+      });
+      const json = await res.json();
+      if (json.success) setUserDetails(json);
+    } catch {}
+    setUserLoading(false);
+  }
 
   // Token persisted în sessionStorage (nu localStorage — dispare la închidere browser)
   useEffect(() => {
@@ -189,20 +212,34 @@ export default function AdminAnalyticsPage() {
           </div>
         )}
 
-        {/* Top users — NOU */}
+        {/* Top users — clickable pentru drill-down */}
         {data.topUsers && data.topUsers.length > 0 && (
           <div className="bg-card border border-edge rounded-2xl p-5">
-            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">👤 Top useri (după pageviews)</h3>
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">👤 Top useri (click pentru detalii)</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {data.topUsers.map((u, i) => (
-                <div key={u.nume} className="flex items-center gap-2 px-3 py-2 bg-elevated rounded-lg">
+                <button
+                  key={u.nume}
+                  onClick={() => loadUserDetails(u.nume)}
+                  className="flex items-center gap-2 px-3 py-2 bg-elevated hover:bg-elevated-hover rounded-lg transition-all text-left active:scale-95"
+                >
                   <span className="text-xs font-bold text-dim w-5">{i + 1}.</span>
                   <span className="text-xs font-bold text-body truncate flex-1">{u.nume}</span>
                   <span className="text-xs font-black text-red-400 tabular-nums">{fmt(u.views)}</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
+        )}
+
+        {/* Modal detalii user */}
+        {selectedUser && (
+          <UserDetailModal
+            user={selectedUser}
+            details={userDetails}
+            loading={userLoading}
+            onClose={() => { setSelectedUser(null); setUserDetails(null); }}
+          />
         )}
 
         {/* Breakdown grids */}
@@ -247,6 +284,144 @@ export default function AdminAnalyticsPage() {
         <p className="text-center text-[10px] text-dim">
           Server time: {new Date(data.serverTime).toLocaleString('ro-RO')} · Auto-refresh 5s
         </p>
+      </div>
+    </div>
+  );
+}
+
+function UserDetailModal({ user, details, loading, onClose }) {
+  const m = details?.meta || {};
+  const routes = details?.routes || {};
+  const countries = details?.countries || {};
+  const devices = details?.devices || {};
+  const days = details?.days || {};
+  const gameStats = details?.gameStats || {};
+
+  const firstSeen = parseInt(m.first_seen) || 0;
+  const lastSeen = parseInt(m.last_seen) || 0;
+  const totalDuration = lastSeen - firstSeen;
+  const fmtDuration = (ms) => {
+    if (ms <= 0) return "—";
+    const h = Math.floor(ms / 3600000);
+    const d = Math.floor(h / 24);
+    if (d > 0) return `${d}z ${h % 24}h`;
+    if (h > 0) return `${h}h ${Math.floor((ms % 3600000) / 60000)}m`;
+    const min = Math.floor(ms / 60000);
+    if (min > 0) return `${min}m`;
+    return `${Math.floor(ms / 1000)}s`;
+  };
+  const fmtDate = (ts) => ts ? new Date(parseInt(ts)).toLocaleString('ro-RO') : '—';
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="bg-main border border-edge rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-main border-b border-edge px-5 py-4 flex items-center justify-between z-10">
+          <h2 className="text-2xl font-black text-heading">👤 {user}</h2>
+          <button onClick={onClose} className="text-dim hover:text-red-400 text-2xl leading-none">×</button>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center">
+            <div className="w-8 h-8 border-2 border-red-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        ) : !details ? (
+          <div className="p-12 text-center text-dim">Eroare la încărcare</div>
+        ) : (
+          <div className="p-5 space-y-5">
+            {/* Stat cards principale */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="bg-card border border-red-900/30 rounded-xl p-3">
+                <p className="text-[10px] font-bold uppercase text-red-400/70">Pageviews</p>
+                <p className="text-2xl font-black text-heading tabular-nums">{fmt(m.views)}</p>
+              </div>
+              <div className="bg-card border border-green-900/30 rounded-xl p-3">
+                <p className="text-[10px] font-bold uppercase text-green-400/70">Timp total</p>
+                <p className="text-xl font-black text-heading">{fmtDuration(totalDuration)}</p>
+              </div>
+              <div className="bg-card border border-amber-900/30 rounded-xl p-3">
+                <p className="text-[10px] font-bold uppercase text-amber-400/70">Zile active</p>
+                <p className="text-2xl font-black text-heading tabular-nums">{Object.keys(days).length}</p>
+              </div>
+              <div className="bg-card border border-blue-900/30 rounded-xl p-3">
+                <p className="text-[10px] font-bold uppercase text-blue-400/70">Țară</p>
+                <p className="text-xl font-black text-heading">{m.last_country || '—'}</p>
+              </div>
+            </div>
+
+            {/* Game stats */}
+            {(parseInt(gameStats.wins) > 0 || parseInt(gameStats.losses) > 0) && (
+              <div className="bg-card border border-edge rounded-xl p-4">
+                <h3 className="text-xs font-black uppercase text-heading mb-2">🎮 Joc</h3>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-2xl font-black text-green-400">{fmt(gameStats.wins)}</p>
+                    <p className="text-[10px] text-muted uppercase">victorii</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-red-400">{fmt(gameStats.losses)}</p>
+                    <p className="text-[10px] text-muted uppercase">înfrângeri</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-amber-400">{fmt(gameStats.currentStreak)}</p>
+                    <p className="text-[10px] text-muted uppercase">streak</p>
+                  </div>
+                </div>
+                {gameStats.regiune && <p className="text-xs text-center text-dim mt-2">📍 {gameStats.regiune}</p>}
+              </div>
+            )}
+
+            {/* Meta info */}
+            <div className="bg-card border border-edge rounded-xl p-4 space-y-1.5 text-xs">
+              <div className="flex justify-between"><span className="text-muted">Prima vizită:</span><span className="font-bold text-body">{fmtDate(firstSeen)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Ultima vizită:</span><span className="font-bold text-body">{fmtDate(lastSeen)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Ultima pagină:</span><span className="font-bold text-body truncate ml-2">{m.last_pathname || '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Sursă:</span><span className="font-bold text-body">{m.last_referrer || 'direct'}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Locale:</span><span className="font-bold text-body uppercase">{m.last_locale || '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Mod afișare:</span><span className="font-bold text-body">{m.last_display_mode === 'standalone' ? '📱 PWA' : '🌐 Browser'}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Device:</span><span className="font-bold text-body">{m.last_device || '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted">OS:</span><span className="font-bold text-body">{m.last_os || '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Browser:</span><span className="font-bold text-body">{m.last_browser || '—'}</span></div>
+            </div>
+
+            {/* Routes vizitate */}
+            {Object.keys(routes).length > 0 && (
+              <div className="bg-card border border-edge rounded-xl p-4">
+                <h3 className="text-xs font-black uppercase text-heading mb-3">📄 Pagini vizitate</h3>
+                <BreakdownList title="" data={routes} color="red" />
+              </div>
+            )}
+
+            {/* Țări */}
+            {Object.keys(countries).length > 1 && (
+              <div className="bg-card border border-edge rounded-xl p-4">
+                <h3 className="text-xs font-black uppercase text-heading mb-3">🌍 Țări</h3>
+                <BreakdownList title="" data={countries} />
+              </div>
+            )}
+
+            {/* Devices distinct */}
+            {Object.keys(devices).length > 0 && (
+              <div className="bg-card border border-edge rounded-xl p-4">
+                <h3 className="text-xs font-black uppercase text-heading mb-3">📱 Combinații device/OS/browser</h3>
+                <BreakdownList title="" data={devices} />
+              </div>
+            )}
+
+            {/* Activitate pe zile */}
+            {Object.keys(days).length > 0 && (
+              <div className="bg-card border border-edge rounded-xl p-4">
+                <h3 className="text-xs font-black uppercase text-heading mb-3">📅 Activitate pe zile</h3>
+                <BreakdownList title="" data={days} />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
