@@ -718,6 +718,72 @@ return redis.call('SCARD', KEYS[1])
         return NextResponse.json({ success: true, online: count });
       }
 
+      // ── Analytics ────────────────────────────────────────────────────────────
+
+      case 'analytics-track': {
+        const visitorId = sanitizeId(body.visitorId);
+        if (!visitorId) return NextResponse.json({ success: true });
+        const eventType = sanitizeStr(body.eventType, 30) || 'pageview';
+        const pathname = sanitizeStr(body.pathname, 100) || '/';
+        const displayMode = sanitizeStr(body.displayMode, 20) || 'browser';
+        const deviceType = sanitizeStr(body.deviceType, 20) || 'unknown';
+        const browser = sanitizeStr(body.browser, 30) || 'unknown';
+        const referrer = sanitizeStr(body.referrer, 100) || 'direct';
+
+        const today = new Date().toISOString().slice(0, 10);
+        const pipe = redis.pipeline();
+
+        if (eventType === 'pageview') {
+          pipe.hincrby('analytics:total', 'views', 1);
+          pipe.hincrby('analytics:total', `display_${displayMode}`, 1);
+          pipe.hincrby('analytics:total', `device_${deviceType}`, 1);
+          pipe.hincrby('analytics:total', `browser_${browser}`, 1);
+          pipe.hincrby('analytics:locales', ns, 1);
+          pipe.hincrby('analytics:routes', pathname, 1);
+          pipe.hincrby('analytics:referrers', referrer, 1);
+          pipe.sadd(`analytics:dau:${today}`, visitorId);
+          pipe.expire(`analytics:dau:${today}`, 60 * 60 * 24 * 90);
+          pipe.hincrby(`analytics:daily:${today}`, 'views', 1);
+          pipe.expire(`analytics:daily:${today}`, 60 * 60 * 24 * 90);
+        } else if (eventType === 'pwa-install') {
+          pipe.hincrby('analytics:total', 'pwa_installs', 1);
+          pipe.hincrby(`analytics:daily:${today}`, 'pwa_installs', 1);
+          pipe.expire(`analytics:daily:${today}`, 60 * 60 * 24 * 90);
+        }
+        await pipe.exec();
+        return NextResponse.json({ success: true });
+      }
+
+      case 'analytics-summary': {
+        const secret = sanitizeStr(body.secret, 100);
+        const expectedBuf = Buffer.from(process.env.ADMIN_SECRET || '');
+        const secretBuf = Buffer.from(secret || '');
+        if (!process.env.ADMIN_SECRET || secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        const [total, locales, routes, referrers, todayDaily, yesterdayDaily, dauToday, dauYesterday] = await Promise.all([
+          redis.hgetall('analytics:total'),
+          redis.hgetall('analytics:locales'),
+          redis.hgetall('analytics:routes'),
+          redis.hgetall('analytics:referrers'),
+          redis.hgetall(`analytics:daily:${today}`),
+          redis.hgetall(`analytics:daily:${yesterday}`),
+          redis.scard(`analytics:dau:${today}`),
+          redis.scard(`analytics:dau:${yesterday}`),
+        ]);
+        return NextResponse.json({
+          success: true,
+          total: total || {},
+          locales: locales || {},
+          routes: routes || {},
+          referrers: referrers || {},
+          today: { ...todayDaily, dau: dauToday || 0 },
+          yesterday: { ...yesterdayDaily, dau: dauYesterday || 0 },
+        });
+      }
+
       // ── Admin ────────────────────────────────────────────────────────────────
 
       case 'reset-all': {

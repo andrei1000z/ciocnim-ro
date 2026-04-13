@@ -4,6 +4,7 @@ import ClientWrapper from "../components/ClientWrapper";
 import ScrollToTop from "../components/ScrollToTop";
 import ThemeToggle from "../components/ThemeToggle";
 import SiteFooter from "../components/SiteFooter";
+import Analytics from "../components/Analytics";
 import SoundToggle from "../components/SoundToggle";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import DictionaryProvider from "../components/DictionaryProvider";
@@ -174,6 +175,7 @@ export default async function LocaleLayout({ children, params }) {
               </main>
               <SiteFooter />
             </div>
+            <Analytics />
           </ClientWrapper>
         </DictionaryProvider>
       </body>
