@@ -11,6 +11,7 @@ import GroupHub from "../components/GroupHub";
 import PlayModal from "../components/PlayModal";
 import { safeLS, safeCopy } from "../lib/utils";
 import { apiPost } from "../lib/api";
+import SeasonCountdown from "../components/SeasonCountdown";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
 import { localeConfig } from "../i18n/config";
@@ -296,6 +297,8 @@ function HomeContent() {
             <span className="tabular-nums">{onlineCount || 1} online</span>
           </div>
         </motion.div>
+
+        <SeasonCountdown />
       </motion.div>
 
       {/* ═══ CTA PRINCIPAL — UN SINGUR BUTON ═══ */}
