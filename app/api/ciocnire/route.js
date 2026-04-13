@@ -738,11 +738,27 @@ return redis.call('SCARD', KEYS[1])
         const browser = sanitizeStr(body.browser, 30) || 'unknown';
         const os = sanitizeStr(body.os, 20) || 'unknown';
         const referrer = sanitizeStr(body.referrer, 100) || 'direct';
+        const language = sanitizeStr(body.language, 10) || 'unknown';
+        const timezone = sanitizeStr(body.timezone, 50) || 'unknown';
+        const screenSize = sanitizeStr(body.screenSize, 20) || 'unknown';
+        const viewport = sanitizeStr(body.viewport, 20) || 'unknown';
+        const orientation = sanitizeStr(body.orientation, 20) || 'unknown';
+        const connection = sanitizeStr(body.connection, 20) || 'unknown';
+        const colorScheme = sanitizeStr(body.colorScheme, 20) || 'unknown';
+        const loadTime = parseInt(body.loadTime) || 0;
+        const timeOnPage = parseInt(body.timeOnPage) || 0;
+
+        // Vercel geo headers (more precise than just country)
         const country = (request.headers.get('x-vercel-ip-country') || 'XX').slice(0, 4);
+        const city = sanitizeStr(decodeURIComponent(request.headers.get('x-vercel-ip-city') || ''), 50) || 'unknown';
+        const region = sanitizeStr(request.headers.get('x-vercel-ip-country-region') || '', 10) || 'unknown';
+        const tz = sanitizeStr(request.headers.get('x-vercel-ip-timezone') || '', 50) || timezone;
 
         const now = Date.now();
         const today = new Date().toISOString().slice(0, 10);
-        const hour = new Date().toISOString().slice(0, 13).replace('T', ' '); // YYYY-MM-DD HH
+        const week = `${new Date().getUTCFullYear()}-W${String(Math.ceil((new Date().getUTCDate() + new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).getUTCDay()) / 7)).padStart(2, '0')}`;
+        const month = today.slice(0, 7);
+        const hour = new Date().toISOString().slice(0, 13).replace('T', ' ');
         const pipe = redis.pipeline();
 
         if (eventType === 'pageview') {
@@ -751,24 +767,67 @@ return redis.call('SCARD', KEYS[1])
           pipe.hincrby('analytics:total', `device_${deviceType}`, 1);
           pipe.hincrby('analytics:total', `browser_${browser}`, 1);
           pipe.hincrby('analytics:total', `os_${os}`, 1);
+          pipe.hincrby('analytics:total', `connection_${connection}`, 1);
+          pipe.hincrby('analytics:total', `orientation_${orientation}`, 1);
+          pipe.hincrby('analytics:total', `scheme_${colorScheme}`, 1);
           pipe.hincrby('analytics:locales', ns, 1);
           pipe.hincrby('analytics:routes', pathname, 1);
           pipe.hincrby('analytics:referrers', referrer, 1);
           pipe.hincrby('analytics:countries', country, 1);
+          pipe.hincrby('analytics:cities', `${city}, ${country}`, 1);
+          pipe.hincrby('analytics:regions', `${region}, ${country}`, 1);
+          pipe.hincrby('analytics:timezones', tz, 1);
+          pipe.hincrby('analytics:languages', language, 1);
+          pipe.hincrby('analytics:viewports', viewport, 1);
+          pipe.hincrby('analytics:screens', screenSize, 1);
           pipe.hincrby('analytics:hourly', hour, 1);
           pipe.expire('analytics:hourly', 60 * 60 * 24 * 7);
 
+          // Performance metrics — running average via separate counters
+          if (loadTime > 0 && loadTime < 60000) {
+            pipe.hincrby('analytics:perf', 'load_total', loadTime);
+            pipe.hincrby('analytics:perf', 'load_count', 1);
+          }
+          if (timeOnPage > 0 && timeOnPage < 3600000) {
+            pipe.hincrby('analytics:perf', 'time_total', timeOnPage);
+            pipe.hincrby('analytics:perf', 'time_count', 1);
+          }
+
+          // DAU / WAU / MAU
           pipe.sadd(`analytics:dau:${today}`, visitorId);
           pipe.expire(`analytics:dau:${today}`, 60 * 60 * 24 * 90);
+          pipe.sadd(`analytics:wau:${week}`, visitorId);
+          pipe.expire(`analytics:wau:${week}`, 60 * 60 * 24 * 60);
+          pipe.sadd(`analytics:mau:${month}`, visitorId);
+          pipe.expire(`analytics:mau:${month}`, 60 * 60 * 24 * 90);
+
           pipe.hincrby(`analytics:daily:${today}`, 'views', 1);
           pipe.expire(`analytics:daily:${today}`, 60 * 60 * 24 * 90);
 
-          // Session tracking: HSET cu first/last seen + view count
+          // Session tracking
           const sessionKey = `analytics:session:${visitorId}`;
           pipe.hsetnx(sessionKey, 'first', now);
           pipe.hset(sessionKey, 'last', now);
           pipe.hincrby(sessionKey, 'views', 1);
           pipe.expire(sessionKey, 60 * 60 * 24 * 90);
+
+          // Real-time event stream — last 200 events (LPUSH + LTRIM)
+          const eventEntry = JSON.stringify({
+            t: now,
+            type: 'pageview',
+            jucator: trackedJucator || null,
+            pathname,
+            country,
+            city: city !== 'unknown' ? city : null,
+            device: deviceType,
+            os,
+            browser,
+            referrer,
+            displayMode,
+          });
+          pipe.lpush('analytics:events', eventEntry);
+          pipe.ltrim('analytics:events', 0, 199);
+          pipe.expire('analytics:events', 60 * 60 * 24 * 7);
 
           // Top users (doar dacă jucător are nume)
           if (trackedJucator) {
@@ -781,6 +840,10 @@ return redis.call('SCARD', KEYS[1])
             pipe.hsetnx(userMetaKey, 'first_seen', now);
             pipe.hset(userMetaKey, 'last_seen', now);
             pipe.hset(userMetaKey, 'last_country', country);
+            pipe.hset(userMetaKey, 'last_city', city);
+            pipe.hset(userMetaKey, 'last_region', region);
+            pipe.hset(userMetaKey, 'last_timezone', tz);
+            pipe.hset(userMetaKey, 'last_language', language);
             pipe.hset(userMetaKey, 'last_device', deviceType);
             pipe.hset(userMetaKey, 'last_os', os);
             pipe.hset(userMetaKey, 'last_browser', browser);
@@ -788,6 +851,9 @@ return redis.call('SCARD', KEYS[1])
             pipe.hset(userMetaKey, 'last_pathname', pathname);
             pipe.hset(userMetaKey, 'last_referrer', referrer);
             pipe.hset(userMetaKey, 'last_display_mode', displayMode);
+            pipe.hset(userMetaKey, 'last_screen', screenSize);
+            pipe.hset(userMetaKey, 'last_viewport', viewport);
+            pipe.hset(userMetaKey, 'last_connection', connection);
             pipe.hincrby(userMetaKey, 'views', 1);
             pipe.expire(userMetaKey, 60 * 60 * 24 * 365);
 
@@ -795,6 +861,8 @@ return redis.call('SCARD', KEYS[1])
             pipe.expire(`analytics:user:${trackedJucator}:routes`, 60 * 60 * 24 * 365);
             pipe.hincrby(`analytics:user:${trackedJucator}:countries`, country, 1);
             pipe.expire(`analytics:user:${trackedJucator}:countries`, 60 * 60 * 24 * 365);
+            pipe.hincrby(`analytics:user:${trackedJucator}:cities`, `${city}, ${country}`, 1);
+            pipe.expire(`analytics:user:${trackedJucator}:cities`, 60 * 60 * 24 * 365);
             pipe.hincrby(`analytics:user:${trackedJucator}:devices`, `${deviceType}/${os}/${browser}`, 1);
             pipe.expire(`analytics:user:${trackedJucator}:devices`, 60 * 60 * 24 * 365);
             pipe.hincrby(`analytics:user:${trackedJucator}:days`, today, 1);
@@ -804,6 +872,37 @@ return redis.call('SCARD', KEYS[1])
           pipe.hincrby('analytics:total', 'pwa_installs', 1);
           pipe.hincrby(`analytics:daily:${today}`, 'pwa_installs', 1);
           pipe.expire(`analytics:daily:${today}`, 60 * 60 * 24 * 90);
+        } else if (eventType === 'pwa-prompt-shown') {
+          pipe.hincrby('analytics:total', 'pwa_prompts_shown', 1);
+        } else if (eventType === 'pwa-prompt-rejected') {
+          pipe.hincrby('analytics:total', 'pwa_prompts_rejected', 1);
+        } else if (eventType === 'time-on-page') {
+          if (timeOnPage > 0 && timeOnPage < 3600000) {
+            pipe.hincrby('analytics:perf', 'time_total', timeOnPage);
+            pipe.hincrby('analytics:perf', 'time_count', 1);
+            if (trackedJucator) {
+              pipe.hincrby(`analytics:user:${trackedJucator}:meta`, 'total_time', timeOnPage);
+            }
+          }
+        } else if (eventType === 'js-error') {
+          const errorMsg = sanitizeStr(body.error, 200);
+          if (errorMsg) {
+            pipe.hincrby('analytics:errors', errorMsg, 1);
+            pipe.expire('analytics:errors', 60 * 60 * 24 * 30);
+          }
+        } else if (['battle-start', 'battle-win', 'battle-loss', 'room-private', 'room-arena', 'group-create', 'group-join', 'invite-sent', 'achievement-unlocked'].includes(eventType)) {
+          pipe.hincrby('analytics:events-total', eventType, 1);
+          pipe.hincrby(`analytics:events-daily:${today}`, eventType, 1);
+          pipe.expire(`analytics:events-daily:${today}`, 60 * 60 * 24 * 90);
+          if (trackedJucator) {
+            pipe.hincrby(`analytics:user:${trackedJucator}:events`, eventType, 1);
+            pipe.expire(`analytics:user:${trackedJucator}:events`, 60 * 60 * 24 * 365);
+          }
+          // Real-time stream
+          pipe.lpush('analytics:events', JSON.stringify({
+            t: now, type: eventType, jucator: trackedJucator || null, country,
+          }));
+          pipe.ltrim('analytics:events', 0, 199);
         }
         await pipe.exec();
         return NextResponse.json({ success: true });
@@ -818,31 +917,62 @@ return redis.call('SCARD', KEYS[1])
         }
         const today = new Date().toISOString().slice(0, 10);
         const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        const week = `${new Date().getUTCFullYear()}-W${String(Math.ceil((new Date().getUTCDate() + new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).getUTCDay()) / 7)).padStart(2, '0')}`;
+        const month = today.slice(0, 7);
+
         const [
-          total, locales, routes, referrers, countries, hourly,
-          todayDaily, yesterdayDaily, dauToday, dauYesterday,
-          activeUsersToday, topUsersRaw, onlineNow,
+          total, locales, routes, referrers, countries, cities, regions, timezones,
+          languages, viewports, screens, hourly, perf, errors,
+          eventsTotal, eventsToday,
+          todayDaily, yesterdayDaily,
+          dauToday, dauYesterday, wau, mau,
+          activeUsersToday, topUsersRaw, onlineNow, eventsStream,
+          totalCiocniri, totalJucatori,
         ] = await Promise.all([
           redis.hgetall('analytics:total'),
           redis.hgetall('analytics:locales'),
           redis.hgetall('analytics:routes'),
           redis.hgetall('analytics:referrers'),
           redis.hgetall('analytics:countries'),
+          redis.hgetall('analytics:cities'),
+          redis.hgetall('analytics:regions'),
+          redis.hgetall('analytics:timezones'),
+          redis.hgetall('analytics:languages'),
+          redis.hgetall('analytics:viewports'),
+          redis.hgetall('analytics:screens'),
           redis.hgetall('analytics:hourly'),
+          redis.hgetall('analytics:perf'),
+          redis.hgetall('analytics:errors'),
+          redis.hgetall('analytics:events-total'),
+          redis.hgetall(`analytics:events-daily:${today}`),
           redis.hgetall(`analytics:daily:${today}`),
           redis.hgetall(`analytics:daily:${yesterday}`),
           redis.scard(`analytics:dau:${today}`),
           redis.scard(`analytics:dau:${yesterday}`),
+          redis.scard(`analytics:wau:${week}`),
+          redis.scard(`analytics:mau:${month}`),
           redis.scard(`analytics:active-users:${today}`),
           redis.zrevrange('analytics:top-users', 0, 19, 'WITHSCORES'),
           redis.zcard(k('arena:online')),
+          redis.lrange('analytics:events', 0, 49),
+          redis.get(k('global_ciocniri_total')),
+          redis.zcard(k('leaderboard_jucatori')),
         ]);
+
         const topUsers = [];
         if (Array.isArray(topUsersRaw)) {
           for (let i = 0; i < topUsersRaw.length; i += 2) {
             topUsers.push({ nume: topUsersRaw[i], views: parseInt(topUsersRaw[i + 1]) || 0 });
           }
         }
+
+        const events = (eventsStream || []).map(e => { try { return JSON.parse(e); } catch { return null; } }).filter(Boolean);
+
+        // Derived metrics
+        const perfData = perf || {};
+        const avgLoadTime = perfData.load_count > 0 ? Math.round(parseInt(perfData.load_total) / parseInt(perfData.load_count)) : 0;
+        const avgTimeOnPage = perfData.time_count > 0 ? Math.round(parseInt(perfData.time_total) / parseInt(perfData.time_count)) : 0;
+
         return NextResponse.json({
           success: true,
           total: total || {},
@@ -850,12 +980,30 @@ return redis.call('SCARD', KEYS[1])
           routes: routes || {},
           referrers: referrers || {},
           countries: countries || {},
+          cities: cities || {},
+          regions: regions || {},
+          timezones: timezones || {},
+          languages: languages || {},
+          viewports: viewports || {},
+          screens: screens || {},
           hourly: hourly || {},
+          errors: errors || {},
+          eventsTotal: eventsTotal || {},
+          eventsToday: eventsToday || {},
           today: { ...todayDaily, dau: dauToday || 0, activeUsers: activeUsersToday || 0 },
           yesterday: { ...yesterdayDaily, dau: dauYesterday || 0 },
+          wau: wau || 0,
+          mau: mau || 0,
+          stickiness: (mau > 0) ? Math.round((dauToday / mau) * 100) : 0,
           topUsers,
           onlineNow: onlineNow || 0,
           serverTime: Date.now(),
+          eventsStream: events,
+          perf: { avgLoadTime, avgTimeOnPage },
+          gameStats: {
+            totalCiocniri: parseInt(totalCiocniri) || 0,
+            totalJucatori: totalJucatori || 0,
+          },
         });
       }
 

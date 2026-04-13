@@ -186,23 +186,64 @@ export default function AdminAnalyticsPage() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
-          <span className="text-green-400 font-bold">LIVE — {fmt(data.onlineNow)} online acum · auto-refresh 5s</span>
+          <span className="text-green-400 font-bold">LIVE — {fmt(data.onlineNow)} online · auto-refresh 5s · {data.gameStats?.totalCiocniri || 0} ciocniri · {data.gameStats?.totalJucatori || 0} jucători</span>
         </div>
 
-        {/* Top stats */}
+        {/* Top stats — 8 cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Online ACUM" value={data.onlineNow} sub="Live (1s precision)" accent="green" />
+          <StatCard label="Online ACUM" value={data.onlineNow} sub="Live 1s precision" accent="green" />
           <StatCard label="DAU azi" value={today.dau} sub={`ieri: ${fmt(yesterday.dau)}`} accent="amber" />
-          <StatCard label="Views azi" value={today.views} sub={`ieri: ${fmt(yesterday.views)}`} accent="red" />
-          <StatCard label="Useri activi azi" value={today.activeUsers} sub="(cu poreclă setată)" accent="blue" />
+          <StatCard label="WAU săptămână" value={data.wau} sub={`MAU: ${fmt(data.mau)}`} accent="blue" />
+          <StatCard label="Stickiness" value={`${data.stickiness}%`} sub="DAU/MAU ratio" accent="red" />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Views totale" value={t.views} accent="red" />
+          <StatCard label="Views azi" value={today.views} sub={`ieri: ${fmt(yesterday.views)}`} accent="red" />
+          <StatCard label="Views totale" value={t.views} accent="amber" />
+          <StatCard label="Useri activi azi" value={today.activeUsers} sub="(cu poreclă)" accent="green" />
           <StatCard label="PWA installs" value={pwaInstalls} sub={`${pwaRatio}% PWA opens`} accent="blue" />
-          <StatCard label="Installs azi" value={today.pwa_installs} accent="green" />
-          <StatCard label="Total useri unici" value={Object.values(data.locales || {}).reduce((a, b) => a + parseInt(b || 0), 0)} accent="amber" />
         </div>
+
+        {/* Performance + game stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="Avg load time" value={`${data.perf?.avgLoadTime || 0}ms`} sub="Page load median" accent="green" />
+          <StatCard label="Avg time on page" value={`${Math.round((data.perf?.avgTimeOnPage || 0) / 1000)}s`} sub="Engagement" accent="amber" />
+          <StatCard label="Battles total" value={data.eventsTotal?.['battle-win'] + data.eventsTotal?.['battle-loss'] || 0} sub={`${fmt(data.eventsTotal?.['battle-win'])} W / ${fmt(data.eventsTotal?.['battle-loss'])} L`} accent="red" />
+          <StatCard label="Camere create" value={(parseInt(data.eventsTotal?.['room-private']) || 0) + (parseInt(data.eventsTotal?.['room-arena']) || 0)} sub={`${fmt(data.eventsTotal?.['room-private'])} privat / ${fmt(data.eventsTotal?.['room-arena'])} arena`} accent="blue" />
+        </div>
+
+        {/* Real-time event feed */}
+        {data.eventsStream && data.eventsStream.length > 0 && (
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3 flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              📡 Event feed live (ultimele 50)
+            </h3>
+            <div className="max-h-80 overflow-y-auto space-y-1 text-[10px] font-mono">
+              {data.eventsStream.map((e, i) => {
+                const time = new Date(e.t).toLocaleTimeString('ro-RO');
+                const ago = Math.round((Date.now() - e.t) / 1000);
+                const icon = e.type === 'pageview' ? '👁' : e.type === 'battle-win' ? '🏆' : e.type === 'battle-loss' ? '💔' : e.type === 'room-private' ? '🚪' : e.type === 'pwa-install' ? '📲' : '⚡';
+                return (
+                  <div key={i} className="flex items-center gap-2 px-2 py-1 hover:bg-elevated rounded">
+                    <span className="text-base">{icon}</span>
+                    <span className="text-dim w-16">{time}</span>
+                    <span className="text-amber-400 font-bold w-20">{e.type}</span>
+                    {e.jucator && <span className="text-green-400 font-bold">{e.jucator}</span>}
+                    {e.country && <span className="text-blue-400">{e.country}</span>}
+                    {e.city && <span className="text-blue-300/70">· {e.city}</span>}
+                    {e.pathname && <span className="text-body truncate flex-1">· {e.pathname}</span>}
+                    {e.referrer && e.referrer !== 'direct' && <span className="text-purple-400/70 ml-auto">← {e.referrer}</span>}
+                    <span className="text-faint text-[9px]">{ago}s ago</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Hourly chart */}
         {data.hourly && Object.keys(data.hourly).length > 0 && (
@@ -246,6 +287,12 @@ export default function AdminAnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <BreakdownList title="🌍 Locale" data={data.locales} />
           <BreakdownList title="🌐 Țări" data={data.countries} />
+          <BreakdownList title="🏙️ Orașe" data={data.cities} />
+          <BreakdownList title="🗺️ Regiuni" data={data.regions} />
+          <BreakdownList title="🕒 Timezones" data={data.timezones} />
+          <BreakdownList title="🔤 Limbi browser" data={data.languages} />
+          <BreakdownList title="📐 Viewports" data={data.viewports} />
+          <BreakdownList title="🖥️ Rezoluții ecran" data={data.screens} />
           <BreakdownList title="📱 Top pagini" data={data.routes} />
           <BreakdownList title="🔗 Surse trafic" data={data.referrers} />
           <div className="bg-card border border-edge rounded-2xl p-5 space-y-4">
@@ -279,7 +326,33 @@ export default function AdminAnalyticsPage() {
               <div className="flex justify-between"><span>Other</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_other)}</span></div>
             </div>
           </div>
+          <div className="bg-card border border-edge rounded-2xl p-5 space-y-4">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-2">📶 Conexiune</h3>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between"><span>4G/wifi</span><span className="tabular-nums font-bold text-red-400">{fmt(t.connection_4g)}</span></div>
+                <div className="flex justify-between"><span>3G</span><span className="tabular-nums font-bold text-red-400">{fmt(t.connection_3g)}</span></div>
+                <div className="flex justify-between"><span>2G</span><span className="tabular-nums font-bold text-red-400">{fmt(t.connection_2g)}</span></div>
+                <div className="flex justify-between"><span>Slow 2G</span><span className="tabular-nums font-bold text-red-400">{fmt(t['connection_slow-2g'])}</span></div>
+                <div className="flex justify-between"><span>Necunoscut</span><span className="tabular-nums font-bold text-red-400">{fmt(t.connection_unknown)}</span></div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-2">📐 Orientare + Theme</h3>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between"><span>Portrait</span><span className="tabular-nums font-bold text-red-400">{fmt(t.orientation_portrait)}</span></div>
+                <div className="flex justify-between"><span>Landscape</span><span className="tabular-nums font-bold text-red-400">{fmt(t.orientation_landscape)}</span></div>
+                <div className="flex justify-between"><span>Dark theme</span><span className="tabular-nums font-bold text-red-400">{fmt(t.scheme_dark)}</span></div>
+                <div className="flex justify-between"><span>Light theme</span><span className="tabular-nums font-bold text-red-400">{fmt(t.scheme_light)}</span></div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Errors */}
+        {data.errors && Object.keys(data.errors).length > 0 && (
+          <BreakdownList title="🐛 Erori JavaScript" data={data.errors} />
+        )}
 
         <p className="text-center text-[10px] text-dim">
           Server time: {new Date(data.serverTime).toLocaleString('ro-RO')} · Auto-refresh 5s

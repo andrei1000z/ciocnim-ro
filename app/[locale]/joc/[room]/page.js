@@ -630,6 +630,11 @@ function ArenaMaster({ room }) {
     // INCREMENT GLOBAL — called once here, guarded by rezultatRef (prevents double-call)
     incrementGlobalRef.current(amCastigat, (isProvocare && teamIdPreluat) ? teamIdPreluat : null, room, isBotMatch);
 
+    // Analytics: battle event
+    try {
+      import("@/app/components/Analytics").then(m => m.trackEvent(amCastigat ? "battle-win" : "battle-loss"));
+    } catch {}
+
     const quotes = amCastigat ? t('quotes.humility') : t('quotes.forgiveness');
     const citatAles = Array.isArray(quotes) ? quotes[Math.floor(Math.random() * quotes.length)] : quotes;
     setCitatFinal(citatAles);

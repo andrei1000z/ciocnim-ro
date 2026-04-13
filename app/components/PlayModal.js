@@ -32,6 +32,7 @@ const PlayModal = ({ isOpen, onClose, router, userSkin }) => {
         try {
           sessionStorage.setItem('room-host-token', data.hostToken || '');
         } catch {}
+        try { import("@/app/components/Analytics").then(m => m.trackEvent("room-private")); } catch {}
         onClose();
         const prefix = locale === 'ro' ? '' : `/${locale}`;
         router.push(`${prefix}/joc/privat-${data.cod}`);
