@@ -1026,7 +1026,7 @@ return redis.call('SCARD', KEYS[1])
           yesterday: { ...yesterdayDaily, dau: dauYesterday || 0 },
           wau: wau || 0,
           mau: mau || 0,
-          stickiness: (mau > 0) ? Math.round((dauToday / mau) * 100) : 0,
+          stickiness: (mau > 0 && dauToday <= mau) ? Math.round((dauToday / mau) * 100) : 0,
           topUsers,
           onlineNow: onlineNow || 0,
           serverTime: Date.now(),

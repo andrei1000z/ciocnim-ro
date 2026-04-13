@@ -269,10 +269,19 @@ export default function Analytics() {
     };
   }, []);
 
-  // JS error tracking (simple)
+  // JS error tracking — filtrat pentru noise (extensii browser, cross-origin scripts)
   useEffect(() => {
+    const NOISE_PATTERNS = [
+      /__firefox__/i,
+      /chrome-extension/i,
+      /moz-extension/i,
+      /safari-extension/i,
+      /^Script error\.?$/,
+      /ResizeObserver loop/i,
+    ];
     const onError = (e) => {
       const msg = (e.message || e.error?.message || "unknown").slice(0, 200);
+      if (NOISE_PATTERNS.some(rx => rx.test(msg))) return; // nu raportăm gunoi
       trackEvent("js-error", { error: msg });
     };
     window.addEventListener("error", onError);

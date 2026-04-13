@@ -192,6 +192,7 @@ function HomeContent() {
       const data = await res.json();
       if (data.success) {
         try { sessionStorage.setItem('room-host-token', data.isHost ? 'arena-host' : ''); } catch {}
+        try { import("../components/Analytics").then(m => m.trackEvent("room-arena")); } catch {}
         const prefix = locale === 'ro' ? '' : `/${locale}`;
         router.push(`${prefix}/joc/${data.roomId}`);
       }
@@ -207,6 +208,7 @@ function HomeContent() {
       const d = await r.json();
       if (d.success) {
         addStoredTeamId(d.teamId);
+        try { import("../components/Analytics").then(m => m.trackEvent("group-create")); } catch {}
         setLoadedTeams(prev => [...prev, { details: { id: d.teamId, nume: `GRUPUL LUI ${nume.toUpperCase().trim()}` }, top: [{ member: nume.toUpperCase().trim(), score: 0 }] }]);
         setActiveTeamIndex(loadedTeams.length);
       }

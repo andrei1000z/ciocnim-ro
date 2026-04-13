@@ -17,7 +17,8 @@ function calcRemaining() {
 }
 
 export default function SeasonCountdown() {
-  const [remaining, setRemaining] = useState(() => calcRemaining());
+  // Inițializat pe null ca să evităm hydration mismatch (Date.now() diferă între SSR și client)
+  const [remaining, setRemaining] = useState(null);
 
   useEffect(() => {
     const tick = () => setRemaining(calcRemaining());
