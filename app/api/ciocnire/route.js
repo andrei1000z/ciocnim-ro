@@ -723,14 +723,26 @@ return redis.call('SCARD', KEYS[1])
       case 'analytics-track': {
         const visitorId = sanitizeId(body.visitorId);
         if (!visitorId) return NextResponse.json({ success: true });
+
+        // Excludere: useri din EXCLUDE_NAMES (env var, comma-separated) sunt ignorați total
+        const trackedJucator = sanitizeStr(body.jucator, 30).toUpperCase();
+        const excludeNames = (process.env.EXCLUDE_NAMES || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+        if (trackedJucator && excludeNames.includes(trackedJucator)) {
+          return NextResponse.json({ success: true, excluded: true });
+        }
+
         const eventType = sanitizeStr(body.eventType, 30) || 'pageview';
         const pathname = sanitizeStr(body.pathname, 100) || '/';
         const displayMode = sanitizeStr(body.displayMode, 20) || 'browser';
         const deviceType = sanitizeStr(body.deviceType, 20) || 'unknown';
         const browser = sanitizeStr(body.browser, 30) || 'unknown';
+        const os = sanitizeStr(body.os, 20) || 'unknown';
         const referrer = sanitizeStr(body.referrer, 100) || 'direct';
+        const country = (request.headers.get('x-vercel-ip-country') || 'XX').slice(0, 4);
 
+        const now = Date.now();
         const today = new Date().toISOString().slice(0, 10);
+        const hour = new Date().toISOString().slice(0, 13).replace('T', ' '); // YYYY-MM-DD HH
         const pipe = redis.pipeline();
 
         if (eventType === 'pageview') {
@@ -738,13 +750,32 @@ return redis.call('SCARD', KEYS[1])
           pipe.hincrby('analytics:total', `display_${displayMode}`, 1);
           pipe.hincrby('analytics:total', `device_${deviceType}`, 1);
           pipe.hincrby('analytics:total', `browser_${browser}`, 1);
+          pipe.hincrby('analytics:total', `os_${os}`, 1);
           pipe.hincrby('analytics:locales', ns, 1);
           pipe.hincrby('analytics:routes', pathname, 1);
           pipe.hincrby('analytics:referrers', referrer, 1);
+          pipe.hincrby('analytics:countries', country, 1);
+          pipe.hincrby('analytics:hourly', hour, 1);
+          pipe.expire('analytics:hourly', 60 * 60 * 24 * 7);
+
           pipe.sadd(`analytics:dau:${today}`, visitorId);
           pipe.expire(`analytics:dau:${today}`, 60 * 60 * 24 * 90);
           pipe.hincrby(`analytics:daily:${today}`, 'views', 1);
           pipe.expire(`analytics:daily:${today}`, 60 * 60 * 24 * 90);
+
+          // Session tracking: HSET cu first/last seen + view count
+          const sessionKey = `analytics:session:${visitorId}`;
+          pipe.hsetnx(sessionKey, 'first', now);
+          pipe.hset(sessionKey, 'last', now);
+          pipe.hincrby(sessionKey, 'views', 1);
+          pipe.expire(sessionKey, 60 * 60 * 24 * 90);
+
+          // Top users (doar dacă jucător are nume)
+          if (trackedJucator) {
+            pipe.zincrby('analytics:top-users', 1, trackedJucator);
+            pipe.sadd(`analytics:active-users:${today}`, trackedJucator);
+            pipe.expire(`analytics:active-users:${today}`, 60 * 60 * 24 * 90);
+          }
         } else if (eventType === 'pwa-install') {
           pipe.hincrby('analytics:total', 'pwa_installs', 1);
           pipe.hincrby(`analytics:daily:${today}`, 'pwa_installs', 1);
@@ -763,24 +794,44 @@ return redis.call('SCARD', KEYS[1])
         }
         const today = new Date().toISOString().slice(0, 10);
         const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        const [total, locales, routes, referrers, todayDaily, yesterdayDaily, dauToday, dauYesterday] = await Promise.all([
+        const [
+          total, locales, routes, referrers, countries, hourly,
+          todayDaily, yesterdayDaily, dauToday, dauYesterday,
+          activeUsersToday, topUsersRaw, onlineNow,
+        ] = await Promise.all([
           redis.hgetall('analytics:total'),
           redis.hgetall('analytics:locales'),
           redis.hgetall('analytics:routes'),
           redis.hgetall('analytics:referrers'),
+          redis.hgetall('analytics:countries'),
+          redis.hgetall('analytics:hourly'),
           redis.hgetall(`analytics:daily:${today}`),
           redis.hgetall(`analytics:daily:${yesterday}`),
           redis.scard(`analytics:dau:${today}`),
           redis.scard(`analytics:dau:${yesterday}`),
+          redis.scard(`analytics:active-users:${today}`),
+          redis.zrevrange('analytics:top-users', 0, 19, 'WITHSCORES'),
+          redis.zcard(k('arena:online')),
         ]);
+        const topUsers = [];
+        if (Array.isArray(topUsersRaw)) {
+          for (let i = 0; i < topUsersRaw.length; i += 2) {
+            topUsers.push({ nume: topUsersRaw[i], views: parseInt(topUsersRaw[i + 1]) || 0 });
+          }
+        }
         return NextResponse.json({
           success: true,
           total: total || {},
           locales: locales || {},
           routes: routes || {},
           referrers: referrers || {},
-          today: { ...todayDaily, dau: dauToday || 0 },
+          countries: countries || {},
+          hourly: hourly || {},
+          today: { ...todayDaily, dau: dauToday || 0, activeUsers: activeUsersToday || 0 },
           yesterday: { ...yesterdayDaily, dau: dauYesterday || 0 },
+          topUsers,
+          onlineNow: onlineNow || 0,
+          serverTime: Date.now(),
         });
       }
 

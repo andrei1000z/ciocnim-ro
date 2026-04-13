@@ -23,6 +23,17 @@ function detectBrowser() {
   return "other";
 }
 
+function detectOS() {
+  if (typeof navigator === "undefined") return "unknown";
+  const ua = navigator.userAgent;
+  if (/Windows/.test(ua)) return "windows";
+  if (/Android/.test(ua)) return "android";
+  if (/iPhone|iPad|iPod/.test(ua)) return "ios";
+  if (/Mac/.test(ua)) return "macos";
+  if (/Linux/.test(ua)) return "linux";
+  return "other";
+}
+
 function detectDisplayMode() {
   if (typeof window === "undefined") return "browser";
   if (window.matchMedia("(display-mode: standalone)").matches) return "standalone";
@@ -71,15 +82,18 @@ export default function Analytics() {
   useEffect(() => {
     const visitorId = getVisitorId();
     const locale = pathname.match(/^\/(ro|bg|el|en)/)?.[1] || "ro";
+    const jucator = safeLS.get("c_nume") || "";
     track({
       actiune: "analytics-track",
       eventType: "pageview",
       visitorId,
       pathname,
       locale,
+      jucator,
       displayMode: detectDisplayMode(),
       deviceType: detectDevice(),
       browser: detectBrowser(),
+      os: detectOS(),
       referrer: getReferrer(),
     });
   }, [pathname]);

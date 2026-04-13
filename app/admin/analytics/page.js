@@ -69,6 +69,13 @@ export default function AdminAnalyticsPage() {
     } catch {}
   }, []);
 
+  // Auto-refresh la 5 secunde dacă autentificat
+  useEffect(() => {
+    if (!authed || !secret) return;
+    const interval = setInterval(() => loadData(secret), 5000);
+    return () => clearInterval(interval);
+  }, [authed, secret]);
+
   async function loadData(s) {
     setLoading(true);
     setError("");
@@ -150,17 +157,58 @@ export default function AdminAnalyticsPage() {
           </button>
         </header>
 
+        {/* LIVE indicator */}
+        <div className="flex items-center justify-center gap-2 text-xs">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          <span className="text-green-400 font-bold">LIVE — {fmt(data.onlineNow)} online acum · auto-refresh 5s</span>
+        </div>
+
         {/* Top stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Views totale" value={t.views} accent="red" />
-          <StatCard label="DAU azi" value={today.dau} sub={`ieri: ${fmt(yesterday.dau)}`} accent="green" />
-          <StatCard label="Views azi" value={today.views} sub={`ieri: ${fmt(yesterday.views)}`} accent="amber" />
-          <StatCard label="PWA installs" value={pwaInstalls} sub={`${pwaRatio}% deschideri PWA`} accent="blue" />
+          <StatCard label="Online ACUM" value={data.onlineNow} sub="Live (1s precision)" accent="green" />
+          <StatCard label="DAU azi" value={today.dau} sub={`ieri: ${fmt(yesterday.dau)}`} accent="amber" />
+          <StatCard label="Views azi" value={today.views} sub={`ieri: ${fmt(yesterday.views)}`} accent="red" />
+          <StatCard label="Useri activi azi" value={today.activeUsers} sub="(cu poreclă setată)" accent="blue" />
         </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="Views totale" value={t.views} accent="red" />
+          <StatCard label="PWA installs" value={pwaInstalls} sub={`${pwaRatio}% PWA opens`} accent="blue" />
+          <StatCard label="Installs azi" value={today.pwa_installs} accent="green" />
+          <StatCard label="Total useri unici" value={Object.values(data.locales || {}).reduce((a, b) => a + parseInt(b || 0), 0)} accent="amber" />
+        </div>
+
+        {/* Hourly chart */}
+        {data.hourly && Object.keys(data.hourly).length > 0 && (
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">⏰ Activitate orară (ultimele 24h)</h3>
+            <HourlyChart data={data.hourly} />
+          </div>
+        )}
+
+        {/* Top users — NOU */}
+        {data.topUsers && data.topUsers.length > 0 && (
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">👤 Top useri (după pageviews)</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {data.topUsers.map((u, i) => (
+                <div key={u.nume} className="flex items-center gap-2 px-3 py-2 bg-elevated rounded-lg">
+                  <span className="text-xs font-bold text-dim w-5">{i + 1}.</span>
+                  <span className="text-xs font-bold text-body truncate flex-1">{u.nume}</span>
+                  <span className="text-xs font-black text-red-400 tabular-nums">{fmt(u.views)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Breakdown grids */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <BreakdownList title="🌍 Locale" data={data.locales} />
+          <BreakdownList title="🌐 Țări" data={data.countries} />
           <BreakdownList title="📱 Top pagini" data={data.routes} />
           <BreakdownList title="🔗 Surse trafic" data={data.referrers} />
           <div className="bg-card border border-edge rounded-2xl p-5 space-y-4">
@@ -173,26 +221,58 @@ export default function AdminAnalyticsPage() {
               </div>
             </div>
             <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-2">🌐 Browser</h3>
+              <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-2">💻 OS</h3>
               <div className="space-y-1.5 text-xs">
-                <div className="flex justify-between"><span>Chrome</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_chrome)}</span></div>
-                <div className="flex justify-between"><span>Safari</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_safari)}</span></div>
-                <div className="flex justify-between"><span>Firefox</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_firefox)}</span></div>
-                <div className="flex justify-between"><span>Edge</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_edge)}</span></div>
-                <div className="flex justify-between"><span>Opera</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_opera)}</span></div>
-                <div className="flex justify-between"><span>Other</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_other)}</span></div>
+                <div className="flex justify-between"><span>Android</span><span className="tabular-nums font-bold text-red-400">{fmt(t.os_android)}</span></div>
+                <div className="flex justify-between"><span>iOS</span><span className="tabular-nums font-bold text-red-400">{fmt(t.os_ios)}</span></div>
+                <div className="flex justify-between"><span>Windows</span><span className="tabular-nums font-bold text-red-400">{fmt(t.os_windows)}</span></div>
+                <div className="flex justify-between"><span>macOS</span><span className="tabular-nums font-bold text-red-400">{fmt(t.os_macos)}</span></div>
+                <div className="flex justify-between"><span>Linux</span><span className="tabular-nums font-bold text-red-400">{fmt(t.os_linux)}</span></div>
               </div>
+            </div>
+          </div>
+          <div className="bg-card border border-edge rounded-2xl p-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-2">🌐 Browser</h3>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between"><span>Chrome</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_chrome)}</span></div>
+              <div className="flex justify-between"><span>Safari</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_safari)}</span></div>
+              <div className="flex justify-between"><span>Firefox</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_firefox)}</span></div>
+              <div className="flex justify-between"><span>Edge</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_edge)}</span></div>
+              <div className="flex justify-between"><span>Opera</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_opera)}</span></div>
+              <div className="flex justify-between"><span>Other</span><span className="tabular-nums font-bold text-red-400">{fmt(t.browser_other)}</span></div>
             </div>
           </div>
         </div>
 
-        <button
-          onClick={() => loadData(secret)}
-          className="w-full bg-elevated hover:bg-elevated-hover border border-edge text-body font-bold py-3 rounded-xl transition-all"
-        >
-          🔄 Refresh
-        </button>
+        <p className="text-center text-[10px] text-dim">
+          Server time: {new Date(data.serverTime).toLocaleString('ro-RO')} · Auto-refresh 5s
+        </p>
       </div>
+    </div>
+  );
+}
+
+function HourlyChart({ data }) {
+  const entries = Object.entries(data)
+    .map(([k, v]) => [k, parseInt(v) || 0])
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-24);
+  if (entries.length === 0) return null;
+  const max = Math.max(...entries.map(e => e[1]), 1);
+  return (
+    <div className="flex items-end gap-1 h-32">
+      {entries.map(([hour, val]) => (
+        <div key={hour} className="flex-1 flex flex-col items-center justify-end gap-1 group relative">
+          <div
+            className="w-full bg-gradient-to-t from-red-700 to-red-500 rounded-t hover:from-red-600 hover:to-red-400 transition-all"
+            style={{ height: `${(val / max) * 100}%`, minHeight: val > 0 ? '2px' : '0' }}
+          />
+          <span className="text-[8px] text-dim opacity-50">{hour.slice(11, 13)}</span>
+          <div className="absolute -top-8 hidden group-hover:flex bg-elevated border border-edge px-2 py-1 rounded text-[10px] font-bold whitespace-nowrap">
+            {val} views
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
