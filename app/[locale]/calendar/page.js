@@ -40,12 +40,20 @@ const datePaste = [
 
 const monthMap = { 'Ianuarie': 0, 'Februarie': 1, 'Martie': 2, 'Aprilie': 3, 'Mai': 4, 'Iunie': 5, 'Iulie': 6, 'August': 7, 'Septembrie': 8, 'Octombrie': 9, 'Noiembrie': 10, 'Decembrie': 11 };
 
+// Hardcoded month names — determinist server + client (evită ICU inconsistencies pe Node vs browser)
+const MONTH_NAMES = {
+  ro: ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  bg: ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'],
+  el: ['Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου', 'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'],
+};
+
 function localizeDate(roDateStr, locale) {
   const parts = roDateStr.split(' ');
   const day = parseInt(parts[0]);
   const month = monthMap[parts[1]];
-  const date = new Date(2026, month, day);
-  return date.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
+  const monthName = (MONTH_NAMES[locale] || MONTH_NAMES.ro)[month] || parts[1];
+  return `${day} ${monthName}`;
 }
 
 const INITIAL_SHOW = 5;

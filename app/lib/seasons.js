@@ -1,5 +1,19 @@
 import { getOrthodoxEaster } from "./easterUtils";
 
+// Determinist date formatter — hardcoded month names per locale.
+// Evită inconsistențe ICU între Node (SSR) și browser (hydration).
+const SHORT_MONTHS = {
+  'ro-RO': ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec'],
+  'bg-BG': ['яну', 'фев', 'мар', 'апр', 'май', 'юни', 'юли', 'авг', 'сеп', 'окт', 'ное', 'дек'],
+  'el-GR': ['Ιαν', 'Φεβ', 'Μαρ', 'Απρ', 'Μαΐ', 'Ιουν', 'Ιουλ', 'Αυγ', 'Σεπ', 'Οκτ', 'Νοε', 'Δεκ'],
+  'en-US': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+};
+
+function formatShortDate(d, localeId) {
+  const months = SHORT_MONTHS[localeId] || SHORT_MONTHS['en-US'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+
 const I18N = {
   ro: {
     name: (year) => `Paște ${year}`,
@@ -47,8 +61,7 @@ export function getCurrentSeason(locale = "ro") {
     const nextStart = new Date(nextEaster);
     nextStart.setDate(nextStart.getDate() - 14);
 
-    const formatDate = (d) =>
-      d.toLocaleDateString(t.dateLocale, { day: "numeric", month: "short" });
+    const formatDate = (d) => formatShortDate(d, t.dateLocale);
 
     return {
       name: t.name(nextYear),

@@ -301,7 +301,7 @@ function HomeContent() {
             </span>
             <span className="tabular-nums">{onlineCount || 1} online</span>
           </div>
-          {userStats.currentStreak > 0 && (
+          {isHydrated && userStats.currentStreak > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
