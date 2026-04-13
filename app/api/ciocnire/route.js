@@ -71,6 +71,10 @@ export async function POST(request) {
 
       case 'increment-global': {
         if (!roomId) return NextResponse.json({ success: false, error: "Room lipsă" }, { status: 400 });
+        // Intersezon flag: bot de intersezon, nu contează la clasament sau stats
+        if (body.intersezon === true) {
+          return NextResponse.json({ success: true, total: parseInt(await redis.get(k('global_ciocniri_total'))) || 0, intersezon: true });
+        }
         // Dedupe pentru counter-ul global se face mai jos prin counted:{roomId}:{battleTs}.
         // Per-user rate limit agresiv (2s) bloca rounduri rapide consecutive → eliminat.
 
@@ -1107,6 +1111,99 @@ return redis.call('SCARD', KEYS[1])
           devices: devices || {},
           days: days || {},
           gameStats: gameStats || {},
+        });
+      }
+
+      // ── Intersezon ───────────────────────────────────────────────────────────
+
+      case 'newsletter-signup': {
+        const email = sanitizeStr(body.email, 100).toLowerCase().trim();
+        // Simple email validation
+        if (!email || !/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(email)) {
+          return NextResponse.json({ success: false, error: "Email invalid" }, { status: 400 });
+        }
+        const rlIp = getClientIp(request);
+        const rlKey = k(`ratelimit:newsletter:${rlIp}`);
+        const rl = await redis.set(rlKey, '1', 'EX', 60, 'NX');
+        if (!rl) return NextResponse.json({ success: false, error: "Așteaptă puțin" }, { status: 429 });
+
+        const added = await redis.sadd('newsletter:subscribers', email);
+        if (added === 1) {
+          await redis.hincrby('newsletter:meta', 'total', 1);
+          await redis.hset(`newsletter:details:${email}`, { joined: Date.now(), locale: ns });
+        }
+        return NextResponse.json({ success: true, alreadySubscribed: added === 0 });
+      }
+
+      case 'contact-submit': {
+        const rlIp = getClientIp(request);
+        const rlKey = k(`ratelimit:contact:${rlIp}`);
+        const rl = await redis.set(rlKey, '1', 'EX', 120, 'NX');
+        if (!rl) return NextResponse.json({ success: false, error: "Așteaptă 2 minute între mesaje" }, { status: 429 });
+
+        const topic = sanitizeStr(body.topic, 30) || 'other';
+        const message = sanitizeStr(body.message, 2000);
+        const replyEmail = sanitizeStr(body.email, 100).toLowerCase().trim();
+        if (!message || message.length < 5) {
+          return NextResponse.json({ success: false, error: "Mesaj prea scurt" }, { status: 400 });
+        }
+        const allowedTopics = ['bug', 'suggestion', 'compliment', 'other'];
+        const finalTopic = allowedTopics.includes(topic) ? topic : 'other';
+        const entry = JSON.stringify({
+          t: Date.now(),
+          topic: finalTopic,
+          message,
+          email: replyEmail || null,
+          ip: rlIp,
+          ua: (request.headers.get('user-agent') || '').slice(0, 200),
+          locale: ns,
+        });
+        await redis.lpush('contact:messages', entry);
+        await redis.ltrim('contact:messages', 0, 499); // keep last 500
+        await redis.hincrby('contact:meta', 'total', 1);
+        await redis.hincrby('contact:meta', `topic_${finalTopic}`, 1);
+        return NextResponse.json({ success: true });
+      }
+
+      case 'reserve-name-2027': {
+        const name = sanitizeStr(body.name, 30).toUpperCase();
+        if (!name || name.length < 2) return NextResponse.json({ success: false, error: "Nume invalid" }, { status: 400 });
+        const numeValidation = valideazaNume(name);
+        if (!numeValidation.valid) return NextResponse.json({ success: false, error: numeValidation.error }, { status: 400 });
+        if (NUME_INTERZISE.includes(name)) return NextResponse.json({ success: false, error: "Nume rezervat sistem" }, { status: 400 });
+        const rlIp = getClientIp(request);
+        const rlKey = k(`ratelimit:reserve27:${rlIp}`);
+        const rl = await redis.set(rlKey, '1', 'EX', 30, 'NX');
+        if (!rl) return NextResponse.json({ success: false, error: "Așteaptă puțin" }, { status: 429 });
+
+        const key = k(`nume_rezervat_2027:${name}`);
+        const reserved = await redis.set(key, JSON.stringify({ t: Date.now(), ip: rlIp }), 'EX', 60 * 60 * 24 * 400, 'NX');
+        if (!reserved) return NextResponse.json({ success: false, error: "Nume deja rezervat pentru 2027" }, { status: 409 });
+        await redis.sadd('reservations:2027', name);
+        return NextResponse.json({ success: true });
+      }
+
+      case 'contact-list': {
+        // Admin only — list contact messages
+        const secret = sanitizeStr(body.secret, 100);
+        const expectedBuf = Buffer.from(process.env.ADMIN_SECRET || '');
+        const secretBuf = Buffer.from(secret || '');
+        if (!process.env.ADMIN_SECRET || secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
+          return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
+        const [rawList, meta, newsletterCount, reservations27] = await Promise.all([
+          redis.lrange('contact:messages', 0, 49),
+          redis.hgetall('contact:meta'),
+          redis.scard('newsletter:subscribers'),
+          redis.scard('reservations:2027'),
+        ]);
+        const messages = rawList.map(m => { try { return JSON.parse(m); } catch { return null; }}).filter(Boolean);
+        return NextResponse.json({
+          success: true,
+          messages,
+          meta: meta || {},
+          newsletterCount: newsletterCount || 0,
+          reservations2027Count: reservations27 || 0,
         });
       }
 

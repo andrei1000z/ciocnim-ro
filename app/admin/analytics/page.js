@@ -64,6 +64,19 @@ export default function AdminAnalyticsPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const [userLoading, setUserLoading] = useState(false);
+  const [contactData, setContactData] = useState(null);
+
+  async function loadContactData() {
+    try {
+      const res = await fetch("/api/ciocnire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actiune: "contact-list", secret, locale: "ro" }),
+      });
+      const json = await res.json();
+      if (json.success) setContactData(json);
+    } catch {}
+  }
 
   async function loadUserDetails(userName) {
     setSelectedUser(userName);
@@ -97,6 +110,14 @@ export default function AdminAnalyticsPage() {
     if (!authed || !secret) return;
     const interval = setInterval(() => loadData(secret), 5000);
     return () => clearInterval(interval);
+  }, [authed, secret]);
+
+  // Load contact data o dată după auth
+  useEffect(() => {
+    if (!authed || !secret) return;
+    loadContactData();
+    const i = setInterval(loadContactData, 15000);
+    return () => clearInterval(i);
   }, [authed, secret]);
 
   async function loadData(s) {
@@ -255,6 +276,43 @@ export default function AdminAnalyticsPage() {
 
         {/* UTM generator */}
         <UTMGenerator />
+
+        {/* Contact + Newsletter + Reservations */}
+        {contactData && (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <StatCard label="📬 Newsletter" value={contactData.newsletterCount} sub="abonați" accent="amber" />
+              <StatCard label="🔒 Rezervări 2027" value={contactData.reservations2027Count} sub="nume rezervate" accent="blue" />
+              <StatCard label="💬 Contact total" value={contactData.meta?.total} sub="mesaje primite" accent="green" />
+              <StatCard label="🐛 Bug-uri raportate" value={contactData.meta?.topic_bug} sub="din contact" accent="red" />
+            </div>
+
+            {contactData.messages && contactData.messages.length > 0 && (
+              <div className="bg-card border border-edge rounded-2xl p-5">
+                <h3 className="text-sm font-black uppercase tracking-wider text-heading mb-3">💬 Ultimele mesaje contact ({contactData.messages.length})</h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {contactData.messages.map((m, i) => {
+                    const when = new Date(m.t).toLocaleString('ro-RO');
+                    const topicIcon = m.topic === 'bug' ? '🐛' : m.topic === 'suggestion' ? '💡' : m.topic === 'compliment' ? '❤️' : '💭';
+                    const topicColor = m.topic === 'bug' ? 'text-red-400' : m.topic === 'suggestion' ? 'text-amber-400' : m.topic === 'compliment' ? 'text-green-400' : 'text-blue-400';
+                    return (
+                      <div key={i} className="p-3 bg-elevated rounded-xl border border-edge">
+                        <div className="flex items-center gap-2 text-[10px] mb-2">
+                          <span className="text-base">{topicIcon}</span>
+                          <span className={`font-bold uppercase ${topicColor}`}>{m.topic}</span>
+                          <span className="text-dim">· {when}</span>
+                          <span className="text-dim">· {m.locale?.toUpperCase()}</span>
+                          {m.email && <a href={`mailto:${m.email}`} className="ml-auto text-red-400 hover:text-red-300">{m.email}</a>}
+                        </div>
+                        <p className="text-xs text-body whitespace-pre-wrap break-words">{m.message}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Top inviters */}
         {data.topInviters && data.topInviters.length > 0 && (
