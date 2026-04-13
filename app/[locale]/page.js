@@ -74,6 +74,15 @@ function HomeContent() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  // Auto-redirect la /intersezon după 15 aprilie 2026 00:00 RO
+  useEffect(() => {
+    const SEASON_END = new Date("2026-04-15T00:00:00+03:00").getTime();
+    if (Date.now() >= SEASON_END) {
+      const pfx = locale === 'ro' ? '' : `/${locale}`;
+      router.replace(`${pfx}/intersezon`);
+    }
+  }, [locale, router]);
+
   useEffect(() => {
     if (searchParams.get("error") === "ocupata") {
       setToastMsg(t('notifications.roomOccupied'));

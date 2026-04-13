@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-// 14 Aprilie 2026, 00:00:00 ora României (UTC+3 EEST)
-const END_TS = new Date("2026-04-14T00:00:00+03:00").getTime();
+// 15 Aprilie 2026, 00:00:00 ora României (UTC+3 EEST)
+const END_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
 
 function calcRemaining() {
   const now = Date.now();

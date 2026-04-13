@@ -8,8 +8,8 @@ import PageHeader from "../../components/PageHeader";
 import { getOrthodoxEaster } from "../../lib/easterUtils";
 import { useGlobalStats } from "../../components/ClientWrapper";
 
-// Data sfârșit sezon 2026 — 14 aprilie 2026 00:00 RO (UTC+3)
-const SEASON_END_TS = new Date("2026-04-14T00:00:00+03:00").getTime();
+// Data sfârșit sezon 2026 — 15 aprilie 2026 00:00 RO (UTC+3)
+const SEASON_END_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
 // Prima săptămână post-sezon arată "Sezonul s-a încheiat"
 const TRANSITION_END_TS = SEASON_END_TS + 7 * 24 * 3600 * 1000;
 
