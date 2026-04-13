@@ -205,8 +205,8 @@ export default function IntersezonPage() {
           viewport={{ once: true }}
           className="bg-card border border-edge rounded-3xl p-6 text-center"
         >
-          <h2 className="text-lg md:text-xl font-black text-heading mb-2">🤖 La misto, cu un bot</h2>
-          <p className="text-xs text-dim mb-4">Intra, apasă, ciocnește — fără clasament, fără stats, doar pentru fun.</p>
+          <h2 className="text-lg md:text-xl font-black text-heading mb-2">🤖 Joacă un meci rapid cu un bot</h2>
+          <p className="text-xs text-dim mb-4">Intră, apasă, ciocnește — fără clasament, fără stats, doar pentru distracție.</p>
           <button
             onClick={handlePlayBot}
             className="w-full py-4 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-lg rounded-2xl border-2 border-red-500/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"

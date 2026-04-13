@@ -9,7 +9,8 @@ export default function SiteFooter() {
   const pathname = usePathname();
 
   const isGame = pathname.includes('/joc/');
-  if (isGame) return null;
+  const isIntersezon = pathname.includes('/intersezon');
+  if (isGame || isIntersezon) return null;
 
   const isHome = /^\/(ro|en|bg|el)?$/.test(pathname);
 
