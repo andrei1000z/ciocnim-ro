@@ -162,6 +162,7 @@ async function track(payload) {
 
 // Export pentru a putea trimite events din alte componente
 export function trackEvent(eventType, extra = {}) {
+  if (typeof window === "undefined") return;
   const visitorId = getVisitorId();
   const jucator = safeLS.get("c_nume") || "";
   track({
@@ -174,9 +175,42 @@ export function trackEvent(eventType, extra = {}) {
   });
 }
 
+// Shorthand pentru click events
+export function trackCTA(ctaId) {
+  trackEvent("cta-click", { ctaId });
+}
+
 export default function Analytics() {
   const pathname = usePathname();
   const pageEnterTimeRef = useRef(Date.now());
+  const scrollMarksRef = useRef(new Set());
+
+  // First visit detection — o singură dată per visitor ever
+  useEffect(() => {
+    const flagKey = "c_first_visit_tracked";
+    if (safeLS.get(flagKey)) return;
+    safeLS.set(flagKey, "1");
+    trackEvent("first-visit");
+  }, []);
+
+  // Scroll depth tracking (25/50/75/100%) — per pagină
+  useEffect(() => {
+    scrollMarksRef.current = new Set();
+    const onScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight <= 0) return;
+      const pct = Math.round((scrollTop / docHeight) * 100);
+      [25, 50, 75, 100].forEach((mark) => {
+        if (pct >= mark && !scrollMarksRef.current.has(mark)) {
+          scrollMarksRef.current.add(mark);
+          trackEvent("scroll-depth", { depth: String(mark) });
+        }
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname]);
 
   // Pageview track + capture timp pe pagină (când plecăm)
   useEffect(() => {

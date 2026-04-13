@@ -396,6 +396,16 @@ export default function AdminAnalyticsPage() {
           </div>
         )}
 
+        {/* Scroll depth + CTA clicks — insights pentru îmbunătățire */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {data.scrollDepth && Object.keys(data.scrollDepth).length > 0 && (
+            <BreakdownList title="📜 Scroll depth (% pagină citită)" data={data.scrollDepth} />
+          )}
+          {data.ctaClicks && Object.keys(data.ctaClicks).length > 0 && (
+            <BreakdownList title="🎯 CTA clicks" data={data.ctaClicks} />
+          )}
+        </div>
+
         {/* Errors */}
         {data.errors && Object.keys(data.errors).length > 0 && (
           <BreakdownList title="🐛 Erori JavaScript" data={data.errors} />

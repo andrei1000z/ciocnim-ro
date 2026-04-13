@@ -320,6 +320,7 @@ function HomeContent() {
               if (!ok) { setToastMsg(t('notifications.errorRetry')); return; }
             }
             setIsPlayModalOpen(true);
+            try { import("../components/Analytics").then(m => m.trackCTA("play-main")); } catch {}
           }}
           className="w-full py-5 md:py-6 rounded-3xl bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-2xl border border-red-600 shadow-2xl shadow-red-900/40 transition-all disabled:opacity-60 flex items-center justify-center gap-3 active:scale-[0.97]"
         >

@@ -907,6 +907,16 @@ return redis.call('SCARD', KEYS[1])
             pipe.hincrby('analytics:errors', errorMsg, 1);
             pipe.expire('analytics:errors', 60 * 60 * 24 * 30);
           }
+        } else if (eventType === 'first-visit') {
+          pipe.hincrby('analytics:total', 'first_visits', 1);
+          pipe.hincrby(`analytics:daily:${today}`, 'first_visits', 1);
+          pipe.expire(`analytics:daily:${today}`, 60 * 60 * 24 * 90);
+        } else if (eventType === 'scroll-depth') {
+          const depth = sanitizeStr(body.depth, 10) || '0';
+          pipe.hincrby('analytics:scroll-depth', depth, 1);
+        } else if (eventType === 'cta-click') {
+          const ctaId = sanitizeStr(body.ctaId, 50) || 'unknown';
+          pipe.hincrby('analytics:cta-clicks', ctaId, 1);
         } else if (['battle-start', 'battle-win', 'battle-loss', 'room-private', 'room-arena', 'group-create', 'group-join', 'invite-sent', 'achievement-unlocked'].includes(eventType)) {
           pipe.hincrby('analytics:events-total', eventType, 1);
           pipe.hincrby(`analytics:events-daily:${today}`, eventType, 1);
@@ -942,6 +952,7 @@ return redis.call('SCARD', KEYS[1])
           languages, viewports, screens, hourly, perf, errors,
           eventsTotal, eventsToday,
           utmSource, utmMedium, utmCampaign, utmContent, utmTerm, landingPages,
+          scrollDepth, ctaClicks,
           todayDaily, yesterdayDaily,
           dauToday, dauYesterday, wau, mau,
           activeUsersToday, topUsersRaw, onlineNow, eventsStream,
@@ -970,6 +981,8 @@ return redis.call('SCARD', KEYS[1])
           redis.hgetall('analytics:utm-content'),
           redis.hgetall('analytics:utm-term'),
           redis.hgetall('analytics:landing-pages'),
+          redis.hgetall('analytics:scroll-depth'),
+          redis.hgetall('analytics:cta-clicks'),
           redis.hgetall(`analytics:daily:${today}`),
           redis.hgetall(`analytics:daily:${yesterday}`),
           redis.scard(`analytics:dau:${today}`),
@@ -1011,6 +1024,8 @@ return redis.call('SCARD', KEYS[1])
           utmContent: utmContent || {},
           utmTerm: utmTerm || {},
           landingPages: landingPages || {},
+          scrollDepth: scrollDepth || {},
+          ctaClicks: ctaClicks || {},
           countries: countries || {},
           cities: cities || {},
           regions: regions || {},
