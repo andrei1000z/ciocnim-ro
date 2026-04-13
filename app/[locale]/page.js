@@ -298,7 +298,9 @@ function HomeContent() {
           </div>
         </motion.div>
 
-        <SeasonCountdown />
+        <div className="mt-4 flex justify-center">
+          <SeasonCountdown />
+        </div>
       </motion.div>
 
       {/* ═══ CTA PRINCIPAL — UN SINGUR BUTON ═══ */}
