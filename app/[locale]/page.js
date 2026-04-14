@@ -13,6 +13,7 @@ import { safeLS, safeCopy } from "../lib/utils";
 import { apiPost } from "../lib/api";
 import SeasonCountdown from "../components/SeasonCountdown";
 import LiveFeed from "../components/LiveFeed";
+import ContactForm from "../components/ContactForm";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
 import { localeConfig } from "../i18n/config";
@@ -543,6 +544,8 @@ function HomeContent() {
           ))}
         </div>
       </motion.div>
+
+      <ContactForm />
 
       <PlayModal isOpen={isPlayModalOpen} onClose={() => setIsPlayModalOpen(false)} router={router} userSkin={userStats.skin || "red"} />
 

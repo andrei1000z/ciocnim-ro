@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import LocaleLink from "../../components/LocaleLink";
 import PageHeader from "../../components/PageHeader";
+import ContactForm from "../../components/ContactForm";
 import { getOrthodoxEaster } from "../../lib/easterUtils";
 import { useGlobalStats } from "../../components/ClientWrapper";
 
@@ -45,10 +46,6 @@ export default function IntersezonPage() {
   const [reserveStatus, setReserveStatus] = useState("");
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState("");
-  const [contactTopic, setContactTopic] = useState("bug");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
-  const [contactStatus, setContactStatus] = useState("");
 
   // Hydration-safe init
   useEffect(() => {
@@ -110,37 +107,6 @@ export default function IntersezonPage() {
       }
     } catch {
       setNewsletterStatus("❌ Eroare rețea");
-    }
-  };
-
-  const handleContact = async () => {
-    if (!contactMessage.trim() || contactMessage.trim().length < 5) {
-      setContactStatus("❌ Mesaj prea scurt");
-      return;
-    }
-    setContactStatus("...");
-    try {
-      const res = await fetch("/api/ciocnire", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          actiune: "contact-submit",
-          topic: contactTopic,
-          message: contactMessage.trim(),
-          email: contactEmail.trim(),
-          locale: "ro",
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setContactStatus("✅ Mesaj trimis! Mulțumesc.");
-        setContactMessage("");
-        setContactEmail("");
-      } else {
-        setContactStatus("❌ " + (data.error || "Eroare"));
-      }
-    } catch {
-      setContactStatus("❌ Eroare rețea");
     }
   };
 
@@ -331,65 +297,8 @@ export default function IntersezonPage() {
           {newsletterStatus && <p className="text-xs mt-2 text-center font-bold">{newsletterStatus}</p>}
         </motion.section>
 
-        {/* CONTACT */}
-        <motion.section
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-card border border-edge rounded-3xl p-6"
-        >
-          <h2 className="text-lg font-black text-heading mb-1">💬 Spune-mi ce crezi</h2>
-          <p className="text-xs text-dim mb-4">Bug, idee, compliment — orice. Citesc tot.</p>
-
-          <div className="flex flex-wrap gap-2 mb-3">
-            {[
-              { key: "bug", label: "🐛 Bug", color: "red" },
-              { key: "suggestion", label: "💡 Sugestie", color: "amber" },
-              { key: "compliment", label: "❤️ Compliment", color: "green" },
-              { key: "other", label: "💭 Altceva", color: "blue" },
-            ].map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setContactTopic(t.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
-                  contactTopic === t.key
-                    ? "bg-red-800 text-white border border-red-600"
-                    : "bg-elevated text-dim border border-edge hover:text-body"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          <textarea
-            value={contactMessage}
-            onChange={(e) => { setContactMessage(e.target.value); setContactStatus(""); }}
-            placeholder="Scrie aici..."
-            rows={4}
-            maxLength={2000}
-            className="w-full px-4 py-3 bg-elevated border border-edge-strong rounded-xl text-body outline-none focus:border-red-700 text-sm mb-2 resize-y"
-          />
-          <input
-            type="email"
-            value={contactEmail}
-            onChange={(e) => setContactEmail(e.target.value)}
-            placeholder="Email (opțional — doar dacă vrei să-ți răspund)"
-            autoComplete="email"
-            className="w-full px-4 py-3 bg-elevated border border-edge-strong rounded-xl text-body outline-none focus:border-red-700 text-sm mb-3"
-          />
-          <button
-            onClick={handleContact}
-            className="w-full py-3 bg-red-800 hover:bg-red-700 text-white rounded-xl font-black text-sm transition-all active:scale-95"
-          >
-            📨 Trimite
-          </button>
-          {contactStatus && <p className="text-xs mt-2 text-center font-bold">{contactStatus}</p>}
-
-          <p className="text-[11px] text-muted mt-4 text-center">
-            Sau direct la <a href="mailto:ciocnim@mail.com" className="text-red-400 hover:text-red-300 transition-colors">ciocnim@mail.com</a>
-          </p>
-        </motion.section>
+        {/* CONTACT — reutilizat component */}
+        <ContactForm />
 
         {/* COPYRIGHT */}
         <footer className="pt-6 border-t border-edge text-center">
