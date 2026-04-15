@@ -143,7 +143,7 @@ export default function ClasamentPage() {
             {season.isActive && !isIntersezon ? `🔴 ${t('content.clasament.season')}` : `📅 ${t('content.clasament.season')}`}
           </p>
           <p className="text-lg font-black text-heading">{season.name}</p>
-          <p className="text-xs text-dim mt-0.5">{season.label}</p>
+          {!isIntersezon && <p className="text-xs text-dim mt-0.5">{season.label}</p>}
         </motion.div>
 
         {/* My rank banner — în intersezon ascuns pentru cei care nu sunt în top */}
