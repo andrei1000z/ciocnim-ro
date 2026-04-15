@@ -20,7 +20,7 @@ function Ou({ skin = "red", spart = false }) {
   return (
     <div
       className={`relative transition-all duration-500 flex-shrink-0 ${!spart ? "animate-float-v9" : "scale-[0.85] opacity-70 rotate-6"}`}
-      style={{ width: "clamp(120px, 32vw, 200px)", height: "auto", aspectRatio: "1 / 1.35" }}
+      style={{ width: "clamp(80px, 18vw, 130px)", height: "auto", aspectRatio: "1 / 1.35" }}
     >
       {!spart && (
         <div
@@ -83,11 +83,11 @@ export default function IntersezonBotGame() {
   const playerSpart = phase === "done" && winner === "bot";
 
   return (
-    <main className="min-h-[100dvh] w-full bg-main text-body flex flex-col relative overflow-hidden">
+    <main className="h-[100dvh] w-full bg-main text-body flex flex-col relative overflow-hidden">
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] bg-amber-900/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 flex items-center justify-between px-4 py-4">
+      <div className="relative z-10 flex items-center justify-between px-4 py-2">
         <button
           onClick={() => router.push("/")}
           className="text-sm text-dim hover:text-body font-bold transition-colors"
@@ -98,8 +98,8 @@ export default function IntersezonBotGame() {
         <div className="w-12" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4 relative z-10">
-        <div className="flex flex-col items-center gap-1">
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 px-4 relative z-10">
+        <div className="flex flex-col items-center gap-0.5">
           <p className="text-[10px] text-dim font-black uppercase tracking-widest">Bot</p>
           <motion.div
             animate={
@@ -113,7 +113,7 @@ export default function IntersezonBotGame() {
           </motion.div>
         </div>
 
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-0.5">
           <motion.div
             animate={
               phase === "striking"
@@ -124,11 +124,11 @@ export default function IntersezonBotGame() {
           >
             <Ou skin="red" spart={playerSpart} />
           </motion.div>
-          <p className="text-[10px] text-dim font-black uppercase tracking-widest mt-1">Tu</p>
+          <p className="text-[10px] text-dim font-black uppercase tracking-widest">Tu</p>
         </div>
       </div>
 
-      <div className="relative z-10 p-4 pb-8 max-w-md mx-auto w-full">
+      <div className="relative z-10 px-4 pb-4 max-w-md mx-auto w-full">
         <AnimatePresence mode="wait">
           {phase !== "done" ? (
             <motion.button
@@ -138,39 +138,38 @@ export default function IntersezonBotGame() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="w-full py-5 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 disabled:opacity-50 text-white font-black text-xl rounded-2xl border-2 border-red-500/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
+              className="w-full py-4 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 disabled:opacity-50 text-white font-black text-lg rounded-2xl border-2 border-red-500/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
             >
               🥚 CIOCNEȘTE
             </motion.button>
           ) : (
             <motion.div
               key="done"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="space-y-3"
+              className="space-y-2"
             >
               <div
-                className={`text-center rounded-2xl p-5 border-2 ${
+                className={`text-center rounded-2xl p-3 border-2 ${
                   winner === "player"
                     ? "bg-gradient-to-br from-green-900/40 to-amber-900/30 border-amber-500/60"
                     : "bg-gradient-to-br from-red-900/40 to-zinc-900/30 border-red-700/60"
                 }`}
               >
-                <p className="text-4xl mb-2">{winner === "player" ? "🏆" : "💥"}</p>
-                <p className="text-2xl font-black text-heading">
-                  {winner === "player" ? "Victorie!" : "Ai pierdut"}
+                <p className="text-xl font-black text-heading">
+                  {winner === "player" ? "🏆 Victorie!" : "💥 Ai pierdut"}
                 </p>
               </div>
               <button
                 onClick={reset}
-                className="w-full py-4 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-lg rounded-2xl border-2 border-red-500/60 transition-all active:scale-95"
+                className="w-full py-3 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-base rounded-2xl border-2 border-red-500/60 transition-all active:scale-95"
               >
                 🔄 Încă o dată
               </button>
               <button
                 onClick={() => router.push("/")}
-                className="w-full py-3 bg-elevated hover:bg-elevated-hover text-dim hover:text-body font-bold rounded-2xl border border-edge transition-all active:scale-95"
+                className="w-full py-2.5 bg-elevated hover:bg-elevated-hover text-dim hover:text-body font-bold text-sm rounded-2xl border border-edge transition-all active:scale-95"
               >
                 Înapoi acasă
               </button>
