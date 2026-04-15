@@ -52,7 +52,7 @@ export default function IntersezonContent() {
   }, []);
 
   const handlePlayBot = () => {
-    const code = Math.floor(100 + Math.random() * 900);
+    const code = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
     router.push(`/joc/${code}`);
   };
 
