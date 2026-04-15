@@ -1209,9 +1209,9 @@ function ArenaFallback() {
 
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
-  const [isIntersezon, setIsIntersezon] = useState(false);
-  useEffect(() => { setIsIntersezon(Date.now() >= SEASON_END_2026_TS); }, []);
-  if (isIntersezon) return <IntersezonBotGame />;
+  // Intersezon: calculat direct (Date.now() e > SEASON_END atât pe SSR cât și pe client),
+  // fără useState/useEffect → ArenaMaster nu se montează deloc, doar IntersezonBotGame.
+  if (Date.now() >= SEASON_END_2026_TS) return <IntersezonBotGame />;
   return (
     <main className="game-arena min-h-[100dvh] w-full bg-main text-body flex flex-col items-center justify-start md:justify-center relative pattern-tradition" style={{ overflowX: 'clip' }}>
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />

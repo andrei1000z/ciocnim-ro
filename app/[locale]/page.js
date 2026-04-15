@@ -77,10 +77,7 @@ function HomeContent() {
   }, []);
 
   // Intersezon mode: după 15 aprilie 2026 00:00 RO, homepage devine intersezon.
-  const [isIntersezon, setIsIntersezon] = useState(false);
-  useEffect(() => {
-    setIsIntersezon(Date.now() >= SEASON_END_2026_TS);
-  }, []);
+  const isIntersezon = Date.now() >= SEASON_END_2026_TS;
 
   useEffect(() => {
     if (searchParams.get("error") === "ocupata") {
