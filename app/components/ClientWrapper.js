@@ -220,6 +220,12 @@ export default function ClientWrapper({ children }) {
   // Override-urile pentru wsPort/wsHost se aplică DOAR dacă sunt setate explicit prin env
   // (ex: soketi self-hosted pe dev).
   useEffect(() => {
+    // Intersezon: fără Pusher/WebSocket. Site-ul e "închis", nu e nevoie de realtime.
+    const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
+    if (Date.now() >= SEASON_END_2026_TS) {
+      setConnectionState('disconnected');
+      return;
+    }
     const forceTLS = process.env.NEXT_PUBLIC_PUSHER_TLS !== 'false';
     const customHost = process.env.NEXT_PUBLIC_PUSHER_HOST;
     const customPort = process.env.NEXT_PUBLIC_PUSHER_PORT;
@@ -461,6 +467,9 @@ export default function ClientWrapper({ children }) {
   // HEARTBEAT: ping la fiecare 120s pentru a număra utilizatorii activi
   useEffect(() => {
     if (!isHydrated) return;
+    // Intersezon: fără heartbeat, site-ul e închis
+    const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
+    if (Date.now() >= SEASON_END_2026_TS) return;
     if (!visitorIdRef.current) {
       let vid = safeLS.get('c_visitorId');
       if (!vid) {

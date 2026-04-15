@@ -14,6 +14,9 @@ const fireConfetti = async (opts) => {
 import { motion, AnimatePresence } from "framer-motion";
 import { safeCopy } from "../../../lib/utils";
 import { playCrack, playVictory, playDefeat, isSoundEnabled, toggleSound } from "../../../lib/sounds";
+import IntersezonBotGame from "../../../components/IntersezonBotGame";
+
+const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
 
 // Quotes (CITATE_IERTARE / CITATE_SMERENIE) now loaded from dictionary via t('quotes.forgiveness') / t('quotes.humility')
 
@@ -1206,6 +1209,9 @@ function ArenaFallback() {
 
 export default function PaginaJoc({ params }) {
   const resolvedParams = React.use(params);
+  const [isIntersezon, setIsIntersezon] = useState(false);
+  useEffect(() => { setIsIntersezon(Date.now() >= SEASON_END_2026_TS); }, []);
+  if (isIntersezon) return <IntersezonBotGame />;
   return (
     <main className="game-arena min-h-[100dvh] w-full bg-main text-body flex flex-col items-center justify-start md:justify-center relative pattern-tradition" style={{ overflowX: 'clip' }}>
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
