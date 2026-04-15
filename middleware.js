@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { locales, canonicalizeSlug, SLUG_MAP } from './app/i18n/config';
 
+const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
+
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
@@ -19,6 +21,32 @@ export function middleware(request) {
     pathname.match(/\.(ico|png|jpg|jpeg|svg|webp|mp3|json|xml|txt|js|css)$/)
   ) {
     return NextResponse.next();
+  }
+
+  // ═══ INTERSEZON: după 15 apr 2026 00:00 RO, orice pagină non-whitelisted → "/"
+  // Whitelist: root, /joc/* (bot match), /clasament (link din intersezon),
+  // locale-prefixed variante ale acelorași.
+  if (Date.now() >= SEASON_END_2026_TS) {
+    const isRoot = pathname === '/' || /^\/(ro|bg|el|en)\/?$/.test(pathname);
+    const isAllowed = isRoot
+      || pathname.startsWith('/joc/')
+      || /^\/(ro|bg|el|en)\/joc\//.test(pathname)
+      || pathname === '/clasament' || pathname.startsWith('/clasament/')
+      || /^\/(ro|bg|el|en)\/clasament/.test(pathname);
+    if (!isAllowed) {
+      const host = request.headers.get('host') || '';
+      const isTroscHost = host.includes('trosc.fun');
+      const segments = pathname.split('/');
+      const maybeLocale = segments[1];
+      const target = request.nextUrl.clone();
+      if (isTroscHost && (maybeLocale === 'bg' || maybeLocale === 'el' || maybeLocale === 'en')) {
+        target.pathname = `/${maybeLocale}`;
+      } else {
+        target.pathname = '/';
+      }
+      target.search = '';
+      return NextResponse.redirect(target, 307);
+    }
   }
 
   const host = request.headers.get('host') || '';

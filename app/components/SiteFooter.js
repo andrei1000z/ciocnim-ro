@@ -9,8 +9,11 @@ export default function SiteFooter() {
   const pathname = usePathname();
 
   const isGame = pathname.includes('/joc/');
-  const isIntersezon = pathname.includes('/intersezon');
-  if (isGame || isIntersezon) return null;
+  const isIntersezonPath = pathname.includes('/intersezon');
+  const isClasament = pathname.includes('/clasament');
+  const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
+  const isIntersezonMode = Date.now() >= SEASON_END_2026_TS;
+  if (isGame || isIntersezonPath || isClasament || isIntersezonMode) return null;
 
   const isHome = /^\/(ro|en|bg|el)?$/.test(pathname);
 

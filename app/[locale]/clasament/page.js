@@ -75,10 +75,14 @@ function RegionRow({ region, index, maxScore }) {
   );
 }
 
+const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
+
 export default function ClasamentPage() {
   const { topRegiuni, topJucatori, nume, userStats, isHydrated } = useGlobalStats();
   const [tab, setTab] = useState("jucatori");
   const [showAll, setShowAll] = useState(false);
+  const [isIntersezon, setIsIntersezon] = useState(false);
+  useEffect(() => { setIsIntersezon(Date.now() >= SEASON_END_2026_TS); }, []);
   const t = useT();
   const { locale } = useLocaleConfig();
   const season = getCurrentSeason(locale);
@@ -130,20 +134,20 @@ export default function ClasamentPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className={`rounded-2xl p-4 border text-center ${
-            season.isActive
+            season.isActive && !isIntersezon
               ? "bg-gradient-to-r from-red-900/30 to-amber-900/20 border-red-700/30"
               : "bg-card border-edge"
           }`}
         >
           <p className="text-[10px] font-black uppercase tracking-widest text-red-500 mb-1">
-            {season.isActive ? `🔴 ${t('content.clasament.season')}` : `📅 ${t('content.clasament.season')}`}
+            {season.isActive && !isIntersezon ? `🔴 ${t('content.clasament.season')}` : `📅 ${t('content.clasament.season')}`}
           </p>
           <p className="text-lg font-black text-heading">{season.name}</p>
           <p className="text-xs text-dim mt-0.5">{season.label}</p>
         </motion.div>
 
-        {/* My rank banner */}
-        {isHydrated && nume && (
+        {/* My rank banner — în intersezon ascuns pentru cei care nu sunt în top */}
+        {isHydrated && nume && !(isIntersezon && !myRank) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -246,7 +250,8 @@ export default function ClasamentPage() {
           </AnimatePresence>
         </div>
 
-        {/* Share */}
+        {/* Share — ascuns în intersezon */}
+        {!isIntersezon && (
         <div className="flex gap-2">
           <button
             onClick={shareRanking}
@@ -268,8 +273,10 @@ export default function ClasamentPage() {
             <span className="font-black text-green-400 text-sm">WhatsApp</span>
           </button>
         </div>
+        )}
 
-        {/* CTA */}
+        {/* CTA — ascuns în intersezon */}
+        {!isIntersezon && (
         <div className="text-center">
           <LocaleLink
             href="/"
@@ -278,6 +285,7 @@ export default function ClasamentPage() {
             {t('content.despre.ctaOnline')}
           </LocaleLink>
         </div>
+        )}
       </div>
     </main>
   );

@@ -411,6 +411,10 @@ export default function ClientWrapper({ children }) {
     try {
       if (!nume || nume.trim() === "") return;
 
+      // Intersezon bot match: nu contează la stats/achievements/clasament
+      const isIntersezonBot = typeof roomId === 'string' && roomId.startsWith('bot-intersezon-');
+      if (isIntersezonBot) return;
+
       const payload = {
         actiune: 'increment-global',
         jucator: nume,

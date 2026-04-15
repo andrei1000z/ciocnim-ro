@@ -14,6 +14,7 @@ import { apiPost } from "../lib/api";
 import SeasonCountdown from "../components/SeasonCountdown";
 import LiveFeed from "../components/LiveFeed";
 import ContactForm from "../components/ContactForm";
+import IntersezonContent, { SEASON_END_2026_TS } from "../components/IntersezonContent";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "../components/DictionaryProvider";
 import { localeConfig } from "../i18n/config";
@@ -75,14 +76,11 @@ function HomeContent() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  // Auto-redirect la /intersezon după 15 aprilie 2026 00:00 RO
+  // Intersezon mode: după 15 aprilie 2026 00:00 RO, homepage devine intersezon.
+  const [isIntersezon, setIsIntersezon] = useState(false);
   useEffect(() => {
-    const SEASON_END = new Date("2026-04-15T00:00:00+03:00").getTime();
-    if (Date.now() >= SEASON_END) {
-      const pfx = locale === 'ro' ? '' : `/${locale}`;
-      router.replace(`${pfx}/intersezon`);
-    }
-  }, [locale, router]);
+    setIsIntersezon(Date.now() >= SEASON_END_2026_TS);
+  }, []);
 
   useEffect(() => {
     if (searchParams.get("error") === "ocupata") {
@@ -267,6 +265,8 @@ function HomeContent() {
       router.push(`${pfx}/joc/${roomCode}?provocare=true&teamId=${teamId}`);
     } catch { setToastMsg(t('notifications.errorNetwork')); }
   };
+
+  if (isIntersezon) return <IntersezonContent />;
 
   if (!isHydrated) return (
     <div className="w-full max-w-md mx-auto pb-16 px-4 pt-8 space-y-6">
