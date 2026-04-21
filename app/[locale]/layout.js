@@ -34,12 +34,17 @@ export async function generateMetadata({ params }) {
   const isIntl = await isIntlDomain();
   const ogImage = isIntl ? '/og-image-trosc.jpg' : '/og-image.jpg';
 
+  const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
+  const isIntersezon = Date.now() >= SEASON_END_2026_TS;
+  const title = isIntersezon && dict.meta.intersezonTitle ? dict.meta.intersezonTitle : dict.meta.title;
+  const description = isIntersezon && dict.meta.intersezonDescription ? dict.meta.intersezonDescription : dict.meta.description;
+
   return {
     title: {
-      default: dict.meta.title,
+      default: title,
       template: dict.meta.titleTemplate,
     },
-    description: dict.meta.description,
+    description,
     // Icons auto-detected de Next.js din app/icon.svg + app/apple-icon.js
     // (red egg — file convention). Nu mai facem override aici.
     applicationName: dict.meta.applicationName,
@@ -49,18 +54,18 @@ export async function generateMetadata({ params }) {
     formatDetection: { email: false, address: false, telephone: false },
     metadataBase: new URL(baseUrl),
     openGraph: {
-      title: dict.meta.ogTitle,
-      description: dict.meta.ogDescription,
+      title: isIntersezon ? title : dict.meta.ogTitle,
+      description: isIntersezon ? description : dict.meta.ogDescription,
       url: locale === 'ro' ? baseUrl : `${baseUrl}/${locale}`,
       siteName: dict.meta.applicationName,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: dict.meta.title, type: "image/jpeg" }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title, type: "image/jpeg" }],
       locale: config.ogLocale,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: dict.meta.twitterTitle,
-      description: dict.meta.twitterDescription,
+      title: isIntersezon ? title : dict.meta.twitterTitle,
+      description: isIntersezon ? description : dict.meta.twitterDescription,
       images: [ogImage],
     },
     alternates: {
