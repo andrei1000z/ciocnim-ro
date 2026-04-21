@@ -9,6 +9,7 @@ import { getOrthodoxEaster } from "../lib/easterUtils";
 import { formatFullDate } from "../lib/seasons";
 import { useT } from "../i18n/useT";
 import { useLocaleConfig } from "./DictionaryProvider";
+import { useGlobalStats } from "./ClientWrapper";
 
 export const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
 const TRANSITION_END_TS = SEASON_END_2026_TS + 7 * 24 * 3600 * 1000;
@@ -29,6 +30,7 @@ export default function IntersezonContent() {
   const router = useRouter();
   const t = useT();
   const { locale, gameName } = useLocaleConfig();
+  const { totalGlobal, topJucatori, topRegiuni } = useGlobalStats();
   const [mounted, setMounted] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [phase, setPhase] = useState("weekAfter");
@@ -150,6 +152,61 @@ export default function IntersezonContent() {
           ) : null}
         </AnimatePresence>
       </motion.header>
+
+      {/* RECAP 2026 — stats de sezon */}
+      {mounted && totalGlobal > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-br from-amber-900/20 via-red-900/15 to-amber-900/10 border border-amber-700/25 rounded-3xl p-6 space-y-4"
+        >
+          <h2 className="text-sm font-black uppercase tracking-wider text-amber-300/80 text-center">
+            {t('intersezon.recapTitle', { year: CURRENT_SEASON_YEAR })}
+          </h2>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-main/40 border border-red-800/30 rounded-2xl p-4 text-center">
+              <p className="text-3xl md:text-4xl font-black text-red-400 tabular-nums">
+                {totalGlobal.toLocaleString(locale === 'bg' ? 'bg-BG' : locale === 'el' ? 'el-GR' : locale === 'en' ? 'en-US' : 'ro-RO')}
+              </p>
+              <p className="text-[10px] text-dim font-black uppercase tracking-wider mt-1">
+                🥚 {t('intersezon.recapTotalCracks')}
+              </p>
+            </div>
+            <div className="bg-main/40 border border-amber-800/30 rounded-2xl p-4 text-center">
+              <p className="text-3xl md:text-4xl font-black text-amber-400 tabular-nums">
+                {topJucatori?.length || 0}
+              </p>
+              <p className="text-[10px] text-dim font-black uppercase tracking-wider mt-1">
+                👥 {t('intersezon.recapTotalPlayers')}
+              </p>
+            </div>
+          </div>
+
+          {topJucatori && topJucatori.length > 0 && (
+            <div>
+              <p className="text-xs font-black text-amber-300/80 mb-2">
+                {t('intersezon.recapTopPlayers', { year: CURRENT_SEASON_YEAR })}
+              </p>
+              <div className="space-y-1.5">
+                {topJucatori.slice(0, 5).map((p, i) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={p.nume} className="flex items-center gap-3 bg-main/30 border border-edge rounded-xl px-3 py-2">
+                      <span className="text-base w-7 text-center font-black">
+                        {medals[i] || <span className="text-dim text-xs">{i + 1}</span>}
+                      </span>
+                      <span className="flex-1 min-w-0 font-bold text-sm truncate text-body">{p.nume}</span>
+                      <span className="font-black text-red-400 text-sm tabular-nums">{parseInt(p.scor) || 0}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </motion.section>
+      )}
 
       <motion.section
         initial={{ opacity: 0, y: 10 }}

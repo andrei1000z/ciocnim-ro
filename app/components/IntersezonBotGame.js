@@ -1,9 +1,17 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useT } from "../i18n/useT";
+import { playCrack, playVictory, playDefeat, isSoundEnabled } from "../lib/sounds";
+
+const fireConfetti = async (opts) => {
+  try {
+    const confetti = (await import("canvas-confetti")).default;
+    confetti(opts);
+  } catch {}
+};
 
 const eggPath = "M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z";
 const crackPath1 = "M35 25 L42 40 L38 52 L50 65 L44 78 L52 90 L47 105 L55 118 L50 130";
@@ -65,14 +73,34 @@ export default function IntersezonBotGame() {
   const t = useT();
   const [phase, setPhase] = useState("ready"); // ready | striking | done
   const [winner, setWinner] = useState(null); // "player" | "bot"
+  const [streak, setStreak] = useState(0);
+  const [rounds, setRounds] = useState(0);
 
   const ciocnește = useCallback(() => {
     if (phase !== "ready") return;
     setPhase("striking");
+    if (isSoundEnabled()) playCrack();
+    if (navigator.vibrate) navigator.vibrate(30);
     const w = Math.random() < 0.5 ? "player" : "bot";
     setTimeout(() => {
       setWinner(w);
       setPhase("done");
+      setRounds((r) => r + 1);
+      if (w === "player") {
+        setStreak((s) => s + 1);
+        if (isSoundEnabled()) playVictory();
+        fireConfetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#fbbf24", "#dc2626", "#f59e0b", "#ffffff"],
+        });
+        if (navigator.vibrate) navigator.vibrate([40, 30, 80]);
+      } else {
+        setStreak(0);
+        if (isSoundEnabled()) playDefeat();
+        if (navigator.vibrate) navigator.vibrate([100, 40, 100]);
+      }
     }, 700);
   }, [phase]);
 
@@ -97,7 +125,18 @@ export default function IntersezonBotGame() {
           {t('botGame.back')}
         </button>
         <p className="text-xs text-dim font-bold uppercase tracking-wider">{t('botGame.training')}</p>
-        <div className="w-12" />
+        <div className="flex items-center gap-2 min-w-[64px] justify-end">
+          {streak > 1 && (
+            <motion.span
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              key={streak}
+              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-900/40 to-red-900/40 border border-amber-600/40 text-amber-300 px-2 py-0.5 rounded-lg font-black text-xs"
+            >
+              🔥 {streak}
+            </motion.span>
+          )}
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 px-4 relative z-10">

@@ -927,7 +927,12 @@
     "newsletterAlready": "✅ Ești deja abonat!",
     "newsletterSuccess": "✅ Gata! Te anunțăm la Paște {year}",
     "newsletterError": "❌ Eroare",
-    "newsletterNetError": "❌ Eroare rețea"
+    "newsletterNetError": "❌ Eroare rețea",
+    "recapTitle": "📊 Sezonul {year} în cifre",
+    "recapTotalCracks": "ciocniri",
+    "recapTotalPlayers": "jucători",
+    "recapTopPlayers": "🏆 Top jucători {year}",
+    "recapRegions": "🗺️ Regiuni de top"
   },
 
   "botGame": {

@@ -932,7 +932,12 @@
     "newsletterAlready": "✅ Вече си абониран!",
     "newsletterSuccess": "✅ Готово! Ще ти съобщим за Великден {year}",
     "newsletterError": "❌ Грешка",
-    "newsletterNetError": "❌ Мрежова грешка"
+    "newsletterNetError": "❌ Мрежова грешка",
+    "recapTitle": "📊 Сезон {year} в цифри",
+    "recapTotalCracks": "чуквания",
+    "recapTotalPlayers": "играчи",
+    "recapTopPlayers": "🏆 Топ играчи {year}",
+    "recapRegions": "🗺️ Топ региони"
   },
 
   "botGame": {

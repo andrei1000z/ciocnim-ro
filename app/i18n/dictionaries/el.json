@@ -938,7 +938,12 @@
     "newsletterAlready": "✅ Είσαι ήδη εγγεγραμμένος!",
     "newsletterSuccess": "✅ Έτοιμο! Θα σε ειδοποιήσουμε το Πάσχα {year}",
     "newsletterError": "❌ Σφάλμα",
-    "newsletterNetError": "❌ Σφάλμα δικτύου"
+    "newsletterNetError": "❌ Σφάλμα δικτύου",
+    "recapTitle": "📊 Σεζόν {year} σε αριθμούς",
+    "recapTotalCracks": "τσουγκρίσματα",
+    "recapTotalPlayers": "παίκτες",
+    "recapTopPlayers": "🏆 Κορυφαίοι παίκτες {year}",
+    "recapRegions": "🗺️ Κορυφαίες περιοχές"
   },
 
   "botGame": {

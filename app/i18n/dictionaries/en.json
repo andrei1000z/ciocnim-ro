@@ -920,7 +920,12 @@
     "newsletterAlready": "✅ You're already subscribed!",
     "newsletterSuccess": "✅ Done! We'll ping you at Easter {year}",
     "newsletterError": "❌ Error",
-    "newsletterNetError": "❌ Network error"
+    "newsletterNetError": "❌ Network error",
+    "recapTitle": "📊 Season {year} in numbers",
+    "recapTotalCracks": "cracks",
+    "recapTotalPlayers": "players",
+    "recapTopPlayers": "🏆 Top players {year}",
+    "recapRegions": "🗺️ Top regions"
   },
 
   "botGame": {
