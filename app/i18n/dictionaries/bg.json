@@ -900,5 +900,68 @@
         "twitterDescription": "Правилата на играта, отговорности и права."
       }
     }
+  },
+
+  "intersezon": {
+    "seasonEnded": "🏁 Сезон {year} приключи",
+    "seeYouNext": "До Великден {year}!",
+    "prepareNext": "🔄 Пригответе се за Сезон {year}",
+    "traditionContinues": "Традицията скоро продължава",
+    "botTitle": "🤖 Бърз тренировъчен мач",
+    "botDesc": "Влез, щракни, чукни — без класация, без статистики, само за тренировка.",
+    "botButton": "🥚 Тренировка с бот",
+    "leaderboardButton": "🏆 Виж класацията {year}",
+    "reserveTitle": "🔒 Запази име за Сезон {year}",
+    "reserveDesc": "Бъди първият с любимия ти псевдоним в началото на следващия сезон.",
+    "reservePlaceholder": "Твоят псевдоним...",
+    "reserveButton": "Запази",
+    "reserveNoName": "❌ Въведи име",
+    "reserveSuccess": "✅ \"{name}\" запазено за {year}!",
+    "reserveError": "❌ Грешка",
+    "reserveNetError": "❌ Мрежова грешка",
+    "countdownTitle": "⛪ Православен Великден {year}",
+    "days": "дни",
+    "hours": "ч",
+    "mins": "мин",
+    "secs": "сек",
+    "newsletterTitle": "📬 Получи новината за Великден {year}",
+    "newsletterDesc": "Остави имейла си и ще ти изпратя едно-единствено съобщение, една седмица преди Великден {year}, за да знаеш, че сезонът започва. Без спам, без реклами, само това.",
+    "newsletterPlaceholder": "email@example.com",
+    "newsletterButton": "Абонирай",
+    "newsletterNoEmail": "❌ Въведи имейл",
+    "newsletterAlready": "✅ Вече си абониран!",
+    "newsletterSuccess": "✅ Готово! Ще ти съобщим за Великден {year}",
+    "newsletterError": "❌ Грешка",
+    "newsletterNetError": "❌ Мрежова грешка"
+  },
+
+  "botGame": {
+    "back": "← Назад",
+    "training": "🤖 Тренировка",
+    "bot": "Бот",
+    "you": "Ти",
+    "strike": "🥚 ЧУКНИ",
+    "victory": "🏆 Победа!",
+    "defeat": "💥 Загуби",
+    "again": "🔄 Пак",
+    "home": "Обратно вкъщи"
+  },
+
+  "contactForm": {
+    "title": "💬 Кажи какво мислиш",
+    "subtitle": "Бъг, идея, комплимент — каквото и да е. Чета всичко.",
+    "topicBug": "🐛 Бъг",
+    "topicSuggestion": "💡 Предложение",
+    "topicCompliment": "❤️ Комплимент",
+    "topicOther": "💭 Друго",
+    "placeholder": "Пиши тук...",
+    "emailPlaceholder": "Имейл (по избор — ако искаш отговор)",
+    "send": "📨 Изпрати",
+    "sending": "...",
+    "tooShort": "❌ Твърде кратко съобщение",
+    "success": "✅ Изпратено! Благодаря.",
+    "error": "❌ Грешка",
+    "netError": "❌ Мрежова грешка",
+    "orDirectly": "Или директно на"
   }
 }

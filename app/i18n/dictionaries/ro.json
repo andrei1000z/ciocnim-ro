@@ -895,5 +895,68 @@
         "twitterDescription": "Regulile jocului, responsabilități și drepturi."
       }
     }
+  },
+
+  "intersezon": {
+    "seasonEnded": "🏁 Sezonul {year} s-a încheiat",
+    "seeYouNext": "Ne vedem la Paște {year}!",
+    "prepareNext": "🔄 Pregătește-te pentru Sezonul {year}",
+    "traditionContinues": "Tradiția continuă în curând",
+    "botTitle": "🤖 Joacă un meci rapid de antrenament",
+    "botDesc": "Intră, apasă, ciocnește — fără clasament, fără stats, doar pentru antrenament.",
+    "botButton": "🥚 Antrenament cu bot",
+    "leaderboardButton": "🏆 Vezi clasamentul {year}",
+    "reserveTitle": "🔒 Rezervă un nume pentru Sezonul {year}",
+    "reserveDesc": "Fii primul cu porecla ta preferată la startul următorului sezon.",
+    "reservePlaceholder": "Porecla ta...",
+    "reserveButton": "Rezervă",
+    "reserveNoName": "❌ Pune un nume",
+    "reserveSuccess": "✅ \"{name}\" rezervat pentru {year}!",
+    "reserveError": "❌ Eroare",
+    "reserveNetError": "❌ Eroare rețea",
+    "countdownTitle": "⛪ Paștele Ortodox {year}",
+    "days": "zile",
+    "hours": "ore",
+    "mins": "min",
+    "secs": "sec",
+    "newsletterTitle": "📬 Primește vestea la Paștele {year}",
+    "newsletterDesc": "Lasă-mi emailul tău și îți trimit un singur mesaj, cu o săptămână înainte de Paștele {year}, să te anunț că sezonul începe. Fără spam, fără reclame, doar asta.",
+    "newsletterPlaceholder": "email@exemplu.ro",
+    "newsletterButton": "Abonează",
+    "newsletterNoEmail": "❌ Pune email",
+    "newsletterAlready": "✅ Ești deja abonat!",
+    "newsletterSuccess": "✅ Gata! Te anunțăm la Paște {year}",
+    "newsletterError": "❌ Eroare",
+    "newsletterNetError": "❌ Eroare rețea"
+  },
+
+  "botGame": {
+    "back": "← Înapoi",
+    "training": "🤖 Antrenament",
+    "bot": "Bot",
+    "you": "Tu",
+    "strike": "🥚 CIOCNEȘTE",
+    "victory": "🏆 Victorie!",
+    "defeat": "💥 Ai pierdut",
+    "again": "🔄 Încă o dată",
+    "home": "Înapoi acasă"
+  },
+
+  "contactForm": {
+    "title": "💬 Spune-mi ce crezi",
+    "subtitle": "Bug, idee, compliment — orice. Citesc tot.",
+    "topicBug": "🐛 Bug",
+    "topicSuggestion": "💡 Sugestie",
+    "topicCompliment": "❤️ Compliment",
+    "topicOther": "💭 Altceva",
+    "placeholder": "Scrie aici...",
+    "emailPlaceholder": "Email (opțional — doar dacă vrei să-ți răspund)",
+    "send": "📨 Trimite",
+    "sending": "...",
+    "tooShort": "❌ Mesaj prea scurt",
+    "success": "✅ Mesaj trimis! Mulțumesc.",
+    "error": "❌ Eroare",
+    "netError": "❌ Eroare rețea",
+    "orDirectly": "Sau direct la"
   }
 }

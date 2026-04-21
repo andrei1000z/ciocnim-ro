@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useT } from "../i18n/useT";
 
 const eggPath = "M50 0 C20 0 0 40 0 80 C0 110 20 130 50 130 C80 130 100 110 100 80 C100 40 80 0 50 0 Z";
 const crackPath1 = "M35 25 L42 40 L38 52 L50 65 L44 78 L52 90 L47 105 L55 118 L50 130";
@@ -61,6 +62,7 @@ function Ou({ skin = "red", spart = false }) {
 
 export default function IntersezonBotGame() {
   const router = useRouter();
+  const t = useT();
   const [phase, setPhase] = useState("ready"); // ready | striking | done
   const [winner, setWinner] = useState(null); // "player" | "bot"
 
@@ -92,15 +94,15 @@ export default function IntersezonBotGame() {
           onClick={() => router.push("/")}
           className="text-sm text-dim hover:text-body font-bold transition-colors"
         >
-          ← Înapoi
+          {t('botGame.back')}
         </button>
-        <p className="text-xs text-dim font-bold uppercase tracking-wider">🤖 Antrenament</p>
+        <p className="text-xs text-dim font-bold uppercase tracking-wider">{t('botGame.training')}</p>
         <div className="w-12" />
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 px-4 relative z-10">
         <div className="flex flex-col items-center gap-0.5">
-          <p className="text-[10px] text-dim font-black uppercase tracking-widest">Bot</p>
+          <p className="text-[10px] text-dim font-black uppercase tracking-widest">{t('botGame.bot')}</p>
           <motion.div
             animate={
               phase === "striking"
@@ -124,7 +126,7 @@ export default function IntersezonBotGame() {
           >
             <Ou skin="red" spart={playerSpart} />
           </motion.div>
-          <p className="text-[10px] text-dim font-black uppercase tracking-widest">Tu</p>
+          <p className="text-[10px] text-dim font-black uppercase tracking-widest">{t('botGame.you')}</p>
         </div>
       </div>
 
@@ -140,7 +142,7 @@ export default function IntersezonBotGame() {
               exit={{ opacity: 0 }}
               className="w-full py-4 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 disabled:opacity-50 text-white font-black text-lg rounded-2xl border-2 border-red-500/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
             >
-              🥚 CIOCNEȘTE
+              {t('botGame.strike')}
             </motion.button>
           ) : (
             <motion.div
@@ -158,20 +160,20 @@ export default function IntersezonBotGame() {
                 }`}
               >
                 <p className="text-xl font-black text-heading">
-                  {winner === "player" ? "🏆 Victorie!" : "💥 Ai pierdut"}
+                  {winner === "player" ? t('botGame.victory') : t('botGame.defeat')}
                 </p>
               </div>
               <button
                 onClick={reset}
                 className="w-full py-3 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-base rounded-2xl border-2 border-red-500/60 transition-all active:scale-95"
               >
-                🔄 Încă o dată
+                {t('botGame.again')}
               </button>
               <button
                 onClick={() => router.push("/")}
                 className="w-full py-2.5 bg-elevated hover:bg-elevated-hover text-dim hover:text-body font-bold text-sm rounded-2xl border border-edge transition-all active:scale-95"
               >
-                Înapoi acasă
+                {t('botGame.home')}
               </button>
             </motion.div>
           )}

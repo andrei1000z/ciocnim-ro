@@ -888,5 +888,68 @@
         "twitterDescription": "Game rules, responsibilities and rights."
       }
     }
+  },
+
+  "intersezon": {
+    "seasonEnded": "🏁 Season {year} has ended",
+    "seeYouNext": "See you at Easter {year}!",
+    "prepareNext": "🔄 Get ready for Season {year}",
+    "traditionContinues": "The tradition continues soon",
+    "botTitle": "🤖 Play a quick training match",
+    "botDesc": "Jump in, tap, crack — no leaderboard, no stats, just training.",
+    "botButton": "🥚 Training with bot",
+    "leaderboardButton": "🏆 See the {year} leaderboard",
+    "reserveTitle": "🔒 Reserve a name for Season {year}",
+    "reserveDesc": "Be the first to claim your favorite nickname at the start of next season.",
+    "reservePlaceholder": "Your nickname...",
+    "reserveButton": "Reserve",
+    "reserveNoName": "❌ Pick a name",
+    "reserveSuccess": "✅ \"{name}\" reserved for {year}!",
+    "reserveError": "❌ Error",
+    "reserveNetError": "❌ Network error",
+    "countdownTitle": "⛪ Orthodox Easter {year}",
+    "days": "days",
+    "hours": "hrs",
+    "mins": "min",
+    "secs": "sec",
+    "newsletterTitle": "📬 Get notified for Easter {year}",
+    "newsletterDesc": "Drop your email and I'll send a single message a week before Easter {year} to let you know the season is starting. No spam, no ads, just that.",
+    "newsletterPlaceholder": "email@example.com",
+    "newsletterButton": "Subscribe",
+    "newsletterNoEmail": "❌ Enter email",
+    "newsletterAlready": "✅ You're already subscribed!",
+    "newsletterSuccess": "✅ Done! We'll ping you at Easter {year}",
+    "newsletterError": "❌ Error",
+    "newsletterNetError": "❌ Network error"
+  },
+
+  "botGame": {
+    "back": "← Back",
+    "training": "🤖 Training",
+    "bot": "Bot",
+    "you": "You",
+    "strike": "🥚 CRACK",
+    "victory": "🏆 Victory!",
+    "defeat": "💥 You lost",
+    "again": "🔄 Play again",
+    "home": "Back home"
+  },
+
+  "contactForm": {
+    "title": "💬 Tell me what you think",
+    "subtitle": "Bug, idea, compliment — anything. I read it all.",
+    "topicBug": "🐛 Bug",
+    "topicSuggestion": "💡 Suggestion",
+    "topicCompliment": "❤️ Compliment",
+    "topicOther": "💭 Other",
+    "placeholder": "Write here...",
+    "emailPlaceholder": "Email (optional — only if you want a reply)",
+    "send": "📨 Send",
+    "sending": "...",
+    "tooShort": "❌ Message too short",
+    "success": "✅ Sent! Thanks.",
+    "error": "❌ Error",
+    "netError": "❌ Network error",
+    "orDirectly": "Or directly at"
   }
 }

@@ -6,9 +6,14 @@ import { useRouter } from "next/navigation";
 import LocaleLink from "./LocaleLink";
 import ContactForm from "./ContactForm";
 import { getOrthodoxEaster } from "../lib/easterUtils";
+import { formatFullDate } from "../lib/seasons";
+import { useT } from "../i18n/useT";
+import { useLocaleConfig } from "./DictionaryProvider";
 
 export const SEASON_END_2026_TS = new Date("2026-04-15T00:00:00+03:00").getTime();
 const TRANSITION_END_TS = SEASON_END_2026_TS + 7 * 24 * 3600 * 1000;
+const CURRENT_SEASON_YEAR = 2026;
+const NEXT_SEASON_YEAR = 2027;
 
 function calcCountdown(targetTs) {
   const diff = targetTs - Date.now();
@@ -20,13 +25,10 @@ function calcCountdown(targetTs) {
   return { days, hours, mins, secs };
 }
 
-const MONTHS_RO = ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'];
-function formatEasterDate(d) {
-  return `${d.getDate()} ${MONTHS_RO[d.getMonth()]} ${d.getFullYear()}`;
-}
-
 export default function IntersezonContent() {
   const router = useRouter();
+  const t = useT();
+  const { locale, gameName } = useLocaleConfig();
   const [mounted, setMounted] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [phase, setPhase] = useState("weekAfter");
@@ -39,7 +41,7 @@ export default function IntersezonContent() {
 
   useEffect(() => {
     setMounted(true);
-    const e = getOrthodoxEaster(2027);
+    const e = getOrthodoxEaster(NEXT_SEASON_YEAR);
     setEaster2027(e);
     const tick = () => {
       const now = Date.now();
@@ -57,49 +59,50 @@ export default function IntersezonContent() {
   };
 
   const handleReserve = async () => {
-    if (!reserveName.trim()) { setReserveStatus("❌ Pune un nume"); return; }
+    if (!reserveName.trim()) { setReserveStatus(t('intersezon.reserveNoName')); return; }
     setReserveStatus("...");
     try {
       const res = await fetch("/api/ciocnire", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ actiune: "reserve-name-2027", name: reserveName.trim(), locale: "ro" }),
+        body: JSON.stringify({ actiune: "reserve-name-2027", name: reserveName.trim(), locale }),
       });
       const data = await res.json();
       if (data.success) {
-        setReserveStatus(`✅ "${reserveName.trim().toUpperCase()}" rezervat pentru 2027!`);
+        setReserveStatus(t('intersezon.reserveSuccess', { name: reserveName.trim().toUpperCase(), year: NEXT_SEASON_YEAR }));
         setReserveName("");
       } else {
-        setReserveStatus("❌ " + (data.error || "Eroare"));
+        setReserveStatus(t('intersezon.reserveError') + " " + (data.error || ""));
       }
     } catch {
-      setReserveStatus("❌ Eroare rețea");
+      setReserveStatus(t('intersezon.reserveNetError'));
     }
   };
 
   const handleNewsletter = async () => {
-    if (!newsletterEmail.trim()) { setNewsletterStatus("❌ Pune email"); return; }
+    if (!newsletterEmail.trim()) { setNewsletterStatus(t('intersezon.newsletterNoEmail')); return; }
     setNewsletterStatus("...");
     try {
       const res = await fetch("/api/ciocnire", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ actiune: "newsletter-signup", email: newsletterEmail.trim(), locale: "ro" }),
+        body: JSON.stringify({ actiune: "newsletter-signup", email: newsletterEmail.trim(), locale }),
       });
       const data = await res.json();
       if (data.success) {
-        setNewsletterStatus(data.alreadySubscribed ? "✅ Ești deja abonat!" : "✅ Gata! Te anunțăm la Paște 2027");
+        setNewsletterStatus(data.alreadySubscribed ? t('intersezon.newsletterAlready') : t('intersezon.newsletterSuccess', { year: NEXT_SEASON_YEAR }));
         setNewsletterEmail("");
       } else {
-        setNewsletterStatus("❌ " + (data.error || "Eroare"));
+        setNewsletterStatus(t('intersezon.newsletterError') + " " + (data.error || ""));
       }
     } catch {
-      setNewsletterStatus("❌ Eroare rețea");
+      setNewsletterStatus(t('intersezon.newsletterNetError'));
     }
   };
 
-  const currentYear = mounted ? new Date().getFullYear() : 2026;
+  const currentYear = mounted ? new Date().getFullYear() : CURRENT_SEASON_YEAR;
   const pad = (n) => String(n).padStart(2, "0");
+  const siteName = locale === 'ro' ? 'Ciocnim.ro' : 'Trosc.fun';
 
   return (
     <main className="w-full max-w-2xl mx-auto pt-8 pb-16 px-4 space-y-10">
@@ -113,9 +116,9 @@ export default function IntersezonContent() {
           <span className="text-5xl">🥚</span>
         </div>
         <h1 className="text-3xl md:text-5xl font-black text-heading tracking-tight leading-tight">
-          Ciocnim<span className="text-red-500">.ro</span>
+          {t('hero.title')}<span className="text-red-500">{t('hero.titleDot')}</span>{t('hero.titleSuffix')}
         </h1>
-        <p className="text-base md:text-lg text-dim font-semibold">Ciocnește ouă online</p>
+        <p className="text-base md:text-lg text-dim font-semibold">{t('hero.subtitle')}</p>
 
         <AnimatePresence mode="wait">
           {mounted && phase === "weekAfter" ? (
@@ -127,9 +130,9 @@ export default function IntersezonContent() {
               className="inline-block bg-gradient-to-br from-red-900/30 to-amber-900/20 border border-red-600/40 rounded-2xl px-6 py-4 mt-4"
             >
               <p className="text-xl md:text-2xl font-black text-amber-300">
-                🏁 Sezonul 2026 s-a încheiat
+                {t('intersezon.seasonEnded', { year: CURRENT_SEASON_YEAR })}
               </p>
-              <p className="text-xs text-dim mt-1">Ne vedem la Paște 2027!</p>
+              <p className="text-xs text-dim mt-1">{t('intersezon.seeYouNext', { year: NEXT_SEASON_YEAR })}</p>
             </motion.div>
           ) : mounted ? (
             <motion.div
@@ -140,9 +143,9 @@ export default function IntersezonContent() {
               className="inline-block bg-gradient-to-br from-amber-900/30 to-red-900/20 border border-amber-600/40 rounded-2xl px-6 py-4 mt-4"
             >
               <p className="text-xl md:text-2xl font-black text-amber-300">
-                🔄 Pregătește-te pentru Sezonul 2027
+                {t('intersezon.prepareNext', { year: NEXT_SEASON_YEAR })}
               </p>
-              <p className="text-xs text-dim mt-1">Tradiția continuă în curând</p>
+              <p className="text-xs text-dim mt-1">{t('intersezon.traditionContinues')}</p>
             </motion.div>
           ) : null}
         </AnimatePresence>
@@ -154,13 +157,13 @@ export default function IntersezonContent() {
         viewport={{ once: true }}
         className="bg-card border border-edge rounded-3xl p-6 text-center"
       >
-        <h2 className="text-lg md:text-xl font-black text-heading mb-2">🤖 Joacă un meci rapid de antrenament</h2>
-        <p className="text-xs text-dim mb-4">Intră, apasă, ciocnește — fără clasament, fără stats, doar pentru antrenament.</p>
+        <h2 className="text-lg md:text-xl font-black text-heading mb-2">{t('intersezon.botTitle')}</h2>
+        <p className="text-xs text-dim mb-4">{t('intersezon.botDesc')}</p>
         <button
           onClick={handlePlayBot}
           className="w-full py-4 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white font-black text-lg rounded-2xl border-2 border-red-500/60 shadow-xl shadow-red-900/40 transition-all active:scale-95"
         >
-          🥚 Antrenament cu bot
+          {t('intersezon.botButton')}
         </button>
       </motion.section>
 
@@ -174,7 +177,7 @@ export default function IntersezonContent() {
           href="/clasament"
           className="inline-flex items-center gap-2 bg-elevated hover:bg-elevated-hover border border-amber-700/30 text-amber-300 px-6 py-3 rounded-2xl font-black text-sm transition-all active:scale-95"
         >
-          🏆 Vezi clasamentul 2026
+          {t('intersezon.leaderboardButton', { year: CURRENT_SEASON_YEAR })}
         </LocaleLink>
       </motion.section>
 
@@ -184,14 +187,14 @@ export default function IntersezonContent() {
         viewport={{ once: true }}
         className="bg-card border border-edge rounded-3xl p-6"
       >
-        <h2 className="text-lg font-black text-heading mb-1">🔒 Rezervă un nume pentru Sezonul 2027</h2>
-        <p className="text-xs text-dim mb-4">Fii primul cu porecla ta preferată la startul următorului sezon.</p>
+        <h2 className="text-lg font-black text-heading mb-1">{t('intersezon.reserveTitle', { year: NEXT_SEASON_YEAR })}</h2>
+        <p className="text-xs text-dim mb-4">{t('intersezon.reserveDesc')}</p>
         <div className="flex gap-2">
           <input
             value={reserveName}
             onChange={(e) => { setReserveName(e.target.value); setReserveStatus(""); }}
             onKeyDown={(e) => e.key === "Enter" && handleReserve()}
-            placeholder="Porecla ta..."
+            placeholder={t('intersezon.reservePlaceholder')}
             maxLength={20}
             autoComplete="off"
             autoCorrect="off"
@@ -203,7 +206,7 @@ export default function IntersezonContent() {
             onClick={handleReserve}
             className="px-5 py-3 bg-red-800 hover:bg-red-700 text-white rounded-xl font-black text-sm transition-all active:scale-95"
           >
-            Rezervă
+            {t('intersezon.reserveButton')}
           </button>
         </div>
         {reserveStatus && <p className="text-xs mt-2 text-center font-bold">{reserveStatus}</p>}
@@ -216,31 +219,31 @@ export default function IntersezonContent() {
         className="bg-gradient-to-br from-red-900/25 via-red-800/15 to-amber-900/20 border border-red-700/30 rounded-3xl p-6 text-center"
       >
         <h2 className="text-sm font-black uppercase tracking-wider text-amber-300/80 mb-2">
-          ⛪ Paștele Ortodox 2027
+          {t('intersezon.countdownTitle', { year: NEXT_SEASON_YEAR })}
         </h2>
         {mounted && easter2027 && (
-          <p className="text-xs text-dim mb-3">{formatEasterDate(easter2027)}</p>
+          <p className="text-xs text-dim mb-3">{formatFullDate(easter2027, locale)}</p>
         )}
         {countdown && (
           <div className="flex items-center justify-center gap-2 md:gap-3 font-black tabular-nums">
             <div className="flex flex-col items-center min-w-[52px] md:min-w-[64px]">
               <span className="text-2xl md:text-4xl text-heading">{countdown.days}</span>
-              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">zile</span>
+              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">{t('intersezon.days')}</span>
             </div>
             <span className="text-red-400/40 text-xl md:text-3xl -mt-3">:</span>
             <div className="flex flex-col items-center min-w-[52px] md:min-w-[64px]">
               <span className="text-2xl md:text-4xl text-heading">{pad(countdown.hours)}</span>
-              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">ore</span>
+              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">{t('intersezon.hours')}</span>
             </div>
             <span className="text-red-400/40 text-xl md:text-3xl -mt-3">:</span>
             <div className="flex flex-col items-center min-w-[52px] md:min-w-[64px]">
               <span className="text-2xl md:text-4xl text-heading">{pad(countdown.mins)}</span>
-              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">min</span>
+              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">{t('intersezon.mins')}</span>
             </div>
             <span className="text-red-400/40 text-xl md:text-3xl -mt-3">:</span>
             <div className="flex flex-col items-center min-w-[52px] md:min-w-[64px]">
               <span className="text-2xl md:text-4xl text-amber-300">{pad(countdown.secs)}</span>
-              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">sec</span>
+              <span className="text-[9px] md:text-[10px] text-muted uppercase tracking-wider mt-0.5">{t('intersezon.secs')}</span>
             </div>
           </div>
         )}
@@ -252,17 +255,15 @@ export default function IntersezonContent() {
         viewport={{ once: true }}
         className="bg-card border border-edge rounded-3xl p-6"
       >
-        <h2 className="text-lg font-black text-heading mb-1">📬 Primește vestea la Paștele 2027</h2>
-        <p className="text-xs text-dim mb-4">
-          Lasă-mi emailul tău și îți trimit un singur mesaj, cu o săptămână înainte de Paștele 2027, să te anunț că sezonul începe. Fără spam, fără reclame, doar asta.
-        </p>
+        <h2 className="text-lg font-black text-heading mb-1">{t('intersezon.newsletterTitle', { year: NEXT_SEASON_YEAR })}</h2>
+        <p className="text-xs text-dim mb-4">{t('intersezon.newsletterDesc', { year: NEXT_SEASON_YEAR })}</p>
         <div className="flex gap-2">
           <input
             type="email"
             value={newsletterEmail}
             onChange={(e) => { setNewsletterEmail(e.target.value); setNewsletterStatus(""); }}
             onKeyDown={(e) => e.key === "Enter" && handleNewsletter()}
-            placeholder="email@exemplu.ro"
+            placeholder={t('intersezon.newsletterPlaceholder')}
             autoComplete="email"
             className="flex-1 min-w-0 px-4 py-3 bg-elevated border border-edge-strong rounded-xl text-body font-bold outline-none focus:border-red-700 text-sm"
           />
@@ -270,7 +271,7 @@ export default function IntersezonContent() {
             onClick={handleNewsletter}
             className="px-5 py-3 bg-amber-700 hover:bg-amber-600 text-white rounded-xl font-black text-sm transition-all active:scale-95"
           >
-            Abonează
+            {t('intersezon.newsletterButton')}
           </button>
         </div>
         {newsletterStatus && <p className="text-xs mt-2 text-center font-bold">{newsletterStatus}</p>}
@@ -279,7 +280,7 @@ export default function IntersezonContent() {
       <ContactForm />
 
       <footer className="pt-6 border-t border-edge text-center">
-        <p className="text-xs text-dim">© {currentYear} Ciocnim.ro</p>
+        <p className="text-xs text-dim">© {currentYear} {siteName}</p>
       </footer>
     </main>
   );

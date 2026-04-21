@@ -906,5 +906,68 @@
         "twitterDescription": "Οι κανόνες του παιχνιδιού, οι ευθύνες και τα δικαιώματα."
       }
     }
+  },
+
+  "intersezon": {
+    "seasonEnded": "🏁 Η σεζόν {year} ολοκληρώθηκε",
+    "seeYouNext": "Τα λέμε το Πάσχα {year}!",
+    "prepareNext": "🔄 Ετοιμαστείτε για τη Σεζόν {year}",
+    "traditionContinues": "Η παράδοση συνεχίζεται σύντομα",
+    "botTitle": "🤖 Γρήγορο προπονητικό παιχνίδι",
+    "botDesc": "Μπες, πάτα, τσούγκρισε — χωρίς κατάταξη, χωρίς στατιστικά, μόνο για προπόνηση.",
+    "botButton": "🥚 Προπόνηση με bot",
+    "leaderboardButton": "🏆 Δες την κατάταξη {year}",
+    "reserveTitle": "🔒 Κράτησε όνομα για τη Σεζόν {year}",
+    "reserveDesc": "Γίνε ο πρώτος με το αγαπημένο σου ψευδώνυμο στην αρχή της επόμενης σεζόν.",
+    "reservePlaceholder": "Το ψευδώνυμό σου...",
+    "reserveButton": "Κράτηση",
+    "reserveNoName": "❌ Βάλε ένα όνομα",
+    "reserveSuccess": "✅ \"{name}\" κρατήθηκε για το {year}!",
+    "reserveError": "❌ Σφάλμα",
+    "reserveNetError": "❌ Σφάλμα δικτύου",
+    "countdownTitle": "⛪ Ορθόδοξο Πάσχα {year}",
+    "days": "μέρες",
+    "hours": "ώρ",
+    "mins": "λεπ",
+    "secs": "δευτ",
+    "newsletterTitle": "📬 Ενημέρωση για το Πάσχα {year}",
+    "newsletterDesc": "Άφησέ μου το email σου και θα σου στείλω ένα μόνο μήνυμα, μία εβδομάδα πριν το Πάσχα {year}, για να σου πω ότι η σεζόν ξεκινάει. Χωρίς spam, χωρίς διαφημίσεις, μόνο αυτό.",
+    "newsletterPlaceholder": "email@example.com",
+    "newsletterButton": "Εγγραφή",
+    "newsletterNoEmail": "❌ Βάλε email",
+    "newsletterAlready": "✅ Είσαι ήδη εγγεγραμμένος!",
+    "newsletterSuccess": "✅ Έτοιμο! Θα σε ειδοποιήσουμε το Πάσχα {year}",
+    "newsletterError": "❌ Σφάλμα",
+    "newsletterNetError": "❌ Σφάλμα δικτύου"
+  },
+
+  "botGame": {
+    "back": "← Πίσω",
+    "training": "🤖 Προπόνηση",
+    "bot": "Bot",
+    "you": "Εσύ",
+    "strike": "🥚 ΤΣΟΥΓΚΡΙΣΕ",
+    "victory": "🏆 Νίκη!",
+    "defeat": "💥 Έχασες",
+    "again": "🔄 Ξανά",
+    "home": "Πίσω στην αρχική"
+  },
+
+  "contactForm": {
+    "title": "💬 Πες μου τη γνώμη σου",
+    "subtitle": "Bug, ιδέα, κομπλιμέντο — οτιδήποτε. Τα διαβάζω όλα.",
+    "topicBug": "🐛 Bug",
+    "topicSuggestion": "💡 Πρόταση",
+    "topicCompliment": "❤️ Κομπλιμέντο",
+    "topicOther": "💭 Άλλο",
+    "placeholder": "Γράψε εδώ...",
+    "emailPlaceholder": "Email (προαιρετικό — αν θες απάντηση)",
+    "send": "📨 Αποστολή",
+    "sending": "...",
+    "tooShort": "❌ Πολύ σύντομο μήνυμα",
+    "success": "✅ Στάλθηκε! Ευχαριστώ.",
+    "error": "❌ Σφάλμα",
+    "netError": "❌ Σφάλμα δικτύου",
+    "orDirectly": "Ή απευθείας στο"
   }
 }
